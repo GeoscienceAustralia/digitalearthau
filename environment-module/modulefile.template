@@ -1,0 +1,67 @@
+#%Module########################################################################
+##
+## ${package_name} modulefile
+##
+
+proc ModulesHelp { } {
+        global version
+
+        puts stderr "   ${package_description}"
+        puts stderr "   Version ${version}"
+}
+
+set name          ${package_name}
+set version       ${version}
+set base          ${module_dir}
+
+module-whatis   "${package_description} ${version}"
+
+proc auto-preqreq {args} {
+    set name_ver [split "$args" /]
+    set mod_name [lindex $name_ver 0]
+    if { [ module-info mode load ] } {
+        puts stderr "Loading $args"
+        # If a version is specified, ensure that exact version is loaded.
+        if { [llength $name_ver] > 1 } {
+            set mod_version [lindex $name_ver 1]
+            if { ! [is-loaded "${mod_name}/${mod_version}"] } {
+                if { [is-loaded $mod_name] } {
+                    # We won't unload modules ourselves, as it can cause too many silent problems.
+                    # We just compain and die instead.
+                    puts stderr " -> Wrong ${mod_name} version is already loaded. Unload it first, or load ${mod_version}."
+                    error "Wrong ${mod_name} is already loaded"
+                }
+                module load "${mod_name}/${mod_version}"
+            }
+        } else {
+            # No version specified: Load default.
+            if { ! [is-loaded "$mod_name"] } {
+                module load "$mod_name"
+            }
+        }
+    }
+    if { [ module-info mode remove ] } {
+        puts stderr "Unloading $args"
+        module unload $mod_name
+    }
+    return 0
+}
+
+# These must match built versions.
+module load netcdf/4.3.2
+module load gdal/${gdal_version}
+module load hdf5/1.8.12
+module load python/${python_version}
+module load numpy/1.9.2
+module load proj/4.8.0
+
+if { [ module-info mode load ] } {
+    prepend-path PYTHONPATH ${module_dir}/${package_name}/${version}/lib/python2.7/site-packages
+    prepend-path       PATH ${module_dir}/${package_name}/${version}/bin
+}
+
+if { [ module-info mode remove ] } {
+    remove-path PYTHONPATH ${module_dir}/${package_name}/${version}/lib/python2.7/site-packages
+    remove-path       PATH ${module_dir}/${package_name}/${version}/bin
+}
+
