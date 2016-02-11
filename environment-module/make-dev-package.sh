@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
 
-./package-module.sh setuptools pip pytest pytest-runner pytest-cov hypothesis pylint virtualenv
+echo "Checking dependencies..."
+dependencies=`./get-dependencies.sh`
+./package-module.sh setuptools pip pytest pytest-runner pytest-cov hypothesis pylint virtualenv ${dependencies}
 

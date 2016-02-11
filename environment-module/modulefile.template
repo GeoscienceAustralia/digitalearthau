@@ -48,12 +48,10 @@ proc auto-preqreq {args} {
 }
 
 # These must match built versions.
-module load netcdf/4.3.2
-module load gdal/${gdal_version}
-module load hdf5/1.8.12
 module load python/${python_version}
-module load numpy/1.9.2
-module load proj/4.8.0
+module load netcdf/${netcdf_version}
+module load gdal/${gdal_version}
+module load hdf5/${hdf5_version}
 
 if { [ module-info mode load ] } {
     prepend-path PYTHONPATH ${module_dir}/${package_name}/${version}/lib/python2.7/site-packages

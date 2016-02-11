@@ -4,31 +4,27 @@ set -eu
 
 umask 002
 
-export python_version='2.7.6'
+export python_version='2.7.5'
 # TODO: Datacube tests fail when using gdal 2.0.0
-export gdal_version='2.0.0'
-export netcdf_version='4.3.2'
+export gdal_version='1.11.1-python'
+export netcdf_version='4.3.3.1'
+export hdf5_version='1.8.14'
 
 module load setuptools
 
 # Our install Python & gdal must match the ones run.
+module load python/${python_version}
 module load netcdf/${netcdf_version}
 module load gdal/${gdal_version}
-module load hdf5/1.8.12
-module load python/${python_version}
-module load numpy/1.9.2
-module load proj/4.8.0
+module load hdf5/${hdf5_version}
 
-# TODO: How do we get a list of install dependencies from setup.py?
-all_deps="setuptools pip pytest pytest-runner pytest-cov hypothesis pylint virtualenv netCDF4
-          toolz xray click pathlib pyyaml sqlalchemy python-dateutil cachetools rasterio jsonschema
-          singledispatch pypeg2 psycopg2 gdal==${gdal_version}"
+all_deps="$*"
+echo $all_deps
 
-export package_name=datacube-py2-env
+export package_name=agdc-py2-env
 
 # We export vars for envsubst below.
-export module_dir=/projects/u46/opt/modules
-#export module_dir=/short/v10/jmh547/modules
+export module_dir=/g/data/v10/public/modules
 export module_path=${module_dir}/modulefiles
 export version=$(date +'%Y%m%d')
 
@@ -52,7 +48,7 @@ then
     PYTHONPATH="$PYTHONPATH:${python_dest}"
     # The linux 64bit Dask tarball that pip austomatically installs is broken.
     echo "Installing:"
-    easy_install "--prefix=${package_dest}" ${all_deps} dask-0.7.5.tar.gz
+    easy_install "--prefix=${package_dest}" ${all_deps} dask-0.7.5.tar.gz matplotlib-1.5.1.tar.gz
 
     modulefile_dir="${module_dir}/modulefiles/${package_name}"
     mkdir -v -p "${modulefile_dir}"
