@@ -17,8 +17,8 @@ set base          ${module_dir}
 module-whatis   "${package_description} ${version}"
 
 if { [ module-info mode load ] } {
-    if { ! [is-loaded datacube-py2-env/${py2_env_version}] } {
-        module load datacube-py2-env/${py2_env_version}
+    if { ! [is-loaded agdc-py2-env/${py2_env_version}] } {
+        module load agdc-py2-env/${py2_env_version}
     }
     prepend-path PYTHONPATH ${module_dir}/${package_name}/${version}/lib/python2.7/site-packages
     prepend-path       PATH ${module_dir}/${package_name}/${version}/bin

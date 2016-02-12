@@ -4,20 +4,22 @@ set -eu
 
 umask 002
 
-repository_location=$1
+rm -rf agdc-v2 > /dev/null 2>&1
+git clone -b develop https://github.com/data-cube/agdc-v2.git
 
-export py2_env_version=20160128
+repository_location="agdc-v2"
 
-module load datacube-py2-env/${py2_env_version}
+export py2_env_version=20160212
+
+module load agdc-py2-env/${py2_env_version}
 
 pushd ${repository_location}
 
 # We export vars for envsubst below.
-export module_dir=/projects/u46/opt/modules
-#export module_dir=/short/v10/jmh547/modules
+export module_dir=/g/data/v10/public/modules
 export module_path=${module_dir}/modulefiles
 export version=`./setup.py --version`
-export package_name='datacube-demo-env'
+export package_name='agdc-py2-demo'
 export package_description=`./setup.py --description`
 
 export package_dest="${module_dir}/${package_name}/${version}"
@@ -48,6 +50,8 @@ then
     envsubst < modulefile.template > "${modulefile_dest}"
     echo "Wrote modulefile to ${modulefile_dest}"
 fi
+
+rm -rf agdc-v2 > /dev/null 2>&1
 
 echo
 echo 'Done.'
