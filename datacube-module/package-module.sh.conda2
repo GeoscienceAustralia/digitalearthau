@@ -9,7 +9,7 @@ git clone -b develop https://github.com/data-cube/agdc-v2.git
 
 repository_location="agdc-v2"
 
-export py2_env_version=20160216
+export py2_env_version=conda2-2.5.0
 
 module load agdc-py2-env/${py2_env_version}
 python --version
