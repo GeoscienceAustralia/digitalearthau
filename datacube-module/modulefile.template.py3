@@ -30,7 +30,7 @@ if { [ module-info mode load ] } {
 
 if { [ module-info mode remove ] } {
     remove-path PYTHONPATH ${module_dir}/${package_name}/${version}/lib/python3.5/site-packages
-    remove-path       PATH ${module_dir}/${package_name}/${version}/bin
+    remove-path PATH ${module_dir}/${package_name}/${version}/bin
 
     unsetenv DATACUBE_CONFIG_PATH
     module unload agdc-py3-env/${py3_env_version}

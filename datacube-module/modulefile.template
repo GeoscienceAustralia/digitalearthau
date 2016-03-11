@@ -21,14 +21,14 @@ if { [ module-info mode load ] } {
         module load agdc-py2-env/${py2_env_version}
     }
     prepend-path PYTHONPATH ${module_dir}/${package_name}/${version}/lib/python2.7/site-packages
-    prepend-path       PATH ${module_dir}/${package_name}/${version}/bin
+    prepend-path PATH ${module_dir}/${package_name}/${version}/bin
 
     setenv DATACUBE_CONFIG_PATH ${module_dir}/${package_name}/${version}/datacube.conf
 }
 
 if { [ module-info mode remove ] } {
     remove-path PYTHONPATH ${module_dir}/${package_name}/${version}/lib/python2.7/site-packages
-    remove-path       PATH ${module_dir}/${package_name}/${version}/bin
+    remove-path PATH ${module_dir}/${package_name}/${version}/bin
 
     unsetenv DATACUBE_CONFIG_PATH
     module unload agdc-py2-env/${py2_env_version}

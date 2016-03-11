@@ -21,7 +21,7 @@ export module_dir=/g/data/v10/public/modules
 export module_path=${module_dir}/modulefiles
 module_requires=`python setup.py --requires`
 export version=`python setup.py --version`
-export package_name='agdc-py2-demo'
+export package_name='agdc-py2-dev'
 export package_description=`python setup.py --description`
 
 export package_dest="${module_dir}/${package_name}/${version}"
@@ -46,7 +46,7 @@ then
 
     popd
 
-    cp -v datacube-demo.conf ${package_dest}/datacube.conf
+    cp -v datacube-dev.conf ${package_dest}/datacube.conf
 
     modulefile_dest="${modulefile_dir}/${version}"
     envsubst < modulefile.template > "${modulefile_dest}"
