@@ -22,7 +22,6 @@ if { ! [is-loaded ${agdc_env_module}] } {
 prepend-path PYTHONPATH ${python_dest}
 prepend-path PATH ${package_dest}/bin
 
-setenv DATACUBE_CONFIG_PATH ${package_dest}/datacube.conf
 setenv LC_ALL en_AU.utf8
 setenv LANG C.UTF-8
 

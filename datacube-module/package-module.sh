@@ -14,12 +14,8 @@ do
 
     case $key in
     --help)
-        echo Usage: $0 --variant ${variant} --env ${agdc_env_module} -- moduledir ${module_dir}
+        echo Usage: $0 --env ${agdc_env_module} --moduledir ${module_dir}
         exit 0
-        ;;
-    --variant)
-        variant="$2"
-        shift # past argument
         ;;
     --env)
         export agdc_env_module="$2"
@@ -49,7 +45,7 @@ pushd agdc-v2
 module_requires=`python setup.py --requires`
 export version=`python setup.py --version`
 
-export package_name=agdc-${subvariant}-${variant}
+export package_name=agdc-${subvariant}
 export package_description=`python setup.py --description`
 
 export package_dest=${module_dir}/${package_name}/${version}
@@ -74,8 +70,6 @@ then
     mkdir -v -p "${modulefile_dir}"
 
     popd
-
-    cp -v datacube-${variant}.conf ${package_dest}/datacube.conf
 
     modulefile_dest="${modulefile_dir}/${version}"
     envsubst < modulefile.template > "${modulefile_dest}"
