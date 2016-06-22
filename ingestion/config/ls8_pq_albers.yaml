@@ -116,3 +116,4 @@ measurements:
       resampling_method: nearest
       src_varname: pqa
       zlib: True
+      fletcher32: True
