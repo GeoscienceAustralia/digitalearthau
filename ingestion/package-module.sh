@@ -34,7 +34,7 @@ shift # past argument or value
 done
 
 export module_name=agdc-ingester
-export version=`git describe --always`
+export version=`git describe --tags --always`
 
 export module_dest=${module_dir}/${module_name}/${version}
 
