@@ -5,7 +5,7 @@ set -eu
 umask 002
 
 variant=dev
-module_dir=/g/data/v10/public/modules
+export module_dir=/g/data/v10/public/modules
 export agdc_module=agdc-py2-prod
 export module_description="Datacube ingester utilities and configuration"
 
@@ -54,6 +54,7 @@ fi
 
 mkdir -v -p "${module_dest}"
 cp -v -r scripts "${module_dest}/"
+cp -v -r products "${module_dest}/"
 
 mkdir -v "${module_dest}/config"
 for i in `ls config`
