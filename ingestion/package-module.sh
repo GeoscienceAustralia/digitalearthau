@@ -53,8 +53,13 @@ then
 fi
 
 mkdir -v -p "${module_dest}"
-cp -v -r config "${module_dest}/"
 cp -v -r scripts "${module_dest}/"
+
+mkdir -v "${module_dest}/config"
+for i in `ls config`
+do
+  render config/${i} ${module_dest}/config/${i}
+done
 
 echo module use "${module_dir}/modulefiles" > "${module_dest}/scripts/environment.sh"
 echo module load ${agdc_module} >> "${module_dest}/scripts/environment.sh"

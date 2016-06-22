@@ -1,5 +1,6 @@
 source_type: ls5_pq_scene
 output_type: ls5_pq_albers
+version: ${version}
 
 description: Landsat 5 Pixel Quality 25 metre, 100km tile, Australian Albers Equal Area projection (EPSG:3577)
 
