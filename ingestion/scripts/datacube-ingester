@@ -7,7 +7,7 @@ import click
 from pathlib import Path
 
 
-ROOT_DIR = Path(__file__).parent.parent
+ROOT_DIR = Path(__file__).resolve().parent.parent
 CONFIG_DIR = ROOT_DIR/'config'
 SCRIPT_DIR = ROOT_DIR/'script'
 
@@ -26,16 +26,45 @@ def list():
 @cli.command()
 @click.argument('config')
 def test(config):
-  print('datacube -v ingest -c "%(config)s" --dry-run' % dict(config=CONFIG_DIR/config))
+  config = CONFIG_DIR/config
+  if not config.exists():
+    print('%s is not a valid config' % config)
+    return 1
+
+  print('datacube -v ingest -c "%(config)s" --dry-run' % dict(config=config))
 
 
 @cli.command()
+@click.option('--queue', '-q', default='normal',
+              type=click.Choice(['normal', 'express']))
+@click.option('--project', '-P', default='v10')
+@click.option('--nodes', '-n', required=True,
+              help='Number of nodes to request',
+              type=click.IntRange(1, 100))
+@click.option('--walltime', '-t', default=10,
+              help='Number of hours to request',
+              type=click.IntRange(1, 10))
+@click.option('--name', help='Job name to use')
 @click.argument('config')
-def qsub(config):
-  qsub = 'qsub -q express -N ls5_ingest -P v10 -l ncpus=48,mem=90gb,walltime=2:00:00 -- /bin/bash "%(distr)s" --ppn 16 --env "%(env)s" datacube -v ingest -c "%(config)s" --executor distributed DSCHEDULER'
+def qsub(queue, project, nodes, walltime, name, config):
+  config = CONFIG_DIR/config
+  if not config.exists():
+    print('%s is not a valid config' % config)
+    return 1
+
+  name = name or config.stem
+
+  qsub = 'qsub -q %(queue)s -N %(name)s -P %(project)s -l ncpus=%(ncpus)d,mem=%(mem)dgb,walltime=%(walltime)d:00:00 -- /bin/bash "%(distr)s" --ppn 16 --env "%(env)s" datacube -v ingest -c "%(config)s" --executor distributed DSCHEDULER'
+
   print(qsub % dict(config=CONFIG_DIR/config,
                     env=SCRIPT_DIR/'environment.sh',
-                    distr=SCRIPT_DIR/'distributed.sh'))
+                    distr=SCRIPT_DIR/'distributed.sh',
+                    queue=queue,
+                    name=name,
+                    project=project,
+                    ncpus=nodes*16,
+                    mem=nodes*31,
+                    walltime=walltime))
 
 
 if __name__ == '__main__':
