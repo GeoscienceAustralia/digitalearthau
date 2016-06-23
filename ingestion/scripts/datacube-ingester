@@ -9,7 +9,7 @@ from pathlib import Path
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
 CONFIG_DIR = ROOT_DIR/'config'
-SCRIPT_DIR = ROOT_DIR/'script'
+SCRIPT_DIR = ROOT_DIR/'scripts'
 
 
 @click.group()
