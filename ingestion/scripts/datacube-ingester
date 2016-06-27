@@ -7,7 +7,7 @@ import click
 from pathlib import Path
 
 
-ROOT_DIR = Path(__file__).resolve().parent.parent
+ROOT_DIR = Path(__file__).absolute().parent.parent
 CONFIG_DIR = ROOT_DIR/'config'
 SCRIPT_DIR = ROOT_DIR/'scripts'
 
@@ -23,15 +23,44 @@ def list():
     print(cfg.name)
 
 
+def resolve_config(config):
+  config = Path(config)
+
+  if config.suffix == '.bin':
+    config_option = '--load-tasks'
+    config = config.absolute()
+  else:
+    config_option = '-c'
+    config = CONFIG_DIR/config
+
+  if not config.exists():
+    click.echo('%s is not a valid config' % config)
+    click.get_current_context().exit(1)
+
+  return config, config_option
+
+
 @cli.command()
 @click.argument('config')
 def test(config):
+  config, config_option = resolve_config(config)
+  test = 'datacube -v ingest %(config_option)s "%(config)s" --dry-run'
+  click.echo(test % dict(config=config,
+                         config_option=config_option))
+
+
+@cli.command()
+@click.argument('config')
+@click.argument('year', type=click.IntRange(1960, 2060))
+def prep(config, year):
   config = CONFIG_DIR/config
+  taskfile = Path(config.stem + '_' + str(year) + '.bin').absolute() 
   if not config.exists():
     print('%s is not a valid config' % config)
     return 1
 
-  print('datacube -v ingest -c "%(config)s" --dry-run' % dict(config=config))
+  prep = 'datacube -v ingest -c "%(config)s" --save-tasks "%(taskfile)s"'
+  click.echo(prep % dict(config=config, taskfile=taskfile))
 
 
 @cli.command()
@@ -47,24 +76,32 @@ def test(config):
 @click.option('--name', help='Job name to use')
 @click.argument('config')
 def qsub(queue, project, nodes, walltime, name, config):
-  config = CONFIG_DIR/config
+  config = Path(config)
+  if config.suffix == '.bin':
+    config_option = '--load-tasks'
+    config = config.absolute()
+  else:
+    config_option = '-c'
+    config = CONFIG_DIR/config
   if not config.exists():
     print('%s is not a valid config' % config)
     return 1
 
+  config, config_option = resolve_config(config)
   name = name or config.stem
 
-  qsub = 'qsub -q %(queue)s -N %(name)s -P %(project)s -l ncpus=%(ncpus)d,mem=%(mem)dgb,walltime=%(walltime)d:00:00 -- /bin/bash "%(distr)s" --ppn 16 --env "%(env)s" datacube -v ingest -c "%(config)s" --executor distributed DSCHEDULER'
+  qsub = 'qsub -q %(queue)s -N %(name)s -P %(project)s -l ncpus=%(ncpus)d,mem=%(mem)dgb,walltime=%(walltime)d:00:00 -- /bin/bash "%(distr)s" --ppn 16 --env "%(env)s" datacube -v ingest %(config_option)s "%(config)s" --executor distributed DSCHEDULER'
 
-  print(qsub % dict(config=CONFIG_DIR/config,
-                    env=SCRIPT_DIR/'environment.sh',
-                    distr=SCRIPT_DIR/'distributed.sh',
-                    queue=queue,
-                    name=name,
-                    project=project,
-                    ncpus=nodes*16,
-                    mem=nodes*31,
-                    walltime=walltime))
+  click.echo(qsub % dict(config=CONFIG_DIR/config,
+                         config_option=config_option,
+                         env=SCRIPT_DIR/'environment.sh',
+                         distr=SCRIPT_DIR/'distributed.sh',
+                         queue=queue,
+                         name=name,
+                         project=project,
+                         ncpus=nodes*16,
+                         mem=nodes*31,
+                         walltime=walltime))
 
 
 if __name__ == '__main__':
