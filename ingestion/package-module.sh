@@ -54,8 +54,10 @@ then
 fi
 
 mkdir -v -p "${module_dest}/scripts"
-render scripts/distributed.sh "${module_dest}/scripts/distributed.sh"
+cp -v -r scripts "${module_dest}/"
 cp -v -r products "${module_dest}/"
+
+render scripts/distributed.sh "${module_dest}/scripts/distributed.sh"
 
 mkdir -v "${module_dest}/config"
 for i in `ls config`
