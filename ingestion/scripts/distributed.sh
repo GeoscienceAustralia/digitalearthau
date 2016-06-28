@@ -50,12 +50,12 @@ SCHEDULER_PORT=`shuf -i 2000-65000 -n 1`
 SCHEDULER_ADDR=$SCHEDULER_NODE:$SCHEDULER_PORT
 
 pbsdsh -n 0 -- /bin/bash -c "${init_env};\
-dask-scheduler --port $SCHEDULER_PORT"&
+dscheduler --port $SCHEDULER_PORT"&
 sleep 5s
 
 for ((i=0; i<PBS_NCPUS; i+=NCPUS)); do
   pbsdsh -n $i -- /bin/bash -c "${init_env};\
-dask-worker $SCHEDULER_ADDR --nprocs ${ppn} --nthreads ${tpp}"&
+dworker $SCHEDULER_ADDR --nprocs ${ppn} --nthreads ${tpp}"&
 done
 sleep 5s
 
