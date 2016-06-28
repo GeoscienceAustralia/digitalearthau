@@ -59,8 +59,8 @@ def prep(config, year):
     print('%s is not a valid config' % config)
     return 1
 
-  prep = 'datacube -v ingest -c "%(config)s" --save-tasks "%(taskfile)s"'
-  click.echo(prep % dict(config=config, taskfile=taskfile))
+  prep = 'datacube -v ingest -c "%(config)s" --year %(year)s --save-tasks "%(taskfile)s"'
+  click.echo(prep % dict(config=config, taskfile=taskfile, year=year))
 
 
 @cli.command()
