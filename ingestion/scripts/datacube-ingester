@@ -90,11 +90,10 @@ def qsub(queue, project, nodes, walltime, name, config):
   config, config_option = resolve_config(config)
   name = name or config.stem
 
-  qsub = 'qsub -q %(queue)s -N %(name)s -P %(project)s -l ncpus=%(ncpus)d,mem=%(mem)dgb,walltime=%(walltime)d:00:00 -- /bin/bash "%(distr)s" --ppn 16 --env "%(env)s" datacube -v ingest %(config_option)s "%(config)s" --executor distributed DSCHEDULER'
+  qsub = 'qsub -q %(queue)s -N %(name)s -P %(project)s -l ncpus=%(ncpus)d,mem=%(mem)dgb,walltime=%(walltime)d:00:00 -- /bin/bash "%(distr)s" --ppn 16 datacube -v ingest %(config_option)s "%(config)s" --executor distributed DSCHEDULER'
 
   click.echo(qsub % dict(config=CONFIG_DIR/config,
                          config_option=config_option,
-                         env=SCRIPT_DIR/'environment.sh',
                          distr=SCRIPT_DIR/'distributed.sh',
                          queue=queue,
                          name=name,

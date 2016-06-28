@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-env_script=/etc/bashrc
+env_script=${module_dest}/scripts/environment.sh
 ppn=1
 tpp=1
 umask=0027
@@ -10,7 +10,7 @@ do
     key="$1"
     case $key in
     --help)
-        echo Usage: $0 --env init_env.sh --umask ${umask} --ppn ${ppn} --tpp ${tpp} script args
+        echo Usage: $0 --env ${env_script} --umask ${umask} --ppn ${ppn} --tpp ${tpp} script args
         exit 0
         ;;
     --env)
