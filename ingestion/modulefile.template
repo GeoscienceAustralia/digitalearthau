@@ -1,6 +1,6 @@
 #%Module########################################################################
 ##
-## ${package_name} modulefile
+## ${module_name} modulefile
 ##
 
 proc ModulesHelp { } {
