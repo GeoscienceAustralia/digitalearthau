@@ -40,7 +40,7 @@ global_attributes:
     Surface Reflectance Correction Models
 
     Image radiance values recorded by passive EO sensors are a composite of
-    - 	surface reflectance;
+    - surface reflectance;
     -	atmospheric condition;
     -	interaction between surface land cover, solar radiation and sensor view angle; 
     -	land surface orientation relative to the imaging sensor.
@@ -56,7 +56,6 @@ global_attributes:
     in Earth surface features through time.
 
     Given the growing time series of EO imagery, this landmark facility will streamline the process of reliably monitoring long-term  chnges in land and water resources.
-  source: SR-N_25_2
   history: |
     -	Ground Control Points (GCP): new GCP chips released by USGS in Dec 2015 are used for re-processing
     -	Geometric QA: each product undergoes geometric assessment and the assessment result will be recorded within v2 AGDC for filtering/masking purposes.
