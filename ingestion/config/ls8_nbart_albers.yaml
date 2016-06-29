@@ -46,7 +46,7 @@ global_attributes:
     Surface Reflectance Correction Models
 
     Image radiance values recorded by passive EO sensors are a composite of
-    - surface reflectance;
+    -   surface reflectance;
     -	atmospheric condition;
     -	interaction between surface land cover, solar radiation and sensor view angle; 
     -	land surface orientation relative to the imaging sensor.
