@@ -24,32 +24,6 @@ def list():
     print(cfg.name)
 
 
-def resolve_config(config):
-  config = Path(config)
-
-  if config.suffix == '.bin':
-    config_option = '--load-tasks'
-    config = config.absolute()
-  else:
-    config_option = '-c'
-    config = CONFIG_DIR/config
-
-  if not config.exists():
-    click.echo('%s is not a valid config' % config)
-    click.get_current_context().exit(1)
-
-  return config, config_option
-
-
-@cli.command()
-@click.argument('config')
-def test(config):
-  config, config_option = resolve_config(config)
-  test = 'datacube -v ingest %(config_option)s "%(config)s" --dry-run'
-  click.echo(test % dict(config=config,
-                         config_option=config_option))
-
-
 @cli.command()
 @click.option('--queue', '-q', default='normal',
               type=click.Choice(['normal', 'express']))
@@ -70,7 +44,7 @@ def qsub(config, year, queue, project, nodes, walltime, name):
     print('%s is not a valid config' % config)
     return 1
 
-  subprocess.call('datacube -v system check', shell=True)
+  subprocess.check_call('datacube -v system check', shell=True)
 
   prep = 'datacube -v ingest -c "%(config)s" --year %(year)s --save-tasks "%(taskfile)s"'
   cmd = prep % dict(config=config, taskfile=taskfile, year=year)
