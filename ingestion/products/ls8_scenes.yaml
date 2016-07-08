@@ -6,7 +6,7 @@ metadata:
     platform:
         code: LANDSAT_8
     instrument:
-        name: OLI
+        name: OLI_TIRS
     product_type: satellite_telemetry_data
 
 ---
@@ -19,7 +19,7 @@ metadata:
     platform:
         code: LANDSAT_8
     instrument:
-        name: OLI
+        name: OLI_TIRS
     product_type: level1
     format:
         name: GeoTiff
@@ -34,7 +34,7 @@ metadata:
     platform:
         code: LANDSAT_8
     instrument:
-        name: OLI
+        name: OLI_TIRS
     product_type: nbar
     format:
         name: GeoTiff
@@ -106,7 +106,7 @@ metadata:
     platform:
         code: LANDSAT_8
     instrument:
-        name: OLI
+        name: OLI_TIRS
     product_type: nbart
     format:
         name: GeoTiff
@@ -179,7 +179,7 @@ metadata:
     platform:
         code: LANDSAT_8
     instrument:
-        name: ETM
+        name: OLI_TIRS
     product_type: pqa
     format:
         name: GeoTiff
