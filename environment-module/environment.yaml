@@ -1,0 +1,41 @@
+name: agdc
+dependencies:
+- python =2.7
+- numpy
+- scipy
+- numexpr
+- pandas
+- gdal >=1.9
+- netcdf4
+- xarray
+- dask
+- distributed
+- click
+- pyyaml
+- sqlalchemy
+- python-dateutil
+- jsonschema
+- singledispatch
+- psycopg2
+- future
+- matplotlib
+- jupyter
+- shapely
+- fiona
+- cython
+- rasterio >=0.34
+- rtree
+- ephem
+- geopandas
+- pathlib2
+- folium
+- scikit-learn
+- scikit-image
+- psutil
+- pip
+- pip:
+  - pathlib
+  - cachetools
+  - pypeg2
+  - plotly
+
