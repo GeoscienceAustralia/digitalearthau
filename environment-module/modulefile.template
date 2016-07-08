@@ -16,6 +16,9 @@ set base          ${module_dir}
 
 module-whatis   "${package_description} ${version}"
 
+# This disables loading modules and .pth files from ~/.local/lib/python2.7/...
+setenv PYTHONNOUSERSITE 1
+
 prepend-path PATH ${module_dir}/${package_name}/${version}/envs/agdc/bin
 setenv GDAL_DATA ${module_dir}/${package_name}/${version}/envs/agdc/share/gdal
 
