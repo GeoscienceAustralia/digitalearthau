@@ -16,6 +16,6 @@ set base          ${module_dir}
 
 module-whatis   "${package_description} ${version}"
 
-prepend-path PATH ${base}/${name}/${version}/envs/agdc/bin
-setenv GDAL_DATA ${base}/${name}/${version}/envs/agdc/share/gdal
+prepend-path PATH ${module_dir}/${package_name}/${version}/envs/agdc/bin
+setenv GDAL_DATA ${module_dir}/${package_name}/${version}/envs/agdc/share/gdal
 

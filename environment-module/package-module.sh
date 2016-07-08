@@ -42,7 +42,7 @@ export package_name=agdc-${variant}-env
 # We export vars for envsubst below.
 export module_path=${module_dir}/modulefiles
 export version=$(date +'%Y%m%d')
-
+export package_description="Datacube environment module"
 export package_dest="${module_dir}/${package_name}/${version}"
 
 echo "# Packaging '$package_name' '$version' to '$package_dest' #"
