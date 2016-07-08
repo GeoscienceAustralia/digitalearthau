@@ -62,9 +62,10 @@ then
     echo "Creating directory"
     mkdir -v -p "${python_dest}"
 
-    export PYTHONPATH="${PYTHONPATH}:${python_dest}"
     echo "Installing:"
-    python setup.py install "--prefix=${package_dest}"
+    python setup.py sdist
+    pip install dist/datacube-${version}.tar.gz --no-deps --prefix "${package_dest}"
+    #python setup.py install "--prefix=${package_dest}"
 
     modulefile_dir="${module_dir}/modulefiles/${package_name}"
     mkdir -v -p "${modulefile_dir}"
