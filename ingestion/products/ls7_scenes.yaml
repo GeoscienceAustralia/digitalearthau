@@ -197,9 +197,13 @@ measurements:
           bits: 4
           description: SWIR1 band is saturated
           values: {0: true, 1: false}
-        tir_saturated:
+        tir_low_saturated:
           bits: 5
-          description: Thermal Infrared band is saturated
+          description: Thermal Infrared Low Gain band is saturated
+          values: {0: true, 1: false}
+        tir_high_saturated:
+          bits: 6
+          description: Thermal Infrared High Gain band is saturated
           values: {0: true, 1: false}
         swir2_saturated:
           bits: 7
