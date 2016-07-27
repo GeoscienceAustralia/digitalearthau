@@ -32,6 +32,10 @@ dependencies:
 - scikit-learn
 - scikit-image
 - psutil
+- pytables
+- flask
+- bottleneck
+- mkl-service
 - pip
 - pip:
   - pathlib

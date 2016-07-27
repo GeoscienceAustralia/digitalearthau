@@ -54,7 +54,10 @@ then
     wget ${conda_url} -O miniconda.sh
     bash miniconda.sh -b -p ${package_dest}
     ${package_dest}/bin/conda config --add channels conda-forge
+    ${package_dest}/bin/conda update --all -y
+    ${package_dest}/bin/conda install anaconda-client -y
     ${package_dest}/bin/conda env create --file environment.yaml
+    ${package_dest}/bin/conda install -n agdc libgcc -y
 
     modulefile_dir="${module_dir}/modulefiles/${package_name}"
     mkdir -v -p "${modulefile_dir}"
