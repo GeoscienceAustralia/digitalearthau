@@ -12,7 +12,8 @@ generated_key="$(< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c32)"
 real_name="$(getent passwd $db_user | cut -d: -f5)"
 
 #Create user
-if ! psql -h $db_server -p $db_port -U guest -w -c "select create_readonly_agdc_user('$db_user', '$generated_key', '$real_name');" > /dev/null ; then
+export PGPASSWORD=guest
+if ! psql -h $db_server -p $db_port -U guest -c "select create_readonly_agdc_user('$db_user', '$generated_key', '$real_name');" > /dev/null ; then
   exit 1
 fi
 
