@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+if [ -n "$PBS_JOBID" ]; then
+  exit 0
+fi
+
 db_server=$1
 db_port=$2
 db_user=$USER
