@@ -16,6 +16,11 @@ set base          ${module_dir}
 
 module-whatis   "${package_description} ${version}"
 
+if {[info exists env(PYTHONPATH)] && ${esc}env(PYTHONPATH) != ""} {
+        puts stderr "Warning: PYTHONPATH is ${esc}env(PYTHONPATH)"
+        puts stderr "Try unloading all python modules if you experience any issues."
+}
+
 # This disables loading modules and .pth files from ~/.local/lib/python2.7/...
 setenv PYTHONNOUSERSITE 1
 

@@ -63,7 +63,7 @@ then
     mkdir -v -p "${modulefile_dir}"
 
     modulefile_dest="${modulefile_dir}/${version}"
-    envsubst < modulefile.template > "${modulefile_dest}"
+    esc='$' envsubst < modulefile.template > "${modulefile_dest}"
     echo "Wrote modulefile to ${modulefile_dest}"
 fi
 
