@@ -35,6 +35,8 @@ dependencies:
 - flask
 - bottleneck
 - mkl-service
+- glueviz
+- ffmpeg
 - pip
 - pip:
   - pathlib
