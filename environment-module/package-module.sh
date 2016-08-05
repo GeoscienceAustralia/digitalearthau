@@ -36,6 +36,18 @@ do
 shift # past argument or value
 done
 
+case $variant in
+py2)
+    python='2.7'
+    ;;
+py3)
+    python='3.5'
+    ;;
+*)
+    echo Unknown variant. Must be one of py2, py3
+    exit 1
+    ;;
+esac
 
 export package_name=agdc-${variant}-env
 
@@ -54,7 +66,7 @@ then
     wget ${conda_url} -O miniconda.sh
     bash miniconda.sh -b -p ${package_dest}
     ${package_dest}/bin/conda config --add channels conda-forge
-    ${package_dest}/bin/conda update --all -y
+    ${package_dest}/bin/conda update --all -y python=${python}
     ${package_dest}/bin/conda install anaconda-client -y
     ${package_dest}/bin/conda env create --file environment.yaml
     ${package_dest}/bin/conda install -n agdc libgcc -y
