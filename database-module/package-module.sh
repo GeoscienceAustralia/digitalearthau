@@ -6,7 +6,7 @@ umask 002
 
 export module_dir=/g/data/v10/public/modules
 export agdc_env_module=agdc-py2-env/anaconda2-2.5.0
-export pyavriant=py2
+export pyvariant=py2
 export variant=prod
 export dbhost=130.56.244.227
 export dbport=6432
@@ -18,7 +18,7 @@ do
 
     case $key in
     --help)
-        echo Usage: $0 --moduledir ${module_dir} --name ${variant} --version "<version>" --dbname $dbname --dbhost $dbhost --dbport $dbport
+        echo Usage: $0 --moduledir ${module_dir} --variant ${pyvariant} --name ${variant} --version "<version>" --dbname $dbname --dbhost $dbhost --dbport $dbport
         exit 0
         ;;
     --moduledir)
@@ -33,6 +33,10 @@ do
         export version="$2"
         shift # past argument
         ;;
+    --variant)
+        export pyvariant="$2"
+        shift # past argument
+        ;;
     *)
      # unknown option
     ;;
@@ -40,7 +44,8 @@ do
 shift # past argument or value
 done
 
-export module_name=agdc-py2-${variant}
+export agdc_module=agdc-${pyvariant}
+export module_name=agdc-${pyvariant}-${variant}
 export module_dest=${module_dir}/${module_name}/${version}
 export module_description="AGDC database configuration"
 

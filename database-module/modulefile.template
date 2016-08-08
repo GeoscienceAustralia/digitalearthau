@@ -13,8 +13,8 @@ set base          ${module_dir}
 
 module-whatis "${module_description}"
 
-if { ! [is-loaded agdc-py2/${version}] } {
-    module load agdc-py2/${version}
+if { ! [is-loaded ${agdc_module}/${version}] } {
+    module load ${agdc_module}/${version}
 }
 
 if { [module-info mode load] } {
@@ -33,6 +33,6 @@ if { [module-info mode load] } {
 setenv DATACUBE_CONFIG_PATH ${module_dest}/datacube.conf
 
 if { [ module-info mode remove ] } {
-    module unload agdc-py2
+    module unload ${agdc_module}
 }
 
