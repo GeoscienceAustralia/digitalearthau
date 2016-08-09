@@ -65,7 +65,7 @@ fi
 
 mkdir -v -p "${module_dest}"
 cp -v datacube-ensure-user.sh "${module_dest}/"
-chmod +x "${module_dest}/datacube-ensure-user.sh"
+chmod 775 "${module_dest}/datacube-ensure-user.sh"
 
 echo "[datacube]" > "${module_dest}/datacube.conf"
 echo db_hostname: ${dbhost} >> "${module_dest}/datacube.conf"
