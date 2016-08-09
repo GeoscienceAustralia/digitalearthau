@@ -50,7 +50,7 @@ The module requires `agdc-py3` module of matching version
 
     cd database-module
     ./package-module.sh --help
-    ./package-module.sh --moduledir /g/data/v10/public/modules --variant py3 --name prod --version 1.1.6 --dbname datacube --dbhost 130.56.244.227 --dbport 6432
+    ./package-module.sh --variant py3 --name prod --version 1.1.6 --dbname datacube --dbhost 130.56.244.227 --dbport 6432 --moduledir /g/data/v10/public/modules
     
 This will create a new configuration module in /g/data/v10/public/modules/agdc-py3/prod/1.1.6.
 
