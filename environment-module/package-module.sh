@@ -66,10 +66,21 @@ then
     wget ${conda_url} -O miniconda.sh
     bash miniconda.sh -b -p ${package_dest}
     ${package_dest}/bin/conda config --add channels conda-forge
+    
+    # update root env to the latest python and packages
     ${package_dest}/bin/conda update --all -y python=${python}
+
+    # ensure anaconda-client is installed
     ${package_dest}/bin/conda install anaconda-client -y
+
+    # create the env
     ${package_dest}/bin/conda env create --file environment.yaml
+
+    # ensure c and c++ runtimes are available
     ${package_dest}/bin/conda install -n agdc libgcc -y
+
+    # ensure numpy comes from defaults channel, since conda-forge doesn't do mkl
+    ${package_dest}/bin/conda install -n agdc -c defaults numpy -y
 
     modulefile_dir="${module_dir}/modulefiles/${package_name}"
     mkdir -v -p "${modulefile_dir}"
