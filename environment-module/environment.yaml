@@ -33,6 +33,7 @@ dependencies:
 - psutil
 - pytables
 - flask
+- gunicorn
 - bottleneck
 - mkl-service
 - glueviz
