@@ -65,7 +65,7 @@ if [[ $REPLY =~ ^[Yy]$ ]]
 then
     wget ${conda_url} -O miniconda.sh
     bash miniconda.sh -b -p ${package_dest}
-    ${package_dest}/bin/conda config --add channels conda-forge
+    ${package_dest}/bin/conda config --add channels conda-forge --system
     
     # update root env to the latest python and packages
     ${package_dest}/bin/conda update --all -y python=${python}
