@@ -37,10 +37,19 @@ dependencies:
 - mkl-service
 - glueviz
 - ffmpeg
+- libgcc
+- pytest
+- pytest-cov
+- pep8
+- pylint
+- mock
+- ipdb
+- luigi
 - pip
 - pip:
   - pathlib
   - cachetools
   - pypeg2
   - plotly
+  - ciso8601
 
