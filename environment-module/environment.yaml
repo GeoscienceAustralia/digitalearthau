@@ -46,6 +46,9 @@ dependencies:
 - ipdb
 - luigi
 - jupyter_contrib_nbextensions
+- jplephem
+- cartopy
+- basemap
 - pip
 - pip:
   - pathlib
@@ -53,4 +56,5 @@ dependencies:
   - pypeg2
   - plotly
   - ciso8601
+  - skyfield
 
