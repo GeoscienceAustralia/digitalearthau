@@ -5,7 +5,7 @@ set -eu
 umask 002
 
 variant=py2
-conda_url=http://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh
+conda_url=http://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
 export module_dir=/g/data/v10/public/modules
 
 while [[ $# > 0 ]]
@@ -73,8 +73,12 @@ then
     # ensure anaconda-client is installed
     ${package_dest}/bin/conda install anaconda-client -y
 
+    # append required version of python
+    cat environment.yaml > env.yaml
+    echo "- python=${python}" >> env.yaml
+
     # create the env
-    ${package_dest}/bin/conda env create --file environment.yaml
+    ${package_dest}/bin/conda env create --file env.yaml
 
     # ensure c and c++ runtimes are available
     ${package_dest}/bin/conda install -n agdc libgcc -y
