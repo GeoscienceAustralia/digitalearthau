@@ -41,8 +41,9 @@ rm -rf agdc-v2 > /dev/null 2>&1
 git clone -b develop https://github.com/data-cube/agdc-v2.git
 pushd agdc-v2
 
-# TODO: what does this do? seems important
-module_requires=`python setup.py --requires`
+# run tests TODO: integration tests?
+python setup.py test
+
 export version=`python setup.py --version`
 
 export package_name=agdc-${subvariant}
@@ -81,3 +82,4 @@ rm -rf agdc-v2 > /dev/null 2>&1
 
 echo
 echo 'Done.'
+
