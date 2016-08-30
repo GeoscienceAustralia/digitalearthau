@@ -49,6 +49,9 @@ dependencies:
 - jplephem
 - cartopy
 - basemap
+- seaborn
+- memory_profiler
+- line_profiler
 - pip
 - pip:
   - pathlib
