@@ -52,6 +52,8 @@ dependencies:
 - seaborn
 - memory_profiler
 - line_profiler
+- pytest
+- pytest-cov
 - pip
 - pip:
   - pathlib
