@@ -30,8 +30,9 @@ do
         shift # past argument
         ;;
     *)
-     # unknown option
-    ;;
+        echo Unknown option argument "$1"
+        exit 1
+        ;;
     esac
 shift # past argument or value
 done
