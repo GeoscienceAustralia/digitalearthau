@@ -17,6 +17,10 @@ do
         echo Usage: $0 --env ${agdc_env_module} --moduledir ${module_dir}
         exit 0
         ;;
+    --version)
+        export version="$2"
+        shift # past argument
+        ;;
     --env)
         export agdc_env_module="$2"
         shift # past argument
@@ -40,6 +44,10 @@ subvariant=py${python_major}
 rm -rf agdc-v2 > /dev/null 2>&1
 git clone -b develop https://github.com/data-cube/agdc-v2.git
 pushd agdc-v2
+if [ ! -z ${version+x} ]
+then
+  git checkout tags/datacube-${version} -b module_package
+fi
 
 # run tests TODO: integration tests?
 python setup.py test
