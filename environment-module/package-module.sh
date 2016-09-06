@@ -2,7 +2,7 @@
 
 set -eu
 
-umask 002
+umask 022
 
 variant=py2
 conda_url=http://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
