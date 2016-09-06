@@ -1,66 +1,64 @@
 name: agdc
 dependencies:
-- numpy
-- scipy
-- numexpr
-- pandas
-- gdal >=1.9
-- netcdf4
-- xarray
+- basemap
+- bottleneck
+- cartopy
+- click
+- cython
 - dask
 - distributed
-- click
-- pyyaml
-- sqlalchemy
-- python-dateutil
-- jsonschema
-- singledispatch
-- psycopg2
-- future
-- matplotlib
-- jupyter
-- shapely
+- ephem
+- ffmpeg
 - fiona
-- cython
+- flask
+- folium
+- future
+- gdal >=1.9
+- geopandas
+- glueviz
+- gunicorn
+- ipdb
+- jplephem
+- jsonschema
+- jupyter
+- jupyter_contrib_nbextensions
+- line_profiler
+- luigi
+- matplotlib
+- memory_profiler
+- mkl-service
+- mock
+- netcdf4
+- numexpr
+- numpy
+- pandas
+- pathlib2
+- pep8
+- pip
+- psutil
+- psycopg2
+- pylint
+- pytables
+- pytest
+- pytest-cov
+- python-dateutil
+- pyyaml
 - rasterio >=0.34
 - rtree
-- ephem
-- geopandas
-- pathlib2
-- folium
-- scikit-learn
 - scikit-image
-- psutil
-- pytables
-- flask
-- gunicorn
-- bottleneck
-- mkl-service
-- glueviz
-- ffmpeg
-- pytest
-- pytest-cov
-- pep8
-- pylint
-- mock
-- ipdb
-- luigi
-- jupyter_contrib_nbextensions
-- jplephem
-- cartopy
-- basemap
+- scikit-learn
+- scipy
 - seaborn
-- memory_profiler
-- line_profiler
-- pytest
-- pytest-cov
-- pip
+- shapely
+- singledispatch
+- sqlalchemy
+- xarray
 - pip:
-  - pathlib
   - cachetools
-  - pypeg2
-  - plotly
   - ciso8601
+  - pathlib
+  - plotly
+  - pypeg2
   - skyfield
   - yappi
 
