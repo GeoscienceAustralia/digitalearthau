@@ -62,4 +62,5 @@ dependencies:
   - plotly
   - ciso8601
   - skyfield
+  - yappi
 
