@@ -30,9 +30,18 @@ The data cube module contains the Data Cube code. It is built against a specific
 
     cd datacube-module
     ./package-module.sh --help
+        Usage: ./package-module.sh --env agdc-py2-env/anaconda2-2.5.0 --moduledir /g/data/v10/public/modules --version 1.1.9
+          Options:
+            --env agdc_env_module     Python module to use.
+            --moduledir module_dir    Destination module path.
+            --version version         GitHub tag to use. ie. 'datacube-<version>'. Default is '<HEAD>'
+
     ./package-module.sh --env agdc-py3-env/21121221 --moduledir /g/data/v10/public/modules
 
 This will create a new data cube module in /g/data/v10/public/modules/agdc-py3/\<version\>. Where `<version>` is the version of the latest code in [agdc-v2/develop](https://github.com/data-cube/agdc-v2/tree/develop) (e.g. 1.1.6+12.abcdefgh).
+
+To specify a particular version, use the version number portion of the GitHub tag.
+Specifying `--version 1.1.9` will use the [datacube-1.1.9](https://github.com/data-cube/agdc-v2/tree/datacube-1.1.9) tag.
 
 ### Use
 
