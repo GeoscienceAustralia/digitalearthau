@@ -14,7 +14,12 @@ do
 
     case $key in
     --help)
-        echo Usage: $0 --env ${agdc_env_module} --moduledir ${module_dir}
+        echo Usage: $0 --env ${agdc_env_module} --moduledir ${module_dir} --version 1.1.9
+        echo "  Options:"
+        echo "    --env agdc_env_module     Python module to use."
+        echo "    --moduledir module_dir    Destination module path."
+        echo "    --version version         GitHub tag to use. ie. 'datacube-<version>'. Default is '<HEAD>'"
+	echo
         exit 0
         ;;
     --version)
