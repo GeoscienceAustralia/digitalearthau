@@ -1,0 +1,235 @@
+name: eo
+description: |
+    Earth Observation datasets.
+    Type of datasets produced by the eodatasets library.
+    (or of similar structure)
+    https://github.com/GeoscienceAustralia/eo-datasets
+dataset:
+    id: ['id']
+    creation_dt: ['creation_dt']
+    label: ['ga_label']
+    measurements: ['image', 'bands']
+    grid_spatial: ['grid_spatial', 'projection']
+    format: ['format', 'name']
+    sources: ['lineage', 'source_datasets']
+
+    search_fields:
+        platform:
+            description: Platform code
+            offset: [platform, code]
+
+        instrument:
+            description: Instrument name
+            offset: [instrument, name]
+
+        product_type:
+            description: Product code
+            offset: [product_type]
+
+        lat:
+            description: Latitude range
+            type: float-range
+            max_offset:
+            - [extent, coord, ur, lat]
+            - [extent, coord, lr, lat]
+            - [extent, coord, ul, lat]
+            - [extent, coord, ll, lat]
+            min_offset:
+            - [extent, coord, ur, lat]
+            - [extent, coord, lr, lat]
+            - [extent, coord, ul, lat]
+            - [extent, coord, ll, lat]
+
+        lon:
+            description: Longitude range
+            type: float-range
+            max_offset:
+            - [extent, coord, ul, lon]
+            - [extent, coord, ur, lon]
+            - [extent, coord, ll, lon]
+            - [extent, coord, lr, lon]
+            min_offset:
+            - [extent, coord, ul, lon]
+            - [extent, coord, ur, lon]
+            - [extent, coord, ll, lon]
+            - [extent, coord, lr, lon]
+
+        time:
+            description: Acquisition time
+            type: datetime-range
+            min_offset:
+            - [extent, from_dt]
+            - [extent, center_dt]
+            max_offset:
+            - [extent, to_dt]
+            - [extent, center_dt]
+
+        gsi:
+            description: Ground Station Identifier (eg. ASA)
+            offset: [acquisition, groundstation, code]
+        orbit:
+            description: Orbit number
+            offset: [acquisition, platform_orbit]
+
+        sat_path:
+            description: Landsat path
+            type: float-range
+            min_offset:
+            - [image, satellite_ref_point_start, x]
+            max_offset:
+            - [image, satellite_ref_point_end, x]
+            # If an end is not specified, use the start.
+            - [image, satellite_ref_point_start, x]
+
+        sat_row:
+            description: Landsat row
+            type: float-range
+            min_offset:
+            - [image, satellite_ref_point_start, y]
+            max_offset:
+            - [image, satellite_ref_point_end, y]
+            # If an end is not specified, use the start.
+            - [image, satellite_ref_point_start, y]
+
+---
+
+name: telemetry
+description: |
+    telemetry datasets.
+    Type of datasets produced by the eodatasets library.
+    (or of similar structure)
+    https://github.com/GeoscienceAustralia/eo-datasets
+dataset:
+    id: ['id']
+    creation_dt: ['creation_dt']
+    label: ['ga_label']
+    sources: ['lineage', 'source_datasets']
+    search_fields:
+        platform:
+            description: Platform code
+            offset: [platform, code]
+
+        instrument:
+            description: Instrument name
+            offset: [instrument, name]
+
+        product_type:
+            description: Product code
+            offset: [product_type]
+
+        time:
+            description: Acquisition time
+            type: datetime-range
+            min_offset:
+            - [acquisition, aos]
+            max_offset:
+            - [acquisition, los]
+
+        gsi:
+            description: Ground Station Identifier (eg. ASA)
+            offset: [acquisition, groundstation, code]
+
+        orbit:
+            description: Orbit number
+            offset: [acquisition, platform_orbit]
+
+
+---
+
+name: landsat_scene
+description: |
+    Scene-based Landsat data
+dataset:
+    id: ['id']
+    creation_dt: ['creation_dt']
+    label: ['ga_label']
+    measurements: ['image', 'bands']
+    format: ['format', 'name']
+    sources: ['lineage', 'source_datasets']
+
+    search_fields:
+        platform:
+            description: Platform code
+            offset: [platform, code]
+
+        instrument:
+            description: Instrument name
+            offset: [instrument, name]
+
+        product_type:
+            description: Product code
+            offset: [product_type]
+
+        lat:
+            description: Latitude range
+            type: numeric-range
+            max_offset:
+            - [extent, coord, ur, lat]
+            - [extent, coord, lr, lat]
+            - [extent, coord, ul, lat]
+            - [extent, coord, ll, lat]
+            min_offset:
+            - [extent, coord, ur, lat]
+            - [extent, coord, lr, lat]
+            - [extent, coord, ul, lat]
+            - [extent, coord, ll, lat]
+
+        lon:
+            description: Longitude range
+            type: numeric-range
+            max_offset:
+            - [extent, coord, ul, lon]
+            - [extent, coord, ur, lon]
+            - [extent, coord, ll, lon]
+            - [extent, coord, lr, lon]
+            min_offset:
+            - [extent, coord, ul, lon]
+            - [extent, coord, ur, lon]
+            - [extent, coord, ll, lon]
+            - [extent, coord, lr, lon]
+
+        time:
+            description: Acquisition time
+            type: datetime-range
+            min_offset:
+            - [extent, from_dt]
+            - [extent, center_dt]
+            max_offset:
+            - [extent, to_dt]
+            - [extent, center_dt]
+
+        gsi:
+            description: Ground Station Identifier (eg. ASA)
+            offset: [acquisition, groundstation, code]
+        orbit:
+            description: Orbit number
+            offset: [acquisition, platform_orbit]
+
+        ancillary_quality:
+            description: Ancillary quality
+            offset: [lineage, ancillary_quality]
+
+        gqa:
+            description: GQA Circular error probable (90%)
+            type: double
+            offset: [gqa, cep90]
+
+        sat_path:
+            description: Landsat path
+            type: numeric-range
+            min_offset:
+            - [image, satellite_ref_point_start, x]
+            max_offset:
+            - [image, satellite_ref_point_end, x]
+            # If an end is not specified, use the start.
+            - [image, satellite_ref_point_start, x]
+
+        sat_row:
+            description: Landsat row
+            type: numeric-range
+            min_offset:
+            - [image, satellite_ref_point_start, y]
+            max_offset:
+            - [image, satellite_ref_point_end, y]
+            # If an end is not specified, use the start.
+            - [image, satellite_ref_point_start, y]
