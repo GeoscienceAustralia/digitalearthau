@@ -52,6 +52,7 @@ dependencies:
 - shapely
 - singledispatch
 - sqlalchemy
+- tqdm
 - xarray
 - pip:
   - cachetools
