@@ -24,6 +24,9 @@ if {[info exists env(PYTHONPATH)] && ${esc}env(PYTHONPATH) != ""} {
 # This disables loading modules and .pth files from ~/.local/lib/python2.7/...
 setenv PYTHONNOUSERSITE 1
 
+# Enable segfault tracebacks in py3. https://docs.python.org/3/library/faulthandler.html
+setenv PYTHONFAULTHANDLER 1
+
 prepend-path PATH ${module_dir}/${package_name}/${version}/envs/agdc/bin
 setenv GDAL_DATA ${module_dir}/${package_name}/${version}/envs/agdc/share/gdal
 
