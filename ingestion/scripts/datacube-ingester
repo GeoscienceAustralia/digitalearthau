@@ -2,26 +2,24 @@
 
 from __future__ import print_function
 
-import os
 import subprocess
 import click
 from pathlib import Path
 
-
 ROOT_DIR = Path(__file__).absolute().parent.parent
-CONFIG_DIR = ROOT_DIR/'config'
-SCRIPT_DIR = ROOT_DIR/'scripts'
+CONFIG_DIR = ROOT_DIR / 'config'
+SCRIPT_DIR = ROOT_DIR / 'scripts'
 
 
 @click.group()
 def cli():
-  pass
+    pass
 
 
 @cli.command()
 def list():
-  for cfg in CONFIG_DIR.glob('*.yaml'):
-    print(cfg.name)
+    for cfg in CONFIG_DIR.glob('*.yaml'):
+        print(cfg.name)
 
 
 @cli.command()
@@ -38,38 +36,40 @@ def list():
 @click.argument('config')
 @click.argument('year', type=click.IntRange(1960, 2060))
 def qsub(config, year, queue, project, nodes, walltime, name):
-  config = CONFIG_DIR/config
-  taskfile = Path(config.stem + '_' + str(year) + '.bin').absolute() 
-  if not config.exists():
-    print('%s is not a valid config' % config)
-    return 1
+    config = CONFIG_DIR / config
+    taskfile = Path(config.stem + '_' + str(year) + '.bin').absolute()
+    if not config.exists():
+        print('%s is not a valid config' % config)
+        return 1
 
-  subprocess.check_call('datacube -v system check', shell=True)
+    subprocess.check_call('datacube -v system check', shell=True)
 
-  prep = 'datacube -v ingest -c "%(config)s" --year %(year)s --save-tasks "%(taskfile)s"'
-  cmd = prep % dict(config=config, taskfile=taskfile, year=year)
-  if click.confirm('\n'+cmd+'\nRUN?', default=True):
-    subprocess.check_call(cmd, shell=True)
-  
-  test = 'datacube -v ingest --load-tasks "%(taskfile)s" --dry-run'
-  cmd = test % dict(taskfile=taskfile)
-  if click.confirm('\n'+cmd+'\nRUN?', default=False):
-    subprocess.check_call(cmd, shell=True)
+    prep = 'datacube -v ingest -c "%(config)s" --year %(year)s --save-tasks "%(taskfile)s"'
+    cmd = prep % dict(config=config, taskfile=taskfile, year=year)
+    if click.confirm('\n' + cmd + '\nRUN?', default=True):
+        subprocess.check_call(cmd, shell=True)
 
-  name = name or taskfile.stem
-  qsub = 'qsub -q %(queue)s -N %(name)s -P %(project)s -l ncpus=%(ncpus)d,mem=%(mem)dgb,walltime=%(walltime)d:00:00 -- /bin/bash "%(distr)s" --ppn 16 datacube -v ingest --load-tasks "%(taskfile)s" --executor distributed DSCHEDULER'
-  cmd = qsub % dict(taskfile=taskfile,
-                    distr=SCRIPT_DIR/'distributed.sh',
-                    queue=queue,
-                    name=name,
-                    project=project,
-                    ncpus=nodes*16,
-                    mem=nodes*31,
-                    walltime=walltime)
-  if click.confirm('\n'+cmd+'\nRUN?', default=True):
-    subprocess.check_call(cmd, shell=True)
+    test = 'datacube -v ingest --load-tasks "%(taskfile)s" --dry-run'
+    cmd = test % dict(taskfile=taskfile)
+    if click.confirm('\n' + cmd + '\nRUN?', default=False):
+        subprocess.check_call(cmd, shell=True)
+
+    name = name or taskfile.stem
+    qsub = 'qsub -q %(queue)s -N %(name)s -P %(project)s ' \
+           '-l ncpus=%(ncpus)d,mem=%(mem)dgb,walltime=%(walltime)d:00:00 ' \
+           '-- /bin/bash "%(distr)s" --ppn 16 ' \
+           'datacube -v ingest --load-tasks "%(taskfile)s" --executor distributed DSCHEDULER'
+    cmd = qsub % dict(taskfile=taskfile,
+                      distr=SCRIPT_DIR / 'distributed.sh',
+                      queue=queue,
+                      name=name,
+                      project=project,
+                      ncpus=nodes * 16,
+                      mem=nodes * 31,
+                      walltime=walltime)
+    if click.confirm('\n' + cmd + '\nRUN?', default=True):
+        subprocess.check_call(cmd, shell=True)
 
 
 if __name__ == '__main__':
-  cli()
-
+    cli()
