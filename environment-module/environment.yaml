@@ -2,6 +2,7 @@ name: agdc
 dependencies:
 - basemap
 - bottleneck
+- cachetools
 - cartopy
 - click
 - cython
@@ -32,9 +33,11 @@ dependencies:
 - numexpr
 - numpy
 - pandas
+- pathlib
 - pathlib2
 - pep8
 - pip
+- plotly
 - psutil
 - psycopg2
 - pylint
@@ -55,10 +58,7 @@ dependencies:
 - tqdm
 - xarray
 - pip:
-  - cachetools
   - ciso8601
-  - pathlib
-  - plotly
   - pypeg2
   - skyfield
   - yappi
