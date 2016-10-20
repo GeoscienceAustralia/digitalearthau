@@ -6,6 +6,8 @@ not the Data Cube itself. See [environment.yaml](environment-module/environment.
 
 ### Creation
 
+Running this from Raijin is highly recommended as we've seen some issues come up when ran from VDI (ghost file locks).
+
     cd environment-module
     ./package-module.sh --help
     ./package-module.sh --variant py3 --moduledir /g/data/v10/public/modules
