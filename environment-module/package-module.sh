@@ -76,6 +76,9 @@ then
     cat environment.yaml > env.yaml
     echo "- python=${python}" >> env.yaml
 
+    # make sure no .local stuff interferes with the install
+    export PYTHONNOUSERSITE=1
+
     # create the env
     ${package_dest}/bin/conda env create --file env.yaml
 
