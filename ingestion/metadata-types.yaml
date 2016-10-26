@@ -102,8 +102,10 @@ description: |
 dataset:
     id: ['id']
     creation_dt: ['creation_dt']
+    format: ['format', 'name']
     label: ['ga_label']
     sources: ['lineage', 'source_datasets']
+
     search_fields:
         platform:
             description: Platform code
@@ -144,6 +146,7 @@ dataset:
     creation_dt: ['creation_dt']
     label: ['ga_label']
     measurements: ['image', 'bands']
+    grid_spatial: ['grid_spatial', 'projection']
     format: ['format', 'name']
     sources: ['lineage', 'source_datasets']
 
