@@ -65,6 +65,10 @@ The module requires `agdc-py3` module of matching version
     
 This will create a new configuration module in /g/data/v10/public/modules/agdc-py3/prod/1.1.6.
 
+### Update default version
+
+Update `/g/data/v10/public/modules/modulefiles/agdc-py3/prod/.version` to make the last version the default one.
+
 ### Use
 
     module load agdc-py3-prod
