@@ -68,7 +68,7 @@ export python_dest=${package_dest}/lib/python${python_version}/site-packages
 
 echo '# Packaging '$package_name' v '$version' to '$package_dest' #'
 
-read -p "Continue? " -n 1 -r
+read -p "Continue? [y/N]" -n 1 -r
 echo    # (optional) move to a new line
 if [[ $REPLY =~ ^[Yy]$ ]]
 then
