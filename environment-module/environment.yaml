@@ -18,6 +18,7 @@ dependencies:
 - geopandas
 - glueviz
 - gunicorn
+- hypothesis
 - ipdb
 - jplephem
 - jsonschema
