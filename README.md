@@ -1,5 +1,6 @@
 
-# Environment module
+# Modules
+## Environment module
 
 The environment module contains all Data Cube dependencies and libraries but
 not the Data Cube itself. See [environment.yaml](environment-module/environment.yaml) for the list of packages
@@ -8,7 +9,7 @@ not the Data Cube itself. See [environment.yaml](environment-module/environment.
 
 Running this from Raijin is highly recommended as we've seen some issues come up when ran from VDI (ghost file locks).
 
-    cd environment-module
+    cd modules/py-environment/
     ./package-module.sh --help
     ./package-module.sh --variant py3 --moduledir /g/data/v10/public/modules
     
@@ -24,13 +25,13 @@ Loading the module might conflict with other python modules you have loaded.
 
 The module will disable locally installed python packages to prevent conflicts by setting `PYTHONNOUSERSITE`
 
-# Data Cube module
+## Data Cube module
 
 The data cube module contains the Data Cube code. It is built against a specific environment module.
 
 ### Creation
 
-    cd datacube-module
+    cd modules/agdc
     ./package-module.sh --help
         Usage: ./package-module.sh --env agdc-py2-env/anaconda2-2.5.0 --moduledir /g/data/v10/public/modules --version 1.1.9
           Options:
@@ -51,7 +52,7 @@ Specifying `--version 1.1.9` will use the [datacube-1.1.9](https://github.com/da
     
 This will load `agdc-py3-env/21121221` and `agdc-py3/<version>` modules
 
-# Database Configuration module
+## Instance configuration module
 
 This module sets up data cube runtime configuration by setting `DATACUBE_CONFIG_PATH` environment variable.
 
@@ -59,7 +60,7 @@ The module requires `agdc-py3` module of matching version
 
 ### Creation
 
-    cd database-module
+    cd modules/agdc-instances
     ./package-module.sh --help
     ./package-module.sh --variant py3 --name prod --version 1.1.6 --dbname datacube --dbhost 130.56.244.227 --dbport 6432 --moduledir /g/data/v10/public/modules
     
@@ -75,3 +76,4 @@ Update `/g/data/v10/public/modules/modulefiles/agdc-py3/prod/.version` to make t
     datacube system check
 
 This will load `agdc-py3-env/21121221`, `agdc-py3/<version>` and `agdc-py3-prod/<version>` modules
+
