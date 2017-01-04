@@ -94,13 +94,6 @@ MDSS = "mdss -P v27"
 DEST_ROOT = "ALOS/L0"
 
 
-def make_mdss_dirs(dir):
-    if os.system("%s ls -d %s > /dev/null 2>&1" % (MDSS, dir)) != 0:
-        if os.system("%s mkdir %s" % (MDSS, dir)) != 0:
-            raise Exception("Failed to mkdir %s with %s" % (dir, MDSS))
-    return
-
-
 class MDSSClient(object):
     def __init__(self, project):
         self.project = project
