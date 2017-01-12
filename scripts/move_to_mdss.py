@@ -33,14 +33,32 @@ def main(index, project, dry_run, paths):
         move_path(index, project, path, dry_run=dry_run)
 
 
-def get_path_dataset_id(path):
-    path = common.get_metadata_path(path)
-    ids = [metadata_doc['id'] for metadata_path, metadata_doc in read_documents(path)]
+def get_path_dataset_id(metadata_path):
+    ids = [metadata_doc['id'] for _, metadata_doc in read_documents(metadata_path)]
     if len(ids) != 1:
         raise ValueError("Only single-document metadata files are currently supported for moving. "
-                         "Found {} in {}".format(len(ids), path))
+                         "Found {} in {}".format(len(ids), metadata_path))
 
     return ids[0]
+
+
+def get_data_paths(metadata_path):
+    if metadata_path.suffix == '.nc':
+        return [metadata_path]
+    if metadata_path.name == 'ga-metadata.yaml':
+        return metadata_path.parent
+
+    raise ValueError("Unsupported path type: " + str(metadata_path))
+
+
+def list_files(path):
+    """
+    Build a list of files in the given path
+    """
+    output = []
+    for directory, _, files in os.walk(str(path)):
+        output.extend(str(Path(directory).joinpath(file_)) for file_ in files)
+    return output
 
 
 def move_path(index, destination_project, path, dry_run=False):
@@ -49,10 +67,12 @@ def move_path(index, destination_project, path, dry_run=False):
     :type path: pathlib.Path
     :type dry_run: bool
     """
-    uri = Path(path).as_uri()
+    metadata_path = common.get_metadata_path(path)
+    uri = Path(metadata_path).as_uri()
     dataset_id = get_path_dataset_id(path)
 
-    if not index.datasets.has(dataset_id):
+    dataset = index.datasets.get(dataset_id)
+    if not dataset:
         _LOG.info("No indexed (%s): %s", dataset_id, path)
         return
 
@@ -63,13 +83,22 @@ def move_path(index, destination_project, path, dry_run=False):
 
     # TODO: Verify checksums
 
-    data_paths = dataset_data_path(dataset)
+    data_paths = get_data_paths(metadata_path)
 
+    dest_uri = put_on_mdss(data_paths, dataset_id, destination_project)
+
+    # Record mdss tar in index
+    index.datasets.add_location(dataset, uri=dest_uri)
+
+    # Remove local file
+    index.datasets.remove_location(dataset, uri)
+    # TODO: Trash data_paths a few hours/days later?
+
+
+def put_on_mdss(data_paths, dataset_id, destination_project):
     mdss = MDSSClient(destination_project)
-
     # Destination MDSS offset: the data path minus the trash path prefix. (?)
     dest_location = "agdc-archive/{file_postfix}"
-
     tmp_dir = tempfile.mkdtemp(suffix='mdss-transfer-{}'.format(str(dataset_id)))
     try:
         # If it's one file, copy it directly
@@ -89,14 +118,7 @@ def move_path(index, destination_project, path, dry_run=False):
     finally:
         shutil.rmtree(tmp_dir, ignore_errors=True)
 
-    dest_uri = mdss.to_uri(dest_location)
-
-    # Record mdss tar in index
-    index.datasets.add_location(dataset, uri=dest_uri)
-
-    # Remove local file
-    index.datasets.remove_location(dataset, uri)
-    # TODO: Trash data_paths a few hours/days later?
+    return mdss.to_uri(dest_location)
 
 
 if __name__ == '__main__':
