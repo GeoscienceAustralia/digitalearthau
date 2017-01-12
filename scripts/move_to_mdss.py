@@ -4,6 +4,7 @@ from __future__ import print_function
 
 import tarfile
 import tempfile
+import uuid
 
 import click
 import logging
@@ -14,7 +15,8 @@ import shutil
 
 from subprocess import call
 from pathlib import Path
-from datacube.ui import click as ui
+from datacube.ui import click as ui, common
+from datacube.utils import read_documents
 
 _LOG = logging.getLogger('move_to_mdss')
 
@@ -31,6 +33,16 @@ def main(index, project, dry_run, paths):
         move_path(index, project, path, dry_run=dry_run)
 
 
+def get_path_dataset_id(path):
+    path = common.get_metadata_path(path)
+    ids = [metadata_doc['id'] for metadata_path, metadata_doc in read_documents(path)]
+    if len(ids) != 1:
+        raise ValueError("Only single-document metadata files are currently supported for moving. "
+                         "Found {} in {}".format(len(ids), path))
+
+    return ids[0]
+
+
 def move_path(index, destination_project, path, dry_run=False):
     """
     :type index: datacube.index._api.Index
@@ -38,15 +50,15 @@ def move_path(index, destination_project, path, dry_run=False):
     :type dry_run: bool
     """
     uri = Path(path).as_uri()
-    dataset = dataset_from_path(path)
+    dataset_id = get_path_dataset_id(path)
 
-    if not index.datasets.has(dataset.id):
-        _LOG.info("No indexed (%s): %s", dataset.id, path)
+    if not index.datasets.has(dataset_id):
+        _LOG.info("No indexed (%s): %s", dataset_id, path)
         return
 
-    derived_datasets = tuple(index.datasets.get_derived(dataset.id))
+    derived_datasets = tuple(index.datasets.get_derived(dataset_id))
     if not derived_datasets:
-        _LOG.info("Nothing has been derived, skipping (%s): %s", dataset.id, path)
+        _LOG.info("Nothing has been derived, skipping (%s): %s", dataset_id, path)
         return
 
     # TODO: Verify checksums
@@ -58,14 +70,14 @@ def move_path(index, destination_project, path, dry_run=False):
     # Destination MDSS offset: the data path minus the trash path prefix. (?)
     dest_location = "agdc-archive/{file_postfix}"
 
-    tmp_dir = tempfile.mkdtemp(suffix='mdss-transfer-{}'.format(str(dataset.id)))
+    tmp_dir = tempfile.mkdtemp(suffix='mdss-transfer-{}'.format(str(dataset_id)))
     try:
         # If it's one file, copy it directly
         if len(data_paths) == 1 and not os.path.isdir(data_paths[0]):
             source_path = data_paths[0]
         # Otherwise tar it.
         else:
-            tar_path = os.path.join(tmp_dir, str(dataset.id) + '.tar')
+            tar_path = os.path.join(tmp_dir, str(dataset_id) + '.tar')
             with tarfile.open(tar_path, "w") as tar:
                 for path in data_paths:
                     tar.add(path)
