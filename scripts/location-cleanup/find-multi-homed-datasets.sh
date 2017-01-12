@@ -2,8 +2,7 @@
 
 set -eu
 
-# find if any locations are used across multiple active datasets
-# (these are not expeted currently, but will be valid when datasets are stacked)
+# Find datasets with more than one location.
 # Writes to STOUT
 
 time psql -h 130.56.244.227 -p 6432 datacube -c "\\copy (
