@@ -14,8 +14,8 @@ import shutil
 
 from pathlib import Path
 from datacube.ui import click as ui, common
+from datacubenci import paths as path_utils
 from datacubenci.mdss import MDSSClient
-import datacubenci.paths as utils
 
 _LOG = logging.getLogger(__name__)
 
@@ -29,10 +29,10 @@ _LOG = logging.getLogger(__name__)
 def main(index, project, dry_run, paths):
     # TODO: @ui.executor_cli_options
     for path in paths:
-        move_path(index, project, path, dry_run=dry_run)
+        _move_path(index, project, path, dry_run=dry_run)
 
 
-def move_path(index, destination_project, path, dry_run=False):
+def _move_path(index, destination_project, path, dry_run=False):
     """
     :type index: datacube.index._api.Index
     :type path: pathlib.Path
@@ -40,7 +40,7 @@ def move_path(index, destination_project, path, dry_run=False):
     """
     metadata_path = common.get_metadata_path(path)
     uri = Path(metadata_path).as_uri()
-    dataset_id = utils.get_path_dataset_id(path)
+    dataset_id = path_utils.get_path_dataset_id(path)
 
     dataset = index.datasets.get(dataset_id)
     if not dataset:
@@ -53,9 +53,8 @@ def move_path(index, destination_project, path, dry_run=False):
         return
 
     # TODO: Verify checksums
-    data_paths = utils.get_dataset_paths(metadata_path)
 
-    mdss_uri = put_on_mdss(data_paths, dataset_id, destination_project)
+    mdss_uri = _copy_to_mdss(metadata_path, dataset_id, destination_project)
 
     # Record mdss tar in index
     index.datasets.add_location(dataset, uri=mdss_uri)
@@ -65,30 +64,40 @@ def move_path(index, destination_project, path, dry_run=False):
     # TODO: Trash data_paths a few hours/days later?
 
 
-def put_on_mdss(data_paths, dataset_id, destination_project):
+def _copy_to_mdss(metadata_path, dataset_id, destination_project):
     mdss = MDSSClient(destination_project)
+
+    dataset_path, all_files = path_utils.get_dataset_paths(metadata_path)
+    assert all_files
+    assert all(f.is_file() for f in all_files)
+
     # Destination MDSS offset: the data path minus the trash path prefix. (?)
-    dest_location = "agdc-archive/{file_postfix}"
     tmp_dir = tempfile.mkdtemp(suffix='mdss-transfer-{}'.format(str(dataset_id)))
     try:
-        # If it's one file, copy it directly
-        if len(data_paths) == 1 and not os.path.isdir(data_paths[0]):
-            source_path = data_paths[0]
-        # Otherwise tar it.
-        else:
-            tar_path = os.path.join(tmp_dir, str(dataset_id) + '.tar')
-            with tarfile.open(tar_path, "w") as tar:
-                for path in data_paths:
-                    tar.add(path)
-            source_path = tar_path
+        transferable_paths = _get_transferable_paths(all_files, dataset_path, tmp_dir)
 
+        _, dataset_path_offset = path_utils.split_path_from_base(dataset_path.parent)
+        dest_location = "agdc-archive/{file_postfix}".format(file_postfix=dataset_path_offset)
         mdss.make_dirs(dest_location)
-        mdss.put(source_path, dest_location)
+        mdss.put(transferable_paths, dest_location)
 
     finally:
         shutil.rmtree(tmp_dir, ignore_errors=True)
 
     return mdss.to_uri(dest_location)
+
+
+def _get_transferable_paths(all_files, dataset_path, tmp_dir):
+    # If it's two files or less, copy them directly
+    if len(all_files) <= 2:
+        return all_files
+
+    # Otherwise tar all files
+    tar_path = os.path.join(tmp_dir, str(dataset_path.name) + '.tar')
+    with tarfile.open(tar_path, "w") as tar:
+        for path in all_files:
+            tar.add(path)
+    return [tar_path]
 
 
 if __name__ == '__main__':

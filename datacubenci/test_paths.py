@@ -28,7 +28,9 @@ def test_get_data_paths_package():
     metadata_path = packaged_dataset.joinpath('ga-metadata.yaml')
     assert paths.get_metadata_path(packaged_dataset) == metadata_path
 
-    assert set(paths.get_dataset_paths(metadata_path)) == {
+    base_path, all_files = paths.get_dataset_paths(metadata_path)
+    assert base_path == packaged_dataset
+    assert set(all_files) == {
         metadata_path,
         packaged_dataset.joinpath('package', 'file1.txt')
     }
@@ -43,7 +45,9 @@ def test_get_data_paths_netcdf():
     netcdf_path = d.joinpath('LS7_SOMETHING.nc')
     assert paths.get_metadata_path(netcdf_path) == netcdf_path
 
-    assert set(paths.get_dataset_paths(netcdf_path)) == {
+    base_path, all_files = paths.get_dataset_paths(netcdf_path)
+    assert base_path == netcdf_path
+    assert set(all_files) == {
         netcdf_path
     }
 
@@ -60,7 +64,9 @@ def test_get_data_paths_sibling():
     metadata_path = sibling_dataset.joinpath('LS7_SOMETHING.tif.ga-md.yaml')
     assert paths.get_metadata_path(data_path) == metadata_path
 
-    assert set(paths.get_dataset_paths(metadata_path)) == {
+    base_path, all_files = paths.get_dataset_paths(metadata_path)
+    assert base_path == data_path
+    assert set(all_files) == {
         metadata_path,
         data_path
     }

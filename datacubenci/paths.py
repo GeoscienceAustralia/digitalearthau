@@ -138,18 +138,19 @@ def get_path_dataset_id(metadata_path):
 
 def get_dataset_paths(metadata_path):
     """
-    Get location of all files for a given dataset (specified by metadata path)
+    Get the base location and all files for a given dataset (specified by the metadata path)
     :param metadata_path:
-    :return:
+    :return: (base_path, all_files)
     """
     if metadata_path.suffix == '.nc':
-        return [metadata_path]
+        return metadata_path, [metadata_path]
     if metadata_path.name == 'ga-metadata.yaml':
-        return list_file_paths(metadata_path.parent)
+        return metadata_path.parent, list_file_paths(metadata_path.parent)
 
     sibling_suffix = '.ga-md.yaml'
     if metadata_path.name.endswith(sibling_suffix):
-        return [metadata_path, metadata_path.parent.joinpath(metadata_path.name[:-len(sibling_suffix)])]
+        data_file = metadata_path.parent.joinpath(metadata_path.name[:-len(sibling_suffix)])
+        return data_file, [metadata_path, data_file]
 
     raise ValueError("Unsupported path type: " + str(metadata_path))
 
