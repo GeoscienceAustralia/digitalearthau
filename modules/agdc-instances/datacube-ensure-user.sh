@@ -25,12 +25,14 @@ user_already_exists_msg="An account for '$db_user' already exists in the Datacub
 #Create user
 export PGPASSWORD=guest
 create_user_output=$((psql -h $db_server -p $db_port -U guest -c "select create_readonly_agdc_user('$db_user', '$generated_key', '$real_name');") 2>&1)
-if [[ $? != 0 && $create_user_output == *"already exists"* ]]; then
-  echo "$user_already_exists_msg" | fmt -t - 1>&2
-  exit 1
-else
-  >&2 echo "Error creating user account for '$db_user'. "
-  >&2 echo ">> " $create_user_output
+if [[ $? != 0 ]]; then
+    if [[ $create_user_output == *"already exists"* ]]; then
+        echo "$user_already_exists_msg" | fmt -t - 1>&2
+    else
+        >&2 echo "Error creating user account for '$db_user'. "
+        >&2 echo ">> " $create_user_output
+    fi
+    exit 1
 fi
 
 
