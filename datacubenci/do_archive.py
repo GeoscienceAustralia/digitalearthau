@@ -53,15 +53,14 @@ def move_path(index, destination_project, path, dry_run=False):
         return
 
     # TODO: Verify checksums
-
     data_paths = utils.get_dataset_paths(metadata_path)
 
-    dest_uri = put_on_mdss(data_paths, dataset_id, destination_project)
+    mdss_uri = put_on_mdss(data_paths, dataset_id, destination_project)
 
     # Record mdss tar in index
-    index.datasets.add_location(dataset, uri=dest_uri)
+    index.datasets.add_location(dataset, uri=mdss_uri)
 
-    # Remove local file
+    # Remove local file from index
     index.datasets.remove_location(dataset, uri)
     # TODO: Trash data_paths a few hours/days later?
 

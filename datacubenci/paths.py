@@ -9,7 +9,7 @@ from pathlib import Path
 from datacube.utils import is_supported_document_type, read_documents
 
 # This may eventually go to a config file...
-TRASH_ROOTS = (
+BASE_DIRECTORIES = (
     '/g/data/fk4/datacube',
     '/g/data/rs0/datacube',
     '/g/data/v10/reprocess',
@@ -27,14 +27,36 @@ def get_trash_path(file_path):
     >>> get_trash_path('/short/unknown_location/something.nc')
     Traceback (most recent call last):
     ...
-    ValueError: Unknown location: no trash directory: /short/unknown_location/something.nc
+    ValueError: Unknown location: can't calculate base directory: /short/unknown_location/something.nc
     """
-    for trash_root in TRASH_ROOTS:
-        if str(file_path).startswith(trash_root):
-            dir_offset = str(file_path)[len(trash_root) + 1:]
-            return Path(trash_root).joinpath('.trash', dir_offset)
+    root_path, dir_offset = split_path_from_base(file_path)
+    return root_path.joinpath('.trash', dir_offset)
 
-    raise ValueError("Unknown location: no trash directory: " + str(file_path))
+
+def split_path_from_base(file_path):
+    """
+    Split a dataset path into base directory and offset.
+
+    :type file_path: pathlib.Path | str
+    :rtype: (pathlib.Path, str)
+
+    >>> base, offset = split_path_from_base('/g/data/fk4/datacube/ls7/2003/something.nc')
+    >>> str(base)
+    '/g/data/fk4/datacube'
+    >>> offset
+    'ls7/2003/something.nc'
+    >>> split_path_from_base('/short/unknown_location/something.nc')
+    Traceback (most recent call last):
+    ...
+    ValueError: Unknown location: can't calculate base directory: /short/unknown_location/something.nc
+    """
+
+    for root_location in BASE_DIRECTORIES:
+        if str(file_path).startswith(root_location):
+            dir_offset = str(file_path)[len(root_location) + 1:]
+            return Path(root_location), dir_offset
+
+    raise ValueError("Unknown location: can't calculate base directory: " + str(file_path))
 
 
 def write_files(file_dict):
