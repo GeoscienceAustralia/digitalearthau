@@ -8,6 +8,34 @@ from pathlib import Path
 
 from datacube.utils import is_supported_document_type, read_documents
 
+# This may eventually go to a config file...
+TRASH_ROOTS = (
+    '/g/data/fk4/datacube',
+    '/g/data/rs0/datacube',
+    '/g/data/v10/reprocess',
+    '/g/data/rs0/scenes/pq-scenes-tmp',
+    '/g/data/rs0/scenes/nbar-scenes-tmp',
+)
+
+
+def get_trash_path(file_path):
+    """
+    For a given path on lustre, get the full path to a destination trash path.
+
+    >>> str(get_trash_path('/g/data/fk4/datacube/ls7/2003/something.nc'))
+    '/g/data/fk4/datacube/.trash/ls7/2003/something.nc'
+    >>> get_trash_path('/short/unknown_location/something.nc')
+    Traceback (most recent call last):
+    ...
+    ValueError: Unknown location: no trash directory: /short/unknown_location/something.nc
+    """
+    for trash_root in TRASH_ROOTS:
+        if str(file_path).startswith(trash_root):
+            dir_offset = str(file_path)[len(trash_root) + 1:]
+            return Path(trash_root).joinpath('.trash', dir_offset)
+
+    raise ValueError("Unknown location: no trash directory: " + str(file_path))
+
 
 def write_files(file_dict):
     """
