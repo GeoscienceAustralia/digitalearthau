@@ -14,8 +14,8 @@ import shutil
 
 from pathlib import Path
 from datacube.ui import click as ui, common
-from datacube.utils import read_documents
 from datacubenci.mdss import MDSSClient
+import datacubenci.paths as utils
 
 _LOG = logging.getLogger(__name__)
 
@@ -32,24 +32,6 @@ def main(index, project, dry_run, paths):
         move_path(index, project, path, dry_run=dry_run)
 
 
-def get_path_dataset_id(metadata_path):
-    ids = [metadata_doc['id'] for _, metadata_doc in read_documents(metadata_path)]
-    if len(ids) != 1:
-        raise ValueError("Only single-document metadata files are currently supported for moving. "
-                         "Found {} in {}".format(len(ids), metadata_path))
-
-    return ids[0]
-
-
-def get_data_paths(metadata_path):
-    if metadata_path.suffix == '.nc':
-        return [metadata_path]
-    if metadata_path.name == 'ga-metadata.yaml':
-        return metadata_path.parent
-
-    raise ValueError("Unsupported path type: " + str(metadata_path))
-
-
 def move_path(index, destination_project, path, dry_run=False):
     """
     :type index: datacube.index._api.Index
@@ -58,7 +40,7 @@ def move_path(index, destination_project, path, dry_run=False):
     """
     metadata_path = common.get_metadata_path(path)
     uri = Path(metadata_path).as_uri()
-    dataset_id = get_path_dataset_id(path)
+    dataset_id = utils.get_path_dataset_id(path)
 
     dataset = index.datasets.get(dataset_id)
     if not dataset:
@@ -72,7 +54,7 @@ def move_path(index, destination_project, path, dry_run=False):
 
     # TODO: Verify checksums
 
-    data_paths = get_data_paths(metadata_path)
+    data_paths = utils.get_dataset_paths(metadata_path)
 
     dest_uri = put_on_mdss(data_paths, dataset_id, destination_project)
 
