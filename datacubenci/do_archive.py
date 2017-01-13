@@ -4,7 +4,6 @@ from __future__ import print_function
 
 import tarfile
 import tempfile
-import uuid
 
 import click
 import logging
@@ -13,12 +12,12 @@ import os
 
 import shutil
 
-from subprocess import call
 from pathlib import Path
 from datacube.ui import click as ui, common
 from datacube.utils import read_documents
+from datacubenci.mdss import MDSSClient
 
-_LOG = logging.getLogger('move_to_mdss')
+_LOG = logging.getLogger(__name__)
 
 
 @click.command()
@@ -49,16 +48,6 @@ def get_data_paths(metadata_path):
         return metadata_path.parent
 
     raise ValueError("Unsupported path type: " + str(metadata_path))
-
-
-def list_files(path):
-    """
-    Build a list of files in the given path
-    """
-    output = []
-    for directory, _, files in os.walk(str(path)):
-        output.extend(str(Path(directory).joinpath(file_)) for file_ in files)
-    return output
 
 
 def move_path(index, destination_project, path, dry_run=False):
@@ -123,32 +112,3 @@ def put_on_mdss(data_paths, dataset_id, destination_project):
 
 if __name__ == '__main__':
     main()
-
-MDSS = "mdss -P v27"
-DEST_ROOT = "ALOS/L0"
-
-
-class MDSSClient(object):
-    def __init__(self, project):
-        self.project = project
-
-    def _call(self, *args):
-        base_args = ['mdss', '-P', self.project]
-        base_args.extend(args)
-        return call(base_args)
-
-    def put(self, source_path, dest_path):
-        retcode = self._call('put', source_path, dest_path)
-        if retcode == -1:
-            raise RuntimeError("Failed to transfer to {} MDSS: {} -> {}".format(self.project, source_path, dest_path))
-
-    def make_dirs(self, path):
-        if self._call('ls', '-d', path) != 0:
-            if self._call('mkdir', path) != 0:
-                raise RuntimeError("Failed to mkdir on MDSS {} at {}".format(self.project, path))
-
-    def to_uri(self, path):
-        return 'mdss://{project}/{offset}'.format(
-            project=self.project,
-            offset=path,
-        )
