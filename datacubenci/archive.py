@@ -118,10 +118,10 @@ def _move_path(index, destination_project, path, dry_run=True):
 
 def _verify_checksum(log, metadata_path, dry_run=True):
     dataset_path, all_files = path_utils.get_dataset_paths(metadata_path)
-    checksum_file = dataset_path.joinpath('checksum.sha1')
+    checksum_file = _expected_checksum_path(dataset_path)
     if not checksum_file.exists():
-        # Ingested data doesn't currently have them.
-        log.warning("No checksum for dataset %s", metadata_path)
+        # Ingested data doesn't currently have them, so it's only a warning.
+        log.warning("checksum.missing", checksum_file=checksum_file)
         return None
 
     ch = verify.PackageChecksum()
@@ -135,6 +135,28 @@ def _verify_checksum(log, metadata_path, dry_run=True):
                 return False
 
     return True
+
+
+def _expected_checksum_path(dataset_path):
+    """
+    :type dataset_path: pathlib.Path
+    :rtype: pathlib.Path
+
+    >>> import tempfile
+    >>> _expected_checksum_path(Path(tempfile.mkdtemp())).name == 'package.sha1'
+    True
+    >>> file_ = Path(tempfile.mktemp(suffix='-dataset-file.tif'))
+    >>> file_.open('a').close()
+    >>> file_chk = _expected_checksum_path(file_)
+    >>> str(file_chk).endswith('-dataset-file.tif.sha1')
+    True
+    >>> file_chk.parent == file_.parent
+    True
+    """
+    if dataset_path.is_dir():
+        return dataset_path.joinpath('package.sha1')
+    else:
+        return dataset_path.parent.joinpath(dataset_path.name + '.sha1')
 
 
 def _copy_to_mdss(log, metadata_path, dataset_id, destination_project, dry_run=True):
