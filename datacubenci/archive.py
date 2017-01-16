@@ -1,9 +1,10 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 from __future__ import print_function
 
 import tarfile
 import tempfile
+from pathlib import Path
 
 import click
 
@@ -30,7 +31,7 @@ _LOG = structlog.get_logger()
 def main(index, project, dry_run, paths):
     # TODO: @ui.executor_cli_options
     for path in paths:
-        _move_path(index, project, path, dry_run=dry_run)
+        _move_path(index, project, Path(path), dry_run=dry_run)
 
 
 class MdssMoveTask:
@@ -56,11 +57,11 @@ class MdssMoveTask:
         """
         log = _LOG.bind(input_path=path)
 
-        metadata_path = common.get_metadata_path(path)
+        metadata_path = path_utils.get_metadata_path(path)
         log = log.bind(metadata_path=metadata_path)
         log.debug("found.metadata_path")
 
-        dataset_id = path_utils.get_path_dataset_id(path)
+        dataset_id = path_utils.get_path_dataset_id(metadata_path)
         log = log.bind(dataset_id=dataset_id)
         log.debug("found.dataset_id")
 
@@ -91,6 +92,8 @@ def _move_path(index, destination_project, path, dry_run=True):
     :type dry_run: bool
     """
     task = MdssMoveTask.evaluate_and_create(index, path)
+    if not task:
+        return
 
     successful_checksum = _verify_checksum(task.log, task.source_metadata_path,
                                            dry_run=dry_run)
