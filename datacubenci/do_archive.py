@@ -84,7 +84,7 @@ class MdssMoveTask:
         )
 
 
-def _move_path(index, destination_project, path, dry_run=False):
+def _move_path(index, destination_project, path, dry_run=True):
     """
     :type index: datacube.index._api.Index
     :type path: pathlib.Path
@@ -92,23 +92,28 @@ def _move_path(index, destination_project, path, dry_run=False):
     """
     task = MdssMoveTask.evaluate_and_create(index, path)
 
-    successful_checksum = _verify_checksum(task.log, task.source_metadata_path)
+    successful_checksum = _verify_checksum(task.log, task.source_metadata_path,
+                                           dry_run=dry_run)
     log = task.log.bind(passes_checksum=successful_checksum)
     if not successful_checksum:
         raise RuntimeError("Checksum failure on " + str(task.source_metadata_path))
 
-    mdss_uri = _copy_to_mdss(log, task.source_metadata_path, task.dataset.id, destination_project)
+    mdss_uri = _copy_to_mdss(log, task.source_metadata_path, task.dataset.id, destination_project,
+                             dry_run=dry_run)
+    log = log.bind(mdss_uri=mdss_uri)
 
     # Record mdss tar in index
-    index.datasets.add_location(task.dataset, uri=mdss_uri)
-    task.log.info('Added mdss location', mdss_uri=mdss_uri)
+    if not dry_run:
+        index.datasets.add_location(task.dataset, uri=mdss_uri)
+    log.info('Added mdss uri')
 
     # Remove local file from index
-    index.datasets.remove_location(task.dataset, task.source_uri)
-    task.log.info('Removed source location', source_uri=task.source_uri)
+    if not dry_run:
+        index.datasets.remove_location(task.dataset, task.source_uri)
+    log.info('Removed source location', source_uri=task.source_uri)
 
 
-def _verify_checksum(log, metadata_path):
+def _verify_checksum(log, metadata_path, dry_run=True):
     dataset_path, all_files = path_utils.get_dataset_paths(metadata_path)
     checksum_file = dataset_path.joinpath('checksum.sha1')
     if not checksum_file.exists():
@@ -118,40 +123,44 @@ def _verify_checksum(log, metadata_path):
 
     ch = verify.PackageChecksum()
     ch.read(checksum_file)
-    for file, successful in ch.iteratively_verify():
-        if successful:
-            log.debug("Checksum passed: %s", file)
-        else:
-            log.error("Checksum failure on %s", file)
-            return False
+    if not dry_run:
+        for file, successful in ch.iteratively_verify():
+            if successful:
+                log.debug("Checksum passed: %s", file)
+            else:
+                log.error("Checksum failure on %s", file)
+                return False
 
     return True
 
 
-def _copy_to_mdss(log, metadata_path, dataset_id, destination_project):
+def _copy_to_mdss(log, metadata_path, dataset_id, destination_project, dry_run=True):
     dataset_path, all_files = path_utils.get_dataset_paths(metadata_path)
     assert all_files
     assert all(f.is_file() for f in all_files)
+    log.debug("All contents are files", file_count=len(all_files))
 
     _, dataset_path_offset = path_utils.split_path_from_base(dataset_path.parent)
     dest_location = "agdc-archive/{file_postfix}".format(file_postfix=dataset_path_offset)
+    log = log.bind(mdss_location=dest_location)
+    log.debug("Calculated MDSS location")
 
     mdss = MDSSClient(destination_project)
 
-    # Destination MDSS offset: the data path minus the trash path prefix. (?)
-    tmp_dir = tempfile.mkdtemp(suffix='mdss-transfer-{}'.format(str(dataset_id)))
-    try:
-        transferable_paths = _get_transferable_paths(log, all_files, dataset_path, tmp_dir)
+    if not dry_run:
+        # Destination MDSS offset: the data path minus the trash path prefix. (?)
+        tmp_dir = tempfile.mkdtemp(suffix='mdss-transfer-{}'.format(str(dataset_id)))
+        try:
+            transferable_paths = _get_transferable_paths(log, all_files, dataset_path, tmp_dir)
 
-        log = log.bind(mdss_location=dest_location)
-        log.debug("Creating MDSS output directory")
-        mdss.make_dirs(dest_location)
-        log.info("Pushing to MDSS")
-        mdss.put(transferable_paths, dest_location)
-        log.info("Done")
-    finally:
-        log.debug("Cleaning temp", tmp_dir=tmp_dir)
-        shutil.rmtree(tmp_dir, ignore_errors=True)
+            log.debug("Creating MDSS output directory")
+            mdss.make_dirs(dest_location)
+            log.info("Pushing to MDSS")
+            mdss.put(transferable_paths, dest_location)
+            log.info("Done")
+        finally:
+            log.debug("Cleaning temp", tmp_dir=tmp_dir)
+            shutil.rmtree(tmp_dir, ignore_errors=True)
 
     return mdss.to_uri(dest_location)
 
