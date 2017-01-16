@@ -55,6 +55,7 @@ class MdssMoveTask:
         :param index:
         :param path:
         """
+        path = path.absolute()
         log = _LOG.bind(input_path=path)
 
         metadata_path = path_utils.get_metadata_path(path)
