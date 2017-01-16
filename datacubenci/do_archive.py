@@ -6,20 +6,19 @@ import tarfile
 import tempfile
 
 import click
-import logging
 
 import os
 
 import shutil
 
-from pathlib import Path
 from datacube.ui import click as ui, common
 from datacubenci import paths as path_utils
 from datacubenci.mdss import MDSSClient
 
 from eodatasets import verify
+import structlog
 
-_LOG = logging.getLogger(__name__)
+_LOG = structlog.get_logger()
 
 
 @click.command()
@@ -34,93 +33,145 @@ def main(index, project, dry_run, paths):
         _move_path(index, project, path, dry_run=dry_run)
 
 
+class MdssMoveTask:
+    def __init__(self, source_path, source_metadata_path, dataset, log=_LOG):
+        self.source_path = source_path
+        self.source_metadata_path = source_metadata_path
+        self.dataset = dataset
+        self.log = log.bind(path=source_path)
+
+    @property
+    def source_uri(self):
+        return self.source_path.as_uri()
+
+    def status(self, **vals):
+        self.log = self.log.bind(**vals)
+
+    @classmethod
+    def evaluate_and_create(cls, index, path):
+        """
+        Create a move task if this is movable.
+        :param index:
+        :param path:
+        """
+        log = _LOG.bind(input_path=path)
+
+        metadata_path = common.get_metadata_path(path)
+        log = log.bind(metadata_path=metadata_path)
+        log.debug("Found metadata path")
+
+        dataset_id = path_utils.get_path_dataset_id(path)
+        log = log.bind(dataset_id=dataset_id)
+        log.debug("Found dataset id")
+
+        dataset = index.datasets.get(dataset_id)
+        log = log.bind(is_indexed=dataset is not None)
+        if not dataset:
+            log.warn("Not indexed")
+            return None
+
+        derived_count = len(tuple(index.datasets.get_derived(dataset_id)))
+        log = log.bind(derived_count=derived_count)
+        if not derived_count:
+            log.info("Nothing has been derived, skipping.")
+            return None
+
+        return MdssMoveTask(
+            source_path=path,
+            source_metadata_path=metadata_path,
+            dataset=dataset,
+            log=log
+        )
+
+
 def _move_path(index, destination_project, path, dry_run=False):
     """
     :type index: datacube.index._api.Index
     :type path: pathlib.Path
     :type dry_run: bool
     """
-    metadata_path = common.get_metadata_path(path)
-    uri = Path(metadata_path).as_uri()
-    dataset_id = path_utils.get_path_dataset_id(path)
+    task = MdssMoveTask.evaluate_and_create(index, path)
 
-    dataset = index.datasets.get(dataset_id)
-    if not dataset:
-        _LOG.info("No indexed (%s): %s", dataset_id, path)
-        return
-
-    derived_datasets = tuple(index.datasets.get_derived(dataset_id))
-    if not derived_datasets:
-        _LOG.info("Nothing has been derived, skipping (%s): %s", dataset_id, path)
-        return
-
-    successful_checksum = _verify_checksum(metadata_path)
+    successful_checksum = _verify_checksum(task.log, task.source_metadata_path)
+    log = task.log.bind(passes_checksum=successful_checksum)
     if not successful_checksum:
-        raise RuntimeError("Checksum failure on " + str(metadata_path))
+        raise RuntimeError("Checksum failure on " + str(task.source_metadata_path))
 
-    mdss_uri = _copy_to_mdss(metadata_path, dataset_id, destination_project)
+    mdss_uri = _copy_to_mdss(log, task.source_metadata_path, task.dataset.id, destination_project)
 
     # Record mdss tar in index
-    index.datasets.add_location(dataset, uri=mdss_uri)
+    index.datasets.add_location(task.dataset, uri=mdss_uri)
+    task.log.info('Added mdss location', mdss_uri=mdss_uri)
 
     # Remove local file from index
-    index.datasets.remove_location(dataset, uri)
-    # TODO: Trash data_paths a few hours/days later?
+    index.datasets.remove_location(task.dataset, task.source_uri)
+    task.log.info('Removed source location', source_uri=task.source_uri)
 
 
-def _verify_checksum(metadata_path):
+def _verify_checksum(log, metadata_path):
     dataset_path, all_files = path_utils.get_dataset_paths(metadata_path)
     checksum_file = dataset_path.joinpath('checksum.sha1')
     if not checksum_file.exists():
         # Ingested data doesn't currently have them.
-        _LOG.warning("No checksum for dataset %s", metadata_path)
-        return True
+        log.warning("No checksum for dataset %s", metadata_path)
+        return None
 
     ch = verify.PackageChecksum()
     ch.read(checksum_file)
     for file, successful in ch.iteratively_verify():
         if successful:
-            _LOG.debug("Checksum passed: %s", file)
+            log.debug("Checksum passed: %s", file)
         else:
-            _LOG.error("Checksum failure on %s", file)
+            log.error("Checksum failure on %s", file)
             return False
 
     return True
 
 
-def _copy_to_mdss(metadata_path, dataset_id, destination_project):
-    mdss = MDSSClient(destination_project)
-
+def _copy_to_mdss(log, metadata_path, dataset_id, destination_project):
     dataset_path, all_files = path_utils.get_dataset_paths(metadata_path)
     assert all_files
     assert all(f.is_file() for f in all_files)
 
+    _, dataset_path_offset = path_utils.split_path_from_base(dataset_path.parent)
+    dest_location = "agdc-archive/{file_postfix}".format(file_postfix=dataset_path_offset)
+
+    mdss = MDSSClient(destination_project)
+
     # Destination MDSS offset: the data path minus the trash path prefix. (?)
     tmp_dir = tempfile.mkdtemp(suffix='mdss-transfer-{}'.format(str(dataset_id)))
     try:
-        transferable_paths = _get_transferable_paths(all_files, dataset_path, tmp_dir)
+        transferable_paths = _get_transferable_paths(log, all_files, dataset_path, tmp_dir)
 
-        _, dataset_path_offset = path_utils.split_path_from_base(dataset_path.parent)
-        dest_location = "agdc-archive/{file_postfix}".format(file_postfix=dataset_path_offset)
+        log = log.bind(mdss_location=dest_location)
+        log.debug("Creating MDSS output directory")
         mdss.make_dirs(dest_location)
+        log.info("Pushing to MDSS")
         mdss.put(transferable_paths, dest_location)
-
+        log.info("Done")
     finally:
+        log.debug("Cleaning temp", tmp_dir=tmp_dir)
         shutil.rmtree(tmp_dir, ignore_errors=True)
 
     return mdss.to_uri(dest_location)
 
 
-def _get_transferable_paths(all_files, dataset_path, tmp_dir):
+def _get_transferable_paths(log, all_files, dataset_path, tmp_dir):
     # If it's two files or less, copy them directly
     if len(all_files) <= 2:
+        log.debug("Fewer than two files, storing directly.")
         return all_files
 
     # Otherwise tar all files
     tar_path = os.path.join(tmp_dir, str(dataset_path.name) + '.tar')
+    log = log.bind(tar_path=tar_path)
+    log.debug("Creating tar")
     with tarfile.open(tar_path, "w") as tar:
         for path in all_files:
+            log.debug("Adding file", file=path)
             tar.add(path)
+
+    log.debug("Tar created")
     return [tar_path]
 
 
