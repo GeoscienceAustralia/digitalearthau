@@ -26,9 +26,10 @@ install:
 - popd
 - export CPLUS_INCLUDE_PATH="/usr/include/gdal"
 - export C_INCLUDE_PATH="/usr/include/gdal"
-- travis_retry pip install pylint pytest-cov pep8 coveralls GDAL==1.10.0
+- travis_retry pip install pylint pytest-cov pep8 GDAL==1.10.0
 - travis_retry pip install git+https://github.com/GeoscienceAustralia/eo-datasets.git
-- travis_retry pip install datacube
+- travis_retry pip install .
+
 script:
 - ./check-code.sh
 cache: apt
