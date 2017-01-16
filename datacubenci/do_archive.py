@@ -58,22 +58,22 @@ class MdssMoveTask:
 
         metadata_path = common.get_metadata_path(path)
         log = log.bind(metadata_path=metadata_path)
-        log.debug("Found metadata path")
+        log.debug("found.metadata_path")
 
         dataset_id = path_utils.get_path_dataset_id(path)
         log = log.bind(dataset_id=dataset_id)
-        log.debug("Found dataset id")
+        log.debug("found.dataset_id")
 
         dataset = index.datasets.get(dataset_id)
         log = log.bind(is_indexed=dataset is not None)
         if not dataset:
-            log.warn("Not indexed")
+            log.warn("skip.not_indexed")
             return None
 
         derived_count = len(tuple(index.datasets.get_derived(dataset_id)))
         log = log.bind(derived_count=derived_count)
         if not derived_count:
-            log.info("Nothing has been derived, skipping.")
+            log.info("skip.no_derived_datasets")
             return None
 
         return MdssMoveTask(
@@ -105,12 +105,12 @@ def _move_path(index, destination_project, path, dry_run=True):
     # Record mdss tar in index
     if not dry_run:
         index.datasets.add_location(task.dataset, uri=mdss_uri)
-    log.info('Added mdss uri')
+    log.info('mdss_uri.indexed')
 
     # Remove local file from index
     if not dry_run:
         index.datasets.remove_location(task.dataset, task.source_uri)
-    log.info('Removed source location', source_uri=task.source_uri)
+    log.info('source_uri.deindexed', source_uri=task.source_uri)
 
 
 def _verify_checksum(log, metadata_path, dry_run=True):
@@ -126,9 +126,9 @@ def _verify_checksum(log, metadata_path, dry_run=True):
     if not dry_run:
         for file, successful in ch.iteratively_verify():
             if successful:
-                log.debug("Checksum passed: %s", file)
+                log.debug("checksum.pass", file=file)
             else:
-                log.error("Checksum failure on %s", file)
+                log.error("checksum.failure", file=file)
                 return False
 
     return True
@@ -138,12 +138,12 @@ def _copy_to_mdss(log, metadata_path, dataset_id, destination_project, dry_run=T
     dataset_path, all_files = path_utils.get_dataset_paths(metadata_path)
     assert all_files
     assert all(f.is_file() for f in all_files)
-    log.debug("All contents are files", file_count=len(all_files))
+    log.debug("files.verify", file_count=len(all_files))
 
     _, dataset_path_offset = path_utils.split_path_from_base(dataset_path.parent)
     dest_location = "agdc-archive/{file_postfix}".format(file_postfix=dataset_path_offset)
     log = log.bind(mdss_location=dest_location)
-    log.debug("Calculated MDSS location")
+    log.debug("mdss_uri.calculated")
 
     mdss = MDSSClient(destination_project)
 
@@ -153,13 +153,13 @@ def _copy_to_mdss(log, metadata_path, dataset_id, destination_project, dry_run=T
         try:
             transferable_paths = _get_transferable_paths(log, all_files, dataset_path, tmp_dir)
 
-            log.debug("Creating MDSS output directory")
+            log.debug("mdss.mkdir")
             mdss.make_dirs(dest_location)
-            log.info("Pushing to MDSS")
+            log.info("mdss.put")
             mdss.put(transferable_paths, dest_location)
-            log.info("Done")
+            log.debug("mdss.put.done")
         finally:
-            log.debug("Cleaning temp", tmp_dir=tmp_dir)
+            log.debug("tmp_dir.rm", tmp_dir=tmp_dir)
             shutil.rmtree(tmp_dir, ignore_errors=True)
 
     return mdss.to_uri(dest_location)
@@ -168,19 +168,19 @@ def _copy_to_mdss(log, metadata_path, dataset_id, destination_project, dry_run=T
 def _get_transferable_paths(log, all_files, dataset_path, tmp_dir):
     # If it's two files or less, copy them directly
     if len(all_files) <= 2:
-        log.debug("Fewer than two files, storing directly.")
+        log.debug("")
         return all_files
 
     # Otherwise tar all files
     tar_path = os.path.join(tmp_dir, str(dataset_path.name) + '.tar')
     log = log.bind(tar_path=tar_path)
-    log.debug("Creating tar")
+    log.debug("tar.create")
     with tarfile.open(tar_path, "w") as tar:
         for path in all_files:
-            log.debug("Adding file", file=path)
+            log.debug("tar.add_file", file=path)
             tar.add(path)
 
-    log.debug("Tar created")
+    log.debug("tar.done")
     return [tar_path]
 
 
