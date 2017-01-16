@@ -17,6 +17,8 @@ from datacube.ui import click as ui, common
 from datacubenci import paths as path_utils
 from datacubenci.mdss import MDSSClient
 
+from eodatasets import verify
+
 _LOG = logging.getLogger(__name__)
 
 
@@ -52,7 +54,9 @@ def _move_path(index, destination_project, path, dry_run=False):
         _LOG.info("Nothing has been derived, skipping (%s): %s", dataset_id, path)
         return
 
-    # TODO: Verify checksums
+    successful_checksum = _verify_checksum(metadata_path)
+    if not successful_checksum:
+        raise RuntimeError("Checksum failure on " + str(metadata_path))
 
     mdss_uri = _copy_to_mdss(metadata_path, dataset_id, destination_project)
 
@@ -62,6 +66,26 @@ def _move_path(index, destination_project, path, dry_run=False):
     # Remove local file from index
     index.datasets.remove_location(dataset, uri)
     # TODO: Trash data_paths a few hours/days later?
+
+
+def _verify_checksum(metadata_path):
+    dataset_path, all_files = path_utils.get_dataset_paths(metadata_path)
+    checksum_file = dataset_path.joinpath('checksum.sha1')
+    if not checksum_file.exists():
+        # Ingested data doesn't currently have them.
+        _LOG.warning("No checksum for dataset %s", metadata_path)
+        return True
+
+    ch = verify.PackageChecksum()
+    ch.read(checksum_file)
+    for file, successful in ch.iteratively_verify():
+        if successful:
+            _LOG.debug("Checksum passed: %s", file)
+        else:
+            _LOG.error("Checksum failure on %s", file)
+            return False
+
+    return True
 
 
 def _copy_to_mdss(metadata_path, dataset_id, destination_project):
