@@ -203,10 +203,10 @@ def _get_transferable_paths(log, all_files, dataset_path, tmp_dir):
     tar_path = os.path.join(tmp_dir, str(dataset_path.name) + '.tar')
     log = log.bind(tar_path=tar_path)
     log.debug("tar.create")
-    with tarfile.open(tar_path, "w") as tar:
+    with tarfile.open(str(tar_path), "w") as tar:
         for path in all_files:
             log.debug("tar.add_file", file=path)
-            tar.add(path)
+            tar.add(str(path))
 
     log.debug("tar.done")
     return [tar_path]
