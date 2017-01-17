@@ -64,16 +64,17 @@ def run_all(index, project, paths, dry_run=False):
         raise RuntimeError("mdss is not available on this system")
 
     for path in paths:
-        task = MdssMoveTask.evaluate_and_create(index, path)
+        task = MdssMoveTask.evaluate_and_create(index, project, path)
         if not task:
             continue
 
-        _archive_path(index, project, task, dry_run=dry_run)
+        _archive_path(index, task, dry_run=dry_run)
 
 
 class MdssMoveTask:
-    def __init__(self, source_path, source_metadata_path, dataset, log=_LOG):
+    def __init__(self, source_path, project, source_metadata_path, dataset, log=_LOG):
         self.source_path = source_path
+        self.project = project
         self.source_metadata_path = source_metadata_path
         self.dataset = dataset
         self.log = log.bind(path=source_path)
@@ -86,14 +87,12 @@ class MdssMoveTask:
         self.log = self.log.bind(**vals)
 
     @classmethod
-    def evaluate_and_create(cls, index, path):
+    def evaluate_and_create(cls, index, project, path):
         """
-        Create a move task if this is movable.
-        :param index:
-        :param path:
+        Create a move task if this path is movable.
         """
         path = path.absolute()
-        log = _LOG.bind(input_path=path)
+        log = _LOG.bind(input_path=path, project=project)
 
         metadata_path = path_utils.get_metadata_path(path)
         log = log.bind(metadata_path=metadata_path)
@@ -117,17 +116,17 @@ class MdssMoveTask:
 
         return MdssMoveTask(
             source_path=path,
+            project=project,
             source_metadata_path=metadata_path,
             dataset=dataset,
             log=log
         )
 
 
-def _archive_path(index, destination_project, task, dry_run=True):
+def _archive_path(index, task, dry_run=True):
     """
     :type index: datacube.index._api.Index
     :type task: MdssMoveTask
-    :type destination_project: str
     :type dry_run: bool
     """
     successful_checksum = _verify_checksum(task.log, task.source_metadata_path,
@@ -136,7 +135,7 @@ def _archive_path(index, destination_project, task, dry_run=True):
     if not successful_checksum:
         raise RuntimeError("Checksum failure on " + str(task.source_metadata_path))
 
-    mdss_uri = _copy_to_mdss(log, task.source_metadata_path, task.dataset.id, destination_project,
+    mdss_uri = _copy_to_mdss(log, task.source_metadata_path, task.dataset.id, task.project,
                              dry_run=dry_run)
     log = log.bind(mdss_uri=mdss_uri)
 
