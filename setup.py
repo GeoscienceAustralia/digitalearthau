@@ -26,7 +26,8 @@ setup(
     install_requires=[
         'click>=5.0',
         'datacube',
-        'structlog',
+        # dev module is used automatically when run interactively.
+        'structlog[dev]',
         'eodatasets'
     ],
     tests_require=tests_require,
