@@ -14,7 +14,7 @@ import shutil
 
 import sys
 
-from datacube.ui import click as ui, common
+from datacube.ui import click as ui
 from datacubenci import paths as path_utils
 from datacubenci.mdss import MDSSClient
 
@@ -31,9 +31,40 @@ _LOG = structlog.get_logger()
 @click.argument('paths', type=str, nargs=-1)
 @ui.pass_index('mdss-archival')
 def main(index, project, dry_run, paths):
+    structlog.configure(
+        processors=[
+            structlog.stdlib.add_log_level,
+            structlog.processors.TimeStamper(fmt="%Y-%m-%d %H:%M.%S"),
+            structlog.processors.StackInfoRenderer(),
+            structlog.processors.format_exc_info,
+            # Coloured output if to terminal.
+            structlog.dev.ConsoleRenderer() if sys.stdout.isatty() else structlog.processors.JSONRenderer(),
+        ],
+        context_class=dict,
+        cache_logger_on_first_use=True,
+    )
+
     # TODO: @ui.executor_cli_options
+    run_all(
+        index,
+        project,
+        [Path(path).absolute() for path in paths],
+        dry_run,
+    )
+
+
+def run_all(index, project, paths, dry_run=False):
+    """
+    :type index: datacube.index._api.Index
+    :type dry_run: bool
+    :param paths:
+    """
     for path in paths:
-        _move_path(index, project, Path(path), dry_run=dry_run)
+        task = MdssMoveTask.evaluate_and_create(index, path)
+        if not task:
+            continue
+
+        _archive_path(index, project, task, dry_run=dry_run)
 
 
 class MdssMoveTask:
@@ -88,16 +119,13 @@ class MdssMoveTask:
         )
 
 
-def _move_path(index, destination_project, path, dry_run=True):
+def _archive_path(index, destination_project, task, dry_run=True):
     """
     :type index: datacube.index._api.Index
-    :type path: pathlib.Path
+    :type task: MdssMoveTask
+    :type destination_project: str
     :type dry_run: bool
     """
-    task = MdssMoveTask.evaluate_and_create(index, path)
-    if not task:
-        return
-
     successful_checksum = _verify_checksum(task.log, task.source_metadata_path,
                                            dry_run=dry_run)
     log = task.log.bind(passes_checksum=successful_checksum)
@@ -213,16 +241,4 @@ def _get_transferable_paths(log, all_files, dataset_path, tmp_dir):
 
 
 if __name__ == '__main__':
-    structlog.configure(
-        processors=[
-            structlog.stdlib.add_log_level,
-            structlog.processors.TimeStamper(fmt="%Y-%m-%d %H:%M.%S"),
-            structlog.processors.StackInfoRenderer(),
-            structlog.processors.format_exc_info,
-            # Coloured output if to terminal.
-            structlog.dev.ConsoleRenderer() if sys.stdout.isatty() else structlog.processors.JSONRenderer(),
-        ],
-        context_class=dict,
-        cache_logger_on_first_use=True,
-    )
     main()
