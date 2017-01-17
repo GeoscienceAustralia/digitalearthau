@@ -206,7 +206,7 @@ def _get_transferable_paths(log, all_files, dataset_path, tmp_dir):
     with tarfile.open(str(tar_path), "w") as tar:
         for path in all_files:
             log.debug("tar.add_file", file=path)
-            tar.add(str(path))
+            tar.add(str(path), arcname=str(path.relative_to(dataset_path)))
 
     log.debug("tar.done")
     return [tar_path]
