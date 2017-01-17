@@ -177,7 +177,7 @@ def _copy_to_mdss(log, metadata_path, dataset_id, destination_project, dry_run=T
 
     if not dry_run:
         # Destination MDSS offset: the data path minus the trash path prefix. (?)
-        tmp_dir = tempfile.mkdtemp(suffix='-mdss-transfer-{}'.format(str(dataset_id)))
+        tmp_dir = tempfile.mkdtemp(prefix='mdss-transfer-{}-'.format(str(dataset_id)))
         try:
             transferable_paths = _get_transferable_paths(log, all_files, dataset_path, tmp_dir)
 
