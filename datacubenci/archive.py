@@ -213,17 +213,15 @@ def _get_transferable_paths(log, all_files, dataset_path, tmp_dir):
 
 
 if __name__ == '__main__':
-    processors = [
-        structlog.stdlib.add_log_level,
-        structlog.processors.TimeStamper(fmt="%Y-%m-%d %H:%M.%S"),
-        structlog.processors.StackInfoRenderer(),
-        structlog.processors.format_exc_info,
-        # Coloured output if to terminal.
-        structlog.dev.ConsoleRenderer() if sys.stdout.isatty() else structlog.processors.JSONRenderer(),
-    ]
-
     structlog.configure(
-        processors=processors,
+        processors=[
+            structlog.stdlib.add_log_level,
+            structlog.processors.TimeStamper(fmt="%Y-%m-%d %H:%M.%S"),
+            structlog.processors.StackInfoRenderer(),
+            structlog.processors.format_exc_info,
+            # Coloured output if to terminal.
+            structlog.dev.ConsoleRenderer() if sys.stdout.isatty() else structlog.processors.JSONRenderer(),
+        ],
         context_class=dict,
         cache_logger_on_first_use=True,
     )
