@@ -1,5 +1,4 @@
-
-
+import shutil
 from subprocess import call
 
 
@@ -25,3 +24,11 @@ class MDSSClient(object):
             project=self.project,
             offset=path,
         )
+
+    @classmethod
+    def is_available(cls):
+        """
+        Is the mdss command available on this system?
+        :rtype: bool
+        """
+        return shutil.which('mdss') is not None

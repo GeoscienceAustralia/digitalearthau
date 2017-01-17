@@ -55,10 +55,14 @@ def main(index, project, dry_run, paths):
 
 def run_all(index, project, paths, dry_run=False):
     """
+    :param str project: Which NCI project's mdss space to use
     :type index: datacube.index._api.Index
     :type dry_run: bool
     :param paths:
     """
+    if not MDSSClient.is_available():
+        raise RuntimeError("mdss is not available on this system")
+
     for path in paths:
         task = MdssMoveTask.evaluate_and_create(index, path)
         if not task:
