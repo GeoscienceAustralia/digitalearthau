@@ -45,15 +45,15 @@ def main(index, project, dry_run, paths):
     )
 
     # TODO: @ui.executor_cli_options
-    run_all(
+    archive_all(
         index,
         project,
         [Path(path).absolute() for path in paths],
-        dry_run,
+        dry_run=dry_run,
     )
 
 
-def run_all(index, project, paths, dry_run=False):
+def archive_all(index, project, paths, dry_run=False):
     """
     :param str project: Which NCI project's mdss space to use
     :type index: datacube.index._api.Index
@@ -95,21 +95,20 @@ class MdssMoveTask:
         log = _LOG.bind(input_path=path, project=project)
 
         metadata_path = path_utils.get_metadata_path(path)
-        log = log.bind(metadata_path=metadata_path)
-        log.debug("found.metadata_path")
+        log.debug("found.metadata_path", metadata_path=metadata_path)
 
         dataset_id = path_utils.get_path_dataset_id(metadata_path)
         log = log.bind(dataset_id=dataset_id)
         log.debug("found.dataset_id")
 
         dataset = index.datasets.get(dataset_id)
-        log = log.bind(is_indexed=dataset is not None)
+        log.debug('found.is_indexed', is_indexed=dataset is not None)
         if not dataset:
             log.warn("skip.not_indexed")
             return None
 
         derived_count = len(tuple(index.datasets.get_derived(dataset_id)))
-        log = log.bind(derived_count=derived_count)
+        log.debug("found.derived", derived_count=derived_count)
         if not derived_count:
             log.info("skip.no_derived_datasets")
             return None
@@ -131,23 +130,22 @@ def _archive_path(index, task, dry_run=True):
     """
     successful_checksum = _verify_checksum(task.log, task.source_metadata_path,
                                            dry_run=dry_run)
-    log = task.log.bind(passes_checksum=successful_checksum)
+    task.log.info("checksum.complete", passes_checksum=successful_checksum)
     if not successful_checksum:
         raise RuntimeError("Checksum failure on " + str(task.source_metadata_path))
 
-    mdss_uri = _copy_to_mdss(log, task.source_metadata_path, task.dataset.id, task.project,
+    mdss_uri = _copy_to_mdss(task.log, task.source_metadata_path, task.dataset.id, task.project,
                              dry_run=dry_run)
-    log = log.bind(mdss_uri=mdss_uri)
 
     # Record mdss tar in index
     if not dry_run:
         index.datasets.add_location(task.dataset, uri=mdss_uri)
-    log.info('mdss_uri.indexed')
+    task.log.info('index.mdss.removed', uri=mdss_uri)
 
     # Remove local file from index
     if not dry_run:
         index.datasets.remove_location(task.dataset, task.source_uri)
-    log.info('source_uri.deindexed', source_uri=task.source_uri)
+    task.log.info('index.source.removed', uri=task.source_uri)
 
 
 def _verify_checksum(log, metadata_path, dry_run=True):
@@ -197,12 +195,12 @@ def _copy_to_mdss(log, metadata_path, dataset_id, destination_project, dry_run=T
     dataset_path, all_files = path_utils.get_dataset_paths(metadata_path)
     assert all_files
     assert all(f.is_file() for f in all_files)
-    log.debug("files.verify", file_count=len(all_files))
+    log.debug("mdss.verify", file_count=len(all_files))
 
     _, dataset_path_offset = path_utils.split_path_from_base(dataset_path.parent)
-    dest_location = "agdc-archive/{file_postfix}".format(file_postfix=dataset_path_offset)
-    log = log.bind(mdss_location=dest_location)
-    log.debug("mdss_uri.calculated")
+    mdss_location = "agdc-archive/{file_postfix}".format(file_postfix=dataset_path_offset)
+    log = log.bind(mdss_location=mdss_location)
+    log.debug("mdss.location")
 
     mdss = MDSSClient(destination_project)
 
@@ -213,15 +211,15 @@ def _copy_to_mdss(log, metadata_path, dataset_id, destination_project, dry_run=T
             transferable_paths = _get_transferable_paths(log, all_files, dataset_path, tmp_dir)
 
             log.debug("mdss.mkdir")
-            mdss.make_dirs(dest_location)
-            log.info("mdss.put")
-            mdss.put(transferable_paths, dest_location)
+            mdss.make_dirs(mdss_location)
+            log.info("mdss.put", transferable_paths=transferable_paths)
+            mdss.put(transferable_paths, mdss_location)
             log.debug("mdss.put.done")
         finally:
             log.debug("tmp_dir.rm", tmp_dir=tmp_dir)
             shutil.rmtree(tmp_dir, ignore_errors=True)
 
-    return mdss.to_uri(dest_location)
+    return mdss.to_uri(mdss_location)
 
 
 def _get_transferable_paths(log, all_files, dataset_path, tmp_dir):
