@@ -38,7 +38,7 @@ def main(index, project, dry_run, paths):
             structlog.processors.StackInfoRenderer(),
             structlog.processors.format_exc_info,
             # Coloured output if to terminal.
-            structlog.dev.ConsoleRenderer() if sys.stdout.isatty() else structlog.processors.JSONRenderer(),
+            CleanConsoleRenderer() if sys.stdout.isatty() else structlog.processors.JSONRenderer(),
         ],
         context_class=dict,
         cache_logger_on_first_use=True,
@@ -51,6 +51,13 @@ def main(index, project, dry_run, paths):
         [Path(path).absolute() for path in paths],
         dry_run=dry_run,
     )
+
+
+class CleanConsoleRenderer(structlog.dev.ConsoleRenderer):
+    def __init__(self, pad_event=25):
+        super().__init__(pad_event)
+        # Dim debug messages
+        self._level_to_color['debug'] = structlog.dev.DIM
 
 
 def archive_all(index, project, paths, dry_run=False):
