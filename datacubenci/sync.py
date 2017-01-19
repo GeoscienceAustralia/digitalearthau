@@ -20,21 +20,14 @@ def load_path_dawg(log, supplementary_paths: Iterable[str]) -> dawg.CompletionDA
     with index_connect(application_name='sync') as index, index.datasets._db.begin() as db:
         # assert db.in_transaction
         log.info("paths.db.load")
-        all_db_results = chain(*(
-            search_result for product, search_result in
-            index.datasets._do_search_by_product(
-                return_fields=True,
-                select_field_names=['uri'],
-                query={
-                    'product': '%s_%s_scene' % (plat, prod)
-                }
-            )
-        ))
+        product = '%s_%s_scene' % (plat, prod)
+        all_db_results = index.datasets.search_returning(['uri'], product=product)
+
         log.info("paths.trie")
 
         uri_set = dawg.CompletionDAWG(
             chain(
-                (str(row[0]) for row in all_db_results),
+                (str(uri) for uri, in all_db_results),
                 (Path(path).absolute().as_uri() for path in supplementary_paths)
             )
         )
