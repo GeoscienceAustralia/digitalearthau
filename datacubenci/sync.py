@@ -1,45 +1,48 @@
-import dawg
+import logging
 from itertools import chain
-
 from pathlib import Path
-
-from sqlalchemy import select
-
 from typing import Iterable
-from datacube.index.postgres import _connections
-from datacube.index import index_connect
+
+import dawg
 import structlog
+from boltons import fileutils
+
+from datacube.index import index_connect
 
 _LOG = structlog.get_logger()
 
 
-def load_path_dawg(log, supplementary_paths: Iterable[str]) -> dawg.CompletionDAWG:
-    plat = 'ls8'
-    prod = 'level1'
-
-    with index_connect(application_name='sync') as index, index.datasets._db.begin() as db:
+def make_path_set(log: logging.Logger,
+                  product: str,
+                  supplementary_paths: Iterable[Path]) -> dawg.CompletionDAWG:
+    with index_connect(application_name='sync') as index:
         # assert db.in_transaction
         log.info("paths.db.load")
-        product = '%s_%s_scene' % (plat, prod)
         all_db_results = index.datasets.search_returning(['uri'], product=product)
 
         log.info("paths.trie")
-
         uri_set = dawg.CompletionDAWG(
             chain(
                 (str(uri) for uri, in all_db_results),
-                (Path(path).absolute().as_uri() for path in supplementary_paths)
+                (path.absolute().as_uri() for path in supplementary_paths)
             )
         )
         log.info("paths.trie.done")
     return uri_set
 
 
-def main():
-    finished_dawg = load_path_dawg(_LOG, [])
-    finished_dawg.save('all_locations.dawg')
-    print(next(finished_dawg.iterkeys('file://')))
+def iter_product_pathsets(product_locations, cache_path):
+    fileutils.mkdir_p(str(cache_path))
+    for product, filesystem_root in product_locations.items():
+        log = _LOG.bind(product=product)
+        locations_cache = cache_path.joinpath(product + '-locations.dawg')
 
-
-if __name__ == '__main__':
-    main()
+        fileutils.atomic_save(str(locations_cache))
+        if locations_cache.exists():
+            path_set = dawg.CompletionDAWG()
+            path_set.load(str(locations_cache))
+        else:
+            path_set = make_path_set(log, product, filesystem_root.rglob("ga-metadata.yaml"))
+            with fileutils.atomic_save(str(locations_cache)) as f:
+                path_set.write(f)
+        yield product, path_set
