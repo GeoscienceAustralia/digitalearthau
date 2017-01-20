@@ -5,6 +5,7 @@ import shutil
 
 import os
 from pathlib import Path
+from typing import List
 
 from datacube.utils import is_supported_document_type, read_documents
 
@@ -120,20 +121,29 @@ def list_file_paths(path):
     return output
 
 
-def get_path_dataset_id(metadata_path):
+def get_path_dataset_id(metadata_path: Path) -> str:
     """
-    Get the dataset id embedded by the given path.
+    Get the dataset id embedded by the given path. Die if there are multiple.
     :param metadata_path:
     :return:
     """
-    # TODO: handle NetCDFs?
-
-    ids = [metadata_doc['id'] for _, metadata_doc in read_documents(metadata_path)]
+    ids = get_path_dataset_ids(metadata_path)
     if len(ids) != 1:
         raise ValueError("Only single-document metadata files are currently supported for moving. "
                          "Found {} in {}".format(len(ids), metadata_path))
 
     return ids[0]
+
+
+def get_path_dataset_ids(metadata_path: Path) -> List[str]:
+    """
+    Get all dataset ids embedded by the given path.
+    :param metadata_path:
+    :return:
+    """
+    # TODO: handle NetCDFs?
+    ids = [metadata_doc['id'] for _, metadata_doc in read_documents(metadata_path)]
+    return ids
 
 
 def get_dataset_paths(metadata_path):

@@ -5,9 +5,13 @@ from pathlib import Path
 from typing import Iterable, List, Mapping, Tuple
 
 import structlog
+from attr import attributes, attrib
 from boltons import fileutils
+from datacubenci import paths
 
 from datacube.index import index_connect
+from datacube.index._api import Index
+from datacube.utils import uri_to_local_path
 
 _LOG = structlog.get_logger()
 
@@ -22,6 +26,9 @@ class DatasetPathIndex:
     def get_dataset_ids_for_uri(self, uri: str) -> List[uuid.UUID]:
         raise NotImplementedError
 
+    def has_dataset(self, dataset_id: uuid.UUID) -> bool:
+        raise NotImplementedError
+
     def add_location(self, dataset_id: uuid.UUID, uri: str) -> bool:
         raise NotImplementedError
 
@@ -29,8 +36,13 @@ class DatasetPathIndex:
         raise NotImplementedError
 
 
+class DatasetLite:
+    def __init__(self, id):
+        self.id = id
+
+
 class AgdcDatasetPathIndex(DatasetPathIndex):
-    def __init__(self, index):
+    def __init__(self, index: Index):
         super().__init__()
         self._index = index
 
@@ -41,6 +53,20 @@ class AgdcDatasetPathIndex(DatasetPathIndex):
     @classmethod
     def connect(cls) -> 'AgdcDatasetPathIndex':
         return cls(index_connect(application_name='datacubenci-pathsync'))
+
+    def get_dataset_ids_for_uri(self, uri: str) -> List[uuid.UUID]:
+        return []
+
+    def remove_location(self, dataset_id: uuid.UUID, uri: str) -> bool:
+        was_removed = self._index.datasets.remove_location(DatasetLite(dataset_id), uri)
+        return was_removed
+
+    def has_dataset(self, dataset_id: uuid.UUID) -> bool:
+        pass
+
+    def add_location(self, dataset_id: uuid.UUID, uri: str) -> bool:
+        was_removed = self._index.datasets.add_location(DatasetLite(dataset_id), uri)
+        return was_removed
 
     def __enter__(self):
         return self
@@ -84,6 +110,47 @@ def _build_pathset(path_search_root: Path,
     return path_set
 
 
+class Mismatch:
+    def __init__(self, dataset_id, uri):
+        super().__init__()
+        self.dataset_id = dataset_id
+        self.uri = uri
+
+
+class MissingFile(Mismatch):
+    pass
+
+
+class LocationNotIndexed(Mismatch):
+    pass
+
+
+class DatasetNotIndexed(Mismatch):
+    pass
+
+
+def compare_index_and_files(all_file_uris: Iterable[str], index: DatasetPathIndex):
+    for uri in all_file_uris:
+        path = uri_to_local_path(uri)
+        log = _LOG.bind(path=path)
+
+        indexed_dataset_ids = index.get_dataset_ids_for_uri(uri)
+        file_ids = paths.get_path_dataset_ids(path) if path.exists() else []
+        log.info("dataset_ids", indexed_dataset_ids=indexed_dataset_ids, file_ids=file_ids)
+
+        # Are we making the index look like the filesystem, or the filesystem like the index?
+
+        # For all indexed ids not in the file
+        #       # yield MissingFile
+
+        # For all file ids not in the index.
+        # - Is the dataset in the index?
+        #   - If so:
+        #       # yield LocationNotIndexed
+        #   - Otherwise
+        #       # yield DatasetNotIndexed
+
+
 def main():
     root = Path('/tmp/test')
     cache = root.joinpath('cache')
@@ -93,7 +160,12 @@ def main():
     }
 
     with AgdcDatasetPathIndex.connect() as path_index:
-        iter_product_pathsets(products, path_index, cache_path=cache)
+        for product, pathset in iter_product_pathsets(products, path_index, cache_path=cache):
+            compare_index_and_files(
+                pathset.iterkeys('file://'),
+                path_index
+            )
+
 
 if __name__ == '__main__':
     main()
