@@ -8,6 +8,10 @@ from datacubenci.paths import write_files
 
 # In-memory index, so that we can test without using a real datacube index.
 class MemoryDatasetPathIndex(sync.DatasetPathIndex):
+    def has_dataset(self, dataset_id: uuid.UUID) -> bool:
+        # noinspection PyCompatibility
+        return dataset_id in self._records.itervalues(multi=True)
+
     def __init__(self):
         super().__init__()
         # Map paths to lists of dataset ids.

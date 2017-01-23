@@ -37,8 +37,8 @@ class DatasetPathIndex:
 
 
 class DatasetLite:
-    def __init__(self, id):
-        self.id = id
+    def __init__(self, id_):
+        self.id = id_
 
 
 class AgdcDatasetPathIndex(DatasetPathIndex):
@@ -55,14 +55,15 @@ class AgdcDatasetPathIndex(DatasetPathIndex):
         return cls(index_connect(application_name='datacubenci-pathsync'))
 
     def get_dataset_ids_for_uri(self, uri: str) -> List[uuid.UUID]:
-        return []
+        for dataset_id, in self._index.datasets.search_returning(['id'], uri=uri):
+            yield str(dataset_id)
 
     def remove_location(self, dataset_id: uuid.UUID, uri: str) -> bool:
         was_removed = self._index.datasets.remove_location(DatasetLite(dataset_id), uri)
         return was_removed
 
     def has_dataset(self, dataset_id: uuid.UUID) -> bool:
-        pass
+        return self._index.datasets.has(dataset_id)
 
     def add_location(self, dataset_id: uuid.UUID, uri: str) -> bool:
         was_removed = self._index.datasets.add_location(DatasetLite(dataset_id), uri)
@@ -86,7 +87,7 @@ def iter_product_pathsets(product_locations: Mapping[str, Path],
 def _build_pathset(path_search_root: Path,
                    product: str,
                    path_index: DatasetPathIndex,
-                   cache_path: Path = None) -> dawg.CompletionDAWG:
+                   cache_path: Path=None) -> dawg.CompletionDAWG:
     log = _LOG.bind(product=product)
 
     locations_cache = cache_path.joinpath(product + '-locations.dawg') if cache_path else None
@@ -116,8 +117,14 @@ class Mismatch:
         self.dataset_id = dataset_id
         self.uri = uri
 
+    def __repr__(self, *args, **kwargs):
+        return "%s(%s)" % (
+            self.__class__.__name__,
+            ", ".join("%s=%r" % (k, v) for k, v in self.__dict__.items())
+        )
 
-class MissingFile(Mismatch):
+
+class MissingIndexedFile(Mismatch):
     pass
 
 
@@ -133,22 +140,21 @@ def compare_index_and_files(all_file_uris: Iterable[str], index: DatasetPathInde
     for uri in all_file_uris:
         path = uri_to_local_path(uri)
         log = _LOG.bind(path=path)
-
-        indexed_dataset_ids = index.get_dataset_ids_for_uri(uri)
-        file_ids = paths.get_path_dataset_ids(path) if path.exists() else []
+        log.debug("index.get_dataset_ids_for_uri")
+        indexed_dataset_ids = set(index.get_dataset_ids_for_uri(uri))
+        file_ids = set(paths.get_path_dataset_ids(path)) if path.exists() else set()
         log.info("dataset_ids", indexed_dataset_ids=indexed_dataset_ids, file_ids=file_ids)
 
-        # Are we making the index look like the filesystem, or the filesystem like the index?
-
         # For all indexed ids not in the file
-        #       # yield MissingFile
+        for dataset_id in indexed_dataset_ids - file_ids:
+            yield MissingIndexedFile(dataset_id, uri)
 
         # For all file ids not in the index.
-        # - Is the dataset in the index?
-        #   - If so:
-        #       # yield LocationNotIndexed
-        #   - Otherwise
-        #       # yield DatasetNotIndexed
+        for dataset_id in file_ids - indexed_dataset_ids:
+            if index.has_dataset(dataset_id):
+                yield LocationNotIndexed(dataset_id, uri)
+            else:
+                yield DatasetNotIndexed(dataset_id, uri)
 
 
 def main():
@@ -161,10 +167,8 @@ def main():
 
     with AgdcDatasetPathIndex.connect() as path_index:
         for product, pathset in iter_product_pathsets(products, path_index, cache_path=cache):
-            compare_index_and_files(
-                pathset.iterkeys('file://'),
-                path_index
-            )
+            for mismatch in compare_index_and_files(pathset.iterkeys('file://'), path_index):
+                print(repr(mismatch))
 
 
 if __name__ == '__main__':
