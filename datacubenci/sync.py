@@ -76,18 +76,10 @@ class AgdcDatasetPathIndex(DatasetPathIndex):
         self._index.close()
 
 
-def iter_product_pathsets(product_locations: Mapping[str, Path],
-                          path_index: DatasetPathIndex,
-                          cache_path: Path) -> Iterable[Tuple[str, dawg.CompletionDAWG]]:
-    fileutils.mkdir_p(str(cache_path))
-    for product, filesystem_root in product_locations.items():
-        yield product, _build_pathset(filesystem_root, product, path_index)
-
-
-def _build_pathset(path_search_root: Path,
-                   product: str,
-                   path_index: DatasetPathIndex,
-                   cache_path: Path=None) -> dawg.CompletionDAWG:
+def build_pathset(path_search_root: Path,
+                  product: str,
+                  path_index: DatasetPathIndex,
+                  cache_path: Path = None) -> dawg.CompletionDAWG:
     log = _LOG.bind(product=product)
 
     locations_cache = cache_path.joinpath(product + '-locations.dawg') if cache_path else None
@@ -118,10 +110,31 @@ class Mismatch:
         self.uri = uri
 
     def __repr__(self, *args, **kwargs):
+        """
+        >>> Mismatch(dataset_id='96519c56-e133-11e6-a29f-185e0f80a5c0', uri='/tmp/test')
+        Mismatch(dataset_id='96519c56-e133-11e6-a29f-185e0f80a5c0', uri='/tmp/test')
+        """
         return "%s(%s)" % (
             self.__class__.__name__,
             ", ".join("%s=%r" % (k, v) for k, v in self.__dict__.items())
         )
+
+    def __eq__(self, other):
+        """
+        >>> m = Mismatch(dataset_id='96519c56-e133-11e6-a29f-185e0f80a5c0', uri='/tmp/test')
+        >>> m == m
+        True
+        >>> import copy
+        >>> m == copy.copy(m)
+        True
+        >>> n = Mismatch(dataset_id='96519c56-e133-11e6-a29f-185e0f80a5c0', uri='/tmp/test2')
+        >>> m == n
+        False
+        """
+        if not isinstance(other, self.__class__):
+            return False
+
+        return self.__dict__ == other.__dict__
 
 
 class MissingIndexedFile(Mismatch):
@@ -157,18 +170,24 @@ def compare_index_and_files(all_file_uris: Iterable[str], index: DatasetPathInde
                 yield DatasetNotIndexed(dataset_id, uri)
 
 
+def compare_product_locations(path_index, product_locations, cache_path=None):
+    fileutils.mkdir_p(str(cache_path))
+    for product, filesystem_root in product_locations.items():
+        pathset = build_pathset(filesystem_root, product, path_index, cache_path=cache_path)
+        yield from compare_index_and_files(pathset.iterkeys('file://'), path_index)
+
+
 def main():
     root = Path('/tmp/test')
     cache = root.joinpath('cache')
-    products = {
+    product_locations = {
         'ls8_level1_scene': root.joinpath('ls8_scenes'),
         'ls7_level1_scene': root.joinpath('ls7_scenes'),
     }
 
     with AgdcDatasetPathIndex.connect() as path_index:
-        for product, pathset in iter_product_pathsets(products, path_index, cache_path=cache):
-            for mismatch in compare_index_and_files(pathset.iterkeys('file://'), path_index):
-                print(repr(mismatch))
+        for mismatch in compare_product_locations(product_locations, cache_path=cache):
+            print(repr(mismatch))
 
 
 if __name__ == '__main__':
