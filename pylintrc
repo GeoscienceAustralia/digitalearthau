@@ -14,7 +14,8 @@ disable=no-self-use,
     no-value-for-parameter,
     file-ignored,
     wrong-import-order,
-    ungrouped-imports
+    ungrouped-imports,
+    bad-whitespace
 
 enable=python3
 
