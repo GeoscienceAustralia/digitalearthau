@@ -5,7 +5,6 @@ from pathlib import Path
 from typing import Iterable, List, Mapping, Tuple
 
 import structlog
-from attr import attributes, attrib
 from boltons import fileutils
 from datacubenci import paths
 
@@ -116,7 +115,7 @@ class Mismatch:
         """
         return "%s(%s)" % (
             self.__class__.__name__,
-            ", ".join("%s=%r" % (k, v) for k, v in self.__dict__.items())
+            ", ".join("%s=%r" % (k, v) for k, v in sorted(self.__dict__.items()))
         )
 
     def __eq__(self, other):
@@ -159,11 +158,13 @@ def compare_index_and_files(all_file_uris: Iterable[str], index: DatasetPathInde
         log.info("dataset_ids", indexed_dataset_ids=indexed_dataset_ids, file_ids=file_ids)
 
         # For all indexed ids not in the file
-        for dataset_id in indexed_dataset_ids - file_ids:
+        indexed_not_in_file = indexed_dataset_ids.difference(file_ids)
+        log.info("indexed_not_in_file", indexed_not_in_file=indexed_not_in_file)
+        for dataset_id in indexed_not_in_file:
             yield MissingIndexedFile(dataset_id, uri)
 
         # For all file ids not in the index.
-        for dataset_id in file_ids - indexed_dataset_ids:
+        for dataset_id in file_ids.difference(indexed_dataset_ids):
             if index.has_dataset(dataset_id):
                 yield LocationNotIndexed(dataset_id, uri)
             else:

@@ -1,8 +1,11 @@
 import uuid
 from typing import Iterable, List
 
+import pytest
+import structlog
 from boltons.dictutils import MultiDict
 from datacubenci import sync
+from datacubenci.archive import CleanConsoleRenderer
 from datacubenci.paths import write_files
 
 
@@ -44,13 +47,28 @@ class MemoryDatasetPathIndex(sync.DatasetPathIndex):
         return list(self._records.getlist(uri))
 
 
-def test_iter_product_pathsets():
+@pytest.fixture(scope="session", autouse=True)
+def do_something(request):
+    structlog.configure(
+        processors=[
+            structlog.stdlib.add_log_level,
+            structlog.processors.TimeStamper(fmt="%Y-%m-%d %H:%M.%S"),
+            structlog.processors.StackInfoRenderer(),
+            structlog.processors.format_exc_info,
+            # Coloured output if to terminal.
+            CleanConsoleRenderer()
+        ],
+        context_class=dict,
+        cache_logger_on_first_use=True,
+    )
+
+    ls8_on_disk_id = uuid.UUID('1e47df58-de0f-11e6-93a4-185e0f80a5c0')
     root = write_files(
         {
             'ls8_scenes': {
                 'ls8_test_dataset': {
                     'ga-metadata.yaml':
-                        'id: 1e47df58-de0f-11e6-93a4-185e0f80a5c0\n',
+                        ('id: %s\n' % ls8_on_disk_id),
                     'otherfile.txt': ''
                 }
             },
@@ -66,9 +84,8 @@ def test_iter_product_pathsets():
 
     index = MemoryDatasetPathIndex()
     already_indexed_uri = root.joinpath('indexed', 'already', 'ga-metadata.yaml').as_uri()
-    already_indexed_id = uuid.UUID('1e47df58-de0f-11e6-93a4-185e0f80a5c0')
-    index.add_location(already_indexed_id,
-                       already_indexed_uri)
+    already_indexed_id = uuid.UUID('b9d77d10-e1c6-11e6-bf63-185e0f80a5c0')
+    index.add_location(already_indexed_id, already_indexed_uri)
 
     products = {
         'ls8_level1_scene': root.joinpath('ls8_scenes'),
@@ -115,10 +132,12 @@ def test_iter_product_pathsets():
     assert product_return_count == len(products)
 
     # Now do filesystem comparisons
-    mismatches = list(sync.compare_product_locations(index, products, cache_path=cache_path))
-    print(repr(mismatches))
-    assert mismatches == [
-        sync.MissingIndexedFile(str(already_indexed_id), already_indexed_uri),
-        sync.DatasetNotIndexed(str(already_indexed_id), ls8_on_disk_uri),
+    mismatches = []
+    for mismatch in sync.compare_product_locations(index, products, cache_path=cache_path):
+        print(repr(mismatch))
+        mismatches.append(mismatch)
 
+    assert mismatches == [
+        sync.MissingIndexedFile(already_indexed_id, already_indexed_uri),
+        sync.DatasetNotIndexed(already_indexed_id, ls8_on_disk_uri),
     ]
