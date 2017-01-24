@@ -22,7 +22,7 @@ class MemoryDatasetPathIndex(sync.DatasetPathIndex):
         # Map paths to lists of dataset ids.
         self._records = MultiDict()
 
-    def iter_all_uris(self, product: str) -> Iterable[str]:
+    def iter_all_uris(self) -> Iterable[str]:
         return self._records.keys()
 
     def add_location(self, dataset_id: uuid.UUID, uri: str) -> bool:
@@ -62,82 +62,117 @@ def do_something(request):
         cache_logger_on_first_use=True,
     )
 
-    ls8_on_disk_id = uuid.UUID('1e47df58-de0f-11e6-93a4-185e0f80a5c0')
+
+def test_something():
+    on_disk_id = uuid.UUID('1e47df58-de0f-11e6-93a4-185e0f80a5c0')
+    on_disk_id2 = uuid.UUID('3604ee9c-e1e8-11e6-8148-185e0f80a5c0')
+
     root = write_files(
         {
             'ls8_scenes': {
                 'ls8_test_dataset': {
                     'ga-metadata.yaml':
-                        ('id: %s\n' % ls8_on_disk_id),
-                    'otherfile.txt': ''
+                        ('id: %s\n' % on_disk_id),
+                    'dummy-file.txt': ''
                 }
             },
             'ls7_scenes': {
-
-            },
-            'dummy_dataset': {
-                'ga-metadata.yaml': ''
+                'ls7_test_dataset': {
+                    'ga-metadata.yaml':
+                        ('id: %s\n' % on_disk_id2)
+                }
             }
-
         }
     )
-
-    index = MemoryDatasetPathIndex()
-    already_indexed_uri = root.joinpath('indexed', 'already', 'ga-metadata.yaml').as_uri()
-    already_indexed_id = uuid.UUID('b9d77d10-e1c6-11e6-bf63-185e0f80a5c0')
-    index.add_location(already_indexed_id, already_indexed_uri)
-
-    products = {
-        'ls8_level1_scene': root.joinpath('ls8_scenes'),
-        'ls7_level1_scene': root.joinpath('ls7_scenes'),
-    }
-
-    ls8_on_disk_uri = root.joinpath('ls8_scenes', 'ls8_test_dataset', 'ga-metadata.yaml').as_uri()
-    expected_paths = {
-        'ls7_level1_scene': [
-            already_indexed_uri
-        ],
-        'ls8_level1_scene': [
-            ls8_on_disk_uri,
-            already_indexed_uri
-        ]
-    }
-
     cache_path = root.joinpath('cache')
     cache_path.mkdir()
 
-    expected_path_count = {
-        'ls7_level1_scene': 1,
-        'ls8_level1_scene': 2
-    }
+    on_disk_uri = root.joinpath('ls8_scenes', 'ls8_test_dataset', 'ga-metadata.yaml').as_uri()
+    on_disk_uri2 = root.joinpath('ls7_scenes', 'ls7_test_dataset', 'ga-metadata.yaml').as_uri()
 
-    # It should find and add all of the on-disk datasets
-    product_return_count = 0
-    for product, path_search_root in products.items():
-        path_set = sync.build_pathset(path_search_root, product, index, cache_path)
-        product_return_count += 1
-        expected = expected_paths.pop(product, None)
-        assert expected is not None, "Product {} not expected (again?)".format(product)
+    # An indexed file not on disk, and disk file not in index.
+    index = MemoryDatasetPathIndex()
+    missing_uri = root.joinpath('indexed', 'already', 'ga-metadata.yaml').as_uri()
+    old_indexed_id = uuid.UUID('b9d77d10-e1c6-11e6-bf63-185e0f80a5c0')
+    index.add_location(old_indexed_id, missing_uri)
+    _check_sync(
+        path_search_root=root.joinpath('ls8_scenes'),
+        expected_paths=[
+            missing_uri,
+            on_disk_uri
+        ],
+        expected_mismatches=[
+            sync.MissingIndexedFile(old_indexed_id, missing_uri),
+            sync.DatasetNotIndexed(on_disk_id, on_disk_uri)
+        ],
+        index=index,
+        cache_path=root
+    )
 
-        # All the paths we expect should be there.
-        for expected_path in expected:
-            assert expected_path in path_set
+    # File on disk has a different id to the one in the index (ie. it was quietly reprocessed)
+    index = MemoryDatasetPathIndex()
+    index.add_location(old_indexed_id, on_disk_uri)
+    _check_sync(
+        path_search_root=root.joinpath('ls8_scenes'),
+        expected_paths=[
+            on_disk_uri
+        ],
+        expected_mismatches=[
+            sync.MissingIndexedFile(old_indexed_id, on_disk_uri),
+            sync.DatasetNotIndexed(on_disk_id, on_disk_uri),
+        ],
+        index=index,
+        cache_path=root
+    )
 
-        # A our dummy outside of the product folder should not
-        dummy_dataset = root.joinpath('dummy_dataset', 'ga-metadata.yaml')
-        assert dummy_dataset.absolute().as_uri() not in path_set
+    # File on disk was moved without updating index, replacing existing indexed file location.
+    index = MemoryDatasetPathIndex()
+    index.add_location(old_indexed_id, on_disk_uri)
+    index.add_location(on_disk_id, missing_uri)
+    _check_sync(
+        path_search_root=root.joinpath('ls8_scenes'),
+        expected_paths=[
+            on_disk_uri,
+            missing_uri
+        ],
+        expected_mismatches=[
+            sync.MissingIndexedFile(old_indexed_id, on_disk_uri),
+            sync.LocationNotIndexed(on_disk_id, on_disk_uri),
+            sync.MissingIndexedFile(on_disk_id, missing_uri),
+        ],
+        index=index,
+        cache_path=root
+    )
 
-        assert sum(1 for p in path_set.iterkeys('file://')) == expected_path_count[product]
 
-    assert product_return_count == len(products)
+def _check_sync(expected_paths, index, path_search_root,
+                expected_mismatches, cache_path):
+    log = structlog.getLogger()
 
-    # Now do filesystem comparisons
+    cache_path = cache_path.joinpath(str(uuid.uuid4()))
+    cache_path.mkdir()
+
+    _check_pathset_loading(cache_path, expected_paths, index, log, path_search_root)
+    _check_mismatch_find(cache_path, expected_mismatches, index, log, path_search_root)
+
+
+def _check_mismatch_find(cache_path, expected_mismatches, index, log, path_search_root):
+    # Now check the actual mismatch output
     mismatches = []
-    for mismatch in sync.compare_product_locations(index, products, cache_path=cache_path):
+    for mismatch in sync.compare_product_locations(log, index, path_search_root, cache_path=cache_path):
         print(repr(mismatch))
         mismatches.append(mismatch)
+    assert set(mismatches) == set(expected_mismatches)
 
-    assert mismatches == [
-        sync.MissingIndexedFile(already_indexed_id, already_indexed_uri),
-        sync.DatasetNotIndexed(already_indexed_id, ls8_on_disk_uri),
-    ]
+
+def _check_pathset_loading(cache_path, expected_paths, index, log, path_search_root):
+    path_set = sync.build_pathset(log, path_search_root, index, cache_path)
+    # All the paths we expect should be there.
+    for expected_path in expected_paths:
+        assert expected_path in path_set
+    # Nothing else: length matches. There's no len() on the dawg.
+    loaded_path_count = sum(1 for p in path_set.iterkeys('file://'))
+    assert loaded_path_count == len(expected_paths)
+    # Sanity check that a random path doesn't match...
+    dummy_dataset = cache_path.joinpath('dummy_dataset', 'ga-metadata.yaml')
+    assert dummy_dataset.absolute().as_uri() not in path_set

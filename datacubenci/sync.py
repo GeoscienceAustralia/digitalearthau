@@ -1,8 +1,9 @@
 import dawg
+import logging
 import uuid
 from itertools import chain
 from pathlib import Path
-from typing import Iterable, List, Mapping, Tuple
+from typing import Iterable, List
 
 import structlog
 from boltons import fileutils
@@ -19,7 +20,7 @@ class DatasetPathIndex:
     def __init__(self):
         super().__init__()
 
-    def iter_all_uris(self, product: str) -> Iterable[str]:
+    def iter_all_uris(self) -> Iterable[str]:
         raise NotImplementedError
 
     def get_dataset_ids_for_uri(self, uri: str) -> List[uuid.UUID]:
@@ -41,17 +42,18 @@ class DatasetLite:
 
 
 class AgdcDatasetPathIndex(DatasetPathIndex):
-    def __init__(self, index: Index):
+    def __init__(self, index: Index, query: dict):
         super().__init__()
         self._index = index
+        self._query = query
 
-    def iter_all_uris(self, product: str) -> Iterable[str]:
-        for uri, in self._index.datasets.search_returning(['uri'], product=product):
+    def iter_all_uris(self) -> Iterable[str]:
+        for uri, in self._index.datasets.search_returning(['uri'], **self._query):
             yield str(uri)
 
     @classmethod
-    def connect(cls) -> 'AgdcDatasetPathIndex':
-        return cls(index_connect(application_name='datacubenci-pathsync'))
+    def connect(cls, **query) -> 'AgdcDatasetPathIndex':
+        return cls(index_connect(application_name='datacubenci-pathsync'), query=query)
 
     def get_dataset_ids_for_uri(self, uri: str) -> List[uuid.UUID]:
         for dataset_id, in self._index.datasets.search_returning(['id'], uri=uri):
@@ -75,13 +77,12 @@ class AgdcDatasetPathIndex(DatasetPathIndex):
         self._index.close()
 
 
-def build_pathset(path_search_root: Path,
-                  product: str,
-                  path_index: DatasetPathIndex,
-                  cache_path: Path = None) -> dawg.CompletionDAWG:
-    log = _LOG.bind(product=product)
-
-    locations_cache = cache_path.joinpath(product + '-locations.dawg') if cache_path else None
+def build_pathset(
+        log: logging.Logger,
+        path_search_root: Path,
+        path_index: DatasetPathIndex,
+        cache_path: Path = None) -> dawg.CompletionDAWG:
+    locations_cache = cache_path.joinpath('locations.dawg') if cache_path else None
     if locations_cache and locations_cache.exists():
         path_set = dawg.CompletionDAWG()
         log.debug("paths.trie.cache.load", file=locations_cache)
@@ -90,7 +91,7 @@ def build_pathset(path_search_root: Path,
         log.info("paths.trie.build")
         path_set = dawg.CompletionDAWG(
             chain(
-                path_index.iter_all_uris(product),
+                path_index.iter_all_uris(),
                 (path.absolute().as_uri() for path in path_search_root.rglob("ga-metadata.yaml"))
             )
         )
@@ -135,6 +136,9 @@ class Mismatch:
 
         return self.__dict__ == other.__dict__
 
+    def __hash__(self):
+        return hash(tuple(v for k, v in sorted(self.__dict__.items())))
+
 
 class MissingIndexedFile(Mismatch):
     pass
@@ -164,18 +168,19 @@ def compare_index_and_files(all_file_uris: Iterable[str], index: DatasetPathInde
             yield MissingIndexedFile(dataset_id, uri)
 
         # For all file ids not in the index.
-        for dataset_id in file_ids.difference(indexed_dataset_ids):
+        files_not_in_index = file_ids.difference(indexed_dataset_ids)
+        log.info("files_not_in_index", files_not_in_index=files_not_in_index)
+
+        for dataset_id in files_not_in_index:
             if index.has_dataset(dataset_id):
                 yield LocationNotIndexed(dataset_id, uri)
             else:
                 yield DatasetNotIndexed(dataset_id, uri)
 
 
-def compare_product_locations(path_index, product_locations, cache_path=None):
-    fileutils.mkdir_p(str(cache_path))
-    for product, filesystem_root in product_locations.items():
-        pathset = build_pathset(filesystem_root, product, path_index, cache_path=cache_path)
-        yield from compare_index_and_files(pathset.iterkeys('file://'), path_index)
+def compare_product_locations(log, path_index, filesystem_root, cache_path=None):
+    pathset = build_pathset(log, filesystem_root, path_index, cache_path=cache_path)
+    yield from compare_index_and_files(pathset.iterkeys('file://'), path_index)
 
 
 def main():
@@ -186,9 +191,14 @@ def main():
         'ls7_level1_scene': root.joinpath('ls7_scenes'),
     }
 
-    with AgdcDatasetPathIndex.connect() as path_index:
-        for mismatch in compare_product_locations(product_locations, cache_path=cache):
-            print(repr(mismatch))
+    for product, filesystem_root in product_locations.items():
+        log = _LOG.bind(product=product)
+        cache_path = cache.joinpath(product)
+        fileutils.mkdir_p(str(cache_path))
+
+        with AgdcDatasetPathIndex.connect(product=product) as path_index:
+            for mismatch in compare_product_locations(log, path_index, product_locations, cache_path=cache_path):
+                print(repr(mismatch))
 
 
 if __name__ == '__main__':
