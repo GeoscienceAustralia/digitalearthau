@@ -56,8 +56,8 @@ class AgdcDatasetPathIndex(DatasetPathIndex):
         return cls(index_connect(application_name='datacubenci-pathsync'), query=query)
 
     def get_dataset_ids_for_uri(self, uri: str) -> List[uuid.UUID]:
-        for dataset_id, in self._index.datasets.search_returning(['id'], uri=uri):
-            yield str(dataset_id)
+        for dataset in self._index.datasets.get_datasets_for_location(uri=uri):
+            yield dataset.id
 
     def remove_location(self, dataset_id: uuid.UUID, uri: str) -> bool:
         was_removed = self._index.datasets.remove_location(DatasetLite(dataset_id), uri)
@@ -197,7 +197,7 @@ def main():
         fileutils.mkdir_p(str(cache_path))
 
         with AgdcDatasetPathIndex.connect(product=product) as path_index:
-            for mismatch in compare_product_locations(log, path_index, product_locations, cache_path=cache_path):
+            for mismatch in compare_product_locations(log, path_index, filesystem_root, cache_path=cache_path):
                 print(repr(mismatch))
 
 
