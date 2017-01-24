@@ -17,6 +17,15 @@ _LOG = structlog.get_logger()
 
 
 class DatasetPathIndex:
+    """
+    An index of datasets and their URIs.
+
+    This is a slightly questionable attempt to make testing/mocking simpler.
+
+    There's two implementations: One in-memory and one that uses a real datacube.
+    (MemoryDatasetPathIndex and AgdcDatasetPathIndex)
+    """
+
     def __init__(self):
         super().__init__()
 
@@ -77,11 +86,17 @@ class AgdcDatasetPathIndex(DatasetPathIndex):
         self._index.close()
 
 
-def build_pathset(
+def _build_pathset(
         log: logging.Logger,
         path_search_root: Path,
         path_index: DatasetPathIndex,
-        cache_path: Path = None) -> dawg.CompletionDAWG:
+        cache_path: Path = None,
+        metadata_glob="ga-metadata.yaml") -> dawg.CompletionDAWG:
+    """
+    Build a combined set (in dawg form) of all dataset paths in the given index and filesystem.
+
+    Optionally use the given cache directory to cache repeated builds.
+    """
     locations_cache = cache_path.joinpath('locations.dawg') if cache_path else None
     if locations_cache and locations_cache.exists():
         path_set = dawg.CompletionDAWG()
@@ -92,7 +107,7 @@ def build_pathset(
         path_set = dawg.CompletionDAWG(
             chain(
                 path_index.iter_all_uris(),
-                (path.absolute().as_uri() for path in path_search_root.rglob("ga-metadata.yaml"))
+                (path.absolute().as_uri() for path in path_search_root.rglob(metadata_glob))
             )
         )
         log.info("paths.trie.done")
@@ -104,10 +119,23 @@ def build_pathset(
 
 
 class Mismatch:
+    """
+    A mismatch between index and filesystem.
+
+    See the implementations for different types of mismataches.
+    """
+
     def __init__(self, dataset_id, uri):
         super().__init__()
         self.dataset_id = dataset_id
         self.uri = uri
+
+    # TODO for all implementations:
+    # def update_index(self, index: Index):
+    #     """
+    #     Fix this issue on the given index.
+    #     """
+    #     raise NotImplementedError
 
     def __repr__(self, *args, **kwargs):
         """
@@ -140,19 +168,45 @@ class Mismatch:
         return hash(tuple(v for k, v in sorted(self.__dict__.items())))
 
 
-class MissingIndexedFile(Mismatch):
+class LocationMissingOnDisk(Mismatch):
+    """
+    The dataset is no longer at the given location.
+
+    (Note that there may still be a file at the location, but it is not this dataset)
+    """
     pass
 
 
 class LocationNotIndexed(Mismatch):
+    """
+    An existing dataset has been found at a new location.
+    """
     pass
 
 
 class DatasetNotIndexed(Mismatch):
+    """
+    A dataset has not been indexed.
+    """
     pass
 
 
-def compare_index_and_files(all_file_uris: Iterable[str], index: DatasetPathIndex):
+def find_index_disk_mismatches(log,
+                               path_index: DatasetPathIndex,
+                               filesystem_root: Path,
+                               cache_path: Path = None) -> Iterable[Mismatch]:
+    """
+    Compare the given index and filesystem contents, yielding Mismatches of any differences.
+    """
+    pathset = _build_pathset(log, filesystem_root, path_index, cache_path=cache_path)
+    yield from _find_uri_mismatches(pathset.iterkeys('file://'), path_index)
+
+
+def _find_uri_mismatches(all_file_uris: Iterable[str], index: DatasetPathIndex) -> Iterable[Mismatch]:
+    """
+    Compare the index and filesystem contents for the given uris,
+    yielding Mismatches of any differences.
+    """
     for uri in all_file_uris:
         path = uri_to_local_path(uri)
         log = _LOG.bind(path=path)
@@ -165,7 +219,7 @@ def compare_index_and_files(all_file_uris: Iterable[str], index: DatasetPathInde
         indexed_not_in_file = indexed_dataset_ids.difference(file_ids)
         log.info("indexed_not_in_file", indexed_not_in_file=indexed_not_in_file)
         for dataset_id in indexed_not_in_file:
-            yield MissingIndexedFile(dataset_id, uri)
+            yield LocationMissingOnDisk(dataset_id, uri)
 
         # For all file ids not in the index.
         files_not_in_index = file_ids.difference(indexed_dataset_ids)
@@ -176,11 +230,6 @@ def compare_index_and_files(all_file_uris: Iterable[str], index: DatasetPathInde
                 yield LocationNotIndexed(dataset_id, uri)
             else:
                 yield DatasetNotIndexed(dataset_id, uri)
-
-
-def compare_product_locations(log, path_index, filesystem_root, cache_path=None):
-    pathset = build_pathset(log, filesystem_root, path_index, cache_path=cache_path)
-    yield from compare_index_and_files(pathset.iterkeys('file://'), path_index)
 
 
 def main():
@@ -197,7 +246,7 @@ def main():
         fileutils.mkdir_p(str(cache_path))
 
         with AgdcDatasetPathIndex.connect(product=product) as path_index:
-            for mismatch in compare_product_locations(log, path_index, filesystem_root, cache_path=cache_path):
+            for mismatch in find_index_disk_mismatches(log, path_index, filesystem_root, cache_path=cache_path):
                 print(repr(mismatch))
 
 
