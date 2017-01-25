@@ -1,4 +1,3 @@
-import collections
 import dawg
 import logging
 import sys
@@ -10,6 +9,7 @@ from typing import Iterable
 
 import structlog
 from boltons import fileutils
+from boltons import strutils
 from datacubenci import paths
 from datacubenci.archive import CleanConsoleRenderer
 
@@ -289,12 +289,13 @@ def main():
         fileutils.mkdir_p(str(cache_path))
 
         with AgdcDatasetPathIndex.connect(product=product) as path_index:
-            stats = collections.defaultdict(int)
             for mismatch in find_index_disk_mismatches(log, path_index, filesystem_root, cache_path=cache_path):
-                print(repr(mismatch))
-                stats[mismatch.__class__.__name__] += 1
-
-        print(repr(stats))
+                print('\t'.join((
+                    product,
+                    strutils.camel2under(mismatch.__class__.__name__),
+                    mismatch.dataset_id,
+                    mismatch.uri
+                )))
 
 
 if __name__ == '__main__':
