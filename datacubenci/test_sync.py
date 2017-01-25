@@ -1,6 +1,8 @@
+import copy
 import uuid
-from typing import Iterable, List, Mapping
+from typing import Iterable, List, Mapping, Tuple
 
+import collections
 import pytest
 import structlog
 from boltons.dictutils import MultiDict
@@ -18,51 +20,58 @@ class MemoryDatasetPathIndex(sync.DatasetPathIndex):
     """
 
     def has_dataset(self, dataset_id: uuid.UUID) -> bool:
-        # noinspection PyCompatibility
-        return dataset_id in self._records.itervalues(multi=True)
+        return dataset_id in self._records.keys()
 
     def __init__(self):
         super().__init__()
-        # Map paths to lists of dataset ids.
-        self._records = MultiDict()
+        # Map of dataset id to locations.
+        # type: Mapping[uuid.UUID, List[str]]
+        self._records = collections.defaultdict(list)
 
     def iter_all_uris(self) -> Iterable[str]:
-        return self._records.keys()
+        for uris in self._records.values():
+            yield from uris
 
     def add_location(self, dataset_id: uuid.UUID, uri: str) -> bool:
-        ids = self._records.getlist(uri)
-        if dataset_id in ids:
+        if dataset_id not in self._records:
+            raise ValueError("Unknown dataset {} -> {}".format(dataset_id, uri))
+
+        return self._add(dataset_id, uri)
+
+    def _add(self, dataset_id, uri):
+        if uri in self._records[dataset_id]:
             # Not added
             return False
 
-        self._records.add(uri, dataset_id)
+        self._records[dataset_id].append(uri)
         return True
 
     def remove_location(self, dataset_id: uuid.UUID, uri: str) -> bool:
-        if dataset_id not in self.get_dataset_ids_for_uri(uri):
+
+        if uri not in self._records[dataset_id]:
             # Not removed
             return False
+        # We never remove the dataset key, only the uris.
+        self._records[dataset_id].remove(uri)
 
-        ids = self._records.popall(uri)
-        ids.remove(dataset_id)
-        self._records.addlist(uri, ids)
+    def get_dataset_ids_for_uri(self, uri: str) -> Iterable[uuid.UUID]:
+        for id_, uris in self._records.items():
+            if uri in uris:
+                yield id_
 
-    def get_dataset_ids_for_uri(self, uri: str) -> List[uuid.UUID]:
-        return list(self._records.getlist(uri))
-
-    def as_map(self) -> Mapping[uuid.UUID, str]:
+    def as_map(self) -> Mapping[uuid.UUID, Tuple[str]]:
         """
-        All contained (dataset, location) pairs, to check test results.
+        All contained (dataset, [location]) values, to check test results.
         """
-        return self._records.inverted().todict()
+        return {id_: tuple(uris) for id_, uris in self._records.items()}
 
     def add_dataset(self, dataset_id: uuid.UUID, uri: str):
         # We're not actually storing datasets...
-        return self.add_location(dataset_id, uri)
+        return self._add(dataset_id, uri)
 
 
 @pytest.fixture(scope="session", autouse=True)
-def do_something(request):
+def configure_log_output(request):
     structlog.configure(
         processors=[
             structlog.stdlib.add_log_level,
@@ -77,7 +86,7 @@ def do_something(request):
     )
 
 
-def test_something():
+def test_index_disk_sync():
     on_disk_id = uuid.UUID('1e47df58-de0f-11e6-93a4-185e0f80a5c0')
     on_disk_id2 = uuid.UUID('3604ee9c-e1e8-11e6-8148-185e0f80a5c0')
 
@@ -108,7 +117,7 @@ def test_something():
     index = MemoryDatasetPathIndex()
     missing_uri = root.joinpath('indexed', 'already', 'ga-metadata.yaml').as_uri()
     old_indexed_id = uuid.UUID('b9d77d10-e1c6-11e6-bf63-185e0f80a5c0')
-    index.add_location(old_indexed_id, missing_uri)
+    index.add_dataset(old_indexed_id, missing_uri)
     _check_sync(
         path_search_root=root.joinpath('ls8_scenes'),
         expected_paths=[
@@ -120,8 +129,8 @@ def test_something():
             sync.DatasetNotIndexed(on_disk_id, on_disk_uri)
         ],
         expected_index_result={
-            on_disk_id: [on_disk_uri],
-            old_indexed_id: []
+            on_disk_id: (on_disk_uri,),
+            old_indexed_id: ()
         },
         index=index,
         cache_path=root
@@ -129,7 +138,7 @@ def test_something():
 
     # File on disk has a different id to the one in the index (ie. it was quietly reprocessed)
     index = MemoryDatasetPathIndex()
-    index.add_location(old_indexed_id, on_disk_uri)
+    index.add_dataset(old_indexed_id, on_disk_uri)
     _check_sync(
         path_search_root=root.joinpath('ls8_scenes'),
         expected_paths=[
@@ -140,8 +149,8 @@ def test_something():
             sync.DatasetNotIndexed(on_disk_id, on_disk_uri),
         ],
         expected_index_result={
-            on_disk_id: [on_disk_uri],
-            old_indexed_id: []
+            on_disk_id: (on_disk_uri,),
+            old_indexed_id: ()
         },
         index=index,
         cache_path=root
@@ -149,8 +158,8 @@ def test_something():
 
     # File on disk was moved without updating index, replacing existing indexed file location.
     index = MemoryDatasetPathIndex()
-    index.add_location(old_indexed_id, on_disk_uri)
-    index.add_location(on_disk_id, missing_uri)
+    index.add_dataset(old_indexed_id, on_disk_uri)
+    index.add_dataset(on_disk_id, missing_uri)
     _check_sync(
         path_search_root=root.joinpath('ls8_scenes'),
         expected_paths=[
@@ -163,8 +172,8 @@ def test_something():
             sync.LocationMissingOnDisk(on_disk_id, missing_uri),
         ],
         expected_index_result={
-            on_disk_id: [on_disk_uri],
-            old_indexed_id: []
+            on_disk_id: (on_disk_uri,),
+            old_indexed_id: ()
         },
         index=index,
         cache_path=root
@@ -172,7 +181,7 @@ def test_something():
 
 
 def _check_sync(expected_paths, index, path_search_root,
-                expected_mismatches, expected_index_result: Mapping[uuid.UUID, List[str]], cache_path):
+                expected_mismatches, expected_index_result: Mapping[uuid.UUID, Tuple[str]], cache_path):
     log = structlog.getLogger()
 
     cache_path = cache_path.joinpath(str(uuid.uuid4()))

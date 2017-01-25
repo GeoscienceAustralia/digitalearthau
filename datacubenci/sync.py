@@ -33,7 +33,7 @@ class DatasetPathIndex:
     def iter_all_uris(self) -> Iterable[str]:
         raise NotImplementedError
 
-    def get_dataset_ids_for_uri(self, uri: str) -> List[uuid.UUID]:
+    def get_dataset_ids_for_uri(self, uri: str) -> Iterable[uuid.UUID]:
         raise NotImplementedError
 
     def has_dataset(self, dataset_id: uuid.UUID) -> bool:
@@ -68,7 +68,7 @@ class AgdcDatasetPathIndex(DatasetPathIndex):
     def connect(cls, **query) -> 'AgdcDatasetPathIndex':
         return cls(index_connect(application_name='datacubenci-pathsync'), query=query)
 
-    def get_dataset_ids_for_uri(self, uri: str) -> List[uuid.UUID]:
+    def get_dataset_ids_for_uri(self, uri: str) -> Iterable[uuid.UUID]:
         for dataset in self._index.datasets.get_datasets_for_location(uri=uri):
             yield dataset.id
 
