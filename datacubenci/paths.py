@@ -122,7 +122,7 @@ def list_file_paths(path):
     return output
 
 
-def get_path_dataset_id(metadata_path: Path) -> str:
+def get_path_dataset_id(metadata_path: Path) -> uuid.UUID:
     """
     Get the dataset id embedded by the given path. Die if there are multiple.
     :param metadata_path:
