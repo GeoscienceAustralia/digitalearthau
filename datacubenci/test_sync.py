@@ -1,5 +1,5 @@
 import uuid
-from typing import Iterable, List
+from typing import Iterable, List, Mapping
 
 import pytest
 import structlog
@@ -16,6 +16,7 @@ class MemoryDatasetPathIndex(sync.DatasetPathIndex):
     """
     An in-memory implementation, so that we can test without using a real datacube index.
     """
+
     def has_dataset(self, dataset_id: uuid.UUID) -> bool:
         # noinspection PyCompatibility
         return dataset_id in self._records.itervalues(multi=True)
@@ -48,6 +49,16 @@ class MemoryDatasetPathIndex(sync.DatasetPathIndex):
 
     def get_dataset_ids_for_uri(self, uri: str) -> List[uuid.UUID]:
         return list(self._records.getlist(uri))
+
+    def as_map(self) -> Mapping[uuid.UUID, str]:
+        """
+        All contained (dataset, location) pairs, to check test results.
+        """
+        return self._records.inverted().todict()
+
+    def add_dataset(self, dataset_id: uuid.UUID, uri: str):
+        # We're not actually storing datasets...
+        return self.add_location(dataset_id, uri)
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -108,6 +119,10 @@ def test_something():
             sync.LocationMissingOnDisk(old_indexed_id, missing_uri),
             sync.DatasetNotIndexed(on_disk_id, on_disk_uri)
         ],
+        expected_index_result={
+            on_disk_id: [on_disk_uri],
+            old_indexed_id: []
+        },
         index=index,
         cache_path=root
     )
@@ -124,6 +139,10 @@ def test_something():
             sync.LocationMissingOnDisk(old_indexed_id, on_disk_uri),
             sync.DatasetNotIndexed(on_disk_id, on_disk_uri),
         ],
+        expected_index_result={
+            on_disk_id: [on_disk_uri],
+            old_indexed_id: []
+        },
         index=index,
         cache_path=root
     )
@@ -143,20 +162,28 @@ def test_something():
             sync.LocationNotIndexed(on_disk_id, on_disk_uri),
             sync.LocationMissingOnDisk(on_disk_id, missing_uri),
         ],
+        expected_index_result={
+            on_disk_id: [on_disk_uri],
+            old_indexed_id: []
+        },
         index=index,
         cache_path=root
     )
 
 
 def _check_sync(expected_paths, index, path_search_root,
-                expected_mismatches, cache_path):
+                expected_mismatches, expected_index_result: Mapping[uuid.UUID, List[str]], cache_path):
     log = structlog.getLogger()
 
     cache_path = cache_path.joinpath(str(uuid.uuid4()))
     cache_path.mkdir()
 
     _check_pathset_loading(cache_path, expected_paths, index, log, path_search_root)
-    _check_mismatch_find(cache_path, expected_mismatches, index, log, path_search_root)
+    mismatches = _check_mismatch_find(cache_path, expected_mismatches, index, log, path_search_root)
+
+    # Apply function should result in the expected index.
+    sync.fix_index_mismatches(log, index, mismatches)
+    assert expected_index_result == index.as_map()
 
 
 def _check_mismatch_find(cache_path, expected_mismatches, index, log, path_search_root):
@@ -166,6 +193,8 @@ def _check_mismatch_find(cache_path, expected_mismatches, index, log, path_searc
         print(repr(mismatch))
         mismatches.append(mismatch)
     assert set(mismatches) == set(expected_mismatches)
+
+    return mismatches
 
 
 # noinspection PyProtectedMember

@@ -3,6 +3,7 @@ import logging
 import uuid
 from itertools import chain
 from pathlib import Path
+from subprocess import check_call
 from typing import Iterable, List
 
 import structlog
@@ -44,6 +45,9 @@ class DatasetPathIndex:
     def remove_location(self, dataset_id: uuid.UUID, uri: str) -> bool:
         raise NotImplementedError
 
+    def add_dataset(self, dataset_id: uuid.UUID, uri: str):
+        raise NotImplementedError
+
 
 class DatasetLite:
     def __init__(self, id_):
@@ -78,6 +82,11 @@ class AgdcDatasetPathIndex(DatasetPathIndex):
     def add_location(self, dataset_id: uuid.UUID, uri: str) -> bool:
         was_removed = self._index.datasets.add_location(DatasetLite(dataset_id), uri)
         return was_removed
+
+    def add_dataset(self, dataset_id: uuid.UUID, uri: str):
+        path = uri_to_local_path(uri)
+        # TODO: Separate this indexing logic from the CLI script to be callable from Python.
+        check_call(['datacube', 'dataset', 'add', '--auto-match', str(path)])
 
     def __enter__(self):
         return self
@@ -130,12 +139,11 @@ class Mismatch:
         self.dataset_id = dataset_id
         self.uri = uri
 
-    # TODO for all implementations:
-    # def update_index(self, index: Index):
-    #     """
-    #     Fix this issue on the given index.
-    #     """
-    #     raise NotImplementedError
+    def update_index(self, index: DatasetPathIndex):
+        """
+        Fix this issue on the given index.
+        """
+        raise NotImplementedError
 
     def __repr__(self, *args, **kwargs):
         """
@@ -174,21 +182,27 @@ class LocationMissingOnDisk(Mismatch):
 
     (Note that there may still be a file at the location, but it is not this dataset)
     """
-    pass
+
+    def update_index(self, index: DatasetPathIndex):
+        index.remove_location(self.dataset_id, self.uri)
 
 
 class LocationNotIndexed(Mismatch):
     """
     An existing dataset has been found at a new location.
     """
-    pass
+
+    def update_index(self, index: DatasetPathIndex):
+        index.add_location(self.dataset_id, self.uri)
 
 
 class DatasetNotIndexed(Mismatch):
     """
     A dataset has not been indexed.
     """
-    pass
+
+    def update_index(self, index: DatasetPathIndex):
+        index.add_dataset(self.dataset_id, self.uri)
 
 
 def find_index_disk_mismatches(log,
@@ -200,6 +214,14 @@ def find_index_disk_mismatches(log,
     """
     pathset = _build_pathset(log, filesystem_root, path_index, cache_path=cache_path)
     yield from _find_uri_mismatches(pathset.iterkeys('file://'), path_index)
+
+
+def fix_index_mismatches(log,
+                         index: DatasetPathIndex,
+                         mismatches: Iterable[Mismatch]):
+    for mismatch in mismatches:
+        log.debug("mismatch.apply", mismatch=mismatch)
+        mismatch.update_index(index)
 
 
 def _find_uri_mismatches(all_file_uris: Iterable[str], index: DatasetPathIndex) -> Iterable[Mismatch]:
