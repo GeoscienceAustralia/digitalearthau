@@ -1,14 +1,17 @@
+import collections
 import dawg
 import logging
+import sys
 import uuid
 from itertools import chain
 from pathlib import Path
 from subprocess import check_call
-from typing import Iterable, List
+from typing import Iterable
 
 import structlog
 from boltons import fileutils
 from datacubenci import paths
+from datacubenci.archive import CleanConsoleRenderer
 
 from datacube.index import index_connect
 from datacube.index._api import Index
@@ -239,13 +242,13 @@ def _find_uri_mismatches(all_file_uris: Iterable[str], index: DatasetPathIndex) 
 
         # For all indexed ids not in the file
         indexed_not_in_file = indexed_dataset_ids.difference(file_ids)
-        log.info("indexed_not_in_file", indexed_not_in_file=indexed_not_in_file)
+        log.debug("indexed_not_in_file", indexed_not_in_file=indexed_not_in_file)
         for dataset_id in indexed_not_in_file:
             yield LocationMissingOnDisk(dataset_id, uri)
 
         # For all file ids not in the index.
         files_not_in_index = file_ids.difference(indexed_dataset_ids)
-        log.info("files_not_in_index", files_not_in_index=files_not_in_index)
+        log.debug("files_not_in_index", files_not_in_index=files_not_in_index)
 
         for dataset_id in files_not_in_index:
             if index.has_dataset(dataset_id):
@@ -255,6 +258,24 @@ def _find_uri_mismatches(all_file_uris: Iterable[str], index: DatasetPathIndex) 
 
 
 def main():
+    # Direct stuctlog into standard logging.
+    structlog.configure(
+        processors=[
+            structlog.stdlib.filter_by_level,
+            structlog.stdlib.add_logger_name,
+            structlog.stdlib.add_log_level,
+            structlog.processors.TimeStamper(fmt="%Y-%m-%d %H:%M.%S"),
+            structlog.processors.StackInfoRenderer(),
+            structlog.processors.format_exc_info,
+            # Coloured output if to terminal.
+            CleanConsoleRenderer() if sys.stdout.isatty() else structlog.processors.KeyValueRenderer(),
+        ],
+        context_class=dict,
+        logger_factory=structlog.stdlib.LoggerFactory(),
+        wrapper_class=structlog.stdlib.BoundLogger,
+        cache_logger_on_first_use=True,
+    )
+
     root = Path('/tmp/test')
     cache = root.joinpath('cache')
     product_locations = {
@@ -268,8 +289,12 @@ def main():
         fileutils.mkdir_p(str(cache_path))
 
         with AgdcDatasetPathIndex.connect(product=product) as path_index:
+            stats = collections.defaultdict(int)
             for mismatch in find_index_disk_mismatches(log, path_index, filesystem_root, cache_path=cache_path):
                 print(repr(mismatch))
+                stats[mismatch.__class__.__name__] += 1
+
+        print(repr(stats))
 
 
 if __name__ == '__main__':
