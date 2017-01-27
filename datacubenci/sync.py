@@ -290,12 +290,12 @@ def main():
 
         with AgdcDatasetPathIndex.connect(product=product) as path_index:
             for mismatch in find_index_disk_mismatches(log, path_index, filesystem_root, cache_path=cache_path):
-                print('\t'.join((
+                print('\t'.join(map(str, (
                     product,
                     strutils.camel2under(mismatch.__class__.__name__),
                     mismatch.dataset_id,
                     mismatch.uri
-                )))
+                ))))
 
 
 if __name__ == '__main__':
