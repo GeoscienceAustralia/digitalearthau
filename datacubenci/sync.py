@@ -279,8 +279,10 @@ def main():
     root = Path('/tmp/test')
     cache = root.joinpath('cache')
     product_locations = {
-        'ls8_level1_scene': root.joinpath('ls8_scenes'),
-        'ls7_level1_scene': root.joinpath('ls7_scenes'),
+        'ls8_level1_scene': Path('/g/data/v10/reprocess/ls8/level1'),
+        'ls7_level1_scene': Path('/g/data/v10/reprocess/ls7/level1'),
+        'ls5_level1_scene': Path('/g/data/v10/reprocess/ls5/level1'),
+        # 'ls5_satellite_telemetry_data': Path('/g/data/v10/repackaged/rawdata/0')
     }
 
     for product, filesystem_root in product_locations.items():
