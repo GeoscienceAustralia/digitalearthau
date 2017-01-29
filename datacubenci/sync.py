@@ -5,7 +5,7 @@ import uuid
 from itertools import chain
 from pathlib import Path
 from subprocess import check_call
-from typing import Iterable
+from typing import Iterable, Any, Mapping
 
 import structlog
 from boltons import fileutils
@@ -68,7 +68,7 @@ class AgdcDatasetPathIndex(DatasetPathIndex):
             yield str(uri)
 
     @classmethod
-    def connect(cls, **query) -> 'AgdcDatasetPathIndex':
+    def connect(cls, query: Mapping[str, Any]) -> 'AgdcDatasetPathIndex':
         return cls(index_connect(application_name='datacubenci-pathsync'), query=query)
 
     def get_dataset_ids_for_uri(self, uri: str) -> Iterable[uuid.UUID]:
@@ -276,28 +276,44 @@ def main():
         cache_logger_on_first_use=True,
     )
 
-    root = Path('/tmp/test')
-    cache = root.joinpath('cache')
-    product_locations = {
-        'ls8_level1_scene': Path('/g/data/v10/reprocess/ls8/level1'),
-        'ls7_level1_scene': Path('/g/data/v10/reprocess/ls7/level1'),
-        'ls5_level1_scene': Path('/g/data/v10/reprocess/ls5/level1'),
-        # 'ls5_satellite_telemetry_data': Path('/g/data/v10/repackaged/rawdata/0')
-    }
+    cache = Path('cache')
+    location_queries = (
+        ({'metadata_type': 'telemetry'}, Path('/g/data/v10/repackaged/rawdata/0')),
+        ({'product': 'ls8_level1_scene'}, Path('/g/data/v10/reprocess/ls8/level1')),
+        ({'product': 'ls7_level1_scene'}, Path('/g/data/v10/reprocess/ls7/level1')),
+        ({'product': 'ls5_level1_scene'}, Path('/g/data/v10/reprocess/ls5/level1')),
+    )
 
-    for product, filesystem_root in product_locations.items():
-        log = _LOG.bind(product=product)
-        cache_path = cache.joinpath(product)
+    for query, filesystem_root in location_queries:
+        log = _LOG.bind(query=query)
+        cache_path = cache.joinpath(query_name(query))
         fileutils.mkdir_p(str(cache_path))
 
-        with AgdcDatasetPathIndex.connect(product=product) as path_index:
+        with AgdcDatasetPathIndex.connect(query) as path_index:
             for mismatch in find_index_disk_mismatches(log, path_index, filesystem_root, cache_path=cache_path):
                 print('\t'.join(map(str, (
-                    product,
+                    repr(query),
                     strutils.camel2under(mismatch.__class__.__name__),
                     mismatch.dataset_id,
                     mismatch.uri
                 ))))
+
+
+def query_name(query: Mapping[str, Any]) -> str:
+    """
+    Get a string name for the given query args.
+
+    >>> query_name({'product': 'ls8_level1_scene'})
+    'product_ls8_level1_scene'
+    >>> query_name({'metadata_type': 'telemetry'})
+    'metadata_type_telemetry'
+    >>> query_name({'a': '1', 'b': 2, 'c': '"3"'})
+    'a_1-b_2-c_3'
+    """
+    return "-".join(
+        '{}_{}'.format(k, strutils.slugify(str(v)))
+        for k, v in sorted(query.items())
+    )
 
 
 if __name__ == '__main__':
