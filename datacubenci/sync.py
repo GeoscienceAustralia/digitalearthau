@@ -240,6 +240,11 @@ def _find_uri_mismatches(all_file_uris: Iterable[str], index: DatasetPathIndex) 
         file_ids = set(paths.get_path_dataset_ids(path)) if path.exists() else set()
         log.info("dataset_ids", indexed_dataset_ids=indexed_dataset_ids, file_ids=file_ids)
 
+        # Sanity check of the types, as our equality checks below are quietly wrong if the types don't match,
+        # and we've previously had problems with libraries accidentally switching string/uuid types...
+        assert all(isinstance(id_, uuid.UUID) for id_ in indexed_dataset_ids)
+        assert all(isinstance(id_, uuid.UUID) for id_ in file_ids)
+
         # For all indexed ids not in the file
         indexed_not_in_file = indexed_dataset_ids.difference(file_ids)
         log.debug("indexed_not_in_file", indexed_not_in_file=indexed_not_in_file)
