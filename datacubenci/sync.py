@@ -2,22 +2,34 @@ import dawg
 import logging
 import sys
 import uuid
+from collections import namedtuple
 from itertools import chain
 from pathlib import Path
 from subprocess import check_call
 from typing import Iterable, Any, Mapping
 
+import click
 import structlog
 from boltons import fileutils
 from boltons import strutils
-from datacubenci import paths
-from datacubenci.archive import CleanConsoleRenderer
 
 from datacube.index import index_connect
 from datacube.index._api import Index
+from datacube.ui import click as ui
 from datacube.utils import uri_to_local_path
+from datacubenci import paths
+from datacubenci.archive import CleanConsoleRenderer
 
 _LOG = structlog.get_logger()
+
+Collection = namedtuple('Collection', ('query', 'base_path'))
+
+NCI_COLLECTIONS = {
+    'telemetry': Collection({'metadata_type': 'telemetry'}, Path('/g/data/v10/repackaged/rawdata/0')),
+    'ls8_level1_scene': Collection({'product': 'ls8_level1_scene'}, Path('/g/data/v10/reprocess/ls8/level1')),
+    'ls7_level1_scene': Collection({'product': 'ls7_level1_scene'}, Path('/g/data/v10/reprocess/ls7/level1')),
+    'ls5_level1_scene': Collection({'product': 'ls5_level1_scene'}, Path('/g/data/v10/reprocess/ls5/level1')),
+}
 
 
 class DatasetPathIndex:
@@ -262,7 +274,18 @@ def _find_uri_mismatches(all_file_uris: Iterable[str], index: DatasetPathIndex) 
                 yield DatasetNotIndexed(dataset_id, uri)
 
 
-def main():
+@click.command()
+@ui.global_cli_options
+@click.option('--dry-run', is_flag=True, default=False)
+@click.option('--cache-folder',
+              type=click.Path(exists=True, readable=True, writable=True),
+              # 'cache' folder in current directory.
+              default='cache')
+@click.argument('collections',
+                type=click.Choice(NCI_COLLECTIONS.keys()),
+                nargs=-1)
+@ui.pass_index('datacubenci-sync')
+def main(index, collections, cache_folder, dry_run):
     # Direct stuctlog into standard logging.
     structlog.configure(
         processors=[
@@ -281,27 +304,29 @@ def main():
         cache_logger_on_first_use=True,
     )
 
-    cache = Path('cache')
-    location_queries = (
-        ({'metadata_type': 'telemetry'}, Path('/g/data/v10/repackaged/rawdata/0')),
-        ({'product': 'ls8_level1_scene'}, Path('/g/data/v10/reprocess/ls8/level1')),
-        ({'product': 'ls7_level1_scene'}, Path('/g/data/v10/reprocess/ls7/level1')),
-        ({'product': 'ls5_level1_scene'}, Path('/g/data/v10/reprocess/ls5/level1')),
-    )
+    cache = Path(cache_folder)
 
-    for query, filesystem_root in location_queries:
-        log = _LOG.bind(query=query)
-        cache_path = cache.joinpath(query_name(query))
-        fileutils.mkdir_p(str(cache_path))
+    for collection_name in collections:
+        collection = NCI_COLLECTIONS[collection_name]
 
-        with AgdcDatasetPathIndex.connect(query) as path_index:
-            for mismatch in find_index_disk_mismatches(log, path_index, filesystem_root, cache_path=cache_path):
-                print('\t'.join(map(str, (
-                    repr(query),
+        log = _LOG.bind(collection=collection_name)
+        collection_cache = cache.joinpath(query_name(collection.query))
+        fileutils.mkdir_p(str(collection_cache))
+
+        with AgdcDatasetPathIndex(index, collection.query) as path_index:
+            for mismatch in find_index_disk_mismatches(log,
+                                                       path_index,
+                                                       collection.base_path,
+                                                       cache_path=collection_cache):
+                click.echo('\t'.join(map(str, (
+                    collection_name,
                     strutils.camel2under(mismatch.__class__.__name__),
                     mismatch.dataset_id,
                     mismatch.uri
                 ))))
+                if not dry_run:
+                    log.info('mismatch.fix', mismatch=mismatch)
+                    mismatch.update_index(index)
 
 
 def query_name(query: Mapping[str, Any]) -> str:

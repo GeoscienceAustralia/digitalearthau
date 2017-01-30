@@ -1,11 +1,9 @@
-import copy
+import collections
 import uuid
 from typing import Iterable, List, Mapping, Tuple
 
-import collections
 import pytest
 import structlog
-from boltons.dictutils import MultiDict
 from datacubenci import sync
 from datacubenci.archive import CleanConsoleRenderer
 from datacubenci.paths import write_files
