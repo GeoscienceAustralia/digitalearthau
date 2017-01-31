@@ -5,7 +5,6 @@ import uuid
 from collections import namedtuple
 from itertools import chain
 from pathlib import Path
-from subprocess import check_call
 from typing import Iterable, Any, Mapping
 from typing import List
 
@@ -16,6 +15,7 @@ from boltons import strutils
 
 from datacube.index import index_connect
 from datacube.index._api import Index
+from datacube.scripts import dataset
 from datacube.ui import click as ui
 from datacube.utils import uri_to_local_path
 from datacubenci import paths
@@ -75,6 +75,7 @@ class AgdcDatasetPathIndex(DatasetPathIndex):
         super().__init__()
         self._index = index
         self._query = query
+        self._rules = dataset.load_rules_from_types(self._index)
 
     def iter_all_uris(self) -> Iterable[str]:
         for uri, in self._index.datasets.search_returning(['uri'], **self._query):
@@ -85,8 +86,8 @@ class AgdcDatasetPathIndex(DatasetPathIndex):
         return cls(index_connect(application_name='datacubenci-pathsync'), query=query)
 
     def get_dataset_ids_for_uri(self, uri: str) -> Iterable[uuid.UUID]:
-        for dataset in self._index.datasets.get_datasets_for_location(uri=uri):
-            yield dataset.id
+        for d in self._index.datasets.get_datasets_for_location(uri=uri):
+            yield d.id
 
     def remove_location(self, dataset_id: uuid.UUID, uri: str) -> bool:
         was_removed = self._index.datasets.remove_location(DatasetLite(dataset_id), uri)
@@ -101,8 +102,13 @@ class AgdcDatasetPathIndex(DatasetPathIndex):
 
     def add_dataset(self, dataset_id: uuid.UUID, uri: str):
         path = uri_to_local_path(uri)
-        # TODO: Separate this indexing logic from the CLI script to be callable from Python.
-        check_call(['datacube', 'dataset', 'add', '--auto-match', str(path)])
+
+        for d in dataset.load_datasets([path], self._rules):
+            if d.id == dataset_id:
+                self._index.datasets.add(d, skip_sources=True)
+                break
+        else:
+            raise RuntimeError('Dataset not found at path: %s, %s' % (dataset_id, uri))
 
     def __enter__(self):
         return self
