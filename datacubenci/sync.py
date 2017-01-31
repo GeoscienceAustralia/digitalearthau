@@ -7,6 +7,7 @@ from itertools import chain
 from pathlib import Path
 from subprocess import check_call
 from typing import Iterable, Any, Mapping
+from typing import List
 
 import click
 import structlog
@@ -286,6 +287,8 @@ def _find_uri_mismatches(all_file_uris: Iterable[str], index: DatasetPathIndex) 
                 nargs=-1)
 @ui.pass_index('datacubenci-sync')
 def main(index, collections, cache_folder, dry_run):
+    # type: (Index, List[str], str, bool) -> None
+
     # Direct stuctlog into standard logging.
     structlog.configure(
         processors=[
@@ -326,7 +329,7 @@ def main(index, collections, cache_folder, dry_run):
                 ))))
                 if not dry_run:
                     log.info('mismatch.fix', mismatch=mismatch)
-                    mismatch.update_index(index)
+                    mismatch.update_index(path_index)
 
 
 def query_name(query: Mapping[str, Any]) -> str:
