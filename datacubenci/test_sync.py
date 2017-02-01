@@ -1,10 +1,10 @@
 import collections
 import uuid
+from datetime import datetime, timedelta
 from typing import Iterable, List, Mapping, Tuple, Optional
 
 import pytest
 import structlog
-
 from datacubenci import sync
 from datacubenci.archive import CleanConsoleRenderer
 from datacubenci.paths import write_files
@@ -182,6 +182,26 @@ def test_index_disk_sync():
         cache_path=root
     )
 
+    # A an already-archived file in on disk
+    index = MemoryDatasetPathIndex()
+    two_days_ago = datetime.utcnow() - timedelta(days=2)
+    archived_on_disk = DatasetLite(on_disk.id, archived_time=two_days_ago)
+    index.add_dataset(archived_on_disk, on_disk_uri)
+    _check_sync(
+        path_search_root=root.joinpath('ls8_scenes'),
+        expected_paths=[
+            on_disk_uri
+        ],
+        expected_mismatches=[
+            sync.ArchivedDatasetOnDisk(archived_on_disk, on_disk_uri),
+        ],
+        expected_index_result={
+            on_disk: (on_disk_uri,),
+        },
+        index=index,
+        cache_path=root
+    )
+
 
 def _check_sync(expected_paths, index, path_search_root,
                 expected_mismatches, expected_index_result: Mapping[DatasetLite, Tuple[str]], cache_path):
@@ -204,7 +224,21 @@ def _check_mismatch_find(cache_path, expected_mismatches, index, log, path_searc
     for mismatch in sync.find_index_disk_mismatches(log, index, path_search_root, cache_path=cache_path):
         print(repr(mismatch))
         mismatches.append(mismatch)
-    assert set(mismatches) == set(expected_mismatches)
+
+    def mismatch_sort_key(m):
+        return m.__class__.__name__, m.dataset.id, m.uri
+
+    sorted_mismatches = sorted(mismatches, key=mismatch_sort_key)
+    sorted_expected_mismatches = sorted(expected_mismatches, key=mismatch_sort_key)
+
+    assert sorted_mismatches == sorted_expected_mismatches
+
+    # DatasetLite.__eq__ only tests for identical ids, so we'll check the properies here too.
+    # This is to catch when we're passing the indexed instance of DatasetLite vs the one Loaded from the file.
+    # (eg. only the indexed one will have archived information.)
+    for i, mismatch in enumerate(sorted_mismatches):
+        expected_mismatch = sorted_expected_mismatches[i]
+        assert expected_mismatch.dataset.__dict__ == mismatch.dataset.__dict__
 
     return mismatches
 

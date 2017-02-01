@@ -298,6 +298,17 @@ class DatasetNotIndexed(Mismatch):
         index.add_dataset(self.dataset, self.uri)
 
 
+class ArchivedDatasetOnDisk(Mismatch):
+    """
+    A dataset on disk is already archived in the index.
+    """
+
+    def fix(self, index: DatasetPathIndex):
+        # We don't fix these yet. It's only here for reporting.
+        # TODO: Trash the file if archived more than X days ago?
+        pass
+
+
 def find_index_disk_mismatches(log,
                                path_index: DatasetPathIndex,
                                filesystem_root: Path,
@@ -337,11 +348,13 @@ def _find_uri_mismatches(all_file_uris: Iterable[str], index: DatasetPathIndex) 
                  indexed_dataset_ids=ids(indexed_datasets),
                  file_ids=ids(datasets_in_file))
 
-        # For all indexed ids not in the file
-        indexed_not_in_file = indexed_datasets.difference(datasets_in_file)
-        log.debug("indexed_not_in_file", indexed_not_in_file=indexed_not_in_file)
-        for indexed_dataset in indexed_not_in_file:
-            yield LocationMissingOnDisk(indexed_dataset, uri)
+        for indexed_dataset in indexed_datasets:
+            # Does the dataset exist in the file?
+            if indexed_dataset in datasets_in_file:
+                if indexed_dataset.is_archived:
+                    yield ArchivedDatasetOnDisk(indexed_dataset, uri)
+            else:
+                yield LocationMissingOnDisk(indexed_dataset, uri)
 
         # For all file ids not in the index.
         file_ds_not_in_index = datasets_in_file.difference(indexed_datasets)
