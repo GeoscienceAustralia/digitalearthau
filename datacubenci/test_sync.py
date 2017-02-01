@@ -1,12 +1,14 @@
 import collections
 import uuid
-from typing import Iterable, List, Mapping, Tuple
+from typing import Iterable, List, Mapping, Tuple, Optional
 
 import pytest
 import structlog
+
 from datacubenci import sync
 from datacubenci.archive import CleanConsoleRenderer
 from datacubenci.paths import write_files
+from datacubenci.sync import DatasetLite
 
 
 # These are ok in tests.
@@ -17,24 +19,27 @@ class MemoryDatasetPathIndex(sync.DatasetPathIndex):
     An in-memory implementation, so that we can test without using a real datacube index.
     """
 
-    def has_dataset(self, dataset_id: uuid.UUID) -> bool:
-        return dataset_id in self._records.keys()
+    def get(self, dataset_id: uuid.UUID) -> Optional[DatasetLite]:
+        for d in self._records.keys():
+            if d.id == dataset_id:
+                return d
+        return None
 
     def __init__(self):
         super().__init__()
-        # Map of dataset id to locations.
-        # type: Mapping[uuid.UUID, List[str]]
+        # Map of dataset to locations.
+        # type: Mapping[DatasetLite, List[str]]
         self._records = collections.defaultdict(list)
 
     def iter_all_uris(self) -> Iterable[str]:
         for uris in self._records.values():
             yield from uris
 
-    def add_location(self, dataset_id: uuid.UUID, uri: str) -> bool:
-        if dataset_id not in self._records:
-            raise ValueError("Unknown dataset {} -> {}".format(dataset_id, uri))
+    def add_location(self, dataset: DatasetLite, uri: str) -> bool:
+        if dataset not in self._records:
+            raise ValueError("Unknown dataset {} -> {}".format(dataset.id, uri))
 
-        return self._add(dataset_id, uri)
+        return self._add(dataset, uri)
 
     def _add(self, dataset_id, uri):
         if uri in self._records[dataset_id]:
@@ -44,28 +49,28 @@ class MemoryDatasetPathIndex(sync.DatasetPathIndex):
         self._records[dataset_id].append(uri)
         return True
 
-    def remove_location(self, dataset_id: uuid.UUID, uri: str) -> bool:
+    def remove_location(self, dataset: DatasetLite, uri: str) -> bool:
 
-        if uri not in self._records[dataset_id]:
+        if uri not in self._records[dataset]:
             # Not removed
             return False
         # We never remove the dataset key, only the uris.
-        self._records[dataset_id].remove(uri)
+        self._records[dataset].remove(uri)
 
-    def get_dataset_ids_for_uri(self, uri: str) -> Iterable[uuid.UUID]:
-        for id_, uris in self._records.items():
+    def get_datasets_for_uri(self, uri: str) -> Iterable[DatasetLite]:
+        for dataset, uris in self._records.items():
             if uri in uris:
-                yield id_
+                yield dataset
 
-    def as_map(self) -> Mapping[uuid.UUID, Tuple[str]]:
+    def as_map(self) -> Mapping[DatasetLite, Tuple[str]]:
         """
         All contained (dataset, [location]) values, to check test results.
         """
         return {id_: tuple(uris) for id_, uris in self._records.items()}
 
-    def add_dataset(self, dataset_id: uuid.UUID, uri: str):
+    def add_dataset(self, dataset: DatasetLite, uri: str):
         # We're not actually storing datasets...
-        return self._add(dataset_id, uri)
+        return self._add(dataset, uri)
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -85,22 +90,22 @@ def configure_log_output(request):
 
 
 def test_index_disk_sync():
-    on_disk_id = uuid.UUID('1e47df58-de0f-11e6-93a4-185e0f80a5c0')
-    on_disk_id2 = uuid.UUID('3604ee9c-e1e8-11e6-8148-185e0f80a5c0')
+    on_disk = DatasetLite(uuid.UUID('1e47df58-de0f-11e6-93a4-185e0f80a5c0'))
+    on_disk2 = DatasetLite(uuid.UUID('3604ee9c-e1e8-11e6-8148-185e0f80a5c0'))
 
     root = write_files(
         {
             'ls8_scenes': {
                 'ls8_test_dataset': {
                     'ga-metadata.yaml':
-                        ('id: %s\n' % on_disk_id),
+                        ('id: %s\n' % on_disk.id),
                     'dummy-file.txt': ''
                 }
             },
             'ls7_scenes': {
                 'ls7_test_dataset': {
                     'ga-metadata.yaml':
-                        ('id: %s\n' % on_disk_id2)
+                        ('id: %s\n' % on_disk2.id)
                 }
             }
         }
@@ -114,8 +119,8 @@ def test_index_disk_sync():
     # An indexed file not on disk, and disk file not in index.
     index = MemoryDatasetPathIndex()
     missing_uri = root.joinpath('indexed', 'already', 'ga-metadata.yaml').as_uri()
-    old_indexed_id = uuid.UUID('b9d77d10-e1c6-11e6-bf63-185e0f80a5c0')
-    index.add_dataset(old_indexed_id, missing_uri)
+    old_indexed = DatasetLite(uuid.UUID('b9d77d10-e1c6-11e6-bf63-185e0f80a5c0'))
+    index.add_dataset(old_indexed, missing_uri)
     _check_sync(
         path_search_root=root.joinpath('ls8_scenes'),
         expected_paths=[
@@ -123,12 +128,12 @@ def test_index_disk_sync():
             on_disk_uri
         ],
         expected_mismatches=[
-            sync.LocationMissingOnDisk(old_indexed_id, missing_uri),
-            sync.DatasetNotIndexed(on_disk_id, on_disk_uri)
+            sync.LocationMissingOnDisk(old_indexed, missing_uri),
+            sync.DatasetNotIndexed(on_disk, on_disk_uri)
         ],
         expected_index_result={
-            on_disk_id: (on_disk_uri,),
-            old_indexed_id: ()
+            on_disk: (on_disk_uri,),
+            old_indexed: ()
         },
         index=index,
         cache_path=root
@@ -136,19 +141,19 @@ def test_index_disk_sync():
 
     # File on disk has a different id to the one in the index (ie. it was quietly reprocessed)
     index = MemoryDatasetPathIndex()
-    index.add_dataset(old_indexed_id, on_disk_uri)
+    index.add_dataset(old_indexed, on_disk_uri)
     _check_sync(
         path_search_root=root.joinpath('ls8_scenes'),
         expected_paths=[
             on_disk_uri
         ],
         expected_mismatches=[
-            sync.LocationMissingOnDisk(old_indexed_id, on_disk_uri),
-            sync.DatasetNotIndexed(on_disk_id, on_disk_uri),
+            sync.LocationMissingOnDisk(old_indexed, on_disk_uri),
+            sync.DatasetNotIndexed(on_disk, on_disk_uri),
         ],
         expected_index_result={
-            on_disk_id: (on_disk_uri,),
-            old_indexed_id: ()
+            on_disk: (on_disk_uri,),
+            old_indexed: ()
         },
         index=index,
         cache_path=root
@@ -156,8 +161,8 @@ def test_index_disk_sync():
 
     # File on disk was moved without updating index, replacing existing indexed file location.
     index = MemoryDatasetPathIndex()
-    index.add_dataset(old_indexed_id, on_disk_uri)
-    index.add_dataset(on_disk_id, missing_uri)
+    index.add_dataset(old_indexed, on_disk_uri)
+    index.add_dataset(on_disk, missing_uri)
     _check_sync(
         path_search_root=root.joinpath('ls8_scenes'),
         expected_paths=[
@@ -165,13 +170,13 @@ def test_index_disk_sync():
             missing_uri
         ],
         expected_mismatches=[
-            sync.LocationMissingOnDisk(old_indexed_id, on_disk_uri),
-            sync.LocationNotIndexed(on_disk_id, on_disk_uri),
-            sync.LocationMissingOnDisk(on_disk_id, missing_uri),
+            sync.LocationMissingOnDisk(old_indexed, on_disk_uri),
+            sync.LocationNotIndexed(on_disk, on_disk_uri),
+            sync.LocationMissingOnDisk(on_disk, missing_uri),
         ],
         expected_index_result={
-            on_disk_id: (on_disk_uri,),
-            old_indexed_id: ()
+            on_disk: (on_disk_uri,),
+            old_indexed: ()
         },
         index=index,
         cache_path=root
@@ -179,7 +184,7 @@ def test_index_disk_sync():
 
 
 def _check_sync(expected_paths, index, path_search_root,
-                expected_mismatches, expected_index_result: Mapping[uuid.UUID, Tuple[str]], cache_path):
+                expected_mismatches, expected_index_result: Mapping[DatasetLite, Tuple[str]], cache_path):
     log = structlog.getLogger()
 
     cache_path = cache_path.joinpath(str(uuid.uuid4()))

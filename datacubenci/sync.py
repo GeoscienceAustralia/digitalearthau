@@ -3,23 +3,26 @@ import logging
 import sys
 import uuid
 from collections import namedtuple
+from datetime import datetime
 from itertools import chain
 from pathlib import Path
-from typing import Iterable, Any, Mapping
+from typing import Iterable, Any, Mapping, Optional
 from typing import List
+from uuid import UUID
 
 import click
 import structlog
 from boltons import fileutils
 from boltons import strutils
-from datacubenci import paths
-from datacubenci.archive import CleanConsoleRenderer
 
 from datacube.index import index_connect
 from datacube.index._api import Index
-from datacube.scripts import dataset
+from datacube.model import Dataset
+from datacube.scripts import dataset as dataset_script
 from datacube.ui import click as ui
 from datacube.utils import uri_to_local_path
+from datacubenci import paths
+from datacubenci.archive import CleanConsoleRenderer
 
 _LOG = structlog.get_logger()
 
@@ -41,7 +44,6 @@ NCI_COLLECTIONS = {
                                  Path('/g/data/rs0/scenes/nbar-scenes-tmp/ls7')),
     'ls8_nbar_scene': Collection({'product': ['ls8_nbar_scene', 'ls8_nbart_scene']},
                                  Path('/g/data/rs0/scenes/nbar-scenes-tmp/ls8')),
-
 
     'ls5_pq_scene': Collection({'product': 'ls5_pq_scene'}, Path('/g/data/rs0/scenes/pq-scenes-tmp/ls5')),
     'ls7_pq_scene': Collection({'product': 'ls7_pq_scene'}, Path('/g/data/rs0/scenes/pq-scenes-tmp/ls7')),
@@ -69,6 +71,45 @@ NCI_COLLECTIONS = {
 }
 
 
+# A small subset of Dataset. A "real" dataset needs a lot of initialisation: types etc.
+# We also depend heavily on the __eq__ behaviour of this particular class (by id only), and subtle
+# bugs could occur if the inner framework made changes.
+class DatasetLite:
+    def __init__(self, id_: uuid.UUID, archived_time: datetime = None):
+        # Sanity check of the type, as our equality checks are quietly wrong if the types don't match,
+        # and we've previously had problems with libraries accidentally switching string/uuid types...
+        assert isinstance(id_, uuid.UUID)
+        self.id = id_
+
+        self.archived_time = archived_time
+
+    @property
+    def is_archived(self):
+        """
+        Is this dataset archived?
+
+        (an archived dataset is one that is not intended to be used by users anymore: eg. it has been
+        replaced by another dataset. It will not show up in search results, but still exists in the
+        system via provenance chains or through id lookup.)
+
+        :rtype: bool
+        """
+        return self.archived_time is not None
+
+    def __eq__(self, other):
+        return self.id == other.id
+
+    def __hash__(self):
+        return hash(self.id)
+
+    @classmethod
+    def from_agdc(cls, dataset: Dataset):
+        return DatasetLite(dataset.id, archived_time=dataset.archived_time)
+
+    def __repr__(self):
+        return _simple_object_repr(self)
+
+
 class DatasetPathIndex:
     """
     An index of datasets and their URIs.
@@ -85,25 +126,20 @@ class DatasetPathIndex:
     def iter_all_uris(self) -> Iterable[str]:
         raise NotImplementedError
 
-    def get_dataset_ids_for_uri(self, uri: str) -> Iterable[uuid.UUID]:
+    def get_datasets_for_uri(self, uri: str) -> Iterable[DatasetLite]:
         raise NotImplementedError
 
-    def has_dataset(self, dataset_id: uuid.UUID) -> bool:
+    def get(self, dataset_id: uuid.UUID) -> Optional[DatasetLite]:
         raise NotImplementedError
 
-    def add_location(self, dataset_id: uuid.UUID, uri: str) -> bool:
+    def add_location(self, dataset: DatasetLite, uri: str) -> bool:
         raise NotImplementedError
 
-    def remove_location(self, dataset_id: uuid.UUID, uri: str) -> bool:
+    def remove_location(self, dataset: DatasetLite, uri: str) -> bool:
         raise NotImplementedError
 
-    def add_dataset(self, dataset_id: uuid.UUID, uri: str):
+    def add_dataset(self, dataset: DatasetLite, uri: str):
         raise NotImplementedError
-
-
-class DatasetLite:
-    def __init__(self, id_):
-        self.id = id_
 
 
 class AgdcDatasetPathIndex(DatasetPathIndex):
@@ -111,7 +147,7 @@ class AgdcDatasetPathIndex(DatasetPathIndex):
         super().__init__()
         self._index = index
         self._query = query
-        self._rules = dataset.load_rules_from_types(self._index)
+        self._rules = dataset_script.load_rules_from_types(self._index)
 
     def iter_all_uris(self) -> Iterable[str]:
         for uri, in self._index.datasets.search_returning(['uri'], **self._query):
@@ -121,30 +157,31 @@ class AgdcDatasetPathIndex(DatasetPathIndex):
     def connect(cls, query: Mapping[str, Any]) -> 'AgdcDatasetPathIndex':
         return cls(index_connect(application_name='datacubenci-pathsync'), query=query)
 
-    def get_dataset_ids_for_uri(self, uri: str) -> Iterable[uuid.UUID]:
+    def get_datasets_for_uri(self, uri: str) -> Iterable[DatasetLite]:
         for d in self._index.datasets.get_datasets_for_location(uri=uri):
-            yield d.id
+            yield DatasetLite.from_agdc(d)
 
-    def remove_location(self, dataset_id: uuid.UUID, uri: str) -> bool:
-        was_removed = self._index.datasets.remove_location(DatasetLite(dataset_id), uri)
+    def remove_location(self, dataset: DatasetLite, uri: str) -> bool:
+        was_removed = self._index.datasets.remove_location(dataset, uri)
         return was_removed
 
-    def has_dataset(self, dataset_id: uuid.UUID) -> bool:
-        return self._index.datasets.has(dataset_id)
+    def get(self, dataset_id: uuid.UUID) -> Optional[DatasetLite]:
+        agdc_dataset = self._index.datasets.get(dataset_id)
+        return DatasetLite.from_agdc(agdc_dataset) if agdc_dataset else None
 
-    def add_location(self, dataset_id: uuid.UUID, uri: str) -> bool:
-        was_removed = self._index.datasets.add_location(DatasetLite(dataset_id), uri)
+    def add_location(self, dataset: DatasetLite, uri: str) -> bool:
+        was_removed = self._index.datasets.add_location(dataset, uri)
         return was_removed
 
-    def add_dataset(self, dataset_id: uuid.UUID, uri: str):
+    def add_dataset(self, dataset: DatasetLite, uri: str):
         path = uri_to_local_path(uri)
 
-        for d in dataset.load_datasets([path], self._rules):
-            if d.id == dataset_id:
+        for d in dataset_script.load_datasets([path], self._rules):
+            if d.id == dataset.id:
                 self._index.datasets.add(d, skip_sources=True)
                 break
         else:
-            raise RuntimeError('Dataset not found at path: %s, %s' % (dataset_id, uri))
+            raise RuntimeError('Dataset not found at path: %s, %s' % (dataset.id, uri))
 
     def __enter__(self):
         return self
@@ -192,12 +229,12 @@ class Mismatch:
     See the implementations for different types of mismataches.
     """
 
-    def __init__(self, dataset_id, uri):
+    def __init__(self, dataset: DatasetLite, uri: str):
         super().__init__()
-        self.dataset_id = dataset_id
+        self.dataset = dataset
         self.uri = uri
 
-    def update_index(self, index: DatasetPathIndex):
+    def fix(self, index: DatasetPathIndex):
         """
         Fix this issue on the given index.
         """
@@ -205,23 +242,21 @@ class Mismatch:
 
     def __repr__(self, *args, **kwargs):
         """
-        >>> Mismatch(dataset_id='96519c56-e133-11e6-a29f-185e0f80a5c0', uri='/tmp/test')
-        Mismatch(dataset_id='96519c56-e133-11e6-a29f-185e0f80a5c0', uri='/tmp/test')
+        >>> Mismatch(DatasetLite(UUID('96519c56-e133-11e6-a29f-185e0f80a5c0')), uri='/tmp/test')
+        Mismatch(dataset=DatasetLite(archived_time=None, id=UUID('96519c56-e133-11e6-a29f-185e0f80a5c0')), \
+uri='/tmp/test')
         """
-        return "%s(%s)" % (
-            self.__class__.__name__,
-            ", ".join("%s=%r" % (k, v) for k, v in sorted(self.__dict__.items()))
-        )
+        return _simple_object_repr(self)
 
     def __eq__(self, other):
         """
-        >>> m = Mismatch(dataset_id='96519c56-e133-11e6-a29f-185e0f80a5c0', uri='/tmp/test')
+        >>> m = Mismatch(DatasetLite(UUID('96519c56-e133-11e6-a29f-185e0f80a5c0')), uri='/tmp/test')
         >>> m == m
         True
         >>> import copy
         >>> m == copy.copy(m)
         True
-        >>> n = Mismatch(dataset_id='96519c56-e133-11e6-a29f-185e0f80a5c0', uri='/tmp/test2')
+        >>> n = Mismatch(DatasetLite(UUID('96519c56-e133-11e6-a29f-185e0f80a5c0')), uri='/tmp/test2')
         >>> m == n
         False
         """
@@ -241,8 +276,8 @@ class LocationMissingOnDisk(Mismatch):
     (Note that there may still be a file at the location, but it is not this dataset)
     """
 
-    def update_index(self, index: DatasetPathIndex):
-        index.remove_location(self.dataset_id, self.uri)
+    def fix(self, index: DatasetPathIndex):
+        index.remove_location(self.dataset, self.uri)
 
 
 class LocationNotIndexed(Mismatch):
@@ -250,8 +285,8 @@ class LocationNotIndexed(Mismatch):
     An existing dataset has been found at a new location.
     """
 
-    def update_index(self, index: DatasetPathIndex):
-        index.add_location(self.dataset_id, self.uri)
+    def fix(self, index: DatasetPathIndex):
+        index.add_location(self.dataset, self.uri)
 
 
 class DatasetNotIndexed(Mismatch):
@@ -259,8 +294,8 @@ class DatasetNotIndexed(Mismatch):
     A dataset has not been indexed.
     """
 
-    def update_index(self, index: DatasetPathIndex):
-        index.add_dataset(self.dataset_id, self.uri)
+    def fix(self, index: DatasetPathIndex):
+        index.add_dataset(self.dataset, self.uri)
 
 
 def find_index_disk_mismatches(log,
@@ -279,7 +314,7 @@ def fix_index_mismatches(log,
                          mismatches: Iterable[Mismatch]):
     for mismatch in mismatches:
         log.debug("mismatch.apply", mismatch=mismatch)
-        mismatch.update_index(index)
+        mismatch.fix(index)
 
 
 def _find_uri_mismatches(all_file_uris: Iterable[str], index: DatasetPathIndex) -> Iterable[Mismatch]:
@@ -288,33 +323,37 @@ def _find_uri_mismatches(all_file_uris: Iterable[str], index: DatasetPathIndex) 
     yielding Mismatches of any differences.
     """
     for uri in all_file_uris:
+
+        def ids(datasets):
+            return [d.id for d in datasets]
+
         path = uri_to_local_path(uri)
         log = _LOG.bind(path=path)
         log.debug("index.get_dataset_ids_for_uri")
-        indexed_dataset_ids = set(index.get_dataset_ids_for_uri(uri))
-        file_ids = set(paths.get_path_dataset_ids(path)) if path.exists() else set()
-        log.info("dataset_ids", indexed_dataset_ids=indexed_dataset_ids, file_ids=file_ids)
+        indexed_datasets = set(index.get_datasets_for_uri(uri))
+        datasets_in_file = set(map(DatasetLite, paths.get_path_dataset_ids(path) if path.exists() else []))
 
-        # Sanity check of the types, as our equality checks below are quietly wrong if the types don't match,
-        # and we've previously had problems with libraries accidentally switching string/uuid types...
-        assert all(isinstance(id_, uuid.UUID) for id_ in indexed_dataset_ids)
-        assert all(isinstance(id_, uuid.UUID) for id_ in file_ids)
+        log.info("dataset_ids",
+                 indexed_dataset_ids=ids(indexed_datasets),
+                 file_ids=ids(datasets_in_file))
 
         # For all indexed ids not in the file
-        indexed_not_in_file = indexed_dataset_ids.difference(file_ids)
+        indexed_not_in_file = indexed_datasets.difference(datasets_in_file)
         log.debug("indexed_not_in_file", indexed_not_in_file=indexed_not_in_file)
-        for dataset_id in indexed_not_in_file:
-            yield LocationMissingOnDisk(dataset_id, uri)
+        for indexed_dataset in indexed_not_in_file:
+            yield LocationMissingOnDisk(indexed_dataset, uri)
 
         # For all file ids not in the index.
-        files_not_in_index = file_ids.difference(indexed_dataset_ids)
-        log.debug("files_not_in_index", files_not_in_index=files_not_in_index)
+        file_ds_not_in_index = datasets_in_file.difference(indexed_datasets)
+        log.debug("files_not_in_index", files_not_in_index=file_ds_not_in_index)
 
-        for dataset_id in files_not_in_index:
-            if index.has_dataset(dataset_id):
-                yield LocationNotIndexed(dataset_id, uri)
+        for dataset in file_ds_not_in_index:
+            # If it's already indexed, we just need to add the location.
+            indexed_dataset = index.get(dataset.id)
+            if indexed_dataset:
+                yield LocationNotIndexed(indexed_dataset, uri)
             else:
-                yield DatasetNotIndexed(dataset_id, uri)
+                yield DatasetNotIndexed(dataset, uri)
 
 
 @click.command()
@@ -366,12 +405,12 @@ def main(index, collections, cache_folder, dry_run):
                 click.echo('\t'.join(map(str, (
                     collection_name,
                     strutils.camel2under(mismatch.__class__.__name__),
-                    mismatch.dataset_id,
+                    mismatch.dataset.id,
                     mismatch.uri
                 ))))
                 if not dry_run:
                     log.info('mismatch.fix', mismatch=mismatch)
-                    mismatch.update_index(path_index)
+                    mismatch.fix(path_index)
 
 
 def query_name(query: Mapping[str, Any]) -> str:
@@ -388,6 +427,13 @@ def query_name(query: Mapping[str, Any]) -> str:
     return "-".join(
         '{}_{}'.format(k, strutils.slugify(str(v)))
         for k, v in sorted(query.items())
+    )
+
+
+def _simple_object_repr(o):
+    return "%s(%s)" % (
+        o.__class__.__name__,
+        ", ".join("%s=%r" % (k, v) for k, v in sorted(o.__dict__.items()))
     )
 
 
