@@ -1,3 +1,9 @@
+# coding=utf-8
+"""
+Sync a datacube index to a folder of datasets on disk.
+
+Locations will be added/removed according to whether they're on disk, extra datasets will be indexed, etc.
+"""
 import dawg
 import logging
 import sys
@@ -14,6 +20,8 @@ import click
 import structlog
 from boltons import fileutils
 from boltons import strutils
+from datacubenci import paths
+from datacubenci.archive import CleanConsoleRenderer
 
 from datacube.index import index_connect
 from datacube.index._api import Index
@@ -21,11 +29,12 @@ from datacube.model import Dataset
 from datacube.scripts import dataset as dataset_script
 from datacube.ui import click as ui
 from datacube.utils import uri_to_local_path
-from datacubenci import paths
-from datacubenci.archive import CleanConsoleRenderer
 
 _LOG = structlog.get_logger()
 
+# A collection is this case is datacube-query-arguments and a folder-on-disk
+# that should contain the same set of datasets.
+# (Our script will compare/"sync" the two)
 Collection = namedtuple('Collection', ('query', 'base_path'))
 
 NCI_COLLECTIONS = {
@@ -71,10 +80,16 @@ NCI_COLLECTIONS = {
 }
 
 
-# A small subset of Dataset. A "real" dataset needs a lot of initialisation: types etc.
-# We also depend heavily on the __eq__ behaviour of this particular class (by id only), and subtle
-# bugs could occur if the inner framework made changes.
 class DatasetLite:
+    """
+    A small subset of datacube.model.Dataset.
+
+    A "real" dataset needs a lot of initialisation: types etc, so this is easier to test with.
+
+    We also, in this script, depend heavily on the __eq__ behaviour of this particular class (by id only), and subtle
+    bugs could occur if the core framework made changes to it.
+    """
+
     def __init__(self, id_: uuid.UUID, archived_time: datetime = None):
         # Sanity check of the type, as our equality checks are quietly wrong if the types don't match,
         # and we've previously had problems with libraries accidentally switching string/uuid types...
@@ -444,6 +459,13 @@ def query_name(query: Mapping[str, Any]) -> str:
 
 
 def _simple_object_repr(o):
+    """
+    Calculate a possible repr() for the given object using the class name and all __dict__ properties.
+
+    eg. MyClass(prop1='val1')
+
+    It will call repr() on property values too, so beware of circular dependencies.
+    """
     return "%s(%s)" % (
         o.__class__.__name__,
         ", ".join("%s=%r" % (k, v) for k, v in sorted(o.__dict__.items()))
