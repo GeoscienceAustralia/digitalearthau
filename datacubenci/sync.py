@@ -20,6 +20,8 @@ import click
 import structlog
 from boltons import fileutils
 from boltons import strutils
+from datacubenci import paths
+from datacubenci.archive import CleanConsoleRenderer
 
 from datacube.index import index_connect
 from datacube.index._api import Index
@@ -27,81 +29,92 @@ from datacube.model import Dataset
 from datacube.scripts import dataset as dataset_script
 from datacube.ui import click as ui
 from datacube.utils import uri_to_local_path
-from datacubenci import paths
-from datacubenci.archive import CleanConsoleRenderer
 
 _LOG = structlog.get_logger()
 
 # A collection is this case is datacube-query-arguments and a folder-on-disk
 # that should contain the same set of datasets.
 # (Our script will compare/"sync" the two)
-Collection = namedtuple('Collection', ('query', 'base_path'))
+Collection = namedtuple('Collection', ('query', 'base_path', 'offset_pattern'))
+
+YEAR_MONTH_GL = "[0-9][0-9][0-9][0-9]/[0-9][0-9]"
 
 NCI_COLLECTIONS = {
     'telemetry': Collection(
         {'metadata_type': 'telemetry'},
-        Path('/g/data/v10/repackaged/rawdata/0')
+        Path('/g/data/v10/repackaged/rawdata/0'),
+        YEAR_MONTH_GL + "/*/ga-metadata.yaml"
     ),
+}
 
+# Level 1
+# /g/data/v10/reprocess/ls7/level1/2016/06/
+#           LS7_ETM_SYS_P31_GALPGS01-002_103_074_20160617/ga-metadata.yaml
+LEVEL1_GL = YEAR_MONTH_GL + "/LS*/ga-metadata.yaml"
+NCI_COLLECTIONS.update({
     'ls8_level1_scene': Collection(
         {'product': ['ls8_level1_scene', 'ls8_level1_oli_scene']},
-        Path('/g/data/v10/reprocess/ls8/level1')
+        Path('/g/data/v10/reprocess/ls8/level1'),
+        LEVEL1_GL
     ),
     'ls7_level1_scene': Collection(
         {'product': 'ls7_level1_scene'},
-        Path('/g/data/v10/reprocess/ls7/level1')
+        Path('/g/data/v10/reprocess/ls7/level1'),
+        LEVEL1_GL
+
     ),
     'ls5_level1_scene': Collection(
         {'product': 'ls5_level1_scene'},
-        Path('/g/data/v10/reprocess/ls5/level1')
+        Path('/g/data/v10/reprocess/ls5/level1'),
+        LEVEL1_GL
     ),
+})
 
+# NBAR & NBART Scenes:
+# /g/data/rs0/scenes/nbar-scenes-tmp/ls7/2004/08/output/nbar/
+#           LS7_ETM_NBAR_P54_GANBAR01-002_089_078_20040816/ga-metadata.yaml
+# /g/data/rs0/scenes/nbar-scenes-tmp/ls7/2004/07/output/nbart/
+#           LS7_ETM_NBART_P54_GANBART01-002_114_078_20040731/ga-metadata.yaml
+NBAR_GL = YEAR_MONTH_GL + "/output/nbar*/LS*/ga-metadata.yaml"
+NCI_COLLECTIONS.update({
     'ls5_nbar_scene': Collection(
         {'product': ['ls5_nbar_scene', 'ls5_nbart_scene']},
-        Path('/g/data/rs0/scenes/nbar-scenes-tmp/ls5')
+        Path('/g/data/rs0/scenes/nbar-scenes-tmp/ls5'),
+        NBAR_GL
     ),
     'ls7_nbar_scene': Collection(
         {'product': ['ls7_nbar_scene', 'ls7_nbart_scene']},
-        Path('/g/data/rs0/scenes/nbar-scenes-tmp/ls7')
+        Path('/g/data/rs0/scenes/nbar-scenes-tmp/ls7'),
+        NBAR_GL
     ),
     'ls8_nbar_scene': Collection(
         {'product': ['ls8_nbar_scene', 'ls8_nbart_scene']},
-        Path('/g/data/rs0/scenes/nbar-scenes-tmp/ls8')
+        Path('/g/data/rs0/scenes/nbar-scenes-tmp/ls8'),
+        NBAR_GL
     ),
+})
 
+# PQ Scenes
+# /g/data/rs0/scenes/pq-scenes-tmp/ls7/2005/01/output/pqa/
+#           LS7_ETM_PQ_P55_GAPQ01-002_108_075_20050113/ga-metadata.yaml
+PQA_GL = YEAR_MONTH_GL + "/output/pqa/LS*/ga-metadata.yaml"
+NCI_COLLECTIONS.update({
     'ls5_pq_scene': Collection(
         {'product': 'ls5_pq_scene'},
-        Path('/g/data/rs0/scenes/pq-scenes-tmp/ls5')
+        Path('/g/data/rs0/scenes/pq-scenes-tmp/ls5'),
+        PQA_GL
     ),
     'ls7_pq_scene': Collection(
         {'product': 'ls7_pq_scene'},
-        Path('/g/data/rs0/scenes/pq-scenes-tmp/ls7')
+        Path('/g/data/rs0/scenes/pq-scenes-tmp/ls7'),
+        PQA_GL
     ),
     'ls8_pq_scene': Collection(
         {'product': 'ls8_pq_scene'},
-        Path('/g/data/rs0/scenes/pq-scenes-tmp/ls8')
+        Path('/g/data/rs0/scenes/pq-scenes-tmp/ls8'),
+        PQA_GL
     ),
-
-    # TODO: Configure properly. This is from a raw DB dump.
-    # 'ls5_fc_albers': Collection({'product': 'ls5_fc_albers'}, Path('/g/data/fk4/datacube/002/LS5_TM_FC')),
-    # 'ls5_nbar_albers': Collection({'product': 'ls5_nbar_albers'}, Path('/g/data/rs0/datacube/002/LS5_TM_NBAR')),
-    # 'ls5_nbart_albers': Collection({'product': 'ls5_nbart_albers'}, Path('/g/data/rs0/datacube/002/LS5_TM_NBART')),
-    # 'ls5_ndvi_albers': Collection({'product': 'ls5_ndvi_albers'}, Path('/g/data/fk4/datacube/002/LS5_TM_NDVI')),
-    # 'ls5_pq_albers': Collection({'product': 'ls5_pq_albers'}, Path('/g/data/rs0/datacube/002/LS5_TM_PQ')),
-    # 'ls7_fc_albers': Collection({'product': 'ls7_fc_albers'}, Path('/g/data/fk4/datacube/002/LS7_ETM_FC')),
-    # 'ls7_nbar_albers': Collection({'product': 'ls7_nbar_albers'}, Path('/g/data/rs0/datacube/002/LS7_ETM_NBAR')),
-    # 'ls7_nbart_albers': Collection({'product': 'ls7_nbart_albers'}, Path('/g/data/rs0/datacube/002/LS7_ETM_NBART')),
-    # 'ls7_ndvi_albers': Collection({'product': 'ls7_ndvi_albers'}, Path('/g/data/fk4/datacube/002/LS7_ETM_NDVI')),
-    # 'ls7_pq_albers': Collection({'product': 'ls7_pq_albers'}, Path('/g/data/rs0/datacube/002/LS7_ETM_PQ')),
-    # 'ls8_fc_albers': Collection({'product': 'ls8_fc_albers'}, Path('/g/data/fk4/datacube/002/LS8_OLI_FC')),
-    # 'ls8_nbar_albers': Collection({'product': 'ls8_nbar_albers'}, Path('/g/data/rs0/datacube/002/LS8_OLI_NBAR')),
-    # 'ls8_nbart_albers': Collection({'product': 'ls8_nbart_albers'}, Path('/g/data/rs0/datacube/002/LS8_OLI_NBART')),
-    # 'ls8_ndvi_albers': Collection({'product': 'ls8_ndvi_albers'}, Path('/g/data/fk4/datacube/002/LS8_OLI_NDVI')),
-    # 'ls8_pq_albers': Collection({'product': 'ls8_pq_albers'}, Path('/g/data/rs0/datacube/002/LS8_OLI_PQ')),
-    #
-    # 'wofs_albers': Collection({'product': 'wofs_albers'}, Path('/g/data/fk4/datacube/002/LS5_TM_WATER')),
-
-}
+})
 
 
 class DatasetLite:
@@ -232,9 +245,9 @@ class AgdcDatasetPathIndex(DatasetPathIndex):
 def _build_pathset(
         log: logging.Logger,
         path_search_root: Path,
+        path_offset_glob: str,
         path_index: DatasetPathIndex,
-        cache_path: Path = None,
-        metadata_glob="ga-metadata.yaml") -> dawg.CompletionDAWG:
+        cache_path: Path = None) -> dawg.CompletionDAWG:
     """
     Build a combined set (in dawg form) of all dataset paths in the given index and filesystem.
 
@@ -250,7 +263,7 @@ def _build_pathset(
         path_set = dawg.CompletionDAWG(
             chain(
                 path_index.iter_all_uris(),
-                (path.absolute().as_uri() for path in path_search_root.rglob(metadata_glob))
+                (path.absolute().as_uri() for path in path_search_root.glob(path_offset_glob))
             )
         )
         log.info("paths.trie.done")
@@ -350,12 +363,13 @@ class ArchivedDatasetOnDisk(Mismatch):
 
 def find_index_disk_mismatches(log,
                                path_index: DatasetPathIndex,
-                               filesystem_root: Path,
+                               root_folder: Path,
+                               dataset_glob: str,
                                cache_path: Path = None) -> Iterable[Mismatch]:
     """
     Compare the given index and filesystem contents, yielding Mismatches of any differences.
     """
-    pathset = _build_pathset(log, filesystem_root, path_index, cache_path=cache_path)
+    pathset = _build_pathset(log, root_folder, dataset_glob, path_index, cache_path=cache_path)
     yield from _find_uri_mismatches(pathset.iterkeys('file://'), path_index)
 
 
@@ -453,6 +467,7 @@ def main(index, collections, cache_folder, dry_run):
             for mismatch in find_index_disk_mismatches(log,
                                                        path_index,
                                                        collection.base_path,
+                                                       collection.offset_pattern,
                                                        cache_path=collection_cache):
                 click.echo('\t'.join(map(str, (
                     collection_name,

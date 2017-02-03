@@ -121,8 +121,10 @@ def test_index_disk_sync():
     missing_uri = root.joinpath('indexed', 'already', 'ga-metadata.yaml').as_uri()
     old_indexed = DatasetLite(uuid.UUID('b9d77d10-e1c6-11e6-bf63-185e0f80a5c0'))
     index.add_dataset(old_indexed, missing_uri)
+
+    ls8_collection = sync.Collection(None, root.joinpath('ls8_scenes'), 'ls*/ga-metadata.yaml')
     _check_sync(
-        path_search_root=root.joinpath('ls8_scenes'),
+        collection=ls8_collection,
         expected_paths=[
             missing_uri,
             on_disk_uri
@@ -143,7 +145,7 @@ def test_index_disk_sync():
     index = MemoryDatasetPathIndex()
     index.add_dataset(old_indexed, on_disk_uri)
     _check_sync(
-        path_search_root=root.joinpath('ls8_scenes'),
+        collection=ls8_collection,
         expected_paths=[
             on_disk_uri
         ],
@@ -164,7 +166,7 @@ def test_index_disk_sync():
     index.add_dataset(old_indexed, on_disk_uri)
     index.add_dataset(on_disk, missing_uri)
     _check_sync(
-        path_search_root=root.joinpath('ls8_scenes'),
+        collection=ls8_collection,
         expected_paths=[
             on_disk_uri,
             missing_uri
@@ -188,7 +190,7 @@ def test_index_disk_sync():
     archived_on_disk = DatasetLite(on_disk.id, archived_time=two_days_ago)
     index.add_dataset(archived_on_disk, on_disk_uri)
     _check_sync(
-        path_search_root=root.joinpath('ls8_scenes'),
+        collection=ls8_collection,
         expected_paths=[
             on_disk_uri
         ],
@@ -203,25 +205,26 @@ def test_index_disk_sync():
     )
 
 
-def _check_sync(expected_paths, index, path_search_root,
+def _check_sync(expected_paths, index, collection: sync.Collection,
                 expected_mismatches, expected_index_result: Mapping[DatasetLite, Tuple[str]], cache_path):
     log = structlog.getLogger()
 
     cache_path = cache_path.joinpath(str(uuid.uuid4()))
     cache_path.mkdir()
 
-    _check_pathset_loading(cache_path, expected_paths, index, log, path_search_root)
-    mismatches = _check_mismatch_find(cache_path, expected_mismatches, index, log, path_search_root)
+    _check_pathset_loading(cache_path, expected_paths, index, log, collection)
+    mismatches = _check_mismatch_find(cache_path, expected_mismatches, index, log, collection)
 
     # Apply function should result in the expected index.
     sync.fix_index_mismatches(log, index, mismatches)
     assert expected_index_result == index.as_map()
 
 
-def _check_mismatch_find(cache_path, expected_mismatches, index, log, path_search_root):
+def _check_mismatch_find(cache_path, expected_mismatches, index, log, collection: sync.Collection):
     # Now check the actual mismatch output
     mismatches = []
-    for mismatch in sync.find_index_disk_mismatches(log, index, path_search_root, cache_path=cache_path):
+    for mismatch in sync.find_index_disk_mismatches(log, index, collection.base_path, collection.offset_pattern,
+                                                    cache_path=cache_path):
         print(repr(mismatch))
         mismatches.append(mismatch)
 
@@ -244,8 +247,8 @@ def _check_mismatch_find(cache_path, expected_mismatches, index, log, path_searc
 
 
 # noinspection PyProtectedMember
-def _check_pathset_loading(cache_path, expected_paths, index, log, path_search_root):
-    path_set = sync._build_pathset(log, path_search_root, index, cache_path)
+def _check_pathset_loading(cache_path, expected_paths, index, log, collection: sync.Collection):
+    path_set = sync._build_pathset(log, collection.base_path, collection.offset_pattern, index, cache_path)
     # All the paths we expect should be there.
     for expected_path in expected_paths:
         assert expected_path in path_set
