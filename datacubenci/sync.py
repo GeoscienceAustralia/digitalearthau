@@ -20,8 +20,6 @@ import click
 import structlog
 from boltons import fileutils
 from boltons import strutils
-from datacubenci import paths
-from datacubenci.archive import CleanConsoleRenderer
 
 from datacube.index import index_connect
 from datacube.index._api import Index
@@ -29,6 +27,8 @@ from datacube.model import Dataset
 from datacube.scripts import dataset as dataset_script
 from datacube.ui import click as ui
 from datacube.utils import uri_to_local_path
+from datacubenci import paths
+from datacubenci.archive import CleanConsoleRenderer
 
 _LOG = structlog.get_logger()
 
@@ -38,25 +38,49 @@ _LOG = structlog.get_logger()
 Collection = namedtuple('Collection', ('query', 'base_path'))
 
 NCI_COLLECTIONS = {
-    'telemetry': Collection({'metadata_type': 'telemetry'}, Path('/g/data/v10/repackaged/rawdata/0')),
+    'telemetry': Collection(
+        {'metadata_type': 'telemetry'},
+        Path('/g/data/v10/repackaged/rawdata/0')
+    ),
 
-    'ls8_level1_scene': Collection({'product': ['ls8_level1_scene', 'ls8_level1_oli_scene']},
-                                   Path('/g/data/v10/reprocess/ls8/level1')),
-    'ls7_level1_scene': Collection({'product': 'ls7_level1_scene'},
-                                   Path('/g/data/v10/reprocess/ls7/level1')),
-    'ls5_level1_scene': Collection({'product': 'ls5_level1_scene'},
-                                   Path('/g/data/v10/reprocess/ls5/level1')),
+    'ls8_level1_scene': Collection(
+        {'product': ['ls8_level1_scene', 'ls8_level1_oli_scene']},
+        Path('/g/data/v10/reprocess/ls8/level1')
+    ),
+    'ls7_level1_scene': Collection(
+        {'product': 'ls7_level1_scene'},
+        Path('/g/data/v10/reprocess/ls7/level1')
+    ),
+    'ls5_level1_scene': Collection(
+        {'product': 'ls5_level1_scene'},
+        Path('/g/data/v10/reprocess/ls5/level1')
+    ),
 
-    'ls5_nbar_scene': Collection({'product': ['ls5_nbar_scene', 'ls5_nbart_scene']},
-                                 Path('/g/data/rs0/scenes/nbar-scenes-tmp/ls5')),
-    'ls7_nbar_scene': Collection({'product': ['ls7_nbar_scene', 'ls7_nbart_scene']},
-                                 Path('/g/data/rs0/scenes/nbar-scenes-tmp/ls7')),
-    'ls8_nbar_scene': Collection({'product': ['ls8_nbar_scene', 'ls8_nbart_scene']},
-                                 Path('/g/data/rs0/scenes/nbar-scenes-tmp/ls8')),
+    'ls5_nbar_scene': Collection(
+        {'product': ['ls5_nbar_scene', 'ls5_nbart_scene']},
+        Path('/g/data/rs0/scenes/nbar-scenes-tmp/ls5')
+    ),
+    'ls7_nbar_scene': Collection(
+        {'product': ['ls7_nbar_scene', 'ls7_nbart_scene']},
+        Path('/g/data/rs0/scenes/nbar-scenes-tmp/ls7')
+    ),
+    'ls8_nbar_scene': Collection(
+        {'product': ['ls8_nbar_scene', 'ls8_nbart_scene']},
+        Path('/g/data/rs0/scenes/nbar-scenes-tmp/ls8')
+    ),
 
-    'ls5_pq_scene': Collection({'product': 'ls5_pq_scene'}, Path('/g/data/rs0/scenes/pq-scenes-tmp/ls5')),
-    'ls7_pq_scene': Collection({'product': 'ls7_pq_scene'}, Path('/g/data/rs0/scenes/pq-scenes-tmp/ls7')),
-    'ls8_pq_scene': Collection({'product': 'ls8_pq_scene'}, Path('/g/data/rs0/scenes/pq-scenes-tmp/ls8')),
+    'ls5_pq_scene': Collection(
+        {'product': 'ls5_pq_scene'},
+        Path('/g/data/rs0/scenes/pq-scenes-tmp/ls5')
+    ),
+    'ls7_pq_scene': Collection(
+        {'product': 'ls7_pq_scene'},
+        Path('/g/data/rs0/scenes/pq-scenes-tmp/ls7')
+    ),
+    'ls8_pq_scene': Collection(
+        {'product': 'ls8_pq_scene'},
+        Path('/g/data/rs0/scenes/pq-scenes-tmp/ls8')
+    ),
 
     # TODO: Configure properly. This is from a raw DB dump.
     # 'ls5_fc_albers': Collection({'product': 'ls5_fc_albers'}, Path('/g/data/fk4/datacube/002/LS5_TM_FC')),
