@@ -50,6 +50,15 @@ export module_name=agdc-${pyvariant}-${variant}
 export module_dest=${module_dir}/${module_name}/${version}
 export module_description="AGDC database configuration"
 
+
+echo "###############"
+echo "agdc_env_module = ${agdc_env_module}"
+echo "pyvariant = ${pyvariant}"
+echo "variant = ${variant}"
+echo "dbhost = ${dbhost}"
+echo "dbport = ${dbport}"
+echo "dbname = ${dbname}"
+echo "###############"
 echo '# Packaging '$module_name' v '$version' to '$module_dest' #'
 read -p "Continue? " -n 1 -r
 echo    # (optional) move to a new line
