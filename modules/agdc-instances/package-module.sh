@@ -4,67 +4,43 @@ set -eu
 
 umask 002
 
-export module_dir=/g/data/v10/public/modules
-export agdc_env_module=agdc-py2-env/anaconda2-2.5.0
-export pyvariant=py2
-export variant=prod
-export dbhost=130.56.244.227
-export dbport=6432
-export dbname=datacube
 
-while [[ $# > 0 ]]
-do
-    key="$1"
+echo "##########################"
+echo "module_dir = ${module_dir:=/g/data/v10/public/modules}"
+echo "agdc_env_module = ${agdc_env_module:=agdc-py3-env/20161201}"
+echo "pyvariant = ${pyvariant:=py3}"
+echo "variant = ${variant:=dev}"
+echo "dbhost = ${dbhost:=130.56.244.225}"
+echo "dbport = ${dbport:=6432}"
+echo "dbname = ${dbname:=datacube}"
+echo "##########################"
+export module_dir agdc_env_module pyvariant variant dbhost dbport dbname
 
-    case $key in
-    --help)
-        echo Usage: $0 --moduledir ${module_dir} --variant ${pyvariant} --name ${variant} --version "<version>" --dbname $dbname --dbhost $dbhost --dbport $dbport
-        exit 0
-        ;;
-    --moduledir)
-        export module_dir="$2"
-        shift # past argument
-        ;;
-   --name)
-        export variant="$2"
-        shift # past argument
-        ;;
-    --version)
-        export version="$2"
-        shift # past argument
-        ;;
-    --variant)
-        export pyvariant="$2"
-        shift # past argument
-        ;;
-    *)
-        echo Unknown option argument "$1"
-        exit 1
-        ;;
-    esac
-shift # past argument or value
-done
+echoerr() { echo "$@" 1>&2; }
+
+if [[ $# != 1 ]] || [[ "$1" == "--help" ]];
+then
+    echoerr 
+    echoerr "Usage: $0 <version>"
+    echoerr "Overriding any above variables as needed."
+    echoerr "  eg. pyvariant=py3 variant=prod dbhost=130.56.244.225 agdc_env_module=agdc-py3-env/20161201 $0 1.1.17"
+    exit 1
+fi
+export version="$1"
 
 export agdc_module=agdc-${pyvariant}
 export module_name=agdc-${pyvariant}-${variant}
 export module_dest=${module_dir}/${module_name}/${version}
-export module_description="AGDC database configuration"
+export module_description="AGDC ${variant} instance"
 
-
-echo "###############"
-echo "agdc_env_module = ${agdc_env_module}"
-echo "pyvariant = ${pyvariant}"
-echo "variant = ${variant}"
-echo "dbhost = ${dbhost}"
-echo "dbport = ${dbport}"
-echo "dbname = ${dbname}"
-echo "###############"
-echo '# Packaging '$module_name' v '$version' to '$module_dest' #'
+echo '# Packaging '$module_name' version '$version' to '$module_dest' #'
 read -p "Continue? " -n 1 -r
 echo    # (optional) move to a new line
 
 function render {
-    envsubst < "$1" > "$2"
+    # User perl instead of envsubst so that we can complain loudly about missing vars
+    perl -p -e 's/\$\{([^}]+)\}/defined $ENV{$1} ? $ENV{$1} : (print STDERR "Undefined: $&\n" and exit 1)/eg' < "$1" > "$2"
+    #envsubst < "$1" > "$2"
     echo Wrote "$2"
 }
 
