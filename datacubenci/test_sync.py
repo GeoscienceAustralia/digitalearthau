@@ -7,6 +7,7 @@ import pytest
 import structlog
 from datacubenci import sync
 from datacubenci.archive import CleanConsoleRenderer
+from datacubenci.collections import Collection
 from datacubenci.paths import write_files
 from datacubenci.sync import DatasetLite
 
@@ -122,7 +123,7 @@ def test_index_disk_sync():
     old_indexed = DatasetLite(uuid.UUID('b9d77d10-e1c6-11e6-bf63-185e0f80a5c0'))
     index.add_dataset(old_indexed, missing_uri)
 
-    ls8_collection = sync.Collection(None, root.joinpath('ls8_scenes'), 'ls*/ga-metadata.yaml')
+    ls8_collection = Collection(None, root.joinpath('ls8_scenes'), 'ls*/ga-metadata.yaml')
     _check_sync(
         collection=ls8_collection,
         expected_paths=[
@@ -205,7 +206,7 @@ def test_index_disk_sync():
     )
 
 
-def _check_sync(expected_paths, index, collection: sync.Collection,
+def _check_sync(expected_paths, index, collection: Collection,
                 expected_mismatches, expected_index_result: Mapping[DatasetLite, Tuple[str]], cache_path):
     log = structlog.getLogger()
 
@@ -220,7 +221,7 @@ def _check_sync(expected_paths, index, collection: sync.Collection,
     assert expected_index_result == index.as_map()
 
 
-def _check_mismatch_find(cache_path, expected_mismatches, index, log, collection: sync.Collection):
+def _check_mismatch_find(cache_path, expected_mismatches, index, log, collection: Collection):
     # Now check the actual mismatch output
     mismatches = []
     for mismatch in sync.find_index_disk_mismatches(log, index, collection.base_path, collection.offset_pattern,
@@ -247,7 +248,7 @@ def _check_mismatch_find(cache_path, expected_mismatches, index, log, collection
 
 
 # noinspection PyProtectedMember
-def _check_pathset_loading(cache_path, expected_paths, index, log, collection: sync.Collection):
+def _check_pathset_loading(cache_path, expected_paths, index, log, collection: Collection):
     path_set = sync._build_pathset(log, collection.base_path, collection.offset_pattern, index, cache_path)
     # All the paths we expect should be there.
     for expected_path in expected_paths:
