@@ -58,13 +58,19 @@ This module sets up data cube runtime configuration by setting `DATACUBE_CONFIG_
 
 The module requires `agdc-py3` module of matching version
 
-### Creation
+### Create all instances
 
     cd modules/agdc-instances
-    ./package-module.sh --help
-    ./package-module.sh --variant py3 --name prod --version 1.1.6 --dbname datacube --dbhost 130.56.244.227 --dbport 6432 --moduledir /g/data/v10/public/modules
+    ./package-all-instances.sh 1.1.17
     
-This will create a new configuration module in /g/data/v10/public/modules/agdc-py3/prod/1.1.6.
+This will interactively create a module for each GA instance at NCI, confirming each one before creation.
+
+### Create custon instance.
+
+    cd modules/agdc-instances
+    ./package-instance-module.sh  --help
+
+See the example and directions in the above help output.
 
 ### Update default version
 
