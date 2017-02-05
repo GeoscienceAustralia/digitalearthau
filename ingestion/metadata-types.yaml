@@ -26,6 +26,11 @@ dataset:
             description: Product code
             offset: [product_type]
 
+        format:
+            description: File format (GeoTiff, NetCDF)
+            offset: [format, name]
+            indexed: false
+
         lat:
             description: Latitude range
             type: float-range
