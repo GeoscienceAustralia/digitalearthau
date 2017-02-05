@@ -23,22 +23,6 @@ metadata:
     format:
         name: GeoTiff
 
-
----
-
-name: ls8_level1_oli_scene
-description: Landsat 8 Level 1 OLI At-sensor Radiance 25 metre
-metadata_type: landsat_scene
-
-metadata:
-    platform:
-        code: LANDSAT_8
-    instrument:
-        name: OLI
-    product_type: level1
-    format:
-        name: GeoTiff
-
 ---
 
 name: ls8_nbar_scene
@@ -269,3 +253,61 @@ measurements:
           values:
             16383: true
 
+
+# OLI variants for indexing
+
+---
+name: ls8_level1_oli_scene
+description: Landsat 8 OLI Level 1 At-sensor Radiance 25 metre
+metadata_type: landsat_scene
+
+metadata:
+    platform:
+        code: LANDSAT_8
+    instrument:
+        name: OLI
+    product_type: level1
+    format:
+        name: GeoTiff
+
+---
+name: ls8_nbar_oli_scene
+description: Landsat 8 OLI NBAR 25 metre
+metadata_type: eo
+
+metadata:
+    platform:
+        code: LANDSAT_8
+    instrument:
+        name: OLI
+    product_type: nbar
+    format:
+        name: GeoTiff
+
+---
+name: ls8_nbart_oli_scene
+description: Landsat 8 OLI NBART 25 metre
+metadata_type: eo
+
+metadata:
+    platform:
+        code: LANDSAT_8
+    instrument:
+        name: OLI
+    product_type: nbart
+    format:
+        name: GeoTiff
+
+---
+name: ls8_pq_oli_scene
+description: Landsat 8 OLI PQ 25 metre
+metadata_type: eo
+
+metadata:
+    platform:
+        code: LANDSAT_8
+    instrument:
+        name: OLI
+    product_type: pqa
+    format:
+        name: GeoTiff
