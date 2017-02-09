@@ -94,6 +94,19 @@ fi
 
 rm -rf agdc-v2 > /dev/null 2>&1
 
+
+read -p "Do you want to also install datacube-stats? [y/N]" -n 1 -r
+echo    # (optional) move to a new line
+if [[ $REPLY =~ ^[Yy]$ ]]
+then
+    # Install datacube-stats as well
+    git clone -b develop https://github.com/GeoscienceAustralia/agdc_statistics.git
+    pushd agdc_statistics
+    python setup.py test
+    pip install . --no-deps --prefix "${package_dest}"
+    popd
+fi
+
 echo
 echo 'Done.'
 
