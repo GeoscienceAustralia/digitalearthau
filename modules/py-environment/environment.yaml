@@ -59,8 +59,11 @@ dependencies:
 - tqdm
 - xarray
 - pip:
+  - boltons
   - ciso8601
+  - DAWG
   - pypeg2
   - skyfield
+  - structlog[dev]
   - yappi
 
