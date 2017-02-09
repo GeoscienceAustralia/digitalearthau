@@ -147,7 +147,7 @@ class AgdcDatasetPathIndex(DatasetPathIndex):
 
         for d in dataset_script.load_datasets([path], self._rules):
             if d.id == dataset.id:
-                self._index.datasets.add(d, skip_sources=True)
+                self._index.datasets.add(d, sources_policy='ensure')
                 break
         else:
             raise RuntimeError('Dataset not found at path: %s, %s' % (dataset.id, uri))
