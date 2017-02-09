@@ -2,6 +2,7 @@ name: agdc
 dependencies:
 - basemap
 - bottleneck
+- bqplot
 - cachetools
 - cartopy
 - click
@@ -20,6 +21,9 @@ dependencies:
 - gunicorn
 - hypothesis
 - ipdb
+- ipyleaflet
+- ipympl
+- ipywidgets
 - jplephem
 - jsonschema
 - jupyter
