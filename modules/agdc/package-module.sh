@@ -100,10 +100,10 @@ echo    # (optional) move to a new line
 if [[ $REPLY =~ ^[Yy]$ ]]
 then
     # Install datacube-stats as well
-    git clone -b develop https://github.com/GeoscienceAustralia/agdc_statistics.git
+    git clone https://github.com/GeoscienceAustralia/agdc_statistics.git
     pushd agdc_statistics
-    python setup.py test
-    pip install . --no-deps --prefix "${package_dest}"
+    python setup.py sdist
+    pip install dist/*.tar.gz --no-deps --prefix "${package_dest}"
     popd
 fi
 
