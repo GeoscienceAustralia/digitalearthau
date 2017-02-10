@@ -6,7 +6,8 @@ if [[ $# != 2 ]] || [[ "$1" == "--help" ]];
 then
     echoerr
     echoerr "Usage: $0 <py-module-version> <datacube-version>"
-    echoerr"        eg. $0 20161201 1.1.17"
+    echoerr
+    echoerr "eg. $0 20161201 1.1.17"
     exit 1
 fi
 export py_module_version="$1"
