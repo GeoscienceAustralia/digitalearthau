@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -eu
+
 echoerr() { echo "$@" 1>&2; }
 
 if [[ $# != 2 ]] || [[ "$1" == "--help" ]];
