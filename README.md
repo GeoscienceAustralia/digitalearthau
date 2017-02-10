@@ -61,9 +61,11 @@ The module requires `agdc-py3` module of matching version
 ### Create all instances
 
     cd modules/agdc-instances
-    ./package-all-instances.sh 1.1.17
+    ./package-all-instances.sh 20161201 1.1.17
     
 This will interactively create a module for each GA instance at NCI, confirming each one before creation.
+
+The first argument is the version of agdc-py\*-env modules to use, the second is datacube version.
 
 ### Create custon instance.
 
