@@ -102,7 +102,7 @@ read -p "Do you want to also install datacube-stats? [y/N]" -n 1 -r
 echo    # (optional) move to a new line
 if [[ $REPLY =~ ^[Yy]$ ]]
 then
-    export PYTHONPATH=${PYTHONPATH}:${python_dest}
+    export PYTHONPATH=${PYTHONPATH:+${PYTHONPATH}:}${python_dest}
     # Install datacube-stats as well
     git clone https://github.com/GeoscienceAustralia/agdc_statistics.git
     pushd agdc_statistics
