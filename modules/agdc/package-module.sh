@@ -8,7 +8,7 @@ variant=dev
 export module_dir=/g/data/v10/public/modules
 export agdc_env_module=agdc-py2-env/anaconda2-2.5.0
 
-export LC_ALL=C.utf8
+export LC_ALL=en_AU.utf8
 export LANG=C.UTF-8
 
 while [[ $# > 0 ]]
