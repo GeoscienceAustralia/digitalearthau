@@ -8,6 +8,9 @@ variant=dev
 export module_dir=/g/data/v10/public/modules
 export agdc_env_module=agdc-py2-env/anaconda2-2.5.0
 
+export LC_ALL=C.utf8
+export LANG=C.UTF-8
+
 while [[ $# > 0 ]]
 do
     key="$1"
@@ -99,6 +102,7 @@ read -p "Do you want to also install datacube-stats? [y/N]" -n 1 -r
 echo    # (optional) move to a new line
 if [[ $REPLY =~ ^[Yy]$ ]]
 then
+    export PYTHONPATH=${PYTHONPATH}:${python_dest}
     # Install datacube-stats as well
     git clone https://github.com/GeoscienceAustralia/agdc_statistics.git
     pushd agdc_statistics
