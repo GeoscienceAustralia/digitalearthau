@@ -104,6 +104,7 @@ if [[ $REPLY =~ ^[Yy]$ ]]
 then
     export PYTHONPATH=${PYTHONPATH:+${PYTHONPATH}:}${python_dest}
     # Install datacube-stats as well
+    rm -rf agdc_statistics > /dev/null 2>&1
     git clone https://github.com/GeoscienceAustralia/agdc_statistics.git
     pushd agdc_statistics
     python setup.py sdist
