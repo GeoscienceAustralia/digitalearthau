@@ -136,14 +136,13 @@ def get_path_dataset_id(metadata_path: Path) -> uuid.UUID:
     return ids[0]
 
 
-def get_path_dataset_ids(metadata_path: Path) -> List[uuid.UUID]:
+def get_path_dataset_ids(path: Path) -> List[uuid.UUID]:
     """
     Get all dataset ids embedded by the given path.
-    :param metadata_path:
-    :return:
+
+    (Either a standalone metadata file or embedded in a given NetCDF)
     """
-    # TODO: handle NetCDFs?
-    ids = [uuid.UUID(metadata_doc['id']) for _, metadata_doc in read_documents(metadata_path)]
+    ids = [uuid.UUID(metadata_doc['id']) for _, metadata_doc in read_documents(path)]
     return ids
 
 
