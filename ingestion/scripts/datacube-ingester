@@ -34,10 +34,10 @@ def list():
               type=click.IntRange(1, 10))
 @click.option('--name', help='Job name to use')
 @click.argument('config')
-@click.argument('year', type=click.IntRange(1960, 2060))
+@click.argument('year')
 def qsub(config, year, queue, project, nodes, walltime, name):
     config = CONFIG_DIR / config
-    taskfile = Path(config.stem + '_' + str(year) + '.bin').absolute()
+    taskfile = Path(config.stem + '_' + year.replace('-', '_') + '.bin').absolute()
     if not config.exists():
         print('%s is not a valid config' % config)
         return 1
