@@ -234,11 +234,11 @@ dataset:
         gqa_final_gcp_count:
             description: GQA GCP Count
             offset: [gqa, final_gcp_count]
+            type: integer
             indexed: false
         gqa_ref_source:
             description: GQA reference imagery collection name
             offset: [gqa, ref_source]
-            type: integer
             indexed: false
         gqa_cep90:
             description: Circular error probable (90%) of the values of the GCP residuals
