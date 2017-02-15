@@ -38,13 +38,19 @@ pushd modules/agdc
     then
         echo
         echo "Creating PY3 AGDC ${agdc_version}"
-        ./package-module.sh --env agdc-py3-env/${py_module_version} --moduledir ${module_dir}
+        ./package-module.sh \
+            --env agdc-py3-env/${py_module_version} \
+            --moduledir ${module_dir} \
+            --version ${agdc_version}
     fi
     if [ ! -e "${module_dir}/agdc-py2/${agdc_version}" ];
     then
         echo
         echo "Creating PY2 AGDC ${agdc_version}"
-        ./package-module.sh --env agdc-py2-env/${py_module_version} --moduledir ${module_dir}
+        ./package-module.sh \
+            --env agdc-py2-env/${py_module_version} \
+            --moduledir ${module_dir} \
+            --version ${agdc_version}
     fi
 popd
 
