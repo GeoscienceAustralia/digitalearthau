@@ -45,6 +45,7 @@ do
 shift # past argument or value
 done
 
+module use ${module_dir}/modulefiles
 module load ${agdc_env_module}
 python_version=`python -c 'from __future__ import print_function; import sys; print("%s.%s"%sys.version_info[:2])'`
 python_major=`python -c 'from __future__ import print_function; import sys; print(sys.version_info[0])'`
