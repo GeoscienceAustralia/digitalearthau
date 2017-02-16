@@ -1,5 +1,13 @@
 
-# Modules
+# Building a release
+
+The `package-release.sh` script will build all modules for a given datacube version:
+
+    modules/package-release.sh 1.2.0
+
+(Note that it's interactive: each section will ask for confirmation of options before starting)
+
+# Individual Modules
 ## Environment module
 
 The environment module contains all Data Cube dependencies and libraries but
