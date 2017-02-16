@@ -2,6 +2,9 @@
 
 set -eu
 
+# This script's directory
+dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
 echoerr() { echo "$@" 1>&2; }
 
 if [[ $# != 1 ]] || [[ "$1" == "--help" ]];
@@ -17,7 +20,7 @@ agdc_version="$1"
 py_module_version=$(date +'%Y%m%d')
 module_dir="/g/data/v10/public/modules"
 
-pushd modules/py-environment
+pushd "${dir}/py-environment"
     if [ ! -e "${module_dir}/agdc-py3-env/${py_module_version}" ];
     then
         echo
@@ -33,7 +36,7 @@ pushd modules/py-environment
     fi
 popd
 
-pushd modules/agdc
+pushd "${dir}/agdc"
     if [ ! -e "${module_dir}/agdc-py3/${agdc_version}" ];
     then
         echo
@@ -55,7 +58,7 @@ pushd modules/agdc
 popd
 
 
-pushd modules/agdc-instances
+pushd "${dir}/agdc-instances"
     echo
     echo "Creating instances"
     ./package-all-instances.sh ${py_module_version} ${agdc_version}
