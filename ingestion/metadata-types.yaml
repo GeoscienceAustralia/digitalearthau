@@ -72,9 +72,12 @@ dataset:
         gsi:
             description: Ground Station Identifier (eg. ASA)
             offset: [acquisition, groundstation, code]
+            indexed: false
+
         orbit:
             description: Orbit number
             offset: [acquisition, platform_orbit]
+            indexed: false
 
         sat_path:
             description: Landsat path
@@ -135,6 +138,7 @@ dataset:
         gsi:
             description: Ground Station Identifier (eg. ASA)
             offset: [acquisition, groundstation, code]
+            indexed: false
 
         orbit:
             description: Orbit number
@@ -214,6 +218,8 @@ dataset:
         gsi:
             description: Ground Station Identifier (eg. ASA)
             offset: [acquisition, groundstation, code]
+            indexed: false
+
         orbit:
             description: Orbit number
             offset: [acquisition, platform_orbit]
