@@ -17,30 +17,46 @@ from singledispatch import singledispatch
 from datacube.index import index_connect
 from datacube.index._api import Index
 from datacube.index.fields import Field
-from datacube.model import DatasetType
+from datacube.model import DatasetType, MetadataType
+from datacubenci import collections
 
 
-def main():
+def parse_field_expression(md: MetadataType, expression: str):
+    parts = expression.split('.')
+    assert all(p.isidentifier() for p in parts)
+
+    name = parts.pop(0)
+    field = md.dataset_fields.get(name)
+    if not field:
+        raise ValueError('No field named %r in %r', name, md.name)
+
+    while parts:
+        name = parts.pop(0)
+        field = getattr(field, name, None)
+        if not field:
+            raise ValueError('No field %s for expression %s in %s', name, expression, md.name)
+
+    return field
+
+
+def write_duplicates_csv(collections_: Iterable[collections.Collection],
+                         out_stream):
     with index_connect(application_name='find-duplicates') as c:
-        # Currently we're only looking at scenes, using path/row/time.
-
-        scene_products = [p for p in c.products.get_all() if p.name.endswith('scene')]
 
         has_started = False
-        for product in scene_products:
-            field = product.metadata_type.dataset_fields.get
-            unique_fields = (
-                field('sat_path').lower,
-                field('sat_row').lower,
-                field('time').lower.day,
-            )
+        for collection in collections_:
+            matching_products = c.products.search(**collection.query)
+            for product in matching_products:
+                unique_fields = tuple(parse_field_expression(product.metadata_type, f)
+                                      for f in collection.unique_fields)
 
-            _write_csv(
-                unique_fields,
-                get_dupes(c, unique_fields, product),
-                append=has_started
-            )
-            has_started = True
+                _write_csv(
+                    unique_fields,
+                    get_dupes(c, unique_fields, product),
+                    out_stream,
+                    append=has_started
+                )
+                has_started = True
 
 
 def get_dupes(index, unique_fields, product):
@@ -112,8 +128,8 @@ def printable_uuid(val):
     return str(val)
 
 
-def _write_csv(unique_fields, dicts, append=False):
-    writer = csv.DictWriter(sys.stdout, _get_headers(unique_fields))
+def _write_csv(unique_fields, dicts, stream, append=False):
+    writer = csv.DictWriter(stream, _get_headers(unique_fields))
     if not append:
         writer.writeheader()
     writer.writerows(
@@ -122,6 +138,24 @@ def _write_csv(unique_fields, dicts, append=False):
             for d in dicts
         )
     )
+
+
+def main():
+    if len(sys.argv) > 1 and sys.argv[1] == '--help':
+        sys.stderr.write(
+            'Usage: {} [collections...]\n\n'
+            'Where collections are among: \n\t{}\n\n'
+            'Or specify --all to check all\n'.format(
+                sys.argv[0], '\n\t'.join(sorted(collections.NCI_COLLECTIONS.keys())))
+        )
+        sys.exit(1)
+
+    if len(sys.argv) > 1 and sys.argv[1] == '--all':
+        cos = list(collections.NCI_COLLECTIONS.values())
+    else:
+        cos = [collections.NCI_COLLECTIONS[name] for name in sys.argv[1:]]
+
+    write_duplicates_csv(cos, sys.stdout)
 
 
 if __name__ == '__main__':

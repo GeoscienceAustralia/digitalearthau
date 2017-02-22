@@ -5,6 +5,7 @@ from typing import Iterable, List, Mapping, Tuple, Optional
 
 import pytest
 import structlog
+
 from datacubenci import sync
 from datacubenci.archive import CleanConsoleRenderer
 from datacubenci.collections import Collection
@@ -123,7 +124,7 @@ def test_index_disk_sync():
     old_indexed = DatasetLite(uuid.UUID('b9d77d10-e1c6-11e6-bf63-185e0f80a5c0'))
     index.add_dataset(old_indexed, missing_uri)
 
-    ls8_collection = Collection(None, root.joinpath('ls8_scenes'), 'ls*/ga-metadata.yaml')
+    ls8_collection = Collection(None, root.joinpath('ls8_scenes'), 'ls*/ga-metadata.yaml', [])
     _check_sync(
         collection=ls8_collection,
         expected_paths=[
