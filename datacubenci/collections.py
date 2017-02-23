@@ -8,7 +8,7 @@ that should contain the same set of datasets.
 """
 
 from pathlib import Path
-from typing import Iterable
+from typing import Iterable, Tuple
 
 
 class Collection:
@@ -16,13 +16,15 @@ class Collection:
                  query: dict,
                  base_path: Path,
                  offset_pattern: str,
-                 unique_fields: Iterable[str],
-                 delete_archived_after_days=None):
+                 unique: Iterable[str],
+                 delete_archived_after_days=None,
+                 expected_parents=None):
         self.query = query
         self.base_path = base_path
         self.offset_pattern = offset_pattern
-        self.unique_fields = unique_fields
+        self.unique = unique
         self.delete_archived_after_days = delete_archived_after_days
+        self.expected_parents = expected_parents
 
 
 class SceneCollection(Collection):
@@ -30,42 +32,41 @@ class SceneCollection(Collection):
                  query: dict,
                  base_path: Path,
                  offset_pattern: str,
-                 delete_archived_after_days=None):
+                 delete_archived_after_days=None,
+                 expected_parents: Tuple[str] = None):
         super().__init__(query, base_path, offset_pattern,
-                         ('sat_path.lower', 'sat_row.lower', 'time.lower.day'),
-                         delete_archived_after_days)
+                         unique=('sat_path.lower', 'sat_row.lower', 'time.lower.day'),
+                         delete_archived_after_days=delete_archived_after_days,
+                         expected_parents=expected_parents)
 
-
-_YEAR_MONTH_GL = "[0-9][0-9][0-9][0-9]/[0-9][0-9]"
 
 NCI_COLLECTIONS = {
     'telemetry': Collection(
-        {'metadata_type': 'telemetry'},
-        Path('/g/data/v10/repackaged/rawdata/0'),
-        _YEAR_MONTH_GL + "/*/ga-metadata.yaml",
-        ('platform', 'time.lower.day')
+        query={'metadata_type': 'telemetry'},
+        base_path=Path('/g/data/v10/repackaged/rawdata/0'),
+        offset_pattern="[0-9][0-9][0-9][0-9]/[0-9][0-9]/*/ga-metadata.yaml",
+        unique=('platform', 'time.lower.day'),
     ),
 }
 
 # Level 1
 # /g/data/v10/reprocess/ls7/level1/2016/06/
 #           LS7_ETM_SYS_P31_GALPGS01-002_103_074_20160617/ga-metadata.yaml
-_LEVEL1_GL = _YEAR_MONTH_GL + "/LS*/ga-metadata.yaml"
 NCI_COLLECTIONS.update({
     'ls8_level1_scene': SceneCollection(
-        {'product': ['ls8_level1_scene', 'ls8_level1_oli_scene']},
-        Path('/g/data/v10/reprocess/ls8/level1'),
-        _LEVEL1_GL
+        query={'product': ['ls8_level1_scene', 'ls8_level1_oli_scene']},
+        base_path=Path('/g/data/v10/reprocess/ls8/level1'),
+        offset_pattern="[0-9][0-9][0-9][0-9]/[0-9][0-9]/LS*/ga-metadata.yaml",
     ),
     'ls7_level1_scene': SceneCollection(
-        {'product': 'ls7_level1_scene'},
-        Path('/g/data/v10/reprocess/ls7/level1'),
-        _LEVEL1_GL
+        query={'product': 'ls7_level1_scene'},
+        base_path=Path('/g/data/v10/reprocess/ls7/level1'),
+        offset_pattern="[0.-9][0-9][0-9][0-9]/[0-9][0-9]/LS*/ga-metadata.yaml",
     ),
     'ls5_level1_scene': SceneCollection(
-        {'product': 'ls5_level1_scene'},
-        Path('/g/data/v10/reprocess/ls5/level1'),
-        _LEVEL1_GL
+        query={'product': 'ls5_level1_scene'},
+        base_path=Path('/g/data/v10/reprocess/ls5/level1'),
+        offset_pattern="[0-9][0-9][0-9][0-9]/[0-9][0-9]/LS*/ga-metadata.yaml",
     ),
 })
 
@@ -74,43 +75,41 @@ NCI_COLLECTIONS.update({
 #           LS7_ETM_NBAR_P54_GANBAR01-002_089_078_20040816/ga-metadata.yaml
 # /g/data/rs0/scenes/nbar-scenes-tmp/ls7/2004/07/output/nbart/
 #           LS7_ETM_NBART_P54_GANBART01-002_114_078_20040731/ga-metadata.yaml
-_NBAR_GL = _YEAR_MONTH_GL + "/output/nbar*/LS*/ga-metadata.yaml"
 NCI_COLLECTIONS.update({
     'ls5_nbar_scene': SceneCollection(
-        {'product': ['ls5_nbar_scene', 'ls5_nbart_scene']},
-        Path('/g/data/rs0/scenes/nbar-scenes-tmp/ls5'),
-        _NBAR_GL
+        query={'product': ['ls5_nbar_scene', 'ls5_nbart_scene']},
+        base_path=Path('/g/data/rs0/scenes/nbar-scenes-tmp/ls5'),
+        offset_pattern="[0-9][0-9][0-9][0-9]/[0-9][0-9]/output/nbar*/LS*/ga-metadata.yaml",
     ),
     'ls7_nbar_scene': SceneCollection(
-        {'product': ['ls7_nbar_scene', 'ls7_nbart_scene']},
-        Path('/g/data/rs0/scenes/nbar-scenes-tmp/ls7'),
-        _NBAR_GL
+        query={'product': ['ls7_nbar_scene', 'ls7_nbart_scene']},
+        base_path=Path('/g/data/rs0/scenes/nbar-scenes-tmp/ls7'),
+        offset_pattern="[0-9][0-9][0-9][0-9]/[0-9][0-9]/output/nbar*/LS*/ga-metadata.yaml",
     ),
     'ls8_nbar_scene': SceneCollection(
-        {'product': ['ls8_nbar_scene', 'ls8_nbart_scene']},
-        Path('/g/data/rs0/scenes/nbar-scenes-tmp/ls8'),
-        _NBAR_GL
+        query={'product': ['ls8_nbar_scene', 'ls8_nbart_scene']},
+        base_path=Path('/g/data/rs0/scenes/nbar-scenes-tmp/ls8'),
+        offset_pattern="[0-9][0-9][0-9][0-9]/[0-9][0-9]/output/nbar*/LS*/ga-metadata.yaml",
     ),
 })
 
 # PQ Scenes
 # /g/data/rs0/scenes/pq-scenes-tmp/ls7/2005/01/output/pqa/
 #           LS7_ETM_PQ_P55_GAPQ01-002_108_075_20050113/ga-metadata.yaml
-_PQA_GL = _YEAR_MONTH_GL + "/output/pqa/LS*/ga-metadata.yaml"
 NCI_COLLECTIONS.update({
     'ls5_pq_scene': SceneCollection(
-        {'product': 'ls5_pq_scene'},
-        Path('/g/data/rs0/scenes/pq-scenes-tmp/ls5'),
-        _PQA_GL
+        query={'product': 'ls5_pq_scene'},
+        base_path=Path('/g/data/rs0/scenes/pq-scenes-tmp/ls5'),
+        offset_pattern="[0-9][0-9][0-9][0-9]/[0-9][0-9]/output/pqa/LS*/ga-metadata.yaml",
     ),
     'ls7_pq_scene': SceneCollection(
-        {'product': 'ls7_pq_scene'},
-        Path('/g/data/rs0/scenes/pq-scenes-tmp/ls7'),
-        _PQA_GL
+        query={'product': 'ls7_pq_scene'},
+        base_path=Path('/g/data/rs0/scenes/pq-scenes-tmp/ls7'),
+        offset_pattern="[0-9][0-9][0-9][0-9]/[0-9][0-9]/output/pqa/LS*/ga-metadata.yaml",
     ),
     'ls8_pq_scene': SceneCollection(
-        {'product': 'ls8_pq_scene'},
-        Path('/g/data/rs0/scenes/pq-scenes-tmp/ls8'),
-        _PQA_GL
+        query={'product': 'ls8_pq_scene'},
+        base_path=Path('/g/data/rs0/scenes/pq-scenes-tmp/ls8'),
+        offset_pattern="[0-9][0-9][0-9][0-9]/[0-9][0-9]/output/pqa/LS*/ga-metadata.yaml",
     ),
 })

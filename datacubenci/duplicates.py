@@ -48,7 +48,7 @@ def write_duplicates_csv(collections_: Iterable[collections.Collection],
             matching_products = c.products.search(**collection.query)
             for product in matching_products:
                 unique_fields = tuple(parse_field_expression(product.metadata_type, f)
-                                      for f in collection.unique_fields)
+                                      for f in collection.unique)
 
                 _write_csv(
                     unique_fields,
