@@ -6,7 +6,9 @@ description: Landsat 7 Surface Reflectance NBART 25 metre, 100km tile, Australia
 
 location: '/g/data/rs0/datacube/002/'
 file_path_template: 'LS7_ETM_NBART/{tile_index[0]}_{tile_index[1]}/LS7_ETM_NBART_3577_{tile_index[0]}_{tile_index[1]}_{start_time}_v{version}.nc'
-global_attributes: 
+ncml_path_template: 'LS7_ETM_NBART/LS7_ETM_NBART_3577_{tile_index[0]}_{tile_index[1]}.ncml'
+
+global_attributes:
   title: Surface Reflectance NBAR+T 25 v2
   summary: |
     Surface Reflectance (SR) is a suite of Earth Observation (EO) products from GA. The SR product suite provides standardised optical surface reflectance datasets using robust 
