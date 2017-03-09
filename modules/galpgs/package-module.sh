@@ -15,8 +15,8 @@ agdc_instance_module_name=${agdc_instance_module%/*}
 instance=${agdc_instance_module_name##*-}
 echo "instance = ${instance}"
 echo
-echo "eodatasets_head = ${eodatasets_head:=eodatasets-0.9}"
-echo "gqa_head = ${gqa_head:=gqa-0.9}"
+echo "eodatasets_head = ${eodatasets_head:=develop}"
+echo "gqa_head = ${gqa_head:=develop}"
 echo "gaip_head = ${gaip_head:=develop}"
 echo
 echo "##########################"
