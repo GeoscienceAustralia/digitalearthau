@@ -10,7 +10,7 @@ echo
 echo "module_dir = ${module_dir:=/g/data/v10/private/modules}"
 echo "agdc_module_dir = ${agdc_module_dir:=/g/data/v10/public/modules}"
 echo
-echo "agdc_instance_module = ${agdc_instance_module:=agdc-py3-prod/1.2.0}"
+echo "agdc_instance_module = ${agdc_instance_module:=agdc-py2-prod/1.2.2}"
 agdc_instance_module_name=${agdc_instance_module%/*}
 instance=${agdc_instance_module_name##*-}
 echo "instance = ${instance}"
