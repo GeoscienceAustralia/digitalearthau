@@ -10,7 +10,6 @@ echo
 echo "module_dir = ${module_dir:=/g/data/v10/private/modules}"
 echo "agdc_module_dir = ${agdc_module_dir:=/g/data/v10/public/modules}"
 echo
-# NBAR needs py2, so it's still the default
 echo "agdc_instance_module = ${agdc_instance_module:=agdc-py3-prod/1.2.0}"
 agdc_instance_module_name=${agdc_instance_module%/*}
 instance=${agdc_instance_module_name##*-}
@@ -21,7 +20,7 @@ echo "gqa_head = ${gqa_head:=gqa-0.9}"
 echo "gaip_head = ${gaip_head:=develop}"
 echo
 echo "##########################"
-export module_dir agdc_instance_module pyvariant 
+export module_dir agdc_instance_module
 
 echoerr() { echo "$@" 1>&2; }
 
@@ -63,7 +62,7 @@ function installrepo() {
     git clone -b $head "${repo_cache}" "${build_dest}"
 
     pushd "${build_dest}"
-        rm -r dist build || true
+        rm -r dist build > /dev/null 2>&1 || true
         python setup.py sdist
         pip install dist/*.tar.gz "--prefix=${package_dest}"
     popd
@@ -81,28 +80,33 @@ read -p "Continue? [y/N]" -n 1 -r
 echo    # (optional) move to a new line
 if [[ $REPLY =~ ^[Yy]$ ]]
 then
-
-    # Setuptools requires the destination to be on the path, as it tests that the target is loadable.
     echo "Creating directory"
     mkdir -v -p "${python_dest}"
+    # The destination needs to be on the path so that latter dependencies can see earlier ones
     export PYTHONPATH=${PYTHONPATH:+${PYTHONPATH}:}${python_dest}
 
+    echo
+    echo "Installing dependencies"
     installrepo idlfunctions develop git@github.com:sixy6e/idl-functions.git
     installrepo eotools develop git@github.com:GeoscienceAustralia/eo-tools.git
     installrepo eodatasets ${eodatasets_head} git@github.com:GeoscienceAustralia/eo-datasets.git
     installrepo gaip ${gaip_head} git@github.com:jeremyh/gaip.git
     installrepo gqa ${gqa_head} git@github.com:GeoscienceAustralia/gqa.git
+
+    echo
+    echo "Installing galpgs"
     installrepo galpgs ${version} git@github.com:jeremyh/galpgs.git
 
+    echo
+    echo "Writing modulefile"
     modulefile_dir="${module_dir}/modulefiles/${package_name}"
     mkdir -v -p "${modulefile_dir}"
-
     modulefile_dest="${modulefile_dir}/${version}"
     envsubst < modulefile.template > "${modulefile_dest}"
     echo "Wrote modulefile to ${modulefile_dest}"
 fi
 
-rm -rf agdc-v2 > /dev/null 2>&1
+rm -rf build > /dev/null 2>&1
 
 
 echo
