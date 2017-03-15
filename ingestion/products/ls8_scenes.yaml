@@ -12,7 +12,7 @@ metadata:
 
 name: ls8_level1_scene
 description: Landsat 8 Level 1 OLI-TIRS At-sensor Radiance 25 metre
-metadata_type: landsat_scene
+metadata_type: landsat_l1_scene
 
 metadata:
     platform:
@@ -259,7 +259,7 @@ measurements:
 ---
 name: ls8_level1_oli_scene
 description: Landsat 8 OLI Level 1 At-sensor Radiance 25 metre
-metadata_type: landsat_scene
+metadata_type: landsat_l1_scene
 
 metadata:
     platform:

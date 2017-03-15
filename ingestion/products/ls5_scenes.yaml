@@ -23,7 +23,7 @@ metadata:
     format:
         name: GeoTiff
 
-metadata_type: landsat_scene
+metadata_type: landsat_l1_scene
 
 ---
 # Start LS5_SCENE

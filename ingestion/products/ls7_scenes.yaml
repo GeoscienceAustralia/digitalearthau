@@ -13,7 +13,7 @@ metadata:
 
 name: ls7_level1_scene
 description: Landsat 7 Level 1 At-sensor Radiance 25 metre
-metadata_type: landsat_scene
+metadata_type: landsat_l1_scene
 
 metadata:
     platform:
