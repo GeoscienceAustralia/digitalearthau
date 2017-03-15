@@ -27,7 +27,7 @@ metadata:
 
 name: ls8_nbar_scene
 description: Landsat 8 NBAR 25 metre
-metadata_type: eo
+metadata_type: landsat_scene
 
 metadata:
     platform:
@@ -99,7 +99,7 @@ measurements:
 
 name: ls8_nbart_scene
 description: Landsat 8 NBART 25 metre
-metadata_type: eo
+metadata_type: landsat_scene
 
 metadata:
     platform:
@@ -172,7 +172,7 @@ measurements:
 
 name: ls8_pq_scene
 description: Landsat 8 PQ 25 metre
-metadata_type: eo
+metadata_type: landsat_scene
 
 metadata:
     platform:
@@ -345,7 +345,7 @@ measurements:
 ---
 name: ls8_nbart_oli_scene
 description: Landsat 8 OLI NBART 25 metre
-metadata_type: eo
+metadata_type: landsat_scene
 
 metadata:
     platform:
@@ -417,7 +417,7 @@ measurements:
 ---
 name: ls8_pq_oli_scene
 description: Landsat 8 OLI PQ 25 metre
-metadata_type: eo
+metadata_type: landsat_scene
 
 metadata:
     platform:

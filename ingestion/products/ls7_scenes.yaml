@@ -28,7 +28,7 @@ metadata:
 
 name: ls7_nbar_scene
 description: Landsat 7 NBAR 25 metre
-metadata_type: eo
+metadata_type: landsat_scene
 
 metadata:
     platform:
@@ -93,7 +93,7 @@ measurements:
 
 name: ls7_nbart_scene
 description: Landsat 7 NBART 25 metre
-metadata_type: eo
+metadata_type: landsat_scene
 
 metadata:
     platform:
@@ -159,7 +159,7 @@ measurements:
 
 name: ls7_pq_scene
 description: Landsat 7 PQ 25 metre
-metadata_type: eo
+metadata_type: landsat_scene
 
 metadata:
     platform:

@@ -1,9 +1,5 @@
 name: eo
-description: |
-    Earth Observation datasets.
-    Type of datasets produced by the eodatasets library.
-    (or of similar structure)
-    https://github.com/GeoscienceAustralia/eo-datasets
+description: Minimal eo metadata for products without custom fields.
 dataset:
     id: ['id']
     creation_dt: ['creation_dt']
@@ -33,7 +29,7 @@ dataset:
 
         lat:
             description: Latitude range
-            type: float-range
+            type: double-range
             max_offset:
             - [extent, coord, ur, lat]
             - [extent, coord, lr, lat]
@@ -47,7 +43,7 @@ dataset:
 
         lon:
             description: Longitude range
-            type: float-range
+            type: double-range
             max_offset:
             - [extent, coord, ul, lon]
             - [extent, coord, ur, lon]
@@ -64,40 +60,8 @@ dataset:
             type: datetime-range
             min_offset:
             - [extent, from_dt]
-            - [extent, center_dt]
             max_offset:
             - [extent, to_dt]
-            - [extent, center_dt]
-
-        gsi:
-            description: Ground Station Identifier (eg. ASA)
-            offset: [acquisition, groundstation, code]
-            indexed: false
-
-        orbit:
-            description: Orbit number
-            offset: [acquisition, platform_orbit]
-            indexed: false
-
-        sat_path:
-            description: Landsat path
-            type: float-range
-            min_offset:
-            - [image, satellite_ref_point_start, x]
-            max_offset:
-            - [image, satellite_ref_point_end, x]
-            # If an end is not specified, use the start.
-            - [image, satellite_ref_point_start, x]
-
-        sat_row:
-            description: Landsat row
-            type: float-range
-            min_offset:
-            - [image, satellite_ref_point_start, y]
-            max_offset:
-            - [image, satellite_ref_point_end, y]
-            # If an end is not specified, use the start.
-            - [image, satellite_ref_point_start, y]
 
 ---
 
@@ -179,7 +143,7 @@ dataset:
 
         lat:
             description: Latitude range
-            type: numeric-range
+            type: double-range
             max_offset:
             - [extent, coord, ur, lat]
             - [extent, coord, lr, lat]
@@ -193,7 +157,7 @@ dataset:
 
         lon:
             description: Longitude range
-            type: numeric-range
+            type: double-range
             max_offset:
             - [extent, coord, ul, lon]
             - [extent, coord, ur, lon]
@@ -223,16 +187,18 @@ dataset:
         orbit:
             description: Orbit number
             offset: [acquisition, platform_orbit]
+            indexed: false
 
         ancillary_quality:
             description: Ancillary quality
             offset: [lineage, ancillary_quality]
+            indexed: false
 
         gqa:
             description: GQA Circular error probable (90%)
             type: double
             offset: [gqa, cep90]
-
+            indexed: false
         gqa_error_message:
             description: GQA Error Message
             offset: [gqa, error_message]

@@ -29,7 +29,7 @@ metadata_type: landsat_scene
 # Start LS5_SCENE
 name: ls5_nbar_scene
 description: Landsat 5 NBAR 25 metre
-metadata_type: eo
+metadata_type: landsat_scene
 
 metadata:
     platform:
@@ -94,7 +94,7 @@ measurements:
 
 name: ls5_nbart_scene
 description: Landsat 5 NBART 25 metre
-metadata_type: eo
+metadata_type: landsat_scene
 
 metadata:
     platform:
@@ -160,7 +160,7 @@ measurements:
 
 name: ls5_pq_scene
 description: Landsat 5 PQ 25 metre
-metadata_type: eo
+metadata_type: landsat_scene
 
 metadata:
     platform:
