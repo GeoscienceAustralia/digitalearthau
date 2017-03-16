@@ -210,7 +210,7 @@ dataset:
             # If an end is not specified, use the start.
             - [image, satellite_ref_point_start, y]
 
-
+---
 
 name: landsat_l1_scene
 description: |
