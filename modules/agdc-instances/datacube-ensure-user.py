@@ -2,6 +2,9 @@
 #
 # Ensure that a datacube user account exists for the current user
 #
+# It can copy credentials stored in .pgpass to connect to a different database
+# Or create a new user account if required.
+#
 
 from collections import namedtuple
 import os
@@ -15,12 +18,12 @@ import psycopg2
 OLD_DB_HOST = '130.56.244.227'
 PASSWORD_LENGTH = 32
 
-DBCreds = namedtuple('DBCreds', ['host', 'port', 'db', 'username', 'password'])
+DBCreds = namedtuple('DBCreds', ['host', 'port', 'database', 'username', 'password'])
 
 CANT_CONNECT_MSG = """
 Unable to connect to the database ({username}@{host}:{port}).
 
-Attempting to create a new user for {db_user}..."""
+Attempting to create a new user for {username}..."""
 
 USER_ALREADY_EXISTS_MSG = """
 An account for '{username}' already exists in the Data Cube Database, but 
@@ -36,6 +39,7 @@ def print_stderr(msg):
 
 
 def can_connect(dbcreds):
+    """ Can we connect to the database defined by these credentials? """
     try:
         conn = psycopg2.connect(host=dbcreds.host, port=dbcreds.port, user=dbcreds.username)
         cur = conn.cursor()
@@ -56,7 +60,7 @@ def find_credentials(pgpass, old_host=OLD_DB_HOST):
 
 
 def append_credentials(pgpass, dbcreds):
-    # Append new db line to end of file
+    """ Append credentials to pgpass file """
     try:
         with pgpass.open() as src:
             filedata = [line.strip() for line in src]
@@ -68,7 +72,8 @@ def append_credentials(pgpass, dbcreds):
 
     os.umask(0o077)
     with pgpass.open('w') as dest:
-        dest.write('\n'.join(filedata))
+        for line in filedata:
+            dest.write(line + '\n')
 
 
 def main():
@@ -81,7 +86,7 @@ def main():
     if can_connect(dbcreds):
         return
     else:
-        print_stderr(CANT_CONNECT_MSG.format(**dbcreds))
+        print_stderr(CANT_CONNECT_MSG.format(**dbcreds._asdict()))
         try:
             creds = find_credentials(pgpass)
             new_creds = creds._replace(host=dbcreds.host)
@@ -94,6 +99,7 @@ def main():
 
 
 def create_db_account(dbcreds):
+    """ Create AGDC user account on the requested """
     password = gen_password()
     real_name = get_real_name()
     try:
@@ -125,8 +131,10 @@ def gen_password(length):
 if __name__ == '__main__':
     main()
 
+#########
+# Tests #
+#########
 
-import pytest
 
 def test_no_pgpass(tmpdir):
     path = tmpdir.join('pgpass.txt')
@@ -143,7 +151,6 @@ def test_no_pgpass(tmpdir):
     append_credentials(path, creds)
 
     assert path.exists()
-
 
 
 def test_append_credentials(tmpdir):
