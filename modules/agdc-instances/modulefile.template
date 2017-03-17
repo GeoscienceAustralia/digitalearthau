@@ -18,7 +18,7 @@ if { ! [is-loaded ${agdc_module}/${version}] } {
 }
 
 if { [module-info mode load] } {
-    if { [catch {exec -ignorestderr ${module_dest}/datacube-ensure-user.sh ${dbhost} ${dbport}} results options] } {
+    if { [catch {exec -ignorestderr ${module_dest}/datacube-ensure-user.py ${dbhost} ${dbport}} results options] } {
         puts stderr "Error: database connection check failed!"
         puts stderr "  see log above for more details"
     }
