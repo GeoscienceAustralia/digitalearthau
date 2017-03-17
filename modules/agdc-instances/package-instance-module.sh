@@ -50,8 +50,8 @@ then
 fi
 
 mkdir -v -p "${module_dest}"
-cp -v datacube-ensure-user.sh "${module_dest}/"
-chmod 775 "${module_dest}/datacube-ensure-user.sh"
+cp -v datacube-ensure-user.py "${module_dest}/"
+chmod 775 "${module_dest}/datacube-ensure-user.py"
 
 echo "[datacube]" > "${module_dest}/datacube.conf"
 echo db_hostname: ${dbhost} >> "${module_dest}/datacube.conf"
