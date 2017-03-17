@@ -22,11 +22,10 @@ DBCreds = namedtuple('DBCreds', ['host', 'port', 'database', 'username', 'passwo
 
 CANT_CONNECT_MSG = """
 Unable to connect to the database ({username}@{host}:{port}).
-
-Attempting to create a new user for {username}..."""
+"""
 
 USER_ALREADY_EXISTS_MSG = """
-An account for '{username}' already exists in the Data Cube Database, but 
+An account for '{}' already exists in the Data Cube Database, but 
 we were unable to connect to it. This can happen if you have used the Data 
 Cube from raijin, and are now trying to access from VDI, or vice-versa.
 
@@ -90,10 +89,15 @@ def main():
         try:
             creds = find_credentials(pgpass, host=OLD_DB_HOST)
             new_creds = creds._replace(host=dbcreds.host)
-            print_stderr('Account found. Copying credentials from old database server in ~/.pgass.')
+            print_stderr('Existing credentials found. Copying from old database server in ~/.pgass.')
         except:
-            new_creds = create_db_account(dbcreds)
-            print_stderr('Created new database account.')
+            try:
+                print_stderr('Attempting to create a new user for {}...'.format(dbcreds.username))
+                new_creds = create_db_account(dbcreds)
+                print_stderr('Created new database account.')
+            except psycopg2.Error:
+                print_stderr('Please contact a datacube administrator to help resolve user account creation.')
+                return
 
         append_credentials(pgpass, new_creds)
 
@@ -102,20 +106,22 @@ def main():
 
 def create_db_account(dbcreds):
     """ Create AGDC user account on the requested """
-    password = gen_password()
     real_name = get_real_name()
+    dbcreds = dbcreds._replace(database='*', password=gen_password())
     try:
-        with psycopg2.connect(host=dbcreds.host, port=dbcreds.port, user='guest', database='guest') as conn:
+        with psycopg2.connect(host=dbcreds.host, port=dbcreds.port,
+                              user='guest', database='guest', password='guest') as conn:
             with conn.cursor() as cur:
                 cur.execute('SELECT create_readonly_agdc_user(%s, %s, %s);', (dbcreds.username,
                                                                               dbcreds.password,
                                                                               real_name))
     except psycopg2.Error as err:
-        if 'already exists' in err.pgerror:
+        if err.pgerror and 'already exists' in err.pgerror:
             print_stderr(USER_ALREADY_EXISTS_MSG.format(dbcreds.username))
         else:
             print_stderr('Error creating user account for {}: {}'.format(dbcreds.username, err))
-    return dbcreds._replace(database='*', password=password)
+        raise err
+    return dbcreds
 
 
 def get_real_name():
@@ -124,7 +130,7 @@ def get_real_name():
     return info.pw_gecos
 
 
-def gen_password(length):
+def gen_password(length=20):
     char_set = string.ascii_letters + string.digits
     if not hasattr(gen_password, "rng"):
         gen_password.rng = random.SystemRandom()  # Create a static variable
