@@ -49,12 +49,12 @@ def can_connect(dbcreds):
         return False
 
 
-def find_credentials(pgpass, old_host=OLD_DB_HOST):
+def find_credentials(pgpass, host):
     with pgpass.open() as src:
         filedata = [line.strip() for line in src]
 
     existing_db = [line for line in filedata
-                   if old_host in line][0]
+                   if host in line][0]
 
     return DBCreds(*existing_db.split(':'))
 
@@ -88,10 +88,12 @@ def main():
     else:
         print_stderr(CANT_CONNECT_MSG.format(**dbcreds._asdict()))
         try:
-            creds = find_credentials(pgpass)
+            creds = find_credentials(pgpass, host=OLD_DB_HOST)
             new_creds = creds._replace(host=dbcreds.host)
+            print_stderr('Account found. Copying credentials from old database server in ~/.pgass.')
         except:
             new_creds = create_db_account(dbcreds)
+            print_stderr('Created new database account.')
 
         append_credentials(pgpass, new_creds)
 
@@ -160,9 +162,9 @@ def test_append_credentials(tmpdir):
 
     path = Path(str(pgpass))
 
-    creds = find_credentials(pgpass)
+    creds = find_credentials(pgpass, host='130.56.244.227')
 
-    assert creds != None
+    assert creds is not None
     assert creds.password == 'asdf'
     
     new_creds = creds._replace(host='127')
