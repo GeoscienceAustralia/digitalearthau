@@ -10,6 +10,7 @@ import os
 import click
 import random
 import pwd
+from boltons.fileutils import atomic_save
 from pathlib import Path
 import string
 import sys
@@ -66,10 +67,17 @@ def find_credentials(pgpass, host, username):
 
 def append_credentials(pgpass, dbcreds):
     """ Append credentials to pgpass file """
-    os.umask(0o077)
-    with pgpass.open(mode='a') as fout:
-        if fout.tell() != 0:
-            fout.write('\n')
+    try:
+        with pgpass.open() as fin:
+            data = fin.read()
+    except FileNotFoundError:
+        data = ''
+
+    with atomic_save(str(pgpass.absolute()), file_perms=0o600, text_mode=True) as fout:
+        if data:
+            fout.write(data)
+            if not data.endswith('\n'):
+                fout.write('\n')
         fout.write(':'.join(dbcreds) + '\n')
 
 
@@ -169,6 +177,9 @@ def test_no_pgpass(tmpdir):
     append_credentials(path, creds)
 
     assert path.exists()
+    with path.open() as src:
+        contents = src.read()
+    assert contents == ':'.join(creds) + '\n'
 
 
 def test_append_credentials(tmpdir):
