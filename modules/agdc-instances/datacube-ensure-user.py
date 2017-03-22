@@ -5,9 +5,9 @@
 # It can copy credentials stored in .pgpass to connect to a different database
 # Or create a new user account if required.
 #
-
 from collections import namedtuple
 import os
+import click
 import random
 import pwd
 from pathlib import Path
@@ -21,7 +21,7 @@ PASSWORD_LENGTH = 32
 DBCreds = namedtuple('DBCreds', ['host', 'port', 'database', 'username', 'password'])
 
 CANT_CONNECT_MSG = """
-Unable to connect to the database ({username}@{host}:{port}).
+Unable to connect to the database ({0.username}@{0.host}:{0.port}).
 """
 
 USER_ALREADY_EXISTS_MSG = """
@@ -31,6 +31,10 @@ Cube from raijin, and are now trying to access from VDI, or vice-versa.
 
 To fix this problem, please copy your ~/.pgpass file from the system you 
 initially used to access the Data Cube, onto the current system."""
+
+
+class CredentialsNotFound(Exception):
+    pass
 
 
 def print_stderr(msg):
@@ -48,49 +52,51 @@ def can_connect(dbcreds):
         return False
 
 
-def find_credentials(pgpass, host):
+def find_credentials(pgpass, host, username):
     with pgpass.open() as src:
-        filedata = [line.strip() for line in src]
-
-    existing_db = [line for line in filedata
-                   if host in line][0]
-
-    return DBCreds(*existing_db.split(':'))
+        for line in src:
+            try:
+                creds = DBCreds(*line.strip().split(':'))
+                if creds.host == host and creds.username == username:
+                    return creds
+            except TypeError:
+                continue
+    raise CredentialsNotFound()
 
 
 def append_credentials(pgpass, dbcreds):
     """ Append credentials to pgpass file """
-    try:
-        with pgpass.open() as src:
-            filedata = [line.strip() for line in src]
-    except FileNotFoundError:
-        filedata = []
-
-    new_creds_line = ':'.join(tuple(dbcreds))
-    filedata.append(new_creds_line)
-
     os.umask(0o077)
-    with pgpass.open('w') as dest:
-        for line in filedata:
-            dest.write(line + '\n')
+    with pgpass.open(mode='a') as fout:
+        if fout.tell() != 0:
+            fout.write('\n')
+        fout.write(':'.join(dbcreds) + '\n')
 
 
-def main():
+@click.command()
+@click.argument('hostname')
+@click.argument('port', type=click.INT)
+@click.argument('username', default=os.environ['USER'], required=False)
+def main(hostname, port, username):
+    """
+    Ensure that a user account exists in the specified Data Cube Database
+    """
     if 'PBS_JOBID' in os.environ:
         return
 
-    dbcreds = DBCreds(host=sys.argv[1], port=sys.argv[2], username=os.environ['USER'], database=None, password=None)
+    dbcreds = DBCreds(host=hostname, port=port, username=username, database=None, password=None)
     pgpass = Path(os.environ['HOME']) / '.pgpass'
 
     if can_connect(dbcreds):
+        # User can connect to requested database without a password, no more work to do
         return
     else:
-        print_stderr(CANT_CONNECT_MSG.format(**dbcreds._asdict()))
+        print_stderr(CANT_CONNECT_MSG.format(dbcreds))
         try:
-            creds = find_credentials(pgpass, host=OLD_DB_HOST)
+            creds = find_credentials(pgpass, OLD_DB_HOST, username)
             new_creds = creds._replace(host=dbcreds.host)
             print_stderr('Existing credentials found. Copying from old database server in ~/.pgass.')
-        except:
+        except CredentialsNotFound:
             try:
                 print_stderr('Attempting to create a new user for {}...'.format(dbcreds.username))
                 new_creds = create_db_account(dbcreds)
@@ -101,7 +107,10 @@ def main():
 
         append_credentials(pgpass, new_creds)
 
-        print_stderr("Success! Credentials written to ~/.pgpass.")
+        if can_connect(dbcreds):
+            print_stderr("Success! Credentials written to ~/.pgpass and connection tested and works.")
+        else:
+            print_stderr('Still unable to connect to the Data Cube database, please contact an administrator for help.')
 
 
 def create_db_account(dbcreds):
@@ -136,6 +145,7 @@ def gen_password(length=20):
         gen_password.rng = random.SystemRandom()  # Create a static variable
     return ''.join([gen_password.rng.choice(char_set) for _ in range(length)])
 
+
 if __name__ == '__main__':
     main()
 
@@ -162,13 +172,12 @@ def test_no_pgpass(tmpdir):
 
 
 def test_append_credentials(tmpdir):
-    existing_line = '130.56.244.227:5432:*:dra547:asdf'
+    existing_line = '130.56.244.227:5432:*:foo_user:asdf'
     pgpass = tmpdir.join('pgpass.txt')
     pgpass.write(existing_line)
 
     path = Path(str(pgpass))
-
-    creds = find_credentials(pgpass, host='130.56.244.227')
+    creds = find_credentials(pgpass, host='130.56.244.227', username='foo_user')
 
     assert creds is not None
     assert creds.password == 'asdf'
@@ -180,6 +189,5 @@ def test_append_credentials(tmpdir):
     with path.open() as src:
         contents = src.read()
 
-    expected = existing_line + '\n' + existing_line.replace('130.56.244.227', '127')
+    expected = existing_line + '\n' + existing_line.replace('130.56.244.227', '127') + '\n'
     assert contents == expected
-
