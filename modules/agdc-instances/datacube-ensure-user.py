@@ -45,7 +45,10 @@ def print_stderr(msg):
 def can_connect(dbcreds):
     """ Can we connect to the database defined by these credentials? """
     try:
-        conn = psycopg2.connect(host=dbcreds.host, port=dbcreds.port, user=dbcreds.username)
+        conn = psycopg2.connect(host=dbcreds.host,
+                                port=dbcreds.port,
+                                user=dbcreds.username,
+                                database=dbcreds.database)
         cur = conn.cursor()
         cur.execute('SELECT 1;')
         return True
@@ -92,7 +95,8 @@ def main(hostname, port, username):
     if 'PBS_JOBID' in os.environ:
         return
 
-    dbcreds = DBCreds(host=hostname, port=port, username=username, database=None, password=None)
+    dbcreds = DBCreds(host=hostname, port=port, username=username,
+                      database='datacube', password=None)
     pgpass = Path(os.environ['HOME']) / '.pgpass'
 
     if can_connect(dbcreds):
@@ -157,6 +161,7 @@ def gen_password(length=20):
 if __name__ == '__main__':
     main()
 
+
 #########
 # Tests #
 #########
@@ -192,7 +197,7 @@ def test_append_credentials(tmpdir):
 
     assert creds is not None
     assert creds.password == 'asdf'
-    
+
     new_creds = creds._replace(host='127')
 
     append_credentials(path, new_creds)
