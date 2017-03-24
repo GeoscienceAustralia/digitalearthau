@@ -17,6 +17,7 @@ dependencies:
 - future
 - gdal >=1.9
 - geopandas
+- geopy
 - glueviz
 - gunicorn
 - hypothesis
@@ -28,6 +29,7 @@ dependencies:
 - jsonschema
 - jupyter
 - jupyter_contrib_nbextensions
+- jupyter_dashboards
 - line_profiler
 - luigi
 - matplotlib
@@ -66,8 +68,8 @@ dependencies:
   - boltons
   - ciso8601
   - DAWG
+  - doit
   - pypeg2
   - skyfield
   - structlog[dev]
   - yappi
-
