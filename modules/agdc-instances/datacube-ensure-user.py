@@ -106,7 +106,7 @@ def main(hostname, port, username):
         print_stderr(CANT_CONNECT_MSG.format(dbcreds))
         try:
             creds = find_credentials(pgpass, OLD_DB_HOST, username)
-            new_creds = creds._replace(host=dbcreds.host)
+            new_creds = creds._replace(host=dbcreds.host, port=dbcreds.port)
             print_stderr('Existing credentials found. Copying from old database server in ~/.pgass.')
         except CredentialsNotFound:
             try:
