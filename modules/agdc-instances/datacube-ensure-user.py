@@ -95,7 +95,7 @@ def main(hostname, port, username):
     if 'PBS_JOBID' in os.environ:
         return
 
-    dbcreds = DBCreds(host=hostname, port=port, username=username,
+    dbcreds = DBCreds(host=hostname, port=str(port), username=username,
                       database='datacube', password=None)
     pgpass = Path(os.environ['HOME']) / '.pgpass'
 
