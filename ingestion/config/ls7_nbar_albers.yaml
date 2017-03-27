@@ -6,6 +6,7 @@ description: Landsat 7 Surface Reflectance NBAR 25 metre, 100km tile, Australian
 
 location: '/g/data/rs0/datacube/002/'
 file_path_template: 'LS7_ETM_NBAR/{tile_index[0]}_{tile_index[1]}/LS7_ETM_NBAR_3577_{tile_index[0]}_{tile_index[1]}_{start_time}_v{version}.nc'
+partial_ncml_path_template: 'LS7_ETM_NBAR/{tile_index[0]}_{tile_index[1]}/LS7_ETM_NBAR_3577_{tile_index[0]}_{tile_index[1]}_{start_time}.ncml'
 ncml_path_template: 'LS7_ETM_NBAR/LS7_ETM_NBAR_3577_{tile_index[0]}_{tile_index[1]}.ncml'
 
 global_attributes:
@@ -58,7 +59,7 @@ global_attributes:
     in Earth surface features through time.
 
     Given the growing time series of EO imagery, this landmark facility will streamline the process of reliably monitoring long-term  chnges in land and water resources.
-  history: |
+  comment: |
     -	Ground Control Points (GCP): new GCP chips released by USGS in Dec 2015 are used for re-processing
     -	Geometric QA: each product undergoes geometric assessment and the assessment result will be recorded within v2 AGDC for filtering/masking purposes.
     -	Processing parameter settings: the minimum number of GCPs for Ortho-rectified product generation has been reduced from 30 to 10.
@@ -69,12 +70,10 @@ global_attributes:
   keywords: AU/GA,NASA/GSFC/SED/ESD/LANDSAT,REFLECTANCE,ETM+,TM,OLI,EARTH SCIENCE
   keywords_vocabulary: GCMD
   platform: LANDSAT-7
-  product_version: 2
   publisher_email: earth.observation@ga.gov.au
   publisher_name: Section Leader, Operations Section, NEMO, Geoscience Australia
   publisher_url: 'http://www.ga.gov.au'
   license: CC BY Attribution 4.0 International License
-  coverage_content_type: physicalMeasurement
   cdm_data_type: Grid
   product_suite: Surface Reflectance NBAR+ 25m
   acknowledgment: Landsat data is provided by the United States Geological Survey (USGS) through direct reception of the data at Geoscience Australias satellite reception facility or download.
@@ -117,7 +116,7 @@ storage:
   chunking:
       x: 200
       y: 200
-      time: 1
+      time: 5
   dimension_order: ['time', 'y', 'x']
 
 measurements:
@@ -131,6 +130,7 @@ measurements:
       attrs:
           long_name: "Nadir BRDF Adjusted Reflectance 0.45-0.52 microns (Blue)"
           alias: "band_1"
+          coverage_content_type: physicalMeasurement
     - name: green
       dtype: int16
       nodata: -999
@@ -141,6 +141,7 @@ measurements:
       attrs:
           long_name: "Nadir BRDF Adjusted Reflectance 0.52-0.60 microns (Green)"
           alias: "band_2"
+          coverage_content_type: physicalMeasurement
     - name: red
       dtype: int16
       nodata: -999
@@ -151,6 +152,7 @@ measurements:
       attrs:
           long_name: "Nadir BRDF Adjusted Reflectance 0.63-0.69 microns (Red)"
           alias: "band_3"
+          coverage_content_type: physicalMeasurement
     - name: nir
       dtype: int16
       nodata: -999
@@ -161,6 +163,7 @@ measurements:
       attrs:
           long_name: "Nadir BRDF Adjusted Reflectance 0.76-0.90 microns (Near Infrared)"
           alias: "band_4"
+          coverage_content_type: physicalMeasurement
     - name: swir1
       dtype: int16
       nodata: -999
@@ -171,6 +174,7 @@ measurements:
       attrs:
           long_name: "Nadir BRDF Adjusted Reflectance 1.55-1.75 microns (Short-wave Infrared)"
           alias: "band_5"
+          coverage_content_type: physicalMeasurement
     - name: swir2
       dtype: int16
       nodata: -999
@@ -181,3 +185,4 @@ measurements:
       attrs:
           long_name: "Nadir BRDF Adjusted Reflectance 2.08-2.35 microns (Short-wave Infrared)"
           alias: "band_7"
+          coverage_content_type: physicalMeasurement

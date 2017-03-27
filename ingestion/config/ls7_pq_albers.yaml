@@ -6,6 +6,7 @@ description: Landsat 7 Pixel Quality 25 metre, 100km tile, Australian Albers Equ
 
 location: '/g/data/rs0/datacube/002/'
 file_path_template: 'LS7_ETM_PQ/{tile_index[0]}_{tile_index[1]}/LS7_ETM_PQ_3577_{tile_index[0]}_{tile_index[1]}_{start_time}_v{version}.nc'
+partial_ncml_path_template: 'LS7_ETM_PQ/{tile_index[0]}_{tile_index[1]}/LS7_ETM_PQ_3577_{tile_index[0]}_{tile_index[1]}_{start_time}.ncml'
 ncml_path_template: 'LS7_ETM_PQ/LS7_ETM_PQ_3577_{tile_index[0]}_{tile_index[1]}.ncml'
 
 global_attributes:
@@ -44,7 +45,7 @@ global_attributes:
     The sensor saturation flagging protocols developed for the Web Enabled Landsat Data (WELD) product as described 
     in Roy et al. (2011) are used to flag sensor saturation.\nThe PQ25 product has similarities to the QAB layer packaged
     with OLI data, however it uses additional algorithms to detect cloud and cloud shadow, and is available for Landsat 5, 7 and 8.
-  history: |
+  comment: |
     -	Ground Control Points (GCP): new GCP chips released by USGS in Dec 2015 are used for re-processing
     -	Geometric QA: each product undergoes geometric assessment and the assessment result will be recorded within v2 AGDC for filtering/masking purposes.
     -	Processing parameter settings: the minimum number of GCPs for Ortho-rectified product generation has been reduced from 30 to 10.
@@ -55,12 +56,10 @@ global_attributes:
   keywords: AU/GA,NASA/GSFC/SED/ESD/LANDSAT,ETM+,TM,OLI,EARTH SCIENCE
   keywords_vocabulary: GCMD
   platform: LANDSAT-7
-  product_version: 2
   publisher_email: earth.observation@ga.gov.au
   publisher_name: Section Leader, Operations Section, NEMO, Geoscience Australia
   publisher_url: http://www.ga.gov.au
   license: CC BY Attribution 4.0 International License
-  coverage_content_type: physicalMeasurement
   cdm_data_type: Grid
   product_suite: Pixel Quality 25m
   acknowledgment: Landsat data is provided by the United States Geological Survey (USGS) through direct reception of the data at Geoscience Australias satellite reception facility or download.
@@ -102,7 +101,7 @@ storage:
   chunking:
       x: 200
       y: 200
-      time: 1
+      time: 5
   dimension_order: ['time', 'y', 'x']
 
 measurements:

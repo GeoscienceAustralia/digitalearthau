@@ -6,6 +6,7 @@ description: Landsat 8 Surface Relfectance NBART 25 metre, 100km tile, Australia
 
 location: '/g/data/rs0/datacube/002/'
 file_path_template: 'LS8_OLI_NBART/{tile_index[0]}_{tile_index[1]}/LS8_OLI_NBART_3577_{tile_index[0]}_{tile_index[1]}_{start_time}_v{version}.nc'
+partial_ncml_path_template: 'LS8_OLI_NBART/{tile_index[0]}_{tile_index[1]}/LS8_OLI_NBART_3577_{tile_index[0]}_{tile_index[1]}_{start_time}.ncml'
 ncml_path_template: 'LS8_OLI_NBART/LS8_OLI_NBART_3577_{tile_index[0]}_{tile_index[1]}.ncml'
 
 global_attributes:
@@ -64,7 +65,7 @@ global_attributes:
     in Earth surface features through time.
 
     Given the growing time series of EO imagery, this landmark facility will streamline the process of reliably monitoring long-term  chnges in land and water resources.
-  history: |
+  comment: |
     -	Ground Control Points (GCP): new GCP chips released by USGS in Dec 2015 are used for re-processing
     -	Geometric QA: each product undergoes geometric assessment and the assessment result will be recorded within v2 AGDC for filtering/masking purposes.
     -	Processing parameter settings: the minimum number of GCPs for Ortho-rectified product generation has been reduced from 30 to 10.
@@ -75,7 +76,6 @@ global_attributes:
   keywords: AU/GA,NASA/GSFC/SED/ESD/LANDSAT,REFLECTANCE,ETM+,TM,OLI,EARTH SCIENCE
   keywords_vocabulary: GCMD
   platform: LANDSAT-8
-  product_version: 2
   publisher_email: earth.observation@ga.gov.au
   publisher_name: Section Leader, Operations Section, NEMO, Geoscience Australia
   publisher_url: 'http://www.ga.gov.au'
@@ -123,7 +123,7 @@ storage:
   chunking:
       x: 200
       y: 200
-      time: 1
+      time: 5
   dimension_order: ['time', 'y', 'x']
 
 measurements:
