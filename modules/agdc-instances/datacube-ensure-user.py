@@ -104,14 +104,13 @@ def main(hostname, port, username):
         # User can connect to requested database without a password, no more work to do
         return
     else:
-        print_stderr(CANT_CONNECT_MSG.format(dbcreds))
         try:
             # We deliberately assume different ports on the same host are the same server.
             # (in our case, pgbouncer and the db itself have different ports)
             # So we don't match port when we find credentials
             creds = find_credentials(pgpass, OLD_DB_HOST, username)
             new_creds = creds._replace(host=dbcreds.host, port=dbcreds.port)
-            print_stderr('Existing credentials found. Copying from old database server in ~/.pgass.')
+            print_stderr('Migrating you to the new database server.')
         except CredentialsNotFound:
             try:
                 print_stderr('Attempting to create a new user for {}...'.format(dbcreds.username))
@@ -124,9 +123,9 @@ def main(hostname, port, username):
         append_credentials(pgpass, new_creds)
 
         if can_connect(dbcreds):
-            print_stderr("Success! Credentials written to ~/.pgpass and connection tested and works.")
+            print_stderr("User credentials written to ~/.pgpass. Connection test: passed.")
         else:
-            print_stderr('Still unable to connect to the Data Cube database, please contact an administrator for help.')
+            print_stderr('Unable to connect to the Data Cube database, please contact an administrator for help.')
 
 
 def create_db_account(dbcreds):
