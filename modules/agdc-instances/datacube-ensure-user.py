@@ -5,6 +5,7 @@
 # It can copy credentials stored in .pgpass to connect to a different database
 # Or create a new user account if required.
 #
+from __future__ import print_function
 from collections import namedtuple
 import os
 import click
