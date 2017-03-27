@@ -39,6 +39,7 @@ dependencies:
 - netcdf4
 - numexpr
 - numpy
+- numba
 - pandas
 - pathlib
 - pathlib2
