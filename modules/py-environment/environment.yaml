@@ -70,6 +70,7 @@ dependencies:
   - ciso8601
   - DAWG
   - doit
+  - modernize
   - pypeg2
   - skyfield
   - structlog[dev]
