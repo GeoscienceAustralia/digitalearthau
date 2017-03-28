@@ -11,6 +11,8 @@ import os
 import click
 import random
 import pwd
+
+import pytest
 from boltons.fileutils import atomic_save
 from pathlib import Path
 import string
@@ -58,6 +60,9 @@ def can_connect(dbcreds):
 
 
 def find_credentials(pgpass, host, username):
+    if not pgpass.exists():
+        raise CredentialsNotFound("No existing pgpass file")
+
     with pgpass.open() as src:
         for line in src:
             try:
@@ -66,7 +71,8 @@ def find_credentials(pgpass, host, username):
                     return creds
             except TypeError:
                 continue
-    raise CredentialsNotFound()
+
+    raise CredentialsNotFound("No legacy DB settings found")
 
 
 def append_credentials(pgpass, dbcreds):
@@ -175,10 +181,10 @@ def test_no_pgpass(tmpdir):
     path = Path(str(path))
 
     assert not path.exists()
-    #
-    # creds = find_credentials(path)
-    #
-    # assert creds == None
+
+    # No pgpass file exists
+    with pytest.raises(CredentialsNotFound):
+        find_credentials(path, host='130.56.244.227', username='foo_user')
 
     creds = DBCreds('127', '1234', 'datacube', 'username', 'password')
 
