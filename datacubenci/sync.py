@@ -131,7 +131,7 @@ class AgdcDatasetPathIndex(DatasetPathIndex):
             yield DatasetLite.from_agdc(d)
 
     def remove_location(self, dataset: DatasetLite, uri: str) -> bool:
-        was_removed = self._index.datasets.remove_location(dataset, uri)
+        was_removed = self._index.datasets.remove_location(dataset.id, uri)
         return was_removed
 
     def get(self, dataset_id: uuid.UUID) -> Optional[DatasetLite]:
@@ -139,7 +139,7 @@ class AgdcDatasetPathIndex(DatasetPathIndex):
         return DatasetLite.from_agdc(agdc_dataset) if agdc_dataset else None
 
     def add_location(self, dataset: DatasetLite, uri: str) -> bool:
-        was_removed = self._index.datasets.add_location(dataset, uri)
+        was_removed = self._index.datasets.add_location(dataset.id, uri)
         return was_removed
 
     def add_dataset(self, dataset: DatasetLite, uri: str):
