@@ -113,3 +113,14 @@ NCI_COLLECTIONS.update({
         offset_pattern="[0-9][0-9][0-9][0-9]/[0-9][0-9]/output/pqa/LS*/ga-metadata.yaml",
     ),
 })
+
+# Ingested fractional cover
+# LS5_TM_FC  LS7_ETM_FC  LS8_OLI_FC
+# /g/data/fk4/datacube/002/LS5_TM_FC/13_-22/LS5_TM_FC_3577_13_-22_20030901235428500000_v1490733226.nc
+NCI_COLLECTIONS.update({
+    'ls_fc': SceneCollection(
+        query={'product': ['ls5_fc_albers', 'ls7_fc_albers', 'ls8_fc_albers']},
+        base_path=Path('/g/data/fk4/datacube/002/LS5_TM_FC'),
+        offset_pattern="*_*/LS*FC*.nc",
+    ),
+})
