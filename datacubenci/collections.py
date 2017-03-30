@@ -120,7 +120,7 @@ NCI_COLLECTIONS.update({
 NCI_COLLECTIONS.update({
     'ls_fc': SceneCollection(
         query={'product': ['ls5_fc_albers', 'ls7_fc_albers', 'ls8_fc_albers']},
-        base_path=Path('/g/data/fk4/datacube/002/LS5_TM_FC'),
-        offset_pattern="*_*/LS*FC*.nc",
+        base_path=Path('/g/data/fk4/datacube/002'),
+        offset_pattern="LS*_FC/*_*/LS*FC*.nc",
     ),
 })
