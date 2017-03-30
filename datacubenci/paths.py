@@ -1,14 +1,12 @@
 import atexit
-import tempfile
-
-import shutil
-
 import os
+import shutil
+import tempfile
 import uuid
 from pathlib import Path
-from typing import List
+from typing import List, Iterable
 
-from datacube.utils import is_supported_document_type, read_documents
+from datacube.utils import is_supported_document_type, read_documents, InvalidDocException
 
 # This may eventually go to a config file...
 BASE_DIRECTORIES = (
@@ -136,14 +134,26 @@ def get_path_dataset_id(metadata_path: Path) -> uuid.UUID:
     return ids[0]
 
 
+def _path_dataset_ids(path: Path) -> Iterable[uuid.UUID]:
+    for _, metadata_doc in read_documents(path):
+        if metadata_doc is None:
+            raise InvalidDocException("Empty document from path {}".format(path))
+
+        if 'id' not in metadata_doc:
+            raise InvalidDocException("No id in path metadata: {}".format(path))
+
+        yield uuid.UUID(metadata_doc['id'])
+
+
 def get_path_dataset_ids(path: Path) -> List[uuid.UUID]:
     """
     Get all dataset ids embedded by the given path.
 
     (Either a standalone metadata file or embedded in a given NetCDF)
+
+    :raises InvalidDocException
     """
-    ids = [uuid.UUID(metadata_doc['id']) for _, metadata_doc in read_documents(path)]
-    return ids
+    return list(_path_dataset_ids(path))
 
 
 def get_dataset_paths(metadata_path):

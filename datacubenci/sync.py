@@ -29,7 +29,7 @@ from datacube.index._api import Index
 from datacube.model import Dataset
 from datacube.scripts import dataset as dataset_script
 from datacube.ui import click as ui
-from datacube.utils import uri_to_local_path
+from datacube.utils import uri_to_local_path, InvalidDocException
 
 _LOG = structlog.get_logger()
 
@@ -312,7 +312,11 @@ def _find_uri_mismatches(all_file_uris: Iterable[str], index: DatasetPathIndex) 
         log = _LOG.bind(path=path)
         log.debug("index.get_dataset_ids_for_uri")
         indexed_datasets = set(index.get_datasets_for_uri(uri))
-        datasets_in_file = set(map(DatasetLite, paths.get_path_dataset_ids(path) if path.exists() else []))
+        try:
+            datasets_in_file = set(map(DatasetLite, paths.get_path_dataset_ids(path) if path.exists() else []))
+        except InvalidDocException:
+            log.exception("invalid_path")
+            continue
 
         log.info("dataset_ids",
                  indexed_dataset_ids=ids(indexed_datasets),
