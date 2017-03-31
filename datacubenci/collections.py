@@ -35,7 +35,7 @@ class SceneCollection(Collection):
                  delete_archived_after_days=None,
                  expected_parents: Tuple[str] = None):
         super().__init__(query, base_path, offset_pattern,
-                         unique=('sat_path.lower', 'sat_row.lower', 'time.lower.day'),
+                         unique=('time.lower.day', 'sat_path.lower', 'sat_row.lower'),
                          delete_archived_after_days=delete_archived_after_days,
                          expected_parents=expected_parents)
 
@@ -45,7 +45,7 @@ NCI_COLLECTIONS = {
         query={'metadata_type': 'telemetry'},
         base_path=Path('/g/data/v10/repackaged/rawdata/0'),
         offset_pattern="[0-9][0-9][0-9][0-9]/[0-9][0-9]/*/ga-metadata.yaml",
-        unique=('platform', 'time.lower.day'),
+        unique=('time.lower.day', 'platform'),
     ),
 }
 
