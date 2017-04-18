@@ -194,8 +194,8 @@ def _expected_checksum_path(dataset_path):
     """
     if dataset_path.is_dir():
         return dataset_path.joinpath('package.sha1')
-    else:
-        return dataset_path.parent.joinpath(dataset_path.name + '.sha1')
+
+    return dataset_path.parent.joinpath(dataset_path.name + '.sha1')
 
 
 def _copy_to_mdss(log, metadata_path, dataset_id, destination_project, dry_run=True):

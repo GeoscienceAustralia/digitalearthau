@@ -94,8 +94,8 @@ def printable_dt(val):
 def _assume_utc(val):
     if val.tzinfo is None:
         return val.replace(tzinfo=tz.tzutc())
-    else:
-        return val.astimezone(tz.tzutc())
+
+    return val.astimezone(tz.tzutc())
 
 
 @printable.register(Range)

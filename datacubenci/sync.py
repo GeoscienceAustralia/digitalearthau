@@ -89,9 +89,6 @@ class DatasetPathIndex:
     (MemoryDatasetPathIndex and AgdcDatasetPathIndex)
     """
 
-    def __init__(self):
-        super().__init__()
-
     def iter_all_uris(self) -> Iterable[str]:
         raise NotImplementedError
 
