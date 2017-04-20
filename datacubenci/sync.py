@@ -7,8 +7,8 @@ Locations will be added/removed according to whether they're on disk, extra data
 import dawg
 import logging
 import sys
+import time
 import uuid
-from collections import namedtuple
 from datetime import datetime
 from itertools import chain
 from pathlib import Path
@@ -20,9 +20,6 @@ import click
 import structlog
 from boltons import fileutils
 from boltons import strutils
-from datacubenci import paths
-from datacubenci.archive import CleanConsoleRenderer
-from datacubenci.collections import NCI_COLLECTIONS
 
 from datacube.index import index_connect
 from datacube.index._api import Index
@@ -30,6 +27,12 @@ from datacube.model import Dataset
 from datacube.scripts import dataset as dataset_script
 from datacube.ui import click as ui
 from datacube.utils import uri_to_local_path, InvalidDocException
+from datacubenci import paths
+from datacubenci.archive import CleanConsoleRenderer
+from datacubenci.collections import NCI_COLLECTIONS
+
+# 12 hours (roughly the same workday)
+CACHE_TIMEOUT_SECS = 60 * 60 * 12
 
 _LOG = structlog.get_logger()
 
@@ -156,6 +159,14 @@ class AgdcDatasetPathIndex(DatasetPathIndex):
         self._index.close()
 
 
+def cache_is_too_old(path):
+    if not path.exists():
+        return True
+
+    oldest_valid_time = time.time() - CACHE_TIMEOUT_SECS
+    return path.stat().st_mtime < oldest_valid_time
+
+
 def _build_pathset(
         log: logging.Logger,
         path_search_root: Path,
@@ -168,7 +179,7 @@ def _build_pathset(
     Optionally use the given cache directory to cache repeated builds.
     """
     locations_cache = cache_path.joinpath('locations.dawg') if cache_path else None
-    if locations_cache and locations_cache.exists():
+    if locations_cache and not cache_is_too_old(locations_cache):
         path_set = dawg.CompletionDAWG()
         log.debug("paths.trie.cache.load", file=locations_cache)
         path_set.load(str(locations_cache))
