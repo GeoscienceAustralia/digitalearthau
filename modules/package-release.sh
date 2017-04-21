@@ -21,14 +21,14 @@ py_module_version=$(date +'%Y%m%d')
 module_dir="/g/data/v10/public/modules"
 
 pushd "${dir}/py-environment"
-    if [ ! -e "${module_dir}/agdc-py3-env/${py_module_version}" ];
+    if [ ! -e "${module_dir}/modulefiles/agdc-py3-env/${py_module_version}" ];
     then
         echo
         echo "Creating PY3 Environment"
         ./package-module.sh --variant py3 --moduledir ${module_dir};
     fi
 
-    if [ ! -e "${module_dir}/agdc-py2-env/${py_module_version}" ];
+    if [ ! -e "${module_dir}/modulefiles/agdc-py2-env/${py_module_version}" ];
     then
         echo
         echo "Creating PY2 Environment"
@@ -37,7 +37,7 @@ pushd "${dir}/py-environment"
 popd
 
 pushd "${dir}/agdc"
-    if [ ! -e "${module_dir}/agdc-py3/${agdc_version}" ];
+    if [ ! -e "${module_dir}/modulefiles/agdc-py3/${agdc_version}" ];
     then
         echo
         echo "Creating PY3 AGDC ${agdc_version}"
@@ -46,7 +46,7 @@ pushd "${dir}/agdc"
             --moduledir ${module_dir} \
             --version ${agdc_version}
     fi
-    if [ ! -e "${module_dir}/agdc-py2/${agdc_version}" ];
+    if [ ! -e "${module_dir}/modulefiles/agdc-py2/${agdc_version}" ];
     then
         echo
         echo "Creating PY2 AGDC ${agdc_version}"
