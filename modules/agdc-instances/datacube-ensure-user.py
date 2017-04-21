@@ -6,18 +6,19 @@
 # Or create a new user account if required.
 #
 from __future__ import print_function
-from collections import namedtuple
-import os
-import click
-import random
-import pwd
 
-import pytest
-from boltons.fileutils import atomic_save
-from pathlib import Path
+import os
+import pwd
+import random
 import string
 import sys
+from collections import namedtuple
+from pathlib import Path
+
+import click
 import psycopg2
+import pytest
+from boltons.fileutils import atomic_save
 
 OLD_DB_HOST = '130.56.244.227'
 PASSWORD_LENGTH = 32
@@ -168,6 +169,18 @@ def gen_password(length=20):
 
 
 if __name__ == '__main__':
+    if sys.version_info[0] == 2:
+        sys.stderr.write("""
+Warning: we may discontinue Python 2 support in the near future.
+
+Please consider moving to our Python 3 module: agdc-py3-prod
+                                                                                                                                                       
+  -> If you have a hard requirement on Python 2 that makes the change 
+     difficult, please notify us at simon.oliver@ga.gov.au
+  -> The python-modernize command is available to ease conversions, 
+     see: https://python-modernize.readthedocs.io
+""")
+        sys.stderr.flush()
     main()
 
 
