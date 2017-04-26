@@ -49,7 +49,7 @@ dependencies:
 - psutil
 - psycopg2
 - py6s
-- pylint
+- pylint == 1.6.4
 - pytables
 - pytest
 - pytest-cov
