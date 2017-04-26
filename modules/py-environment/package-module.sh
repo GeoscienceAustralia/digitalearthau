@@ -42,7 +42,7 @@ py2)
     conda_url=https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh
     ;;
 py3)
-    python='3.5'
+    python='3.6'
     conda_url=https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
     ;;
 *)
