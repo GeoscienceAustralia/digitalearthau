@@ -5,7 +5,6 @@ set -eu
 umask 022
 
 variant=py2
-conda_url=http://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
 export module_dir=/g/data/v10/public/modules
 
 while [[ $# > 0 ]]
@@ -40,9 +39,11 @@ done
 case $variant in
 py2)
     python='2.7'
+    conda_url=https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh
     ;;
 py3)
     python='3.5'
+    conda_url=https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
     ;;
 *)
     echo Unknown variant. Must be one of py2, py3
