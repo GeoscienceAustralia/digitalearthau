@@ -66,10 +66,10 @@ echo    # (optional) move to a new line
 if [[ $REPLY =~ ^[Yy]$ ]]
 then
     wget ${conda_url} -O miniconda.sh
-    bash miniconda.sh -b -p ${package_dest}
+    bash miniconda.sh -b -p "${package_dest}"
 
     # The root folder (but not its contents) is missing public read/execute by default (?)
-    chmod a+rx ${package_dest}
+    chmod a+rx "${package_dest}"
 
     ${package_dest}/bin/conda config --prepend channels conda-forge --system
     # update root env to the latest python and packages
@@ -85,7 +85,7 @@ then
     # create the env
     ${package_dest}/bin/conda env create --file env.yaml
 
-    chmod -R a-w ${package_dest}
+    chmod -R a-w "${package_dest}"
 
     modulefile_dir="${module_dir}/modulefiles/${package_name}"
     mkdir -v -p "${modulefile_dir}"
