@@ -85,6 +85,8 @@ then
     # create the env
     ${package_dest}/bin/conda env create --file env.yaml
 
+    chmod -R a-w ${package_dest}
+
     modulefile_dir="${module_dir}/modulefiles/${package_name}"
     mkdir -v -p "${modulefile_dir}"
 
