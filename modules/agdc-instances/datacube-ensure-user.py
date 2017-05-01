@@ -92,10 +92,16 @@ def append_credentials(pgpass, dbcreds):
         fout.write(':'.join(dbcreds) + '\n')
 
 
+_PWD = pwd.getpwuid(os.geteuid())
+CURRENT_USER = _PWD.pw_name
+CURRENT_REAL_NAME = _PWD.pw_gecos
+CURRENT_HOME_DIR = _PWD.pw_dir
+
+
 @click.command()
 @click.argument('hostname')
 @click.argument('port', type=click.INT)
-@click.argument('username', default=os.environ['USER'], required=False)
+@click.argument('username', default=CURRENT_USER, required=False)
 def main(hostname, port, username):
     """
     Ensure that a user account exists in the specified Data Cube Database
@@ -105,7 +111,7 @@ def main(hostname, port, username):
 
     dbcreds = DBCreds(host=hostname, port=str(port), username=username,
                       database='datacube', password=None)
-    pgpass = Path(os.environ['HOME']) / '.pgpass'
+    pgpass = Path(CURRENT_HOME_DIR) / '.pgpass'
 
     if can_connect(dbcreds):
         # User can connect to requested database without a password, no more work to do
@@ -137,7 +143,8 @@ def main(hostname, port, username):
 
 def create_db_account(dbcreds):
     """ Create AGDC user account on the requested """
-    real_name = get_real_name()
+    real_name = CURRENT_REAL_NAME if dbcreds.username == CURRENT_USER else None
+
     dbcreds = dbcreds._replace(database='*', password=gen_password())
     try:
         with psycopg2.connect(host=dbcreds.host, port=dbcreds.port,
@@ -153,12 +160,6 @@ def create_db_account(dbcreds):
             print_stderr('Error creating user account for {}: {}'.format(dbcreds.username, err))
         raise err
     return dbcreds
-
-
-def get_real_name():
-    uid = os.getuid()
-    info = pwd.getpwuid(uid)
-    return info.pw_gecos
 
 
 def gen_password(length=20):
