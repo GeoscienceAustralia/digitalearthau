@@ -143,7 +143,7 @@ def main(hostname, port, username):
 
 def create_db_account(dbcreds):
     """ Create AGDC user account on the requested """
-    real_name = CURRENT_REAL_NAME if dbcreds.username == CURRENT_USER else None
+    real_name = CURRENT_REAL_NAME if dbcreds.username == CURRENT_USER else ''
 
     dbcreds = dbcreds._replace(database='*', password=gen_password())
     try:
