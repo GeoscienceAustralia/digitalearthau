@@ -70,9 +70,10 @@ dependencies:
 - pip:
   - boltons
   - ciso8601
+  - compliance-checker
   - DAWG
-  - modernize
   - hdmedians
+  - modernize
   - pypeg2
   - skyfield
   - structlog[dev]
