@@ -118,10 +118,22 @@ NCI_COLLECTIONS.update({
 # LS5_TM_FC  LS7_ETM_FC  LS8_OLI_FC
 # /g/data/fk4/datacube/002/LS5_TM_FC/13_-22/LS5_TM_FC_3577_13_-22_20030901235428500000_v1490733226.nc
 NCI_COLLECTIONS.update({
-    'ls_fc': Collection(
-        query={'product': ['ls5_fc_albers', 'ls7_fc_albers', 'ls8_fc_albers']},
+    'ls5_fc': Collection(
+        query={'product': 'ls5_fc_albers'},
         base_path=Path('/g/data/fk4/datacube/002'),
-        offset_pattern="LS*_FC/*_*/LS*FC*.nc",
+        offset_pattern="LS5_TM_FC/*_*/LS5*FC*.nc",
         unique=('time.lower.day', 'lat', 'lon'),
     ),
+    'ls7_fc': Collection(
+        query={'product': 'ls7_fc_albers'},
+        base_path=Path('/g/data/fk4/datacube/002'),
+        offset_pattern="LS7_ETM_FC/*_*/LS7*FC*.nc",
+        unique=('time.lower.day', 'lat', 'lon'),
+    ),
+    'ls8_fc': Collection(
+        query={'product': 'ls8_fc_albers'},
+        base_path=Path('/g/data/fk4/datacube/002'),
+        offset_pattern="LS8_OLI_FC/*_*/LS8*FC*.nc",
+        unique=('time.lower.day', 'lat', 'lon'),
+    )
 })
