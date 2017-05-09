@@ -1,6 +1,8 @@
 import collections
+import logging
 import uuid
 from datetime import datetime, timedelta
+from pathlib import Path
 from typing import Iterable, List, Mapping, Optional
 
 import pytest
@@ -9,7 +11,7 @@ import structlog
 from datacubenci.archive import CleanConsoleRenderer
 from datacubenci.collections import Collection
 from datacubenci.paths import write_files
-from datacubenci.sync import differences as mm, fixes, scan
+from datacubenci.sync import differences as mm, fixes, scan, Mismatch
 from datacubenci.sync.index import DatasetLite, DatasetPathIndex
 
 
@@ -208,30 +210,45 @@ def test_index_disk_sync():
     )
 
 
-def _check_sync(expected_paths, index, collection: Collection,
-                expected_mismatches, expected_index_result: Mapping[DatasetLite, Iterable[str]], cache_path):
+def _check_sync(expected_paths: Iterable[str],
+                index: MemoryDatasetPathIndex,
+                collection: Collection,
+                expected_mismatches: Iterable[Mismatch],
+                expected_index_result: Mapping[DatasetLite, Iterable[str]],
+                cache_path: Path):
+    """Check the correct outputs come from the given sync inputs"""
     log = structlog.getLogger()
 
     cache_path = cache_path.joinpath(str(uuid.uuid4()))
     cache_path.mkdir()
 
     _check_pathset_loading(cache_path, expected_paths, index, log, collection)
+
     mismatches = _check_mismatch_find(cache_path, expected_mismatches, index, log, collection)
 
-    # No change should be made to index if fix settings are all false.
-    starting_index = index.as_map()
-    # Default settings are all false.
-    fixes.fix_mismatches(mismatches, index)
-    assert starting_index == index.as_map(), "Changes made to index despite all fix settings being " \
-                                             "false (index_missing=False etc)"
+    _check_mismatch_fix(index, mismatches, expected_index_result)
 
-    # Apply function should result in the expected index.
-    fixes.fix_mismatches(mismatches, index, index_missing=True, update_locations=True)
-    assert expected_index_result == index.as_map()
+
+# noinspection PyProtectedMember
+def _check_pathset_loading(cache_path: Path,
+                           expected_paths: Iterable[str],
+                           index: MemoryDatasetPathIndex,
+                           log: logging.Logger,
+                           collection: Collection):
+    """Check that the right mix of paths (index and filesystem) are loaded"""
+    path_set = scan._build_pathset(log, collection.base_path, collection.offset_pattern, index, cache_path)
+
+    loaded_paths = set(path_set.iterkeys('file://'))
+    assert loaded_paths == set(expected_paths)
+
+    # Sanity check that a random path doesn't match...
+    dummy_dataset = cache_path.joinpath('dummy_dataset', 'ga-metadata.yaml')
+    assert dummy_dataset.absolute().as_uri() not in path_set
 
 
 def _check_mismatch_find(cache_path, expected_mismatches, index, log, collection: Collection):
-    # Now check the actual mismatch output
+    """Check that the correct mismatches were found"""
+
     mismatches = []
     for mismatch in scan.find_index_disk_mismatches(log, index, collection.base_path, collection.offset_pattern,
                                                     cache_path=cache_path):
@@ -256,15 +273,18 @@ def _check_mismatch_find(cache_path, expected_mismatches, index, log, collection
     return mismatches
 
 
-# noinspection PyProtectedMember
-def _check_pathset_loading(cache_path, expected_paths, index, log, collection: Collection):
-    path_set = scan._build_pathset(log, collection.base_path, collection.offset_pattern, index, cache_path)
-    # All the paths we expect should be there.
-    for expected_path in expected_paths:
-        assert expected_path in path_set
-    # Nothing else: length matches. There's no len() on the dawg.
-    loaded_path_count = sum(1 for p in path_set.iterkeys('file://'))
-    assert loaded_path_count == len(expected_paths)
-    # Sanity check that a random path doesn't match...
-    dummy_dataset = cache_path.joinpath('dummy_dataset', 'ga-metadata.yaml')
-    assert dummy_dataset.absolute().as_uri() not in path_set
+def _check_mismatch_fix(index: MemoryDatasetPathIndex,
+                        mismatches: Iterable[Mismatch],
+                        expected_index_result: Mapping[DatasetLite, Iterable[str]]):
+    """Check that the index is correctly updated when fixing mismatches"""
+
+    # First check that no change is made to the index if we have all fixes set to False.
+    starting_index = index.as_map()
+    # Default settings are all false.
+    fixes.fix_mismatches(mismatches, index)
+    assert starting_index == index.as_map(), "Changes made to index despite all fix settings being " \
+                                             "false (index_missing=False etc)"
+
+    # Now perform fixes, check that they match expected.
+    fixes.fix_mismatches(mismatches, index, index_missing=True, update_locations=True)
+    assert expected_index_result == index.as_map()
