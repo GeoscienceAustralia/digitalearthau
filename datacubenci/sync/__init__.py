@@ -17,6 +17,7 @@ from datacube.ui import click as ui
 from datacubenci.archive import CleanConsoleRenderer
 from datacubenci.collections import get_collection, registered_collection_names
 from datacubenci.sync import scan
+from datacubenci.sync.index import AgdcDatasetPathIndex
 from . import fixes
 from .differences import Mismatch
 
@@ -25,7 +26,7 @@ _LOG = structlog.get_logger()
 
 @click.command()
 @ui.global_cli_options
-@click.option('--path-cache-folder',
+@click.option('--cache-folder',
               type=click.Path(exists=True, readable=True, writable=True),
               # 'cache' folder in current directory.
               default='cache')
@@ -51,7 +52,7 @@ _LOG = structlog.get_logger()
 @click.argument('collections',
                 type=click.Choice(registered_collection_names()),
                 nargs=-1)
-@ui.pass_index()
+@ui.pass_index(expect_initialised=False)
 def cli(index: Index, collections: Iterable[str], cache_folder: str, f: str, o: str,
         min_trash_age_hours: bool, **fix_settings):
     init_logging()
@@ -86,10 +87,11 @@ def cli(index: Index, collections: Iterable[str], cache_folder: str, f: str, o: 
         )
 
     try:
-        fixes.fix_mismatches(mismatches, index, o,
-                             min_trash_age_hours=min_trash_age_hours,
-                             pre_fix=print_mismatch,
-                             **fix_settings)
+        with AgdcDatasetPathIndex(index, None) as path_index:
+            fixes.fix_mismatches(mismatches, path_index,
+                                 min_trash_age_hours=min_trash_age_hours,
+                                 pre_fix=print_mismatch,
+                                 **fix_settings)
     finally:
         if o:
             out_f.close()
