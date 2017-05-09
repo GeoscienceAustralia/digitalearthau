@@ -22,11 +22,11 @@ from datacube.ui import click as ui
 from datacube.utils import uri_to_local_path, InvalidDocException
 from datacubenci import paths
 from datacubenci.archive import CleanConsoleRenderer
-from datacubenci.collections import NCI_COLLECTIONS
-from datacubenci.sync import fixes
-from datacubenci.sync.differences import ArchivedDatasetOnDisk, Mismatch, LocationMissingOnDisk, LocationNotIndexed, \
+from datacubenci.collections import Collection, get_collection, registered_collection_names
+from . import fixes
+from .differences import ArchivedDatasetOnDisk, Mismatch, LocationMissingOnDisk, LocationNotIndexed, \
     DatasetNotIndexed
-from datacubenci.sync.index import DatasetPathIndex, DatasetLite
+from .index import DatasetPathIndex, DatasetLite, AgdcDatasetPathIndex
 
 # 12 hours (roughly the same workday)
 CACHE_TIMEOUT_SECS = 60 * 60 * 12
@@ -157,7 +157,7 @@ def _find_uri_mismatches(all_file_uris: Iterable[str], index: DatasetPathIndex) 
               type=click.Path(writable=True, dir_okay=False),
               help="Output to file instead of stdout")
 @click.argument('collections',
-                type=click.Choice(NCI_COLLECTIONS.keys()),
+                type=click.Choice(registered_collection_names()),
                 nargs=-1)
 @ui.pass_index()
 def cli(index: Index, collections: Iterable[str], cache_folder: str, f: str, o: str,
@@ -172,7 +172,10 @@ def cli(index: Index, collections: Iterable[str], cache_folder: str, f: str, o: 
     if f:
         mismatches = mismatches_from_file(Path(f))
     else:
-        mismatches = find_collection_mismatches(collections, cache_folder, index)
+        mismatches = mismatches_for_collections(
+            (get_collection(collection_name) for collection_name in collections),
+            Path(cache_folder), index
+        )
 
     for mismatch in mismatches:
         _LOG.info('mismatch.found', mismatch=mismatch)
@@ -211,17 +214,13 @@ def mismatches_from_file(f: Path):
     return []
 
 
-def find_collection_mismatches(collections, cache_folder, index):
-    for collection_name in collections:
-        collection = NCI_COLLECTIONS[collection_name]
-
-        cache = Path(cache_folder)
-
-        log = _LOG.bind(collection=collection_name)
-        collection_cache = cache.joinpath(query_name(collection.query))
+def mismatches_for_collections(collections: Iterable[Collection], cache_folder: Path, index: Index):
+    for collection in collections:
+        log = _LOG.bind(collection=collection.name)
+        collection_cache = cache_folder.joinpath(query_name(collection.query))
         fileutils.mkdir_p(str(collection_cache))
 
-        with index.AgdcDatasetPathIndex(index, collection.query) as path_index:
+        with AgdcDatasetPathIndex(index, collection.query) as path_index:
             yield from find_index_disk_mismatches(log,
                                                   path_index,
                                                   collection.base_path,
@@ -230,7 +229,7 @@ def find_collection_mismatches(collections, cache_folder, index):
 
 
 def init_logging():
-    # Direct stuctlog into standard logging.
+    # Direct structlog into standard logging.
     structlog.configure(
         processors=[
             structlog.stdlib.filter_by_level,

@@ -146,16 +146,19 @@ def main():
             'Usage: {} [collections...]\n\n'
             'Where collections are among: \n\t{}\n\n'
             'Or specify --all to check all\n'.format(
-                sys.argv[0], '\n\t'.join(sorted(collections.NCI_COLLECTIONS.keys())))
+                sys.argv[0], '\n\t'.join(sorted(collections.registered_collection_names())))
         )
         sys.exit(1)
 
     if len(sys.argv) > 1 and sys.argv[1] == '--all':
-        cos = list(collections.NCI_COLLECTIONS.values())
+        collection_names = collections.registered_collection_names()
     else:
-        cos = [collections.NCI_COLLECTIONS[name] for name in sys.argv[1:]]
+        collection_names = sys.argv[1:]
 
-    write_duplicates_csv(cos, sys.stdout)
+    write_duplicates_csv(
+        [collections.get_collection(name) for name in collection_names],
+        sys.stdout
+    )
 
 
 if __name__ == '__main__':
