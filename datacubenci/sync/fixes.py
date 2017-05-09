@@ -48,18 +48,18 @@ def do_trash_archived(mismatch: Mismatch, index: DatasetPathIndex, min_age_hours
 
 @do_trash_archived.register(ArchivedDatasetOnDisk)
 def _(mismatch: ArchivedDatasetOnDisk, index: DatasetPathIndex, min_age_hours: int):
+    # all datasets at location must have been archived to trash.
+    for dataset in index.get_datasets_for_uri(mismatch.uri):
+        # Must be archived
+        if dataset.archived_time is None:
+            _LOG.info("do_trash_archived.active_siblings", dataset_id=mismatch.dataset.id)
+            return
+        # Archived more than min_age_hours ago
+        if dataset.archived_time > (datetime.utcnow() - timedelta(hours=min_age_hours)):
+            _LOG.info("do_trash_archived.too_young", dataset_id=mismatch.dataset.id)
+            return
 
-    # Must have been archived more than min_age_hours ago to trash.
-    if mismatch.dataset.archived_time > (datetime.utcnow() - timedelta(hours=min_age_hours)):
-        _LOG.info("do_trash_archived.too_young", dataset_id=mismatch.dataset.id)
-        return
-
-    local_path = uri_to_local_path(mismatch.uri)
-    if not local_path.exists():
-        _LOG.warning("do_trash_archived.not_exist", path=local_path)
-        return
-
-    _trash(local_path)
+    _trash(mismatch, index)
 
 
 @singledispatch
@@ -69,16 +69,22 @@ def do_trash_missing(mismatch: Mismatch, index: DatasetPathIndex):
 
 @do_trash_missing.register(DatasetNotIndexed)
 def _(mismatch: DatasetNotIndexed, index: DatasetPathIndex):
+    # If any (other) indexed datasets exist at the same location we can't trash it.
+    datasets_at_location = list(index.get_datasets_for_uri(mismatch.uri))
+    if datasets_at_location:
+        _LOG.info("do_trash_missing.indexed_siblings_exist", uri=mismatch.uri)
+        return
+
+    _trash(mismatch, index)
+
+
+def _trash(mismatch: Mismatch, index: DatasetPathIndex):
     local_path = uri_to_local_path(mismatch.uri)
 
     if not local_path.exists():
-        _LOG.warning("do_trash_missing.not_exist", path=local_path)
+        _LOG.warning("trash.not_exist", path=local_path)
         return
 
-    _trash(local_path)
-
-
-def _trash(local_path):
     # TODO: to handle sibling-metadata we should trash "all_dataset_paths" too.
     base_path, all_dataset_files = paths.get_dataset_paths(local_path)
 
