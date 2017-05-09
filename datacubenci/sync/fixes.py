@@ -1,4 +1,5 @@
 import os
+from datetime import datetime, timedelta
 from functools import singledispatch
 from typing import Iterable, Callable
 
@@ -47,10 +48,15 @@ def do_trash_archived(mismatch: Mismatch, index: DatasetPathIndex, min_age_hours
 
 @do_trash_archived.register(ArchivedDatasetOnDisk)
 def _(mismatch: ArchivedDatasetOnDisk, index: DatasetPathIndex, min_age_hours: int):
-    local_path = uri_to_local_path(mismatch.uri)
 
+    # Must have been archived more than min_age_hours ago to trash.
+    if mismatch.dataset.archived_time > (datetime.utcnow() - timedelta(hours=min_age_hours)):
+        _LOG.info("do_trash_archived.too_young", dataset_id=mismatch.dataset.id)
+        return
+
+    local_path = uri_to_local_path(mismatch.uri)
     if not local_path.exists():
-        _LOG.warning("Trying to trash a path that doesn't exist: %s", local_path)
+        _LOG.warning("do_trash_archived.not_exist", path=local_path)
         return
 
     _trash(local_path)
@@ -66,7 +72,7 @@ def _(mismatch: DatasetNotIndexed, index: DatasetPathIndex):
     local_path = uri_to_local_path(mismatch.uri)
 
     if not local_path.exists():
-        _LOG.warning("Trying to trash a path that doesn't exist: %s", local_path)
+        _LOG.warning("do_trash_missing.not_exist", path=local_path)
         return
 
     _trash(local_path)
