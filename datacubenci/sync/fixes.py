@@ -1,7 +1,12 @@
 from functools import singledispatch
+from typing import Iterable, Callable
+
+import structlog
 
 from .differences import DatasetNotIndexed, Mismatch, ArchivedDatasetOnDisk, LocationNotIndexed, LocationMissingOnDisk
 from .index import DatasetPathIndex
+
+_LOG = structlog.get_logger()
 
 
 # underscore function names are the norm with singledispatch
@@ -52,3 +57,25 @@ def do_trash_missing(mismatch: Mismatch, index: DatasetPathIndex):
 def _(mismatch: DatasetNotIndexed, index: DatasetPathIndex):
     # TODO: Trash
     pass
+
+
+def fix_mismatches(mismatches: Iterable[Mismatch], index: DatasetPathIndex,
+                   index_missing=False, trash_missing=False,
+                   trash_archived=False, min_trash_age_hours=72,
+                   update_locations=False, pre_fix: Callable[[Mismatch], None]=None):
+    for mismatch in mismatches:
+        _LOG.info('mismatch.found', mismatch=mismatch)
+
+        if pre_fix:
+            pre_fix(mismatch)
+
+        if update_locations:
+            do_update_locations(mismatch, index)
+
+        if index_missing:
+            do_index_missing(mismatch, index)
+        elif trash_missing:
+            do_trash_missing(mismatch)
+
+        if trash_archived:
+            do_trash_archived(mismatch, index, min_age_hours=min_trash_age_hours)

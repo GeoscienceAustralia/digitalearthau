@@ -9,13 +9,13 @@ import structlog
 from datacubenci.archive import CleanConsoleRenderer
 from datacubenci.collections import Collection
 from datacubenci.paths import write_files
-from datacubenci.sync import differences as mm
+from datacubenci.sync import differences as mm, fixes, scan
 from datacubenci.sync.index import DatasetLite, DatasetPathIndex
-from datacubenci.sync.sync import fix_mismatches, find_index_disk_mismatches, _build_pathset
 
 
 # These are ok in tests.
 # pylint: disable=too-many-locals, protected-access
+
 
 class MemoryDatasetPathIndex(DatasetPathIndex):
     """
@@ -219,15 +219,15 @@ def _check_sync(expected_paths, index, collection: Collection,
     mismatches = _check_mismatch_find(cache_path, expected_mismatches, index, log, collection)
 
     # Apply function should result in the expected index.
-    fix_mismatches(mismatches, index, index_missing=True, update_locations=True)
+    fixes.fix_mismatches(mismatches, index, index_missing=True, update_locations=True)
     assert expected_index_result == index.as_map()
 
 
 def _check_mismatch_find(cache_path, expected_mismatches, index, log, collection: Collection):
     # Now check the actual mismatch output
     mismatches = []
-    for mismatch in find_index_disk_mismatches(log, index, collection.base_path, collection.offset_pattern,
-                                               cache_path=cache_path):
+    for mismatch in scan.find_index_disk_mismatches(log, index, collection.base_path, collection.offset_pattern,
+                                                    cache_path=cache_path):
         print(repr(mismatch))
         mismatches.append(mismatch)
 
@@ -251,7 +251,7 @@ def _check_mismatch_find(cache_path, expected_mismatches, index, log, collection
 
 # noinspection PyProtectedMember
 def _check_pathset_loading(cache_path, expected_paths, index, log, collection: Collection):
-    path_set = _build_pathset(log, collection.base_path, collection.offset_pattern, index, cache_path)
+    path_set = scan._build_pathset(log, collection.base_path, collection.offset_pattern, index, cache_path)
     # All the paths we expect should be there.
     for expected_path in expected_paths:
         assert expected_path in path_set
