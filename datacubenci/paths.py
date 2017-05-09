@@ -64,7 +64,7 @@ def split_path_from_base(file_path):
     raise ValueError("Unknown location: can't calculate base directory: " + str(file_path))
 
 
-def write_files(file_dict):
+def write_files(file_dict, containing_dir=None):
     """
     Convenience method for writing a tree of files to a temporary directory.
 
@@ -76,19 +76,22 @@ def write_files(file_dict):
 
     write_files({'test.txt': 'contents of text file'})
 
+    :param containing_dir: Optionally specify the directory to add the files to.
     :type file_dict: dict
     :rtype: pathlib.Path
     :return: Created temporary directory path
     """
-    containing_dir = tempfile.mkdtemp(suffix='neotestrun')
-    _write_files_to_dir(containing_dir, file_dict)
+    if not containing_dir:
+        containing_dir = Path(tempfile.mkdtemp(suffix='neotestrun'))
+
+    _write_files_to_dir(str(containing_dir), file_dict)
 
     def remove_if_exists(path):
         if os.path.exists(path):
             shutil.rmtree(path)
 
-    atexit.register(remove_if_exists, containing_dir)
-    return Path(containing_dir)
+    atexit.register(remove_if_exists, str(containing_dir))
+    return containing_dir
 
 
 def _write_files_to_dir(directory_path, file_dict):

@@ -223,6 +223,51 @@ def test_index_disk_sync(syncable_environment):
     assert uri_to_local_path(on_disk_uri).exists(), "On-disk location shouldn't be touched"
 
 
+def test_remove_missing(syncable_environment):
+    """An on-disk dataset that's not indexed should be trashed when trash_missing=True"""
+    ls8_collection, on_disk, on_disk_uri, root = syncable_environment
+
+    # Empty index
+    index = MemoryDatasetPathIndex()
+
+    register_base_directory(root)
+    on_disk_path = root.joinpath('ls8_scenes', 'ls8_test_dataset', 'ga-metadata.yaml')
+    trashed_path = root.joinpath('.trash', 'ls8_scenes', 'ls8_test_dataset', 'ga-metadata.yaml')
+
+    # Add a second dataset outside of the collection folder. Should not be touched!
+    paths.write_files(
+        {
+            'ls8_test_dataset2': {
+                'ga-metadata.yaml': 'id: 5294efa6-348d-11e7-a079-185e0f80a5c0\n',
+                'dummy-file.txt': ''
+            }
+        },
+        containing_dir=root
+    )
+
+    outside_path = root.joinpath('ls8_test_dataset2')
+    assert outside_path.exists()
+
+    assert on_disk_path.exists(), "On-disk location should exist before test begins."
+    assert not trashed_path.exists(), "Trashed file shouldn't exit."
+    _check_sync(
+        collection=ls8_collection,
+        expected_paths=[
+            on_disk_uri
+        ],
+        expected_mismatches=[
+            mm.DatasetNotIndexed(on_disk, on_disk_uri)
+        ],
+        expected_index_result={},
+        index=index,
+        cache_path=root,
+        fix_settings=dict(trash_missing=True, update_locations=True)
+    )
+    assert not on_disk_path.exists(), "On-disk location should exist before test begins."
+    assert trashed_path.exists(), "Trashed file shouldn't exit."
+    assert outside_path.exists(), "Dataset outside of collection folder shouldn't be touched"
+
+
 @pytest.mark.parametrize("archived_ago,expect_to_be_trashed", [
     # Default settings: trash files archived more than three days ago.
     # Four days ago, should be trashed.

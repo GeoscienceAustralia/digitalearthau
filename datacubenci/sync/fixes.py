@@ -113,7 +113,7 @@ def fix_mismatches(mismatches: Iterable[Mismatch],
         if index_missing:
             do_index_missing(mismatch, index)
         elif trash_missing:
-            do_trash_missing(mismatch)
+            do_trash_missing(mismatch, index)
 
         if trash_archived:
             _LOG.info('mismatch.trash', mismatch=mismatch)
