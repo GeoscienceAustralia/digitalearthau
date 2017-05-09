@@ -125,7 +125,7 @@ def test_index_disk_sync():
     old_indexed = DatasetLite(uuid.UUID('b9d77d10-e1c6-11e6-bf63-185e0f80a5c0'))
     index.add_dataset(old_indexed, missing_uri)
 
-    ls8_collection = Collection('ls8_scenes', None, root.joinpath('ls8_scenes'), 'ls*/ga-metadata.yaml', [])
+    ls8_collection = Collection('ls8_scenes', {}, root.joinpath('ls8_scenes'), 'ls*/ga-metadata.yaml', [])
     _check_sync(
         collection=ls8_collection,
         expected_paths=[
@@ -217,6 +217,13 @@ def _check_sync(expected_paths, index, collection: Collection,
 
     _check_pathset_loading(cache_path, expected_paths, index, log, collection)
     mismatches = _check_mismatch_find(cache_path, expected_mismatches, index, log, collection)
+
+    # No change should be made to index if fix settings are all false.
+    starting_index = index.as_map()
+    # Default settings are all false.
+    fixes.fix_mismatches(mismatches, index)
+    assert starting_index == index.as_map(), "Changes made to index despite all fix settings being " \
+                                             "false (index_missing=False etc)"
 
     # Apply function should result in the expected index.
     fixes.fix_mismatches(mismatches, index, index_missing=True, update_locations=True)
