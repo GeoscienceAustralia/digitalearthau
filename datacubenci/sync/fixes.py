@@ -48,7 +48,7 @@ def do_trash_missing(mismatch: Mismatch, index: DatasetPathIndex):
     pass
 
 
-@do_index_missing.register(DatasetNotIndexed)
+@do_trash_missing.register(DatasetNotIndexed)
 def _(mismatch: DatasetNotIndexed, index: DatasetPathIndex):
     # TODO: Trash
     pass
