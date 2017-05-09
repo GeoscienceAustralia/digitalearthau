@@ -52,7 +52,7 @@ def _(mismatch: ArchivedDatasetOnDisk, index: DatasetPathIndex, min_age_hours: i
     for dataset in index.get_datasets_for_uri(mismatch.uri):
         # Must be archived
         if dataset.archived_time is None:
-            _LOG.info("do_trash_archived.active_siblings", dataset_id=mismatch.dataset.id)
+            _LOG.warning("do_trash_archived.active_siblings", dataset_id=mismatch.dataset.id)
             return
         # Archived more than min_age_hours ago
         if dataset.archived_time > (datetime.utcnow() - timedelta(hours=min_age_hours)):
@@ -72,7 +72,7 @@ def _(mismatch: DatasetNotIndexed, index: DatasetPathIndex):
     # If any (other) indexed datasets exist at the same location we can't trash it.
     datasets_at_location = list(index.get_datasets_for_uri(mismatch.uri))
     if datasets_at_location:
-        _LOG.info("do_trash_missing.indexed_siblings_exist", uri=mismatch.uri)
+        _LOG.warning("do_trash_missing.indexed_siblings_exist", uri=mismatch.uri)
         return
 
     _trash(mismatch, index)
