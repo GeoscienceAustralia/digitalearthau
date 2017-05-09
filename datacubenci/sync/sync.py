@@ -8,156 +8,30 @@ import dawg
 import logging
 import sys
 import time
-import uuid
-from datetime import datetime
-from functools import singledispatch
 from itertools import chain
 from pathlib import Path
-from typing import Iterable, Any, Mapping, Optional
-from typing import List
-from uuid import UUID
+from typing import Iterable, Any, Mapping
 
 import click
 import structlog
 from boltons import fileutils
 from boltons import strutils
 
-from datacube.index import index_connect
 from datacube.index._api import Index
-from datacube.model import Dataset
-from datacube.scripts import dataset as dataset_script
 from datacube.ui import click as ui
 from datacube.utils import uri_to_local_path, InvalidDocException
 from datacubenci import paths
 from datacubenci.archive import CleanConsoleRenderer
-from datacubenci.collections import NCI_COLLECTIONS, Collection
+from datacubenci.collections import NCI_COLLECTIONS
+from datacubenci.sync import fixes
+from datacubenci.sync.differences import ArchivedDatasetOnDisk, Mismatch, LocationMissingOnDisk, LocationNotIndexed, \
+    DatasetNotIndexed
+from datacubenci.sync.index import DatasetPathIndex, DatasetLite
 
 # 12 hours (roughly the same workday)
 CACHE_TIMEOUT_SECS = 60 * 60 * 12
 
 _LOG = structlog.get_logger()
-
-
-class DatasetLite:
-    """
-    A small subset of datacube.model.Dataset.
-
-    A "real" dataset needs a lot of initialisation: types etc, so this is easier to test with.
-
-    We also, in this script, depend heavily on the __eq__ behaviour of this particular class (by id only), and subtle
-    bugs could occur if the core framework made changes to it.
-    """
-
-    def __init__(self, id_: uuid.UUID, archived_time: datetime = None):
-        # Sanity check of the type, as our equality checks are quietly wrong if the types don't match,
-        # and we've previously had problems with libraries accidentally switching string/uuid types...
-        assert isinstance(id_, uuid.UUID)
-        self.id = id_
-
-        self.archived_time = archived_time
-
-    @property
-    def is_archived(self):
-        """
-        Is this dataset archived?
-
-        (an archived dataset is one that is not intended to be used by users anymore: eg. it has been
-        replaced by another dataset. It will not show up in search results, but still exists in the
-        system via provenance chains or through id lookup.)
-
-        :rtype: bool
-        """
-        return self.archived_time is not None
-
-    def __eq__(self, other):
-        return self.id == other.id
-
-    def __hash__(self):
-        return hash(self.id)
-
-    @classmethod
-    def from_agdc(cls, dataset: Dataset):
-        return DatasetLite(dataset.id, archived_time=dataset.archived_time)
-
-    def __repr__(self):
-        return _simple_object_repr(self)
-
-
-class DatasetPathIndex:
-    """
-    An index of datasets and their URIs.
-
-    This is a slightly questionable attempt to make testing/mocking simpler.
-
-    There's two implementations: One in-memory and one that uses a real datacube.
-    (MemoryDatasetPathIndex and AgdcDatasetPathIndex)
-    """
-
-    def iter_all_uris(self) -> Iterable[str]:
-        raise NotImplementedError
-
-    def get_datasets_for_uri(self, uri: str) -> Iterable[DatasetLite]:
-        raise NotImplementedError
-
-    def get(self, dataset_id: uuid.UUID) -> Optional[DatasetLite]:
-        raise NotImplementedError
-
-    def add_location(self, dataset: DatasetLite, uri: str) -> bool:
-        raise NotImplementedError
-
-    def remove_location(self, dataset: DatasetLite, uri: str) -> bool:
-        raise NotImplementedError
-
-    def add_dataset(self, dataset: DatasetLite, uri: str):
-        raise NotImplementedError
-
-
-class AgdcDatasetPathIndex(DatasetPathIndex):
-    def __init__(self, index: Index, query: dict):
-        super().__init__()
-        self._index = index
-        self._query = query
-        self._rules = dataset_script.load_rules_from_types(self._index)
-
-    def iter_all_uris(self) -> Iterable[str]:
-        for uri, in self._index.datasets.search_returning(['uri'], **self._query):
-            yield str(uri)
-
-    @classmethod
-    def connect(cls, query: Mapping[str, Any]) -> 'AgdcDatasetPathIndex':
-        return cls(index_connect(application_name='datacubenci-pathsync'), query=query)
-
-    def get_datasets_for_uri(self, uri: str) -> Iterable[DatasetLite]:
-        for d in self._index.datasets.get_datasets_for_location(uri=uri):
-            yield DatasetLite.from_agdc(d)
-
-    def remove_location(self, dataset: DatasetLite, uri: str) -> bool:
-        was_removed = self._index.datasets.remove_location(dataset.id, uri)
-        return was_removed
-
-    def get(self, dataset_id: uuid.UUID) -> Optional[DatasetLite]:
-        agdc_dataset = self._index.datasets.get(dataset_id)
-        return DatasetLite.from_agdc(agdc_dataset) if agdc_dataset else None
-
-    def add_location(self, dataset: DatasetLite, uri: str) -> bool:
-        was_removed = self._index.datasets.add_location(dataset.id, uri)
-        return was_removed
-
-    def add_dataset(self, dataset: DatasetLite, uri: str):
-        path = uri_to_local_path(uri)
-
-        for d in dataset_script.load_datasets([path], self._rules):
-            if d.id == dataset.id:
-                self._index.datasets.add(d, sources_policy='ensure')
-                break
-        else:
-            raise RuntimeError('Dataset not found at path: %s, %s' % (dataset.id, uri))
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, type_, value, traceback):
-        self._index.close()
 
 
 def cache_is_too_old(path):
@@ -200,78 +74,6 @@ def _build_pathset(
     return path_set
 
 
-class Mismatch:
-    """
-    A mismatch between index and filesystem.
-
-    See the implementations for different types of mismataches.
-    """
-
-    def __init__(self, collection: Collection, dataset: DatasetLite, uri: str):
-        super().__init__()
-        self.dataset = dataset
-        self.uri = uri
-        self.collection = collection
-
-    def __repr__(self, *args, **kwargs):
-        """
-        >>> Mismatch(DatasetLite(UUID('96519c56-e133-11e6-a29f-185e0f80a5c0')), uri='/tmp/test')
-        Mismatch(dataset=DatasetLite(archived_time=None, id=UUID('96519c56-e133-11e6-a29f-185e0f80a5c0')), \
-uri='/tmp/test')
-        """
-        return _simple_object_repr(self)
-
-    def __eq__(self, other):
-        """
-        >>> m = Mismatch(DatasetLite(UUID('96519c56-e133-11e6-a29f-185e0f80a5c0')), uri='/tmp/test')
-        >>> m == m
-        True
-        >>> import copy
-        >>> m == copy.copy(m)
-        True
-        >>> n = Mismatch(DatasetLite(UUID('96519c56-e133-11e6-a29f-185e0f80a5c0')), uri='/tmp/test2')
-        >>> m == n
-        False
-        """
-        if not isinstance(other, self.__class__):
-            return False
-
-        return self.__dict__ == other.__dict__
-
-    def __hash__(self):
-        return hash(tuple(v for k, v in sorted(self.__dict__.items())))
-
-
-class LocationMissingOnDisk(Mismatch):
-    """
-    The dataset is no longer at the given location.
-
-    (Note that there may still be a file at the location, but it is not this dataset)
-    """
-    pass
-
-
-class LocationNotIndexed(Mismatch):
-    """
-    An existing dataset has been found at a new location.
-    """
-    pass
-
-
-class DatasetNotIndexed(Mismatch):
-    """
-    A dataset has not been indexed.
-    """
-    pass
-
-
-class ArchivedDatasetOnDisk(Mismatch):
-    """
-    A dataset on disk is already archived in the index.
-    """
-    pass
-
-
 def find_index_disk_mismatches(log,
                                path_index: DatasetPathIndex,
                                root_folder: Path,
@@ -282,14 +84,6 @@ def find_index_disk_mismatches(log,
     """
     pathset = _build_pathset(log, root_folder, dataset_glob, path_index, cache_path=cache_path)
     yield from _find_uri_mismatches(pathset.iterkeys('file://'), path_index)
-
-
-def fix_index_mismatches(log,
-                         index: DatasetPathIndex,
-                         mismatches: Iterable[Mismatch]):
-    for mismatch in mismatches:
-        log.debug("mismatch.apply", mismatch=mismatch)
-        mismatch.update_location(index)
 
 
 def _find_uri_mismatches(all_file_uris: Iterable[str], index: DatasetPathIndex) -> Iterable[Mismatch]:
@@ -366,18 +160,15 @@ def _find_uri_mismatches(all_file_uris: Iterable[str], index: DatasetPathIndex) 
                 type=click.Choice(NCI_COLLECTIONS.keys()),
                 nargs=-1)
 @ui.pass_index()
-def cli(index, collections, cache_folder, f, o,
-        index_missing, trash_missing, update_locations,
-        trash_archived, min_trash_age_hours):
-    # type: (Index, List[str], str, bool) -> None
+def cli(index: Index, collections: Iterable[str], cache_folder: str, f: str, o: str,
+        index_missing: bool, trash_missing: bool, update_locations: bool,
+        trash_archived: bool, min_trash_age_hours: bool):
+    init_logging()
 
     if index_missing and trash_missing:
         click.echo('Can either index missing datasets (--index-missing) , or trash them (--trash-missing), '
                    'but not both at the same time.', err=True)
         sys.exit(1)
-
-    init_logging()
-
     if f:
         mismatches = mismatches_from_file(Path(f))
     else:
@@ -393,15 +184,15 @@ def cli(index, collections, cache_folder, f, o,
             print_mismatch(mismatch)
 
         if update_locations:
-            do_update_locations(mismatch, index)
+            fixes.do_update_locations(mismatch, index)
 
         if index_missing:
-            do_index_missing(mismatch, index)
+            fixes.do_index_missing(mismatch, index)
         elif trash_missing:
-            do_trash_missing(mismatch)
+            fixes.do_trash_missing(mismatch)
 
         if trash_archived:
-            do_trash_archived(mismatch, index, min_age_hours=min_trash_age_hours)
+            fixes.do_trash_archived(mismatch, index, min_age_hours=min_trash_age_hours)
 
 
 def print_mismatch(mismatch, file=None):
@@ -414,53 +205,6 @@ def print_mismatch(mismatch, file=None):
         ))),
         file=file
     )
-
-
-@singledispatch
-def do_index_missing(mismatch: Mismatch, index: DatasetPathIndex):
-    pass
-
-
-@do_index_missing.register(DatasetNotIndexed)
-def _(mismatch: DatasetNotIndexed, index: DatasetPathIndex):
-    index.add_dataset(mismatch.dataset, mismatch.uri)
-
-
-@singledispatch
-def do_update_locations(mismatch: Mismatch, index: DatasetPathIndex):
-    pass
-
-
-@do_update_locations.register(LocationMissingOnDisk)
-def _(mismatch: LocationMissingOnDisk, index: DatasetPathIndex):
-    index.remove_location(mismatch.dataset, mismatch.uri)
-
-
-@do_update_locations.register(LocationNotIndexed)
-def _(mismatch: LocationNotIndexed, index: DatasetPathIndex):
-    index.add_location(mismatch.dataset, mismatch.uri)
-
-
-@singledispatch
-def do_trash_archived(mismatch: Mismatch, index: DatasetPathIndex, min_age_hours: int):
-    pass
-
-
-@do_trash_archived.register(ArchivedDatasetOnDisk)
-def _(mismatch: ArchivedDatasetOnDisk, index: DatasetPathIndex, min_age_hours: int):
-    # TODO: Trash if older than X
-    pass
-
-
-@singledispatch
-def do_trash_missing(mismatch: Mismatch, index: DatasetPathIndex):
-    pass
-
-
-@do_index_missing.register(DatasetNotIndexed)
-def _(mismatch: DatasetNotIndexed, index: DatasetPathIndex):
-    # TODO: Trash
-    pass
 
 
 def mismatches_from_file(f: Path):
@@ -477,7 +221,7 @@ def find_collection_mismatches(collections, cache_folder, index):
         collection_cache = cache.joinpath(query_name(collection.query))
         fileutils.mkdir_p(str(collection_cache))
 
-        with AgdcDatasetPathIndex(index, collection.query) as path_index:
+        with index.AgdcDatasetPathIndex(index, collection.query) as path_index:
             yield from find_index_disk_mismatches(log,
                                                   path_index,
                                                   collection.base_path,
@@ -522,20 +266,6 @@ def query_name(query: Mapping[str, Any]) -> str:
     )
 
 
-def _simple_object_repr(o):
-    """
-    Calculate a possible repr() for the given object using the class name and all __dict__ properties.
-
-    eg. MyClass(prop1='val1')
-
-    It will call repr() on property values too, so beware of circular dependencies.
-    """
-    return "%s(%s)" % (
-        o.__class__.__name__,
-        ", ".join("%s=%r" % (k, v) for k, v in sorted(o.__dict__.items()))
-    )
-
-
 if __name__ == '__main__':
-    main()
+    cli()
     print("Done", file=sys.stderr)
