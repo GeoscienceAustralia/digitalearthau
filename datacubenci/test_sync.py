@@ -1,22 +1,23 @@
 import collections
 import uuid
 from datetime import datetime, timedelta
-from typing import Iterable, List, Mapping, Tuple, Optional
+from typing import Iterable, List, Mapping, Optional
 
 import pytest
 import structlog
 
-from datacubenci.sync import differences as sync
 from datacubenci.archive import CleanConsoleRenderer
 from datacubenci.collections import Collection
 from datacubenci.paths import write_files
-from datacubenci.sync.index import DatasetLite
+from datacubenci.sync import differences as mm
+from datacubenci.sync.index import DatasetLite, DatasetPathIndex
+from datacubenci.sync.sync import fix_mismatches, find_index_disk_mismatches, _build_pathset
 
 
 # These are ok in tests.
 # pylint: disable=too-many-locals, protected-access
 
-class MemoryDatasetPathIndex(sync.DatasetPathIndex):
+class MemoryDatasetPathIndex(DatasetPathIndex):
     """
     An in-memory implementation, so that we can test without using a real datacube index.
     """
@@ -124,7 +125,7 @@ def test_index_disk_sync():
     old_indexed = DatasetLite(uuid.UUID('b9d77d10-e1c6-11e6-bf63-185e0f80a5c0'))
     index.add_dataset(old_indexed, missing_uri)
 
-    ls8_collection = Collection(None, root.joinpath('ls8_scenes'), 'ls*/ga-metadata.yaml', [])
+    ls8_collection = Collection('ls8_scenes', None, root.joinpath('ls8_scenes'), 'ls*/ga-metadata.yaml', [])
     _check_sync(
         collection=ls8_collection,
         expected_paths=[
@@ -132,8 +133,8 @@ def test_index_disk_sync():
             on_disk_uri
         ],
         expected_mismatches=[
-            sync.LocationMissingOnDisk(old_indexed, missing_uri),
-            sync.DatasetNotIndexed(on_disk, on_disk_uri)
+            mm.LocationMissingOnDisk(old_indexed, missing_uri),
+            mm.DatasetNotIndexed(on_disk, on_disk_uri)
         ],
         expected_index_result={
             on_disk: (on_disk_uri,),
@@ -152,8 +153,8 @@ def test_index_disk_sync():
             on_disk_uri
         ],
         expected_mismatches=[
-            sync.LocationMissingOnDisk(old_indexed, on_disk_uri),
-            sync.DatasetNotIndexed(on_disk, on_disk_uri),
+            mm.LocationMissingOnDisk(old_indexed, on_disk_uri),
+            mm.DatasetNotIndexed(on_disk, on_disk_uri),
         ],
         expected_index_result={
             on_disk: (on_disk_uri,),
@@ -174,9 +175,9 @@ def test_index_disk_sync():
             missing_uri
         ],
         expected_mismatches=[
-            sync.LocationMissingOnDisk(old_indexed, on_disk_uri),
-            sync.LocationNotIndexed(on_disk, on_disk_uri),
-            sync.LocationMissingOnDisk(on_disk, missing_uri),
+            mm.LocationMissingOnDisk(old_indexed, on_disk_uri),
+            mm.LocationNotIndexed(on_disk, on_disk_uri),
+            mm.LocationMissingOnDisk(on_disk, missing_uri),
         ],
         expected_index_result={
             on_disk: (on_disk_uri,),
@@ -197,7 +198,7 @@ def test_index_disk_sync():
             on_disk_uri
         ],
         expected_mismatches=[
-            sync.ArchivedDatasetOnDisk(archived_on_disk, on_disk_uri),
+            mm.ArchivedDatasetOnDisk(archived_on_disk, on_disk_uri),
         ],
         expected_index_result={
             on_disk: (on_disk_uri,),
@@ -218,15 +219,15 @@ def _check_sync(expected_paths, index, collection: Collection,
     mismatches = _check_mismatch_find(cache_path, expected_mismatches, index, log, collection)
 
     # Apply function should result in the expected index.
-    sync.fix_index_mismatches(log, index, mismatches)
+    fix_mismatches(mismatches, index, index_missing=True, update_locations=True)
     assert expected_index_result == index.as_map()
 
 
 def _check_mismatch_find(cache_path, expected_mismatches, index, log, collection: Collection):
     # Now check the actual mismatch output
     mismatches = []
-    for mismatch in sync.find_index_disk_mismatches(log, index, collection.base_path, collection.offset_pattern,
-                                                    cache_path=cache_path):
+    for mismatch in find_index_disk_mismatches(log, index, collection.base_path, collection.offset_pattern,
+                                               cache_path=cache_path):
         print(repr(mismatch))
         mismatches.append(mismatch)
 
@@ -250,7 +251,7 @@ def _check_mismatch_find(cache_path, expected_mismatches, index, log, collection
 
 # noinspection PyProtectedMember
 def _check_pathset_loading(cache_path, expected_paths, index, log, collection: Collection):
-    path_set = sync._build_pathset(log, collection.base_path, collection.offset_pattern, index, cache_path)
+    path_set = _build_pathset(log, collection.base_path, collection.offset_pattern, index, cache_path)
     # All the paths we expect should be there.
     for expected_path in expected_paths:
         assert expected_path in path_set

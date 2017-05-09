@@ -161,14 +161,22 @@ def _find_uri_mismatches(all_file_uris: Iterable[str], index: DatasetPathIndex) 
                 nargs=-1)
 @ui.pass_index()
 def cli(index: Index, collections: Iterable[str], cache_folder: str, f: str, o: str,
-        index_missing: bool, trash_missing: bool, update_locations: bool,
-        trash_archived: bool, min_trash_age_hours: bool):
+        min_trash_age_hours: bool, **fix_settings):
     init_logging()
 
-    if index_missing and trash_missing:
+    if fix_settings['index_missing'] and fix_settings['trash_missing']:
         click.echo('Can either index missing datasets (--index-missing) , or trash them (--trash-missing), '
                    'but not both at the same time.', err=True)
         sys.exit(1)
+
+    mismatches = load_mismatches(cache_folder, collections, f, index)
+
+    fix_mismatches(mismatches, index, o,
+                   min_trash_age_hours=min_trash_age_hours,
+                   **fix_settings)
+
+
+def load_mismatches(cache_folder, collections, f, index):
     if f:
         mismatches = mismatches_from_file(Path(f))
     else:
@@ -176,12 +184,19 @@ def cli(index: Index, collections: Iterable[str], cache_folder: str, f: str, o: 
             (get_collection(collection_name) for collection_name in collections),
             Path(cache_folder), index
         )
+    return mismatches
+
+
+def fix_mismatches(mismatches: Iterable[Mismatch], index: DatasetPathIndex, output_file: str = None,
+                   index_missing=False, trash_missing=False,
+                   trash_archived=False, min_trash_age_hours=72,
+                   update_locations=False):
 
     for mismatch in mismatches:
         _LOG.info('mismatch.found', mismatch=mismatch)
 
-        if o:
-            with Path(o) as f:
+        if output_file:
+            with Path(output_file) as f:
                 print_mismatch(mismatch, f)
         else:
             print_mismatch(mismatch)
@@ -201,7 +216,8 @@ def cli(index: Index, collections: Iterable[str], cache_folder: str, f: str, o: 
 def print_mismatch(mismatch, file=None):
     click.echo(
         '\t'.join(map(str, (
-            mismatch.collection,
+            # TODO: mismatch.collection:
+            None,
             strutils.camel2under(mismatch.__class__.__name__),
             mismatch.dataset.id,
             mismatch.uri

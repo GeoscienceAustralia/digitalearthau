@@ -1,4 +1,6 @@
-from datacubenci.collections import Collection, simple_object_repr
+from uuid import UUID
+
+from datacubenci.collections import simple_object_repr
 from .index import DatasetLite
 
 
@@ -9,11 +11,10 @@ class Mismatch:
     See the implementations for different types of mismataches.
     """
 
-    def __init__(self, collection: Collection, dataset: DatasetLite, uri: str):
+    def __init__(self, dataset: DatasetLite, uri: str):
         super().__init__()
         self.dataset = dataset
         self.uri = uri
-        self.collection = collection
 
     def __repr__(self, *args, **kwargs):
         """
