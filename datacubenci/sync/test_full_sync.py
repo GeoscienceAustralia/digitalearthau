@@ -8,15 +8,17 @@ from typing import Iterable, List, Mapping, Optional
 import pytest
 import structlog
 
+from datacube.utils import uri_to_local_path
+from datacubenci import paths
 from datacubenci.archive import CleanConsoleRenderer
 from datacubenci.collections import Collection
-from datacubenci.paths import write_files
+from datacubenci.paths import write_files, register_base_directory
 from datacubenci.sync import differences as mm, fixes, scan, Mismatch
 from datacubenci.sync.index import DatasetLite, DatasetPathIndex
 
 
 # These are ok in tests.
-# pylint: disable=too-many-locals, protected-access
+# pylint: disable=too-many-locals, protected-access, redefined-outer-name
 
 
 class MemoryDatasetPathIndex(DatasetPathIndex):
@@ -94,10 +96,10 @@ def configure_log_output(request):
     )
 
 
-def test_index_disk_sync():
+@pytest.fixture
+def syncable_environment():
     on_disk = DatasetLite(uuid.UUID('1e47df58-de0f-11e6-93a4-185e0f80a5c0'))
     on_disk2 = DatasetLite(uuid.UUID('3604ee9c-e1e8-11e6-8148-185e0f80a5c0'))
-
     root = write_files(
         {
             'ls8_scenes': {
@@ -117,9 +119,16 @@ def test_index_disk_sync():
     )
     cache_path = root.joinpath('cache')
     cache_path.mkdir()
-
     on_disk_uri = root.joinpath('ls8_scenes', 'ls8_test_dataset', 'ga-metadata.yaml').as_uri()
     on_disk_uri2 = root.joinpath('ls7_scenes', 'ls7_test_dataset', 'ga-metadata.yaml').as_uri()
+
+    ls8_collection = Collection('ls8_scenes', {}, root.joinpath('ls8_scenes'), 'ls*/ga-metadata.yaml', [])
+
+    return ls8_collection, on_disk, on_disk_uri, root
+
+
+def test_index_disk_sync(syncable_environment):
+    ls8_collection, on_disk, on_disk_uri, root = syncable_environment
 
     # An indexed file not on disk, and disk file not in index.
     index = MemoryDatasetPathIndex()
@@ -127,7 +136,6 @@ def test_index_disk_sync():
     old_indexed = DatasetLite(uuid.UUID('b9d77d10-e1c6-11e6-bf63-185e0f80a5c0'))
     index.add_dataset(old_indexed, missing_uri)
 
-    ls8_collection = Collection('ls8_scenes', {}, root.joinpath('ls8_scenes'), 'ls*/ga-metadata.yaml', [])
     _check_sync(
         collection=ls8_collection,
         expected_paths=[
@@ -143,7 +151,8 @@ def test_index_disk_sync():
             old_indexed: ()
         },
         index=index,
-        cache_path=root
+        cache_path=root,
+        fix_settings=dict(index_missing=True, update_locations=True)
     )
 
     # File on disk has a different id to the one in the index (ie. it was quietly reprocessed)
@@ -163,7 +172,8 @@ def test_index_disk_sync():
             old_indexed: ()
         },
         index=index,
-        cache_path=root
+        cache_path=root,
+        fix_settings=dict(index_missing=True, update_locations=True)
     )
 
     # File on disk was moved without updating index, replacing existing indexed file location.
@@ -186,14 +196,15 @@ def test_index_disk_sync():
             old_indexed: ()
         },
         index=index,
-        cache_path=root
+        cache_path=root,
+        fix_settings=dict(index_missing=True, update_locations=True)
     )
 
-    # A an already-archived file in on disk
+    # A an already-archived file in on disk. Should report it, but not touch the file (trash_archived is false)
     index = MemoryDatasetPathIndex()
-    two_days_ago = datetime.utcnow() - timedelta(days=2)
-    archived_on_disk = DatasetLite(on_disk.id, archived_time=two_days_ago)
+    archived_on_disk = DatasetLite(on_disk.id, archived_time=(datetime.utcnow() - timedelta(days=5)))
     index.add_dataset(archived_on_disk, on_disk_uri)
+    assert uri_to_local_path(on_disk_uri).exists(), "On-disk location should exist before test begins."
     _check_sync(
         collection=ls8_collection,
         expected_paths=[
@@ -206,8 +217,61 @@ def test_index_disk_sync():
             on_disk: (on_disk_uri,),
         },
         index=index,
-        cache_path=root
+        cache_path=root,
+        fix_settings=dict(index_missing=True, update_locations=True)
     )
+    assert uri_to_local_path(on_disk_uri).exists(), "On-disk location shouldn't be touched"
+
+
+@pytest.mark.parametrize("archived_ago,expect_to_be_trashed", [
+    # Default settings: trash files archived more than three days ago.
+    # Four days ago, should be trashed.
+    (timedelta(days=4), True),
+    # Only one day ago, not trashed
+    (timedelta(days=1), False),
+    # One day in the future, not trashed.
+    (timedelta(days=-1), False),
+])
+def test_is_trashed(syncable_environment, archived_ago, expect_to_be_trashed):
+    ls8_collection, on_disk, on_disk_uri, root = syncable_environment
+
+    # Same test, but trash_archived=True, so it should be renamed to the.
+    register_base_directory(root)
+    index = MemoryDatasetPathIndex()
+    archived_on_disk = DatasetLite(on_disk.id, archived_time=(datetime.utcnow() - archived_ago))
+    index.add_dataset(archived_on_disk, on_disk_uri)
+    on_disk_path = root.joinpath('ls8_scenes', 'ls8_test_dataset', 'ga-metadata.yaml')
+    trashed_path = root.joinpath('.trash', 'ls8_scenes', 'ls8_test_dataset', 'ga-metadata.yaml')
+    # Before the test, file is in place and nothing trashed.
+    assert on_disk_path.exists(), "On-disk location should exist before test begins."
+    assert not trashed_path.exists(), "Trashed file shouldn't exit."
+    _check_sync(
+        collection=ls8_collection,
+        expected_paths=[
+            on_disk_uri
+        ],
+        expected_mismatches=[
+            mm.ArchivedDatasetOnDisk(archived_on_disk, on_disk_uri),
+        ],
+        expected_index_result={
+            on_disk: (on_disk_uri,),
+        },
+        index=index,
+        cache_path=root,
+        fix_settings=dict(index_missing=True, update_locations=True, trash_archived=True)
+    )
+
+    # Show output structure for debugging
+    print("Output structure")
+    for p in paths.list_file_paths(root):
+        print("\t{}".format(p))
+
+    if expect_to_be_trashed:
+        assert trashed_path.exists(), "File should have been trashed."
+        assert not on_disk_path.exists(), "On-disk location should have been moved to trash."
+    else:
+        assert not trashed_path.exists(), "File shouldn't have been trashed."
+        assert on_disk_path.exists(), "On-disk location should still be in place."
 
 
 def _check_sync(expected_paths: Iterable[str],
@@ -215,7 +279,8 @@ def _check_sync(expected_paths: Iterable[str],
                 collection: Collection,
                 expected_mismatches: Iterable[Mismatch],
                 expected_index_result: Mapping[DatasetLite, Iterable[str]],
-                cache_path: Path):
+                cache_path: Path,
+                fix_settings: dict):
     """Check the correct outputs come from the given sync inputs"""
     log = structlog.getLogger()
 
@@ -226,7 +291,7 @@ def _check_sync(expected_paths: Iterable[str],
 
     mismatches = _check_mismatch_find(cache_path, expected_mismatches, index, log, collection)
 
-    _check_mismatch_fix(index, mismatches, expected_index_result)
+    _check_mismatch_fix(index, mismatches, expected_index_result, fix_settings=fix_settings)
 
 
 # noinspection PyProtectedMember
@@ -275,7 +340,8 @@ def _check_mismatch_find(cache_path, expected_mismatches, index, log, collection
 
 def _check_mismatch_fix(index: MemoryDatasetPathIndex,
                         mismatches: Iterable[Mismatch],
-                        expected_index_result: Mapping[DatasetLite, Iterable[str]]):
+                        expected_index_result: Mapping[DatasetLite, Iterable[str]],
+                        fix_settings: dict):
     """Check that the index is correctly updated when fixing mismatches"""
 
     # First check that no change is made to the index if we have all fixes set to False.
@@ -286,5 +352,5 @@ def _check_mismatch_fix(index: MemoryDatasetPathIndex,
                                              "false (index_missing=False etc)"
 
     # Now perform fixes, check that they match expected.
-    fixes.fix_mismatches(mismatches, index, index_missing=True, update_locations=True)
+    fixes.fix_mismatches(mismatches, index, **fix_settings)
     assert expected_index_result == index.as_map()

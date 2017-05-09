@@ -1,8 +1,11 @@
+import os
 from functools import singledispatch
 from typing import Iterable, Callable
 
 import structlog
 
+from datacube.utils import uri_to_local_path
+from datacubenci import paths
 from .differences import DatasetNotIndexed, Mismatch, ArchivedDatasetOnDisk, LocationNotIndexed, LocationMissingOnDisk
 from .index import DatasetPathIndex
 
@@ -44,8 +47,13 @@ def do_trash_archived(mismatch: Mismatch, index: DatasetPathIndex, min_age_hours
 
 @do_trash_archived.register(ArchivedDatasetOnDisk)
 def _(mismatch: ArchivedDatasetOnDisk, index: DatasetPathIndex, min_age_hours: int):
-    # TODO: Trash if older than X
-    pass
+    local_path = uri_to_local_path(mismatch.uri)
+
+    if not local_path.exists():
+        _LOG.warning("Trying to trash a path that doesn't exist: %s", local_path)
+        return
+
+    _trash(local_path)
 
 
 @singledispatch
@@ -55,14 +63,38 @@ def do_trash_missing(mismatch: Mismatch, index: DatasetPathIndex):
 
 @do_trash_missing.register(DatasetNotIndexed)
 def _(mismatch: DatasetNotIndexed, index: DatasetPathIndex):
-    # TODO: Trash
-    pass
+    local_path = uri_to_local_path(mismatch.uri)
+
+    if not local_path.exists():
+        _LOG.warning("Trying to trash a path that doesn't exist: %s", local_path)
+        return
+
+    _trash(local_path)
 
 
-def fix_mismatches(mismatches: Iterable[Mismatch], index: DatasetPathIndex,
-                   index_missing=False, trash_missing=False,
-                   trash_archived=False, min_trash_age_hours=72,
-                   update_locations=False, pre_fix: Callable[[Mismatch], None]=None):
+def _trash(local_path):
+    # TODO: to handle sibling-metadata we should trash "all_dataset_paths" too.
+    base_path, all_dataset_files = paths.get_dataset_paths(local_path)
+
+    trash_path = paths.get_trash_path(base_path)
+
+    _LOG.info("trashing", base_path=base_path, trash_path=trash_path)
+    if not trash_path.parent.exists():
+        os.makedirs(str(trash_path.parent))
+    os.rename(str(base_path), str(trash_path))
+
+
+def fix_mismatches(mismatches: Iterable[Mismatch],
+                   index: DatasetPathIndex,
+                   index_missing=False,
+                   trash_missing=False,
+                   trash_archived=False,
+                   min_trash_age_hours=72,
+                   update_locations=False,
+                   pre_fix: Callable[[Mismatch], None]=None):
+    if index_missing and trash_missing:
+        raise RuntimeError("Datasets missing from the index can either be indexed or trashed, but not both.")
+
     for mismatch in mismatches:
         _LOG.info('mismatch.found', mismatch=mismatch)
 
@@ -78,4 +110,5 @@ def fix_mismatches(mismatches: Iterable[Mismatch], index: DatasetPathIndex,
             do_trash_missing(mismatch)
 
         if trash_archived:
+            _LOG.info('mismatch.trash', mismatch=mismatch)
             do_trash_archived(mismatch, index, min_age_hours=min_trash_age_hours)
