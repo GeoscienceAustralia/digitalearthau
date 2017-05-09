@@ -239,7 +239,7 @@ def _check_mismatch_find(cache_path, expected_mismatches, index, log, collection
 
     assert sorted_mismatches == sorted_expected_mismatches
 
-    # DatasetLite.__eq__ only tests for identical ids, so we'll check the properies here too.
+    # DatasetLite.__eq__ only tests for identical ids, so we'll check the properties here too.
     # This is to catch when we're passing the indexed instance of DatasetLite vs the one Loaded from the file.
     # (eg. only the indexed one will have archived information.)
     for i, mismatch in enumerate(sorted_mismatches):
