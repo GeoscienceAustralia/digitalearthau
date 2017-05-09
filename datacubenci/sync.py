@@ -10,6 +10,7 @@ import sys
 import time
 import uuid
 from datetime import datetime
+from functools import singledispatch
 from itertools import chain
 from pathlib import Path
 from typing import Iterable, Any, Mapping, Optional
@@ -29,7 +30,7 @@ from datacube.ui import click as ui
 from datacube.utils import uri_to_local_path, InvalidDocException
 from datacubenci import paths
 from datacubenci.archive import CleanConsoleRenderer
-from datacubenci.collections import NCI_COLLECTIONS
+from datacubenci.collections import NCI_COLLECTIONS, Collection
 
 # 12 hours (roughly the same workday)
 CACHE_TIMEOUT_SECS = 60 * 60 * 12
@@ -206,16 +207,11 @@ class Mismatch:
     See the implementations for different types of mismataches.
     """
 
-    def __init__(self, dataset: DatasetLite, uri: str):
+    def __init__(self, collection: Collection, dataset: DatasetLite, uri: str):
         super().__init__()
         self.dataset = dataset
         self.uri = uri
-
-    def fix(self, index: DatasetPathIndex):
-        """
-        Fix this issue on the given index.
-        """
-        raise NotImplementedError
+        self.collection = collection
 
     def __repr__(self, *args, **kwargs):
         """
@@ -252,38 +248,28 @@ class LocationMissingOnDisk(Mismatch):
 
     (Note that there may still be a file at the location, but it is not this dataset)
     """
-
-    def fix(self, index: DatasetPathIndex):
-        index.remove_location(self.dataset, self.uri)
+    pass
 
 
 class LocationNotIndexed(Mismatch):
     """
     An existing dataset has been found at a new location.
     """
-
-    def fix(self, index: DatasetPathIndex):
-        index.add_location(self.dataset, self.uri)
+    pass
 
 
 class DatasetNotIndexed(Mismatch):
     """
     A dataset has not been indexed.
     """
-
-    def fix(self, index: DatasetPathIndex):
-        index.add_dataset(self.dataset, self.uri)
+    pass
 
 
 class ArchivedDatasetOnDisk(Mismatch):
     """
     A dataset on disk is already archived in the index.
     """
-
-    def fix(self, index: DatasetPathIndex):
-        # We don't fix these yet. It's only here for reporting.
-        # TODO: Trash the file if archived more than X days ago?
-        pass
+    pass
 
 
 def find_index_disk_mismatches(log,
@@ -303,7 +289,7 @@ def fix_index_mismatches(log,
                          mismatches: Iterable[Mismatch]):
     for mismatch in mismatches:
         log.debug("mismatch.apply", mismatch=mismatch)
-        mismatch.fix(index)
+        mismatch.update_location(index)
 
 
 def _find_uri_mismatches(all_file_uris: Iterable[str], index: DatasetPathIndex) -> Iterable[Mismatch]:
@@ -353,18 +339,153 @@ def _find_uri_mismatches(all_file_uris: Iterable[str], index: DatasetPathIndex) 
 
 @click.command()
 @ui.global_cli_options
-@click.option('--dry-run', is_flag=True, default=False)
-@click.option('--cache-folder',
+@click.option('--path-cache-folder',
               type=click.Path(exists=True, readable=True, writable=True),
               # 'cache' folder in current directory.
               default='cache')
+@click.option('-f',
+              type=click.Path(exists=True, readable=True, dir_okay=False),
+              help="Input from file instead of scanning collections")
+@click.option('--index-missing', is_flag=True, default=False,
+              help="Index on-disk datasets that have never been indexed")
+@click.option('--trash-missing', is_flag=True, default=False,
+              help="Trash on-disk datasets that have never been indexed")
+@click.option('--update-locations', is_flag=True, default=False,
+              help="Update the locations in the index to reflect locations on disk")
+@click.option('--trash-archived', is_flag=True, default=False,
+              help="Trash any files that were archived at least '--min-trash-age' hours ago")
+@click.option('--min-trash-age-hours', is_flag=True, default=False, default=72, type=int,
+              help="Minimum allowed archive age to trash a file")
+# TODO
+# @click.option('--validate', is_flag=True, default=False,
+#               help="Run any available checksums or validation checks for the file type")
+@click.option('-o',
+              type=click.Path(writable=True, dir_okay=False),
+              help="Output to file instead of stdout")
 @click.argument('collections',
                 type=click.Choice(NCI_COLLECTIONS.keys()),
                 nargs=-1)
-@ui.pass_index('datacubenci-sync')
-def main(index, collections, cache_folder, dry_run):
+@ui.pass_index()
+def cli(index, collections, cache_folder, f, o,
+        index_missing, trash_missing, update_locations,
+        trash_archived, min_trash_age_hours):
     # type: (Index, List[str], str, bool) -> None
 
+    if index_missing and trash_missing:
+        click.echo('Can either index missing datasets (--index-missing) , or trash them (--trash-missing), '
+                   'but not both at the same time.', err=True)
+        sys.exit(1)
+
+    init_logging()
+
+    if f:
+        mismatches = mismatches_from_file(Path(f))
+    else:
+        mismatches = find_collection_mismatches(collections, cache_folder, index)
+
+    for mismatch in mismatches:
+        _LOG.info('mismatch.found', mismatch=mismatch)
+
+        if o:
+            with Path(o) as f:
+                print_mismatch(mismatch, f)
+        else:
+            print_mismatch(mismatch)
+
+        if update_locations:
+            do_update_locations(mismatch, index)
+
+        if index_missing:
+            do_index_missing(mismatch, index)
+        elif trash_missing:
+            do_trash_missing(mismatch)
+
+        if trash_archived:
+            do_trash_archived(mismatch, index, min_age_hours=min_trash_age_hours)
+
+
+def print_mismatch(mismatch, file=None):
+    click.echo(
+        '\t'.join(map(str, (
+            mismatch.collection,
+            strutils.camel2under(mismatch.__class__.__name__),
+            mismatch.dataset.id,
+            mismatch.uri
+        ))),
+        file=file
+    )
+
+
+@singledispatch
+def do_index_missing(mismatch: Mismatch, index: DatasetPathIndex):
+    pass
+
+
+@do_index_missing.register(DatasetNotIndexed)
+def _(mismatch: DatasetNotIndexed, index: DatasetPathIndex):
+    index.add_dataset(mismatch.dataset, mismatch.uri)
+
+
+@singledispatch
+def do_update_locations(mismatch: Mismatch, index: DatasetPathIndex):
+    pass
+
+
+@do_update_locations.register(LocationMissingOnDisk)
+def _(mismatch: LocationMissingOnDisk, index: DatasetPathIndex):
+    index.remove_location(mismatch.dataset, mismatch.uri)
+
+
+@do_update_locations.register(LocationNotIndexed)
+def _(mismatch: LocationNotIndexed, index: DatasetPathIndex):
+    index.add_location(mismatch.dataset, mismatch.uri)
+
+
+@singledispatch
+def do_trash_archived(mismatch: Mismatch, index: DatasetPathIndex, min_age_hours: int):
+    pass
+
+
+@do_trash_archived.register(ArchivedDatasetOnDisk)
+def _(mismatch: ArchivedDatasetOnDisk, index: DatasetPathIndex, min_age_hours: int):
+    # TODO: Trash if older than X
+    pass
+
+
+@singledispatch
+def do_trash_missing(mismatch: Mismatch, index: DatasetPathIndex):
+    pass
+
+
+@do_index_missing.register(DatasetNotIndexed)
+def _(mismatch: DatasetNotIndexed, index: DatasetPathIndex):
+    # TODO: Trash
+    pass
+
+
+def mismatches_from_file(f: Path):
+    return []
+
+
+def find_collection_mismatches(collections, cache_folder, index):
+    for collection_name in collections:
+        collection = NCI_COLLECTIONS[collection_name]
+
+        cache = Path(cache_folder)
+
+        log = _LOG.bind(collection=collection_name)
+        collection_cache = cache.joinpath(query_name(collection.query))
+        fileutils.mkdir_p(str(collection_cache))
+
+        with AgdcDatasetPathIndex(index, collection.query) as path_index:
+            yield from find_index_disk_mismatches(log,
+                                                  path_index,
+                                                  collection.base_path,
+                                                  collection.offset_pattern,
+                                                  cache_path=collection_cache)
+
+
+def init_logging():
     # Direct stuctlog into standard logging.
     structlog.configure(
         processors=[
@@ -382,31 +503,6 @@ def main(index, collections, cache_folder, dry_run):
         wrapper_class=structlog.stdlib.BoundLogger,
         cache_logger_on_first_use=True,
     )
-
-    cache = Path(cache_folder)
-
-    for collection_name in collections:
-        collection = NCI_COLLECTIONS[collection_name]
-
-        log = _LOG.bind(collection=collection_name)
-        collection_cache = cache.joinpath(query_name(collection.query))
-        fileutils.mkdir_p(str(collection_cache))
-
-        with AgdcDatasetPathIndex(index, collection.query) as path_index:
-            for mismatch in find_index_disk_mismatches(log,
-                                                       path_index,
-                                                       collection.base_path,
-                                                       collection.offset_pattern,
-                                                       cache_path=collection_cache):
-                click.echo('\t'.join(map(str, (
-                    collection_name,
-                    strutils.camel2under(mismatch.__class__.__name__),
-                    mismatch.dataset.id,
-                    mismatch.uri
-                ))))
-                if not dry_run:
-                    log.info('mismatch.fix', mismatch=mismatch)
-                    mismatch.fix(path_index)
 
 
 def query_name(query: Mapping[str, Any]) -> str:
@@ -442,3 +538,4 @@ def _simple_object_repr(o):
 
 if __name__ == '__main__':
     main()
+    print("Done", file=sys.stderr)
