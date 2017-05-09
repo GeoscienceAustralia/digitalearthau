@@ -4,6 +4,9 @@ from .differences import DatasetNotIndexed, Mismatch, ArchivedDatasetOnDisk, Loc
 from .index import DatasetPathIndex
 
 
+# underscore function names are the norm with singledispatch
+# pylint: disable=function-redefined
+
 @singledispatch
 def do_index_missing(mismatch: Mismatch, index: DatasetPathIndex):
     pass

@@ -7,6 +7,7 @@ from datacube.index._api import Index
 from datacube.model import Dataset
 from datacube.scripts import dataset as dataset_script
 from datacube.utils import uri_to_local_path
+from datacubenci.collections import simple_object_repr
 
 
 class DatasetLite:
@@ -51,7 +52,7 @@ class DatasetLite:
         return DatasetLite(dataset.id, archived_time=dataset.archived_time)
 
     def __repr__(self):
-        return _simple_object_repr(self)
+        return simple_object_repr(self)
 
 
 class DatasetPathIndex:
@@ -129,17 +130,3 @@ class AgdcDatasetPathIndex(DatasetPathIndex):
 
     def __exit__(self, type_, value, traceback):
         self._index.close()
-
-
-def _simple_object_repr(o):
-    """
-    Calculate a possible repr() for the given object using the class name and all __dict__ properties.
-
-    eg. MyClass(prop1='val1')
-
-    It will call repr() on property values too, so beware of circular dependencies.
-    """
-    return "%s(%s)" % (
-        o.__class__.__name__,
-        ", ".join("%s=%r" % (k, v) for k, v in sorted(o.__dict__.items()))
-    )

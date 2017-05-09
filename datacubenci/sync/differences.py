@@ -1,4 +1,4 @@
-from datacubenci.collections import Collection
+from datacubenci.collections import Collection, simple_object_repr
 from .index import DatasetLite
 
 
@@ -21,7 +21,7 @@ class Mismatch:
         Mismatch(dataset=DatasetLite(archived_time=None, id=UUID('96519c56-e133-11e6-a29f-185e0f80a5c0')), \
 uri='/tmp/test')
         """
-        return _simple_object_repr(self)
+        return simple_object_repr(self)
 
     def __eq__(self, other):
         """

@@ -148,7 +148,7 @@ def _find_uri_mismatches(all_file_uris: Iterable[str], index: DatasetPathIndex) 
               help="Update the locations in the index to reflect locations on disk")
 @click.option('--trash-archived', is_flag=True, default=False,
               help="Trash any files that were archived at least '--min-trash-age' hours ago")
-@click.option('--min-trash-age-hours', is_flag=True, default=False, default=72, type=int,
+@click.option('--min-trash-age-hours', is_flag=True, default=72, type=int,
               help="Minimum allowed archive age to trash a file")
 # TODO
 # @click.option('--validate', is_flag=True, default=False,
@@ -211,7 +211,8 @@ def print_mismatch(mismatch, file=None):
 
 
 def mismatches_from_file(f: Path):
-    return []
+    for thing in ():
+        yield thing
 
 
 def mismatches_for_collections(collections: Iterable[Collection], cache_folder: Path, index: Index):

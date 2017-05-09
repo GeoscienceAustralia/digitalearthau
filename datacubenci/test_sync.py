@@ -6,11 +6,11 @@ from typing import Iterable, List, Mapping, Tuple, Optional
 import pytest
 import structlog
 
-from datacubenci import sync
+from datacubenci.sync import differences as sync
 from datacubenci.archive import CleanConsoleRenderer
 from datacubenci.collections import Collection
 from datacubenci.paths import write_files
-from datacubenci.sync import DatasetLite
+from datacubenci.sync.index import DatasetLite
 
 
 # These are ok in tests.
@@ -64,7 +64,7 @@ class MemoryDatasetPathIndex(sync.DatasetPathIndex):
             if uri in uris:
                 yield dataset
 
-    def as_map(self) -> Mapping[DatasetLite, Tuple[str]]:
+    def as_map(self) -> Mapping[DatasetLite, Iterable[str]]:
         """
         All contained (dataset, [location]) values, to check test results.
         """
@@ -208,7 +208,7 @@ def test_index_disk_sync():
 
 
 def _check_sync(expected_paths, index, collection: Collection,
-                expected_mismatches, expected_index_result: Mapping[DatasetLite, Tuple[str]], cache_path):
+                expected_mismatches, expected_index_result: Mapping[DatasetLite, Iterable[str]], cache_path):
     log = structlog.getLogger()
 
     cache_path = cache_path.joinpath(str(uuid.uuid4()))
