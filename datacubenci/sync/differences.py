@@ -63,13 +63,13 @@ class LocationNotIndexed(Mismatch):
 
 class DatasetNotIndexed(Mismatch):
     """
-    A dataset has not been indexed.
+    A dataset on the filesystem is not in the index.
     """
     pass
 
 
 class ArchivedDatasetOnDisk(Mismatch):
     """
-    A dataset on disk is already archived in the index.
+    A dataset on disk is archived in the index.
     """
     pass
