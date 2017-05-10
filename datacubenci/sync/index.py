@@ -42,6 +42,9 @@ class DatasetLite:
         return self.archived_time is not None
 
     def __eq__(self, other):
+        if not other:
+            return False
+
         return self.id == other.id
 
     def __hash__(self):

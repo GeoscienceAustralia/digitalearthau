@@ -1,3 +1,4 @@
+from typing import Optional
 from uuid import UUID
 
 from datacubenci.collections import simple_object_repr
@@ -11,7 +12,7 @@ class Mismatch:
     See the implementations for different types of mismataches.
     """
 
-    def __init__(self, dataset: DatasetLite, uri: str):
+    def __init__(self, dataset: Optional[DatasetLite], uri: str):
         super().__init__()
         self.dataset = dataset
         self.uri = uri
@@ -71,5 +72,14 @@ class DatasetNotIndexed(Mismatch):
 class ArchivedDatasetOnDisk(Mismatch):
     """
     A dataset on disk is archived in the index.
+    """
+    pass
+
+
+class UnreadableDataset(Mismatch):
+    """
+    An error was returned when reading a dataset.
+
+    We can't currently easily separate whether this is a temporary system/disk error or an actual corrupt dataset.
     """
     pass

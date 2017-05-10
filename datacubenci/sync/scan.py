@@ -15,6 +15,7 @@ from datacube.index._api import Index
 from datacube.utils import uri_to_local_path, InvalidDocException
 from datacubenci import paths
 from datacubenci.collections import Collection
+from datacubenci.sync.differences import UnreadableDataset
 from .differences import ArchivedDatasetOnDisk, Mismatch, LocationMissingOnDisk, LocationNotIndexed, \
     DatasetNotIndexed
 from .index import DatasetPathIndex, DatasetLite, AgdcDatasetPathIndex
@@ -118,6 +119,8 @@ def _find_uri_mismatches(index: DatasetPathIndex, uri: str) -> Iterable[Mismatch
     try:
         datasets_in_file = set(map(DatasetLite, paths.get_path_dataset_ids(path) if path.exists() else []))
     except InvalidDocException:
+        # Should we do something with indexed_datasets here? If there's none, we're more willing to trash.
+        yield UnreadableDataset(None, uri)
         log.exception("invalid_path")
         return
 

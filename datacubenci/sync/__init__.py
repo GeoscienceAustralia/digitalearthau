@@ -84,7 +84,7 @@ def cli(index: Index, collections: Iterable[str], cache_folder: str, f: str, o: 
                 # TODO: mismatch.collection:
                 None,
                 strutils.camel2under(mismatch.__class__.__name__),
-                mismatch.dataset.id,
+                mismatch.dataset.id if mismatch.dataset else None,
                 mismatch.uri
             ))),
             file=out_f

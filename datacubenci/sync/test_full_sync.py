@@ -1,5 +1,6 @@
 import collections
 import logging
+import os
 import uuid
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -122,7 +123,7 @@ def syncable_environment():
     on_disk_uri = root.joinpath('ls8_scenes', 'ls8_test_dataset', 'ga-metadata.yaml').as_uri()
     on_disk_uri2 = root.joinpath('ls7_scenes', 'ls7_test_dataset', 'ga-metadata.yaml').as_uri()
 
-    ls8_collection = Collection('ls8_scenes', {}, root.joinpath('ls8_scenes'), 'ls*/ga-metadata.yaml', [])
+    ls8_collection = Collection('ls8_scene_collection', {}, root.joinpath('ls8_scenes'), 'ls*/ga-metadata.yaml', [])
 
     return ls8_collection, on_disk, on_disk_uri, root
 
@@ -221,6 +222,28 @@ def test_index_disk_sync(syncable_environment):
         fix_settings=dict(index_missing=True, update_locations=True)
     )
     assert uri_to_local_path(on_disk_uri).exists(), "On-disk location shouldn't be touched"
+
+
+def test_detect_corrupt(syncable_environment):
+    """If a dataset exists but cannot be read, report as corrupt"""
+    ls8_collection, on_disk, on_disk_uri, root = syncable_environment
+    index = MemoryDatasetPathIndex()
+    path = uri_to_local_path(on_disk_uri)
+    os.unlink(str(path))
+    with path.open('w') as f:
+        f.write('corruption!')
+
+    _check_sync(
+        collection=ls8_collection,
+        expected_paths=[on_disk_uri],
+        expected_mismatches=[
+            mm.UnreadableDataset(None, on_disk_uri)
+        ],
+        expected_index_result={},
+        index=index,
+        cache_path=root,
+        fix_settings=dict(index_missing=True, trash_archived=True, update_locations=True)
+    )
 
 
 def test_remove_missing(syncable_environment):
@@ -366,7 +389,10 @@ def _check_mismatch_find(cache_path, expected_mismatches, index, log, collection
         mismatches.append(mismatch)
 
     def mismatch_sort_key(m):
-        return m.__class__.__name__, m.dataset.id, m.uri
+        dataset_id = None
+        if m.dataset:
+            dataset_id = m.dataset.id
+        return m.__class__.__name__, dataset_id, m.uri
 
     sorted_mismatches = sorted(mismatches, key=mismatch_sort_key)
     sorted_expected_mismatches = sorted(expected_mismatches, key=mismatch_sort_key)
@@ -378,7 +404,11 @@ def _check_mismatch_find(cache_path, expected_mismatches, index, log, collection
     # (eg. only the indexed one will have archived information.)
     for i, mismatch in enumerate(sorted_mismatches):
         expected_mismatch = sorted_expected_mismatches[i]
-        assert expected_mismatch.dataset.__dict__ == mismatch.dataset.__dict__
+
+        if not expected_mismatch.dataset:
+            assert not mismatch.dataset
+        else:
+            assert expected_mismatch.dataset.__dict__ == mismatch.dataset.__dict__
 
     return mismatches
 
