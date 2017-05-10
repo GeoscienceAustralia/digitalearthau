@@ -1,9 +1,9 @@
 import os
+import structlog
 from datetime import datetime, timedelta
+from dateutil import tz
 from functools import singledispatch
 from typing import Iterable, Callable
-
-import structlog
 
 from datacube.utils import uri_to_local_path
 from datacubenci import paths
@@ -46,8 +46,17 @@ def do_trash_archived(mismatch: Mismatch, index: DatasetPathIndex, min_age_hours
     pass
 
 
+def _as_utc(d):
+    # UTC is default if not specified
+    if d.tzinfo is None:
+        return d.replace(tzinfo=tz.tzutc())
+    return d.astimezone(tz.tzutc())
+
+
 @do_trash_archived.register(ArchivedDatasetOnDisk)
 def _(mismatch: ArchivedDatasetOnDisk, index: DatasetPathIndex, min_age_hours: int):
+    latest_archived_time = datetime.utcnow().replace(tzinfo=tz.tzutc()) - timedelta(hours=min_age_hours)
+
     # all datasets at location must have been archived to trash.
     for dataset in index.get_datasets_for_uri(mismatch.uri):
         # Must be archived
@@ -55,7 +64,7 @@ def _(mismatch: ArchivedDatasetOnDisk, index: DatasetPathIndex, min_age_hours: i
             _LOG.warning("do_trash_archived.active_siblings", dataset_id=mismatch.dataset.id)
             return
         # Archived more than min_age_hours ago
-        if dataset.archived_time > (datetime.utcnow() - timedelta(hours=min_age_hours)):
+        if _as_utc(dataset.archived_time) > latest_archived_time:
             _LOG.info("do_trash_archived.too_young", dataset_id=mismatch.dataset.id)
             return
 

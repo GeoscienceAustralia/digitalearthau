@@ -5,6 +5,7 @@ import pytest
 import structlog
 import uuid
 from datetime import datetime, timedelta
+from dateutil import tz
 from pathlib import Path
 from typing import Iterable, List, Mapping, Optional
 
@@ -293,22 +294,28 @@ def test_remove_missing(syncable_environment):
     assert outside_path.exists(), "Dataset outside of collection folder shouldn't be touched"
 
 
-@pytest.mark.parametrize("archived_ago,expect_to_be_trashed", [
+@pytest.mark.parametrize("archived_dt,expect_to_be_trashed", [
     # Default settings: trash files archived more than three days ago.
     # Four days ago, should be trashed.
-    (timedelta(days=4), True),
+    (datetime.utcnow() - timedelta(days=4), True),
     # Only one day ago, not trashed
-    (timedelta(days=1), False),
+    (datetime.utcnow() - timedelta(days=1), False),
     # One day in the future, not trashed.
-    (timedelta(days=-1), False),
+    (datetime.utcnow() + timedelta(days=1), False),
+
+    # ------ With embedded timezone info ------
+    # Four days ago, should be trashed.
+    (datetime.utcnow().replace(tzinfo=tz.tzutc()) - timedelta(days=4), True),
+    # Only one day ago, not trashed
+    (datetime.utcnow().replace(tzinfo=tz.tzutc()) - timedelta(days=1), False),
 ])
-def test_is_trashed(syncable_environment, archived_ago, expect_to_be_trashed):
+def test_is_trashed(syncable_environment, archived_dt, expect_to_be_trashed):
     ls8_collection, on_disk, on_disk_uri, root = syncable_environment
 
     # Same test, but trash_archived=True, so it should be renamed to the.
     register_base_directory(root)
     index = MemoryDatasetPathIndex()
-    archived_on_disk = DatasetLite(on_disk.id, archived_time=(datetime.utcnow() - archived_ago))
+    archived_on_disk = DatasetLite(on_disk.id, archived_time=archived_dt)
     index.add_dataset(archived_on_disk, on_disk_uri)
     on_disk_path = root.joinpath('ls8_scenes', 'ls8_test_dataset', 'ga-metadata.yaml')
 
