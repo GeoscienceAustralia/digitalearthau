@@ -83,6 +83,11 @@ class DatasetPathIndex:
     def add_dataset(self, dataset: DatasetLite, uri: str):
         raise NotImplementedError
 
+    def close(self):
+        """Do any clean-up as needed before forking."""
+        # Default implementation: no-op
+        pass
+
 
 class AgdcDatasetPathIndex(DatasetPathIndex):
     def __init__(self, index: Index, query: dict):
@@ -125,8 +130,11 @@ class AgdcDatasetPathIndex(DatasetPathIndex):
         else:
             raise RuntimeError('Dataset not found at path: %s, %s' % (dataset.id, uri))
 
+    def close(self):
+        self._index.close()
+
     def __enter__(self):
         return self
 
     def __exit__(self, type_, value, traceback):
-        self._index.close()
+        self.close()

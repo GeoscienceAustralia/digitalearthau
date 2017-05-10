@@ -30,6 +30,10 @@ _LOG = structlog.get_logger()
               type=click.Path(exists=True, readable=True, writable=True),
               # 'cache' folder in current directory.
               default='cache')
+@click.option('-j', '--jobs',
+              type=int,
+              default=2,
+              help="Number of worker processes to use")
 @click.option('-f',
               type=click.Path(exists=True, readable=True, dir_okay=False),
               help="Input from file instead of scanning collections")
@@ -54,7 +58,7 @@ _LOG = structlog.get_logger()
                 nargs=-1)
 @ui.pass_index(expect_initialised=False)
 def cli(index: Index, collections: Iterable[str], cache_folder: str, f: str, o: str,
-        min_trash_age_hours: bool, **fix_settings):
+        min_trash_age_hours: bool, jobs: int, **fix_settings):
     init_logging()
 
     if fix_settings['index_missing'] and fix_settings['trash_missing']:
@@ -67,7 +71,7 @@ def cli(index: Index, collections: Iterable[str], cache_folder: str, f: str, o: 
     else:
         mismatches = scan.mismatches_for_collections(
             (get_collection(collection_name) for collection_name in collections),
-            Path(cache_folder), index
+            Path(cache_folder), index, workers=jobs
         )
 
     out_f = sys.stdout

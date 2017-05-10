@@ -1,9 +1,11 @@
 import dawg
 import logging
+import multiprocessing
 import time
+from functools import partial
 from itertools import chain
 from pathlib import Path
-from typing import Iterable, Any, Mapping
+from typing import Iterable, Any, Mapping, List
 
 import structlog
 from boltons import fileutils
@@ -63,64 +65,89 @@ def _build_pathset(
     return path_set
 
 
+# Suppress "Serializing PostgresDb engine" warning. It's triggered due to using index as a multiprocessing argument.
+# It's usually warned against to prevent datacube clients hitting the index from every worker, but it's a valid
+# use case with this sync tool, where we have a handful of small workers.
+# TODO: Push only the connection setup information? Or have a dedicated process for index info.
+logging.getLogger('datacube.index.postgres._connections').setLevel(logging.ERROR)
+
+
 def find_index_disk_mismatches(log,
                                path_index: DatasetPathIndex,
                                root_folder: Path,
                                dataset_glob: str,
-                               cache_path: Path = None) -> Iterable[Mismatch]:
+                               cache_path: Path = None,
+                               worker_count=2,
+                               work_chunksize=30) -> Iterable[Mismatch]:
     """
     Compare the given index and filesystem contents, yielding Mismatches of any differences.
     """
     pathset = _build_pathset(log, root_folder, dataset_glob, path_index, cache_path=cache_path)
-    yield from _find_uri_mismatches(pathset.iterkeys('file://'), path_index)
+
+    # Clean up any open connections before we fork.
+    path_index.close()
+
+    with multiprocessing.Pool(processes=worker_count) as pool:
+        result = pool.imap_unordered(
+            partial(_find_uri_mismatches_eager, path_index),
+            pathset.iterkeys("file://"),
+            chunksize=work_chunksize
+        )
+
+        for r in result:
+            yield from r
 
 
-def _find_uri_mismatches(all_file_uris: Iterable[str], index: DatasetPathIndex) -> Iterable[Mismatch]:
+def _find_uri_mismatches_eager(index: DatasetPathIndex, uri: str) -> List[Mismatch]:
+    return list(_find_uri_mismatches(index, uri))
+
+
+def _find_uri_mismatches(index: DatasetPathIndex, uri: str) -> Iterable[Mismatch]:
     """
     Compare the index and filesystem contents for the given uris,
     yielding Mismatches of any differences.
     """
-    for uri in all_file_uris:
 
-        def ids(datasets):
-            return [d.id for d in datasets]
+    def ids(datasets):
+        return [d.id for d in datasets]
 
-        path = uri_to_local_path(uri)
-        log = _LOG.bind(path=path)
-        log.debug("index.get_dataset_ids_for_uri")
-        indexed_datasets = set(index.get_datasets_for_uri(uri))
-        try:
-            datasets_in_file = set(map(DatasetLite, paths.get_path_dataset_ids(path) if path.exists() else []))
-        except InvalidDocException:
-            log.exception("invalid_path")
-            continue
+    path = uri_to_local_path(uri)
+    log = _LOG.bind(path=path)
+    log.debug("index.get_dataset_ids_for_uri")
+    indexed_datasets = set(index.get_datasets_for_uri(uri))
+    try:
+        datasets_in_file = set(map(DatasetLite, paths.get_path_dataset_ids(path) if path.exists() else []))
+    except InvalidDocException:
+        log.exception("invalid_path")
+        return
 
-        log.info("dataset_ids",
-                 indexed_dataset_ids=ids(indexed_datasets),
-                 file_ids=ids(datasets_in_file))
+    log.info("dataset_ids",
+             indexed_dataset_ids=ids(indexed_datasets),
+             file_ids=ids(datasets_in_file))
 
-        for indexed_dataset in indexed_datasets:
-            # Does the dataset exist in the file?
-            if indexed_dataset in datasets_in_file:
-                if indexed_dataset.is_archived:
-                    yield ArchivedDatasetOnDisk(indexed_dataset, uri)
-            else:
-                yield LocationMissingOnDisk(indexed_dataset, uri)
+    for indexed_dataset in indexed_datasets:
+        # Does the dataset exist in the file?
+        if indexed_dataset in datasets_in_file:
+            if indexed_dataset.is_archived:
+                yield ArchivedDatasetOnDisk(indexed_dataset, uri)
+        else:
+            yield LocationMissingOnDisk(indexed_dataset, uri)
 
-        # For all file ids not in the index.
-        file_ds_not_in_index = datasets_in_file.difference(indexed_datasets)
-        log.debug("files_not_in_index", files_not_in_index=file_ds_not_in_index)
+    # For all file ids not in the index.
+    file_ds_not_in_index = datasets_in_file.difference(indexed_datasets)
+    log.debug("files_not_in_index", files_not_in_index=file_ds_not_in_index)
 
-        for dataset in file_ds_not_in_index:
-            # If it's already indexed, we just need to add the location.
-            indexed_dataset = index.get(dataset.id)
-            if indexed_dataset:
-                yield LocationNotIndexed(indexed_dataset, uri)
-            else:
-                yield DatasetNotIndexed(dataset, uri)
+    for dataset in file_ds_not_in_index:
+        # If it's already indexed, we just need to add the location.
+        indexed_dataset = index.get(dataset.id)
+        if indexed_dataset:
+            yield LocationNotIndexed(indexed_dataset, uri)
+        else:
+            yield DatasetNotIndexed(dataset, uri)
 
 
-def mismatches_for_collections(collections: Iterable[Collection], cache_folder: Path, index: Index):
+def mismatches_for_collections(collections: Iterable[Collection], cache_folder: Path, index: Index,
+                               workers=2, work_chunksize=30):
     for collection in collections:
         log = _LOG.bind(collection=collection.name)
         collection_cache = cache_folder.joinpath(query_name(collection.query))
@@ -131,7 +158,9 @@ def mismatches_for_collections(collections: Iterable[Collection], cache_folder: 
                                                   path_index,
                                                   collection.base_path,
                                                   collection.offset_pattern,
-                                                  cache_path=collection_cache)
+                                                  cache_path=collection_cache,
+                                                  worker_count=workers,
+                                                  work_chunksize=work_chunksize)
 
 
 def query_name(query: Mapping[str, Any]) -> str:
