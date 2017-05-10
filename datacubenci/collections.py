@@ -155,22 +155,22 @@ _add(
     Collection(
         name='ls5_fc',
         query={'product': 'ls5_fc_albers'},
-        base_path=Path('/g/data/fk4/datacube/002'),
-        offset_pattern="LS5_TM_FC/*_*/LS5*FC*.nc",
+        base_path=Path('/g/data/fk4/datacube/002/LS5_TM_FC'),
+        offset_pattern="*_*/LS5*FC*.nc",
         unique=('time.lower.day', 'lat', 'lon'),
     ),
     Collection(
         name='ls7_fc',
         query={'product': 'ls7_fc_albers'},
-        base_path=Path('/g/data/fk4/datacube/002'),
-        offset_pattern="LS7_ETM_FC/*_*/LS7*FC*.nc",
+        base_path=Path('/g/data/fk4/datacube/002/LS7_ETM_FC'),
+        offset_pattern="*_*/LS7*FC*.nc",
         unique=('time.lower.day', 'lat', 'lon'),
     ),
     Collection(
         name='ls8_fc',
         query={'product': 'ls8_fc_albers'},
-        base_path=Path('/g/data/fk4/datacube/002'),
-        offset_pattern="LS8_OLI_FC/*_*/LS8*FC*.nc",
+        base_path=Path('/g/data/fk4/datacube/002/LS8_OLI_FC'),
+        offset_pattern="*_*/LS8*FC*.nc",
         unique=('time.lower.day', 'lat', 'lon'),
     )
 )
