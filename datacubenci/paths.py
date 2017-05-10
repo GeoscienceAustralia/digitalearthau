@@ -1,4 +1,6 @@
 import atexit
+
+import datetime
 import os
 import shutil
 import tempfile
@@ -18,6 +20,9 @@ _BASE_DIRECTORIES = [
     '/g/data/rs0/scenes/nbar-scenes-tmp',
 ]
 
+# Use a static variable so that trashed items in the same run will be in the same trash bin.
+_TRASH_DAY = datetime.datetime.utcnow().strftime('%Y-%m-%d')
+
 
 def register_base_directory(d: Union[str, Path]):
     _BASE_DIRECTORIES.append(str(d))
@@ -27,15 +32,18 @@ def get_trash_path(file_path):
     """
     For a given path on lustre, get the full path to a destination trash path.
 
-    >>> str(get_trash_path('/g/data/fk4/datacube/ls7/2003/something.nc'))
-    '/g/data/fk4/datacube/.trash/ls7/2003/something.nc'
+    >>> trash_path = str(get_trash_path('/g/data/fk4/datacube/ls7/2003/something.nc'))
+    >>> trash_path == '/g/data/fk4/datacube/.trash/{day}/ls7/2003/something.nc'.format(day=_TRASH_DAY)
+    True
     >>> get_trash_path('/short/unknown_location/something.nc')
     Traceback (most recent call last):
     ...
     ValueError: Unknown location: can't calculate base directory: /short/unknown_location/something.nc
     """
     root_path, dir_offset = split_path_from_base(file_path)
-    return root_path.joinpath('.trash', dir_offset)
+
+    # A trash subfolder for each day.
+    return root_path.joinpath('.trash', _TRASH_DAY, dir_offset)
 
 
 def split_path_from_base(file_path):

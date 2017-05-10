@@ -1,13 +1,12 @@
 import collections
 import logging
 import os
+import pytest
+import structlog
 import uuid
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Iterable, List, Mapping, Optional
-
-import pytest
-import structlog
 
 from datacube.utils import uri_to_local_path
 from datacubenci import paths
@@ -246,6 +245,9 @@ def test_detect_corrupt(syncable_environment):
     )
 
 
+_TRASH_PREFIX = ('.trash', (datetime.utcnow().strftime('%Y-%m-%d')))
+
+
 def test_remove_missing(syncable_environment):
     """An on-disk dataset that's not indexed should be trashed when trash_missing=True"""
     ls8_collection, on_disk, on_disk_uri, root = syncable_environment
@@ -255,7 +257,7 @@ def test_remove_missing(syncable_environment):
 
     register_base_directory(root)
     on_disk_path = root.joinpath('ls8_scenes', 'ls8_test_dataset', 'ga-metadata.yaml')
-    trashed_path = root.joinpath('.trash', 'ls8_scenes', 'ls8_test_dataset', 'ga-metadata.yaml')
+    trashed_path = root.joinpath(*_TRASH_PREFIX, 'ls8_scenes', 'ls8_test_dataset', 'ga-metadata.yaml')
 
     # Add a second dataset outside of the collection folder. Should not be touched!
     paths.write_files(
@@ -309,7 +311,8 @@ def test_is_trashed(syncable_environment, archived_ago, expect_to_be_trashed):
     archived_on_disk = DatasetLite(on_disk.id, archived_time=(datetime.utcnow() - archived_ago))
     index.add_dataset(archived_on_disk, on_disk_uri)
     on_disk_path = root.joinpath('ls8_scenes', 'ls8_test_dataset', 'ga-metadata.yaml')
-    trashed_path = root.joinpath('.trash', 'ls8_scenes', 'ls8_test_dataset', 'ga-metadata.yaml')
+
+    trashed_path = root.joinpath(*_TRASH_PREFIX, 'ls8_scenes', 'ls8_test_dataset', 'ga-metadata.yaml')
     # Before the test, file is in place and nothing trashed.
     assert on_disk_path.exists(), "On-disk location should exist before test begins."
     assert not trashed_path.exists(), "Trashed file shouldn't exit."
@@ -335,8 +338,8 @@ def test_is_trashed(syncable_environment, archived_ago, expect_to_be_trashed):
         print("\t{}".format(p))
 
     if expect_to_be_trashed:
-        assert trashed_path.exists(), "File should have been trashed."
-        assert not on_disk_path.exists(), "On-disk location should have been moved to trash."
+        assert trashed_path.exists(), "File isn't in trash."
+        assert not on_disk_path.exists(), "On-disk location still exists (should have been moved to trash)."
     else:
         assert not trashed_path.exists(), "File shouldn't have been trashed."
         assert on_disk_path.exists(), "On-disk location should still be in place."
