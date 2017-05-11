@@ -17,7 +17,7 @@ from datacube.ui import click as ui
 from datacubenci.archive import CleanConsoleRenderer
 from datacubenci.collections import get_collection, registered_collection_names
 from datacubenci.sync import scan
-from datacubenci.sync.index import AgdcDatasetPathIndex
+from datacubenci.sync.index import AgdcDatasetPathIndex, DatasetPathIndex
 from . import fixes
 from .differences import Mismatch
 
@@ -66,39 +66,53 @@ def cli(index: Index, collections: Iterable[str], cache_folder: str, f: str, o: 
                    'but not both at the same time.', err=True)
         sys.exit(1)
 
-    if f:
-        mismatches = mismatches_from_file(Path(f))
+    with AgdcDatasetPathIndex(index) as path_index:
+        mismatches = get_mismatches(cache_folder, collections, f, path_index, jobs)
+
+        out_f = sys.stdout
+        try:
+            if o:
+                out_f = open(o, 'w')
+
+            def print_mismatch(mismatch):
+                click.echo(
+                    '\t'.join(map(str, (
+                        # TODO: mismatch.collection:
+                        None,
+                        strutils.camel2under(mismatch.__class__.__name__),
+                        mismatch.dataset.id if mismatch.dataset else None,
+                        mismatch.uri
+                    ))),
+                    file=out_f
+                )
+
+            fixes.fix_mismatches(
+                mismatches,
+                path_index,
+                min_trash_age_hours=min_trash_age_hours,
+                pre_fix=print_mismatch,
+                **fix_settings
+            )
+        finally:
+            if o:
+                out_f.close()
+
+
+def get_mismatches(cache_folder: str,
+                   collection_names: Iterable[str],
+                   input_file: str,
+                   path_index: DatasetPathIndex,
+                   job_count: int):
+    if input_file:
+        yield from mismatches_from_file(Path(input_file))
     else:
-        mismatches = scan.mismatches_for_collections(
-            (get_collection(collection_name) for collection_name in collections),
-            Path(cache_folder), index, workers=jobs
-        )
-
-    out_f = sys.stdout
-    if o:
-        out_f = open(o, 'w')
-
-    def print_mismatch(mismatch):
-        click.echo(
-            '\t'.join(map(str, (
-                # TODO: mismatch.collection:
-                None,
-                strutils.camel2under(mismatch.__class__.__name__),
-                mismatch.dataset.id if mismatch.dataset else None,
-                mismatch.uri
-            ))),
-            file=out_f
-        )
-
-    try:
-        with AgdcDatasetPathIndex(index, None) as path_index:
-            fixes.fix_mismatches(mismatches, path_index,
-                                 min_trash_age_hours=min_trash_age_hours,
-                                 pre_fix=print_mismatch,
-                                 **fix_settings)
-    finally:
-        if o:
-            out_f.close()
+        for collection_name in collection_names:
+            yield from scan.mismatches_for_collection(
+                get_collection(collection_name),
+                Path(cache_folder),
+                path_index,
+                workers=job_count
+            )
 
 
 def mismatches_from_file(f: Path):

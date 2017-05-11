@@ -34,10 +34,9 @@ def cache_is_too_old(path):
     return path.stat().st_mtime < oldest_valid_time
 
 
-def _build_pathset(
+def build_pathset(
         log: logging.Logger,
-        path_search_root: Path,
-        path_offset_glob: str,
+        collection: Collection,
         path_index: DatasetPathIndex,
         cache_path: Path = None) -> dawg.CompletionDAWG:
     """
@@ -54,8 +53,8 @@ def _build_pathset(
         log.info("paths.trie.build")
         path_set = dawg.CompletionDAWG(
             chain(
-                path_index.iter_all_uris(),
-                (path.absolute().as_uri() for path in path_search_root.glob(path_offset_glob))
+                path_index.iter_all_uris(collection.query),
+                (path.absolute().as_uri() for path in collection.base_path.glob(collection.offset_pattern))
             )
         )
         log.info("paths.trie.done")
@@ -71,36 +70,6 @@ def _build_pathset(
 # use case with this sync tool, where we have a handful of small workers.
 # TODO: Push only the connection setup information? Or have a dedicated process for index info.
 logging.getLogger('datacube.index.postgres._connections').setLevel(logging.ERROR)
-
-
-def find_index_disk_mismatches(log,
-                               path_index: DatasetPathIndex,
-                               root_folder: Path,
-                               dataset_glob: str,
-                               cache_path: Path = None,
-                               worker_count=2,
-                               work_chunksize=30) -> Iterable[Mismatch]:
-    """
-    Compare the given index and filesystem contents, yielding Mismatches of any differences.
-    """
-    pathset = _build_pathset(log, root_folder, dataset_glob, path_index, cache_path=cache_path)
-
-    # Clean up any open connections before we fork.
-    path_index.close()
-
-    with multiprocessing.Pool(processes=worker_count) as pool:
-        result = pool.imap_unordered(
-            partial(_find_uri_mismatches_eager, path_index),
-            pathset.iterkeys("file://"),
-            chunksize=work_chunksize
-        )
-
-        for r in result:
-            yield from r
-
-
-def _find_uri_mismatches_eager(index: DatasetPathIndex, uri: str) -> List[Mismatch]:
-    return list(_find_uri_mismatches(index, uri))
 
 
 def _find_uri_mismatches(index: DatasetPathIndex, uri: str) -> Iterable[Mismatch]:
@@ -149,21 +118,36 @@ def _find_uri_mismatches(index: DatasetPathIndex, uri: str) -> Iterable[Mismatch
             yield DatasetNotIndexed(dataset, uri)
 
 
-def mismatches_for_collections(collections: Iterable[Collection], cache_folder: Path, index: Index,
-                               workers=2, work_chunksize=30):
-    for collection in collections:
-        log = _LOG.bind(collection=collection.name)
-        collection_cache = cache_folder.joinpath(query_name(collection.query))
-        fileutils.mkdir_p(str(collection_cache))
+def mismatches_for_collection(collection: Collection,
+                              cache_folder: Path,
+                              path_index: DatasetPathIndex,
+                              workers=2,
+                              work_chunksize=30) -> Iterable[Mismatch]:
+    """
+    Compare the given index and filesystem contents, yielding Mismatches of any differences.
+    """
+    log = _LOG.bind(collection=collection.name)
+    collection_cache = cache_folder.joinpath(query_name(collection.query))
+    fileutils.mkdir_p(str(collection_cache))
 
-        with AgdcDatasetPathIndex(index, collection.query) as path_index:
-            yield from find_index_disk_mismatches(log,
-                                                  path_index,
-                                                  collection.base_path,
-                                                  collection.offset_pattern,
-                                                  cache_path=collection_cache,
-                                                  worker_count=workers,
-                                                  work_chunksize=work_chunksize)
+    path_dawg = build_pathset(log, collection, path_index, collection_cache)
+
+    # Clean up any open connections before we fork.
+    path_index.close()
+
+    with multiprocessing.Pool(processes=workers) as pool:
+        result = pool.imap_unordered(
+            partial(_find_uri_mismatches_eager, path_index),
+            path_dawg.iterkeys("file://"),
+            chunksize=work_chunksize
+        )
+
+        for r in result:
+            yield from r
+
+
+def _find_uri_mismatches_eager(index: DatasetPathIndex, uri: str) -> List[Mismatch]:
+    return list(_find_uri_mismatches(index, uri))
 
 
 def query_name(query: Mapping[str, Any]) -> str:

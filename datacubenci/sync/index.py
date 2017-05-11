@@ -68,7 +68,7 @@ class DatasetPathIndex:
     (MemoryDatasetPathIndex and AgdcDatasetPathIndex)
     """
 
-    def iter_all_uris(self) -> Iterable[str]:
+    def iter_all_uris(self, query: dict) -> Iterable[str]:
         raise NotImplementedError
 
     def get_datasets_for_uri(self, uri: str) -> Iterable[DatasetLite]:
@@ -93,19 +93,18 @@ class DatasetPathIndex:
 
 
 class AgdcDatasetPathIndex(DatasetPathIndex):
-    def __init__(self, index: Index, query: dict):
+    def __init__(self, index: Index):
         super().__init__()
         self._index = index
-        self._query = query
         self._rules = dataset_script.load_rules_from_types(self._index)
 
-    def iter_all_uris(self) -> Iterable[str]:
-        for uri, in self._index.datasets.search_returning(['uri'], **self._query):
+    def iter_all_uris(self, query: dict) -> Iterable[str]:
+        for uri, in self._index.datasets.search_returning(['uri'], **query):
             yield str(uri)
 
     @classmethod
-    def connect(cls, query: Mapping[str, Any]) -> 'AgdcDatasetPathIndex':
-        return cls(index_connect(application_name='datacubenci-pathsync'), query=query)
+    def connect(cls) -> 'AgdcDatasetPathIndex':
+        return cls(index_connect(application_name='datacubenci-pathsync'))
 
     def get_datasets_for_uri(self, uri: str) -> Iterable[DatasetLite]:
         for d in self._index.datasets.get_datasets_for_location(uri=uri):

@@ -39,7 +39,7 @@ class MemoryDatasetPathIndex(DatasetPathIndex):
         # type: Mapping[DatasetLite, List[str]]
         self._records = collections.defaultdict(list)
 
-    def iter_all_uris(self) -> Iterable[str]:
+    def iter_all_uris(self, query: dict) -> Iterable[str]:
         for uris in self._records.values():
             yield from uris
 
@@ -379,7 +379,7 @@ def _check_pathset_loading(cache_path: Path,
                            log: logging.Logger,
                            collection: Collection):
     """Check that the right mix of paths (index and filesystem) are loaded"""
-    path_set = scan._build_pathset(log, collection.base_path, collection.offset_pattern, index, cache_path)
+    path_set = scan.build_pathset(log, collection, index, cache_path)
 
     loaded_paths = set(path_set.iterkeys('file://'))
     assert loaded_paths == set(expected_paths)
@@ -393,8 +393,8 @@ def _check_mismatch_find(cache_path, expected_mismatches, index, log, collection
     """Check that the correct mismatches were found"""
 
     mismatches = []
-    for mismatch in scan.find_index_disk_mismatches(log, index, collection.base_path, collection.offset_pattern,
-                                                    cache_path=cache_path):
+
+    for mismatch in scan.mismatches_for_collection(collection, cache_path, index):
         print(repr(mismatch))
         mismatches.append(mismatch)
 
