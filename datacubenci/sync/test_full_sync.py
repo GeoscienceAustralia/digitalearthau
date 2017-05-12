@@ -1,21 +1,22 @@
 import collections
 import logging
 import os
-import pytest
-import structlog
 import uuid
 from datetime import datetime, timedelta
-from dateutil import tz
 from pathlib import Path
 from typing import Iterable, List, Mapping, Optional
+
+import pytest
+import structlog
+from dateutil import tz
 
 from datacube.utils import uri_to_local_path
 from datacubenci import paths
 from datacubenci.archive import CleanConsoleRenderer
 from datacubenci.collections import Collection
+from datacubenci.index import DatasetLite, DatasetPathIndex
 from datacubenci.paths import write_files, register_base_directory
 from datacubenci.sync import differences as mm, fixes, scan, Mismatch
-from datacubenci.sync.index import DatasetLite, DatasetPathIndex
 
 
 # These are ok in tests.
@@ -37,6 +38,9 @@ class MemoryDatasetPathIndex(DatasetPathIndex):
         super().__init__()
         # Map of dataset to locations.
         # type: Mapping[DatasetLite, List[str]]
+        self._records = collections.defaultdict(list)
+
+    def reset(self):
         self._records = collections.defaultdict(list)
 
     def iter_all_uris(self, query: dict) -> Iterable[str]:
@@ -123,19 +127,21 @@ def syncable_environment():
     on_disk_uri = root.joinpath('ls8_scenes', 'ls8_test_dataset', 'ga-metadata.yaml').as_uri()
     on_disk_uri2 = root.joinpath('ls7_scenes', 'ls7_test_dataset', 'ga-metadata.yaml').as_uri()
 
-    ls8_collection = Collection('ls8_scene_collection', {}, root.joinpath('ls8_scenes'), 'ls*/ga-metadata.yaml', [])
+    ls8_collection = Collection('ls8_scene_collection', {}, root.joinpath('ls8_scenes'), 'ls*/ga-metadata.yaml', [],
+                                index=MemoryDatasetPathIndex())
 
     return ls8_collection, on_disk, on_disk_uri, root
 
 
 def test_index_disk_sync(syncable_environment):
+    # type: (Tuple[Collection, str, str, Path]) -> None
     ls8_collection, on_disk, on_disk_uri, root = syncable_environment
 
     # An indexed file not on disk, and disk file not in index.
-    index = MemoryDatasetPathIndex()
+
     missing_uri = root.joinpath('indexed', 'already', 'ga-metadata.yaml').as_uri()
     old_indexed = DatasetLite(uuid.UUID('b9d77d10-e1c6-11e6-bf63-185e0f80a5c0'))
-    index.add_dataset(old_indexed, missing_uri)
+    ls8_collection._index.add_dataset(old_indexed, missing_uri)
 
     _check_sync(
         collection=ls8_collection,
@@ -151,14 +157,13 @@ def test_index_disk_sync(syncable_environment):
             on_disk: (on_disk_uri,),
             old_indexed: ()
         },
-        index=index,
         cache_path=root,
         fix_settings=dict(index_missing=True, update_locations=True)
     )
 
     # File on disk has a different id to the one in the index (ie. it was quietly reprocessed)
-    index = MemoryDatasetPathIndex()
-    index.add_dataset(old_indexed, on_disk_uri)
+    ls8_collection._index.reset()
+    ls8_collection._index.add_dataset(old_indexed, on_disk_uri)
     _check_sync(
         collection=ls8_collection,
         expected_paths=[
@@ -172,15 +177,14 @@ def test_index_disk_sync(syncable_environment):
             on_disk: (on_disk_uri,),
             old_indexed: ()
         },
-        index=index,
         cache_path=root,
         fix_settings=dict(index_missing=True, update_locations=True)
     )
 
     # File on disk was moved without updating index, replacing existing indexed file location.
-    index = MemoryDatasetPathIndex()
-    index.add_dataset(old_indexed, on_disk_uri)
-    index.add_dataset(on_disk, missing_uri)
+    ls8_collection._index.reset()
+    ls8_collection._index.add_dataset(old_indexed, on_disk_uri)
+    ls8_collection._index.add_dataset(on_disk, missing_uri)
     _check_sync(
         collection=ls8_collection,
         expected_paths=[
@@ -196,15 +200,14 @@ def test_index_disk_sync(syncable_environment):
             on_disk: (on_disk_uri,),
             old_indexed: ()
         },
-        index=index,
         cache_path=root,
         fix_settings=dict(index_missing=True, update_locations=True)
     )
 
     # A an already-archived file in on disk. Should report it, but not touch the file (trash_archived is false)
-    index = MemoryDatasetPathIndex()
+    ls8_collection._index.reset()
     archived_on_disk = DatasetLite(on_disk.id, archived_time=(datetime.utcnow() - timedelta(days=5)))
-    index.add_dataset(archived_on_disk, on_disk_uri)
+    ls8_collection._index.add_dataset(archived_on_disk, on_disk_uri)
     assert uri_to_local_path(on_disk_uri).exists(), "On-disk location should exist before test begins."
     _check_sync(
         collection=ls8_collection,
@@ -217,7 +220,6 @@ def test_index_disk_sync(syncable_environment):
         expected_index_result={
             on_disk: (on_disk_uri,),
         },
-        index=index,
         cache_path=root,
         fix_settings=dict(index_missing=True, update_locations=True)
     )
@@ -227,7 +229,6 @@ def test_index_disk_sync(syncable_environment):
 def test_detect_corrupt(syncable_environment):
     """If a dataset exists but cannot be read, report as corrupt"""
     ls8_collection, on_disk, on_disk_uri, root = syncable_environment
-    index = MemoryDatasetPathIndex()
     path = uri_to_local_path(on_disk_uri)
     os.unlink(str(path))
     with path.open('w') as f:
@@ -240,7 +241,6 @@ def test_detect_corrupt(syncable_environment):
             mm.UnreadableDataset(None, on_disk_uri)
         ],
         expected_index_result={},
-        index=index,
         cache_path=root,
         fix_settings=dict(index_missing=True, trash_archived=True, update_locations=True)
     )
@@ -252,9 +252,6 @@ _TRASH_PREFIX = ('.trash', (datetime.utcnow().strftime('%Y-%m-%d')))
 def test_remove_missing(syncable_environment):
     """An on-disk dataset that's not indexed should be trashed when trash_missing=True"""
     ls8_collection, on_disk, on_disk_uri, root = syncable_environment
-
-    # Empty index
-    index = MemoryDatasetPathIndex()
 
     register_base_directory(root)
     on_disk_path = root.joinpath('ls8_scenes', 'ls8_test_dataset', 'ga-metadata.yaml')
@@ -285,7 +282,6 @@ def test_remove_missing(syncable_environment):
             mm.DatasetNotIndexed(on_disk, on_disk_uri)
         ],
         expected_index_result={},
-        index=index,
         cache_path=root,
         fix_settings=dict(trash_missing=True, update_locations=True)
     )
@@ -314,9 +310,8 @@ def test_is_trashed(syncable_environment, archived_dt, expect_to_be_trashed):
 
     # Same test, but trash_archived=True, so it should be renamed to the.
     register_base_directory(root)
-    index = MemoryDatasetPathIndex()
     archived_on_disk = DatasetLite(on_disk.id, archived_time=archived_dt)
-    index.add_dataset(archived_on_disk, on_disk_uri)
+    ls8_collection._index.add_dataset(archived_on_disk, on_disk_uri)
     on_disk_path = root.joinpath('ls8_scenes', 'ls8_test_dataset', 'ga-metadata.yaml')
 
     trashed_path = root.joinpath(*_TRASH_PREFIX, 'ls8_scenes', 'ls8_test_dataset', 'ga-metadata.yaml')
@@ -334,7 +329,6 @@ def test_is_trashed(syncable_environment, archived_dt, expect_to_be_trashed):
         expected_index_result={
             on_disk: (on_disk_uri,),
         },
-        index=index,
         cache_path=root,
         fix_settings=dict(index_missing=True, update_locations=True, trash_archived=True)
     )
@@ -353,7 +347,6 @@ def test_is_trashed(syncable_environment, archived_dt, expect_to_be_trashed):
 
 
 def _check_sync(expected_paths: Iterable[str],
-                index: MemoryDatasetPathIndex,
                 collection: Collection,
                 expected_mismatches: Iterable[Mismatch],
                 expected_index_result: Mapping[DatasetLite, Iterable[str]],
@@ -365,21 +358,20 @@ def _check_sync(expected_paths: Iterable[str],
     cache_path = cache_path.joinpath(str(uuid.uuid4()))
     cache_path.mkdir()
 
-    _check_pathset_loading(cache_path, expected_paths, index, log, collection)
+    _check_pathset_loading(cache_path, expected_paths, log, collection)
 
-    mismatches = _check_mismatch_find(cache_path, expected_mismatches, index, log, collection)
+    mismatches = _check_mismatch_find(cache_path, expected_mismatches, collection._index, log, collection)
 
-    _check_mismatch_fix(index, mismatches, expected_index_result, fix_settings=fix_settings)
+    _check_mismatch_fix(collection._index, mismatches, expected_index_result, fix_settings=fix_settings)
 
 
 # noinspection PyProtectedMember
 def _check_pathset_loading(cache_path: Path,
                            expected_paths: Iterable[str],
-                           index: MemoryDatasetPathIndex,
                            log: logging.Logger,
                            collection: Collection):
     """Check that the right mix of paths (index and filesystem) are loaded"""
-    path_set = scan.build_pathset(log, collection, index, cache_path)
+    path_set = scan.build_pathset(log, collection, cache_path)
 
     loaded_paths = set(path_set.iterkeys('file://'))
     assert loaded_paths == set(expected_paths)

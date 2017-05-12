@@ -12,12 +12,13 @@ import click
 import structlog
 from boltons import strutils
 
+import datacubenci.collections
 from datacube.index._api import Index
 from datacube.ui import click as ui
 from datacubenci.archive import CleanConsoleRenderer
 from datacubenci.collections import get_collection, registered_collection_names
+from datacubenci.index import AgdcDatasetPathIndex, DatasetPathIndex
 from datacubenci.sync import scan
-from datacubenci.sync.index import AgdcDatasetPathIndex, DatasetPathIndex
 from . import fixes
 from .differences import Mismatch
 
@@ -67,6 +68,8 @@ def cli(index: Index, collections: Iterable[str], cache_folder: str, f: str, o: 
         sys.exit(1)
 
     with AgdcDatasetPathIndex(index) as path_index:
+        datacubenci.collections.init_nci_collections(path_index)
+
         mismatches = get_mismatches(cache_folder, collections, f, path_index, jobs)
 
         out_f = sys.stdout

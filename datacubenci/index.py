@@ -1,13 +1,13 @@
 import uuid
 from datetime import datetime
-from typing import Iterable, Any, Mapping, Optional
+from typing import Iterable, Optional
 
 from datacube.index import index_connect
 from datacube.index._api import Index
 from datacube.model import Dataset
 from datacube.scripts import dataset as dataset_script
 from datacube.utils import uri_to_local_path
-from datacubenci.collections import simple_object_repr
+from datacubenci.utils import simple_object_repr
 
 
 class DatasetLite:

@@ -1,14 +1,15 @@
 import os
-import structlog
 from datetime import datetime, timedelta
-from dateutil import tz
 from functools import singledispatch
 from typing import Iterable, Callable
 
+import structlog
+from dateutil import tz
+
 from datacube.utils import uri_to_local_path
 from datacubenci import paths
+from datacubenci.index import DatasetPathIndex
 from .differences import DatasetNotIndexed, Mismatch, ArchivedDatasetOnDisk, LocationNotIndexed, LocationMissingOnDisk
-from .index import DatasetPathIndex
 
 _LOG = structlog.get_logger()
 

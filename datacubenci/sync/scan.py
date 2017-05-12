@@ -11,14 +11,13 @@ import structlog
 from boltons import fileutils
 from boltons import strutils
 
-from datacube.index._api import Index
 from datacube.utils import uri_to_local_path, InvalidDocException
 from datacubenci import paths
 from datacubenci.collections import Collection
+from datacubenci.index import DatasetPathIndex, DatasetLite
 from datacubenci.sync.differences import UnreadableDataset
 from .differences import ArchivedDatasetOnDisk, Mismatch, LocationMissingOnDisk, LocationNotIndexed, \
     DatasetNotIndexed
-from .index import DatasetPathIndex, DatasetLite, AgdcDatasetPathIndex
 
 _LOG = structlog.get_logger()
 
@@ -37,14 +36,16 @@ def cache_is_too_old(path):
 def build_pathset(
         log: logging.Logger,
         collection: Collection,
-        path_index: DatasetPathIndex,
         cache_path: Path = None) -> dawg.CompletionDAWG:
     """
     Build a combined set (in dawg form) of all dataset paths in the given index and filesystem.
 
     Optionally use the given cache directory to cache repeated builds.
     """
-    locations_cache = cache_path.joinpath('locations.dawg') if cache_path else None
+    locations_cache = cache_path.joinpath(query_name(collection.query), 'locations.dawg') if cache_path else None
+    if locations_cache:
+        fileutils.mkdir_p(str(locations_cache.parent))
+
     if locations_cache and not cache_is_too_old(locations_cache):
         path_set = dawg.CompletionDAWG()
         log.debug("paths.trie.cache.load", file=locations_cache)
@@ -53,8 +54,8 @@ def build_pathset(
         log.info("paths.trie.build")
         path_set = dawg.CompletionDAWG(
             chain(
-                path_index.iter_all_uris(collection.query),
-                (path.absolute().as_uri() for path in collection.base_path.glob(collection.offset_pattern))
+                collection.iter_index_uris(),
+                collection.iter_fs_uris()
             )
         )
         log.info("paths.trie.done")
@@ -127,10 +128,8 @@ def mismatches_for_collection(collection: Collection,
     Compare the given index and filesystem contents, yielding Mismatches of any differences.
     """
     log = _LOG.bind(collection=collection.name)
-    collection_cache = cache_folder.joinpath(query_name(collection.query))
-    fileutils.mkdir_p(str(collection_cache))
 
-    path_dawg = build_pathset(log, collection, path_index, collection_cache)
+    path_dawg = build_pathset(log, collection, cache_folder)
 
     # Clean up any open connections before we fork.
     path_index.close()

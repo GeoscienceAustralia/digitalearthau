@@ -1,8 +1,8 @@
 from typing import Optional
 from uuid import UUID
 
-from datacubenci.collections import simple_object_repr
-from .index import DatasetLite
+from datacubenci.index import DatasetLite
+from datacubenci.utils import simple_object_repr
 
 
 class Mismatch:
