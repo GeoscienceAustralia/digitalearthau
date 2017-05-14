@@ -1,10 +1,9 @@
-import collections
 import logging
 import os
 import uuid
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Iterable, List, Mapping, Optional
+from typing import Iterable, Mapping
 
 import pytest
 import structlog
@@ -14,75 +13,13 @@ from datacube.utils import uri_to_local_path
 from datacubenci import paths
 from datacubenci.archive import CleanConsoleRenderer
 from datacubenci.collections import Collection
-from datacubenci.index import DatasetLite, DatasetPathIndex
+from datacubenci.index import DatasetLite, MemoryDatasetPathIndex
 from datacubenci.paths import write_files, register_base_directory
 from datacubenci.sync import differences as mm, fixes, scan, Mismatch
 
 
 # These are ok in tests.
 # pylint: disable=too-many-locals, protected-access, redefined-outer-name
-
-
-class MemoryDatasetPathIndex(DatasetPathIndex):
-    """
-    An in-memory implementation, so that we can test without using a real datacube index.
-    """
-
-    def get(self, dataset_id: uuid.UUID) -> Optional[DatasetLite]:
-        for d in self._records.keys():
-            if d.id == dataset_id:
-                return d
-        return None
-
-    def __init__(self):
-        super().__init__()
-        # Map of dataset to locations.
-        # type: Mapping[DatasetLite, List[str]]
-        self._records = collections.defaultdict(list)
-
-    def reset(self):
-        self._records = collections.defaultdict(list)
-
-    def iter_all_uris(self, query: dict) -> Iterable[str]:
-        for uris in self._records.values():
-            yield from uris
-
-    def add_location(self, dataset: DatasetLite, uri: str) -> bool:
-        if dataset not in self._records:
-            raise ValueError("Unknown dataset {} -> {}".format(dataset.id, uri))
-
-        return self._add(dataset, uri)
-
-    def _add(self, dataset_id, uri):
-        if uri in self._records[dataset_id]:
-            # Not added
-            return False
-
-        self._records[dataset_id].append(uri)
-        return True
-
-    def remove_location(self, dataset: DatasetLite, uri: str) -> bool:
-
-        if uri not in self._records[dataset]:
-            # Not removed
-            return False
-        # We never remove the dataset key, only the uris.
-        self._records[dataset].remove(uri)
-
-    def get_datasets_for_uri(self, uri: str) -> Iterable[DatasetLite]:
-        for dataset, uris in self._records.items():
-            if uri in uris:
-                yield dataset
-
-    def as_map(self) -> Mapping[DatasetLite, Iterable[str]]:
-        """
-        All contained (dataset, [location]) values, to check test results.
-        """
-        return {id_: tuple(uris) for id_, uris in self._records.items()}
-
-    def add_dataset(self, dataset: DatasetLite, uri: str):
-        # We're not actually storing datasets...
-        return self._add(dataset, uri)
 
 
 @pytest.fixture(scope="session", autouse=True)
