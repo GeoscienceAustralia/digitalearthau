@@ -8,9 +8,8 @@ that should contain the same set of datasets.
 """
 
 from pathlib import Path
-from typing import Iterable
+from typing import Iterable, Optional
 
-from datacube.index._api import Index
 from datacubenci.index import DatasetPathIndex
 from datacubenci.utils import simple_object_repr
 
@@ -55,7 +54,7 @@ class SceneCollection(Collection):
                  query: dict,
                  base_path: Path,
                  offset_pattern: str,
-                 index: Index,
+                 index: Optional[DatasetPathIndex],
                  delete_archived_after_days=None,
                  expected_parents: Iterable[str] = None):
         super().__init__(name, query, base_path, offset_pattern, index=index,
@@ -72,15 +71,15 @@ def _add(*cs: Collection):
         _COLLECTIONS[c.name] = c
 
 
-def get_collection(name: str):
-    return _COLLECTIONS[name]
+def get_collection(name: str) -> Optional[Collection]:
+    return _COLLECTIONS.get(name)
 
 
 def registered_collection_names():
     return list(_COLLECTIONS.keys())
 
 
-def init_nci_collections(index: Index):
+def init_nci_collections(index: DatasetPathIndex):
     # NCI collections. TODO: move these to config file?
 
     _add(
