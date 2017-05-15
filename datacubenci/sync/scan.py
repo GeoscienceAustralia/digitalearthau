@@ -122,6 +122,8 @@ def _find_uri_mismatches(index: DatasetPathIndex, uri: str) -> Iterable[Mismatch
 def mismatches_for_collection(collection: Collection,
                               cache_folder: Path,
                               path_index: DatasetPathIndex,
+                              # Root folder of all file uris.
+                              uri_prefix="file:///",
                               workers=2,
                               work_chunksize=30) -> Iterable[Mismatch]:
     """
@@ -137,7 +139,7 @@ def mismatches_for_collection(collection: Collection,
     with multiprocessing.Pool(processes=workers) as pool:
         result = pool.imap_unordered(
             partial(_find_uri_mismatches_eager, path_index),
-            path_dawg.iterkeys("file://"),
+            path_dawg.iterkeys(uri_prefix),
             chunksize=work_chunksize
         )
 

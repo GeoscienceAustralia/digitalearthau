@@ -6,24 +6,26 @@ Locations will be added/removed according to whether they're on disk, extra data
 """
 import sys
 from pathlib import Path
-from typing import Iterable
+from typing import Iterable, List, Tuple
 
 import click
 import structlog
 from boltons import strutils
 
-import datacubenci.collections
+import datacubenci.collections as cs
 from datacube.index._api import Index
 from datacube.ui import click as ui
 from datacubenci.archive import CleanConsoleRenderer
-from datacubenci.collections import get_collection, registered_collection_names
-from datacubenci.index import AgdcDatasetPathIndex, DatasetPathIndex
+from datacubenci.index import AgdcDatasetPathIndex, DatasetPathIndex, MemoryDatasetPathIndex
 from datacubenci.sync import scan
 from . import fixes
 from .differences import Mismatch
 
 _LOG = structlog.get_logger()
 
+
+# This check is buggy when used with Tuple[] type: https://github.com/PyCQA/pylint/issues/867
+# pylint: disable=invalid-sequence-index
 
 @click.command()
 @ui.global_cli_options
@@ -55,8 +57,9 @@ _LOG = structlog.get_logger()
               type=click.Path(writable=True, dir_okay=False),
               help="Output to file instead of stdout")
 @click.argument('collections',
-                type=click.Choice(registered_collection_names()),
-                nargs=-1)
+                # help = "Either names of collections or subfolders of collections"
+                # type=click.Choice(cs.registered_collection_names()),
+                nargs=-1, )
 @ui.pass_index(expect_initialised=False)
 def cli(index: Index, collections: Iterable[str], cache_folder: str, f: str, o: str,
         min_trash_age_hours: bool, jobs: int, **fix_settings):
@@ -68,7 +71,7 @@ def cli(index: Index, collections: Iterable[str], cache_folder: str, f: str, o: 
         sys.exit(1)
 
     with AgdcDatasetPathIndex(index) as path_index:
-        datacubenci.collections.init_nci_collections(path_index)
+        cs.init_nci_collections(path_index)
 
         mismatches = get_mismatches(cache_folder, collections, f, path_index, jobs)
 
@@ -101,19 +104,64 @@ def cli(index: Index, collections: Iterable[str], cache_folder: str, f: str, o: 
                 out_f.close()
 
 
+def resolve_collections(collection_specifiers: Iterable[str]) -> List[Tuple[cs.Collection, str]]:
+    """
+    >>> cs.init_nci_collections(MemoryDatasetPathIndex())
+    >>> [(c.name, p) for c, p in resolve_collections(['ls8_level1_scene'])]
+    [('ls8_level1_scene', 'file:///')]
+    >>> [(c.name, p) for c, p in resolve_collections(['/g/data/v10/repackaged/rawdata/0/2015'])]
+    [('telemetry', 'file:///g/data/v10/repackaged/rawdata/0/2015')]
+    >>> [(c.name, p) for c, p in resolve_collections(['/g/data/v10/reprocess/ls7/level1'])]
+    [('ls7_level1_scene', 'file:///g/data/v10/reprocess/ls7/level1')]
+    >>> level1_folder_match = resolve_collections(['/g/data/v10/reprocess'])
+    >>> sorted(c.name for c, p in level1_folder_match)
+    ['ls5_level1_scene', 'ls7_level1_scene', 'ls8_level1_scene']
+    >>> set(p for c, p in level1_folder_match)
+    {'file:///g/data/v10/reprocess'}
+    >>> resolve_collections(['/some/fake/path'])
+    Traceback (most recent call last):
+    ...
+    ValueError: Matches no collections: '/some/fake/path'
+    """
+    out = []
+    for spec in collection_specifiers:
+        # Either a collection name or a path on the filesystem
+
+        possible_path = Path(spec).absolute()
+
+        collection = cs.get_collection(spec)
+        collections_in_path = list(cs.get_collections_in_path(possible_path))
+
+        # If it matches both, throw an error
+        if collections_in_path and collection is not None:
+            raise ValueError("Ambiguous input: %r is both a "
+                             "collection name and a path on the filesystem" % (spec,))
+
+        if collection:
+            out.append((collection, 'file:///'))
+        elif collections_in_path:
+            for match in collections_in_path:
+                out.append((match, possible_path.as_uri()))
+        else:
+            raise ValueError("Matches no collections: %r" % spec)
+
+    return out
+
+
 def get_mismatches(cache_folder: str,
-                   collection_names: Iterable[str],
+                   collection_specifiers: Iterable[str],
                    input_file: str,
                    path_index: DatasetPathIndex,
                    job_count: int):
     if input_file:
         yield from mismatches_from_file(Path(input_file))
     else:
-        for collection_name in collection_names:
+        for collection, uri_prefix in resolve_collections(collection_specifiers):
             yield from scan.mismatches_for_collection(
-                get_collection(collection_name),
+                collection,
                 Path(cache_folder),
                 path_index,
+                uri_prefix=uri_prefix,
                 workers=job_count
             )
 

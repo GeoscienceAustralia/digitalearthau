@@ -6,11 +6,11 @@ that should contain the same set of datasets.
 
 (Our sync script will compare/"sync" the two)
 """
-
+import fnmatch
 from pathlib import Path
-from typing import Iterable, Optional
+from typing import Iterable, Optional, Mapping
 
-from datacubenci.index import DatasetPathIndex
+from datacubenci.index import DatasetPathIndex, MemoryDatasetPathIndex
 from datacubenci.utils import simple_object_repr
 
 
@@ -47,6 +47,10 @@ class Collection:
     def iter_index_uris(self):
         return map(str, self._index.iter_all_uris(self.query))
 
+    @property
+    def file_pattern(self):
+        return self.base_path.joinpath(self.offset_pattern)
+
 
 class SceneCollection(Collection):
     def __init__(self,
@@ -63,6 +67,7 @@ class SceneCollection(Collection):
                          expected_parents=expected_parents)
 
 
+# type: Mapping[str, Collection]
 _COLLECTIONS = {}
 
 
@@ -75,8 +80,31 @@ def get_collection(name: str) -> Optional[Collection]:
     return _COLLECTIONS.get(name)
 
 
+def get_collections() -> Iterable[Collection]:
+    return _COLLECTIONS.values()
+
+
 def registered_collection_names():
     return list(_COLLECTIONS.keys())
+
+
+def get_collections_in_path(p: Path) -> Iterable[Collection]:
+    """
+    Get any collections that may have datasets within the given path.
+
+    >>> init_nci_collections(MemoryDatasetPathIndex())
+    >>> [c.name for c in get_collections_in_path('/g/data/v10/repackaged')]
+    ['telemetry']
+    >>> [c.name for c in get_collections_in_path('/g/data/v10/reprocess/ls8/level1/2016/04')]
+    ['ls8_level1_scene']
+    >>> [c.name for c in get_collections_in_path('/g/data/some/fake/path')]
+    []
+    """
+    for c in get_collections():
+        pat = Path(c.file_pattern)
+        if fnmatch.fnmatch(str(p), str(pat)) or \
+                any(fnmatch.fnmatch(str(p), str(subpat)) for subpat in pat.parents):
+            yield c
 
 
 def init_nci_collections(index: DatasetPathIndex):
