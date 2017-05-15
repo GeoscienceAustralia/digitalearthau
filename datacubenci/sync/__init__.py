@@ -122,6 +122,11 @@ def resolve_collections(collection_specifiers: Iterable[str]) -> List[Tuple[cs.C
     Traceback (most recent call last):
     ...
     ValueError: Matches no collections: '/some/fake/path'
+    >>> # Just the prefix, not the whole complete folder name
+    >>> [(c.name, p) for c, p in resolve_collections(['/g/data/v10/repackaged/rawdata/0/20'])]
+    Traceback (most recent call last):
+    ...
+    ValueError: Matches no collections: '/g/data/v10/repackaged/rawdata/0/20'
     """
     out = []
     for spec in collection_specifiers:

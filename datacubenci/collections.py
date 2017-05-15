@@ -93,11 +93,11 @@ def get_collections_in_path(p: Path) -> Iterable[Collection]:
     Get any collections that may have datasets within the given path.
 
     >>> init_nci_collections(MemoryDatasetPathIndex())
-    >>> [c.name for c in get_collections_in_path('/g/data/v10/repackaged')]
+    >>> [c.name for c in get_collections_in_path(Path('/g/data/v10/repackaged'))]
     ['telemetry']
-    >>> [c.name for c in get_collections_in_path('/g/data/v10/reprocess/ls8/level1/2016/04')]
+    >>> [c.name for c in get_collections_in_path(Path('/g/data/v10/reprocess/ls8/level1/2016/04'))]
     ['ls8_level1_scene']
-    >>> [c.name for c in get_collections_in_path('/g/data/some/fake/path')]
+    >>> [c.name for c in get_collections_in_path(Path('/g/data/some/fake/path'))]
     []
     """
     for c in get_collections():
