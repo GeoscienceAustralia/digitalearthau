@@ -46,6 +46,7 @@ def main(name: str, folder: Path, submit_limit: int, concurrent_jobs=4):
 
         last_job_id = last_job_slots.get(i % concurrent_jobs)
 
+        # Folders are named "X_Y", we glob for all folders with the give X coord.
         input_folders = list(folder.glob('{}_*'.format(tile_x)))
 
         job_id = submit_job(error_path, input_folders, output_path, subjob_name, require_job_id=last_job_id)
@@ -55,14 +56,32 @@ def main(name: str, folder: Path, submit_limit: int, concurrent_jobs=4):
         time.sleep(SUBMIT_THROTTLE_SECS)
 
 
-def submit_job(error_path, input_folders, output_path, subjob_name, require_job_id=None):
+def submit_job(error_path,
+               input_folders,
+               output_path,
+               subjob_name,
+               require_job_id=None,
+               sync_workers=4,
+               verbose=True,
+               dry_run=True):
     requirements = []
+    sync_opts = []
     if require_job_id:
         requirements.extend(['-W', 'depend=afterok:{}'.format(str(require_job_id).strip())])
+    if verbose:
+        sync_opts.append('-v')
+    if not dry_run:
+        # For tile products like the current FC we trust the index over the filesystem.
+        # (jobs that failed part-way-through left datasets on disk and were not indexed)
+        sync_opts.extend(['--trash-missing', '--trash-archived'])
+        # Scene products are the opposite:
+        # Only complete scenes are written to fs, so '--index-missing' instead of trash.
+        # (also want to '--update-locations' to fix any moved datasets)
 
     sync_command = [
-        'python', '-m', 'datacubenci.sync', '-j', '4',  # '--trash-missing', '--trash-archived',
-        # glob all the paths starting with X_
+        'python', '-m', 'datacubenci.sync',
+        '-j', str(sync_workers),
+        *sync_opts,
         *(map(str, input_folders))
     ]
     output = check_output([
