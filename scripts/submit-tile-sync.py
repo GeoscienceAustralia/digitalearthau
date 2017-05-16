@@ -6,20 +6,25 @@ from pathlib import Path
 from subprocess import check_output
 from typing import Mapping
 
+import click
+
 SUBMIT_THROTTLE_SECS = 1
 
 
-def main(name: str, folder: Path, submit_limit: int, concurrent_jobs=4):
-    folder = folder.absolute()
+@click.command()
+@click.argument('job_name')
+@click.argument('tile_folder', type=click.Path(exists=True, readable=True, writable=False))
+@click.option('--submit-limit', type=int, default=None, help="Max number of jobs to submit (remaining tiles will "
+                                                             "not be submitted)")
+@click.option('--concurrent-jobs', type=int, default=5, help="Number of PBS jobs to run concurrently")
+def main(job_name: str, tile_folder: Path, submit_limit: int, concurrent_jobs: int):
+    tile_path = Path(tile_folder).absolute()
 
     run_directory = Path('runs').absolute()
 
-    if not folder.exists():
-        raise ValueError("Folder doesn't exist: %s" % folder)
-
-    # For input folder, get list of unique tile X values
+    # For input tile_path, get list of unique tile X values
     # They are named "X_Y", eg "-12_23"
-    tile_xs = set(int(p.name.split('_')[0]) for p in folder.iterdir() if p.name != 'ncml')
+    tile_xs = set(int(p.name.split('_')[0]) for p in tile_path.iterdir() if p.name != 'ncml')
     tile_xs = sorted(tile_xs)
 
     print("Found %s total jobs" % len(tile_xs))
@@ -37,7 +42,7 @@ def main(name: str, folder: Path, submit_limit: int, concurrent_jobs=4):
             print("Submit limit ({}) reached, done.".format(submit_limit))
             break
 
-        subjob_name = '{}_{}'.format(name, tile_x)
+        subjob_name = '{}_{}'.format(job_name, tile_x)
 
         output_path = run_directory.joinpath('{}.tsv'.format(subjob_name))
         error_path = run_directory.joinpath('{}.log'.format(subjob_name))
@@ -48,10 +53,14 @@ def main(name: str, folder: Path, submit_limit: int, concurrent_jobs=4):
 
         last_job_id = last_job_slots.get(submitted % concurrent_jobs)
 
-        # Folders are named "X_Y", we glob for all folders with the give X coord.
-        input_folders = list(folder.glob('{}_*'.format(tile_x)))
-
-        job_id = submit_job(error_path, input_folders, output_path, subjob_name, require_job_id=last_job_id)
+        job_id = submit_job(
+            error_path=error_path,
+            # Folders are named "X_Y", we glob for all folders with the give X coord.
+            input_folders=list(tile_path.glob('{}_*'.format(tile_x))),
+            output_path=output_path,
+            subjob_name=subjob_name,
+            require_job_id=last_job_id
+        )
         print("[{}] {}: submitted {}".format(i, subjob_name, job_id))
         last_job_slots[submitted % concurrent_jobs] = job_id
         submitted += 1
@@ -87,7 +96,7 @@ def submit_job(error_path,
         *sync_opts,
         *(map(str, input_folders))
     ]
-    output = check_output([
+    command = [
         'qsub', '-V',
         '-P', 'v10',
         '-q', 'express',
@@ -101,10 +110,13 @@ def submit_job(error_path,
         *requirements,
         '--',
         *sync_command
-    ])
+    ]
+    print(' '.join(command))
+    output = check_output(command)
     job_id = output.decode('utf-8').strip(' \\n')
     return job_id
 
 
 if __name__ == '__main__':
-    main('5fc', Path('/g/data/fk4/datacube/002/LS5_TM_FC'), 4)
+    # Eg. scripts/submit-tile-sync.py 5fc /g/data/fk4/datacube/002/LS5_TM_FC
+    main()
