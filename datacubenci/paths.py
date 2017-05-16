@@ -1,14 +1,17 @@
 import atexit
-
 import datetime
 import os
 import shutil
 import tempfile
 import uuid
 from pathlib import Path
-from typing import List, Iterable, Union
+from typing import List, Iterable, Union, Tuple
 
 from datacube.utils import is_supported_document_type, read_documents, InvalidDocException
+
+# This check is buggy when used with Tuple[] type: https://github.com/PyCQA/pylint/issues/867
+# pylint: disable=invalid-sequence-index
+
 
 # This may eventually go to a config file...
 # ".trash" directories will be created at this level for any datasets contained within.
@@ -172,7 +175,7 @@ def get_path_dataset_ids(path: Path) -> List[uuid.UUID]:
     return list(_path_dataset_ids(path))
 
 
-def get_dataset_paths(metadata_path):
+def get_dataset_paths(metadata_path: Path) -> Tuple[Path, List[Path]]:
     """
     Get the base location and all files for a given dataset (specified by the metadata path)
     :param metadata_path:

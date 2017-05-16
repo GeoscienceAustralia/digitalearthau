@@ -15,7 +15,8 @@ from datacube.utils import uri_to_local_path, InvalidDocException
 from datacubenci import paths
 from datacubenci.collections import Collection
 from datacubenci.index import DatasetPathIndex, DatasetLite
-from datacubenci.sync.differences import UnreadableDataset
+from datacubenci.sync import validate
+from datacubenci.sync.differences import UnreadableDataset, InvalidDataset
 from .differences import ArchivedDatasetOnDisk, Mismatch, LocationMissingOnDisk, LocationNotIndexed, \
     DatasetNotIndexed
 
@@ -73,7 +74,7 @@ def build_pathset(
 logging.getLogger('datacube.index.postgres._connections').setLevel(logging.ERROR)
 
 
-def _find_uri_mismatches(index: DatasetPathIndex, uri: str) -> Iterable[Mismatch]:
+def _find_uri_mismatches(index: DatasetPathIndex, uri: str, validate_data=True) -> Iterable[Mismatch]:
     """
     Compare the index and filesystem contents for the given uris,
     yielding Mismatches of any differences.
@@ -86,17 +87,27 @@ def _find_uri_mismatches(index: DatasetPathIndex, uri: str) -> Iterable[Mismatch
     log = _LOG.bind(path=path)
     log.debug("index.get_dataset_ids_for_uri")
     indexed_datasets = set(index.get_datasets_for_uri(uri))
-    try:
-        datasets_in_file = set(map(DatasetLite, paths.get_path_dataset_ids(path) if path.exists() else []))
-    except InvalidDocException:
-        # Should we do something with indexed_datasets here? If there's none, we're more willing to trash.
-        yield UnreadableDataset(None, uri)
-        log.exception("invalid_path")
-        return
 
-    log.info("dataset_ids",
-             indexed_dataset_ids=ids(indexed_datasets),
-             file_ids=ids(datasets_in_file))
+    datasets_in_file = set()
+    if path.exists():
+        try:
+            datasets_in_file = set(map(DatasetLite, paths.get_path_dataset_ids(path)))
+        except InvalidDocException:
+            # Should we do something with indexed_datasets here? If there's none, we're more willing to trash.
+            yield UnreadableDataset(None, uri)
+            log.exception("invalid_path")
+            return
+
+        log.info("dataset_ids",
+                 indexed_dataset_ids=ids(indexed_datasets),
+                 file_ids=ids(datasets_in_file))
+
+        if validate_data:
+            validation_success = validate.validate_dataset(path, log=log)
+            if not validation_success:
+                yield InvalidDataset(None, uri)
+                log.exception("invalid_path")
+                return
 
     for indexed_dataset in indexed_datasets:
         # Does the dataset exist in the file?

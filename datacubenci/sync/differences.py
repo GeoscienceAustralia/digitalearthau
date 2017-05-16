@@ -83,3 +83,10 @@ class UnreadableDataset(Mismatch):
     We can't currently easily separate whether this is a temporary system/disk error or an actual corrupt dataset.
     """
     pass
+
+
+class InvalidDataset(Mismatch):
+    """
+    An error was returned from validation
+    """
+    pass
