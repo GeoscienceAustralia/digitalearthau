@@ -24,6 +24,8 @@ def main(name: str, folder: Path, submit_limit: int, concurrent_jobs=4):
 
     print("Found %s total jobs" % len(tile_xs))
 
+    submitted = 0
+
     # To maintain concurrent_jobs limit, we set a pbs dependency on previous jobs.
 
     # mapping of slot number to the last job id to be submitted in it.
@@ -31,7 +33,7 @@ def main(name: str, folder: Path, submit_limit: int, concurrent_jobs=4):
     last_job_slots = {}
 
     for i, tile_x in enumerate(tile_xs):
-        if i == submit_limit:
+        if submitted == submit_limit:
             print("Submit limit ({}) reached, done.".format(submit_limit))
             break
 
@@ -44,14 +46,15 @@ def main(name: str, folder: Path, submit_limit: int, concurrent_jobs=4):
             print("[{}] {}: output exists, skipping".format(i, subjob_name))
             continue
 
-        last_job_id = last_job_slots.get(i % concurrent_jobs)
+        last_job_id = last_job_slots.get(submitted % concurrent_jobs)
 
         # Folders are named "X_Y", we glob for all folders with the give X coord.
         input_folders = list(folder.glob('{}_*'.format(tile_x)))
 
         job_id = submit_job(error_path, input_folders, output_path, subjob_name, require_job_id=last_job_id)
         print("[{}] {}: submitted {}".format(i, subjob_name, job_id))
-        last_job_slots[i % concurrent_jobs] = job_id
+        last_job_slots[submitted % concurrent_jobs] = job_id
+        submitted += 1
 
         time.sleep(SUBMIT_THROTTLE_SECS)
 
