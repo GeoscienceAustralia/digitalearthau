@@ -1,4 +1,5 @@
 import logging
+import os
 from pathlib import Path
 
 import gdal
@@ -6,8 +7,11 @@ from compliance_checker.runner import ComplianceChecker, CheckSuite
 
 from datacubenci import paths
 
-# Is this necessary? Copied from Simon's checker
+# prevent aux.xml write
+os.environ["GDAL_PAM_ENABLED"] = "NO"
 
+
+# Is this necessary? Copied from Simon's checker
 CHECK_SUITE = CheckSuite()
 CHECK_SUITE.load_all_available_checkers()
 
