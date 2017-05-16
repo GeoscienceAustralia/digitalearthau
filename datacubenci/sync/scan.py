@@ -35,9 +35,9 @@ def cache_is_too_old(path):
 
 
 def build_pathset(
-        log: logging.Logger,
         collection: Collection,
-        cache_path: Path = None) -> dawg.CompletionDAWG:
+        cache_path: Path = None,
+        log: logging.Logger = _LOG) -> dawg.CompletionDAWG:
     """
     Build a combined set (in dawg form) of all dataset paths in the given index and filesystem.
 
@@ -141,7 +141,7 @@ def mismatches_for_collection(collection: Collection,
     """
     log = _LOG.bind(collection=collection.name)
 
-    path_dawg = build_pathset(log, collection, cache_folder)
+    path_dawg = build_pathset(collection, cache_folder, log=log)
 
     # Clean up any open connections before we fork.
     path_index.close()

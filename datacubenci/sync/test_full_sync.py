@@ -308,7 +308,7 @@ def _check_pathset_loading(cache_path: Path,
                            log: logging.Logger,
                            collection: Collection):
     """Check that the right mix of paths (index and filesystem) are loaded"""
-    path_set = scan.build_pathset(log, collection, cache_path)
+    path_set = scan.build_pathset(collection, cache_path, log=log)
 
     loaded_paths = set(path_set.iterkeys('file://'))
     assert loaded_paths == set(expected_paths)
