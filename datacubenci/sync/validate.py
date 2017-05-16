@@ -34,11 +34,15 @@ def validate_dataset(md_path: Path, log: logging.Logger):
                             band.GetRasterBand(1).GetStatistics(0, 1)
                             logging.info("Band is OK %s", subdataset[0])
                             log.info("validate.band.pass", path=file)
-                        except ValueError:
-                            log.info("validate.band.fail", path=file, exc_info=True)
+                        except ValueError as v:
+                            # Only show stack trace at debug-level logging. We get the message at info.
+                            log.debug("validate.band.exception", exc_info=True)
+                            log.info("validate.band.fail", path=file, error_args=v.args)
                             return False
-            except ValueError:
-                logging.error("validate.open.fail", path=file, exc_info=True)
+            except ValueError as v:
+                # Only show stack trace at debug-level logging. We get the message at info.
+                log.debug("validate.band.exception", exc_info=True)
+                log.info("validate.open.fail", path=file, error_args=v.args)
                 return False
     return True
 
@@ -48,7 +52,7 @@ def _compliance_check(nc_path: Path):
     Run cf and adcc checks with normal strictness, verbose text format to stdout
     """
     was_success, errors_occurred = ComplianceChecker.run_checker(
-        nc_path,
+        str(nc_path),
         ['cf'],
         0,
         'lenient',

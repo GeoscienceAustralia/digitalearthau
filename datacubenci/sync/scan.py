@@ -92,10 +92,10 @@ def _find_uri_mismatches(index: DatasetPathIndex, uri: str, validate_data=True) 
     if path.exists():
         try:
             datasets_in_file = set(map(DatasetLite, paths.get_path_dataset_ids(path)))
-        except InvalidDocException:
+        except InvalidDocException as e:
             # Should we do something with indexed_datasets here? If there's none, we're more willing to trash.
+            log.info("invalid_path", error_args=e.args)
             yield UnreadableDataset(None, uri)
-            log.exception("invalid_path")
             return
 
         log.info("dataset_ids",
@@ -106,7 +106,6 @@ def _find_uri_mismatches(index: DatasetPathIndex, uri: str, validate_data=True) 
             validation_success = validate.validate_dataset(path, log=log)
             if not validation_success:
                 yield InvalidDataset(None, uri)
-                log.exception("invalid_path")
                 return
 
     for indexed_dataset in indexed_datasets:
