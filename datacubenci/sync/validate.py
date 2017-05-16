@@ -1,5 +1,6 @@
 import logging
 import os
+import tempfile
 from pathlib import Path
 
 import gdal
@@ -11,7 +12,7 @@ from datacubenci import paths
 os.environ["GDAL_PAM_ENABLED"] = "NO"
 
 
-# Is this necessary? Copied from Simon's checker
+# The 'load' method actually loads it globally, not on the specific instance.
 CHECK_SUITE = CheckSuite()
 CHECK_SUITE.load_all_available_checkers()
 
@@ -51,16 +52,18 @@ def validate_dataset(md_path: Path, log: logging.Logger):
     return True
 
 
-def _compliance_check(nc_path: Path):
+def _compliance_check(nc_path: Path, results_path: Path = None):
     """
     Run cf and adcc checks with normal strictness, verbose text format to stdout
     """
     was_success, errors_occurred = ComplianceChecker.run_checker(
-        str(nc_path),
-        ['cf'],
-        0,
-        'lenient',
-        '-',
-        'text'
+        ds_loc=str(nc_path),
+        checker_names=['cf'],
+        verbose=0,
+        criteria='lenient',
+        skip_checks=['check_dimension_order'],
+        # Specify a tempfile as a sink, as otherwise it will spew results into stdout.
+        output_filename=str(results_path) if results_path else tempfile.mktemp(prefix='compliance-log-'),
+        output_format='text'
     )
     return was_success, errors_occurred
