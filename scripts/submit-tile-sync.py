@@ -9,6 +9,7 @@ from subprocess import check_output
 from typing import Mapping, List, Optional
 
 import click
+from boltons import fileutils
 
 from datacube.index import index_connect
 from datacubenci import collections
@@ -79,10 +80,12 @@ def _run(job_name: str,
             click.echo("Submit limit ({}) reached, done.".format(submit_limit))
             break
 
-        subjob_name = '{}_{}'.format(job_name, tile_x)
+        subjob_name = "{}{:+04d}".format(job_name, tile_x)
+        subjob_run_path = run_path.joinpath(job_name, subjob_name)
+        fileutils.mkdir_p(subjob_run_path)
 
-        output_path = run_path.joinpath('{}.tsv'.format(subjob_name))
-        error_path = run_path.joinpath('{}.log'.format(subjob_name))
+        output_path = subjob_run_path.joinpath('out.tsv')
+        error_path = subjob_run_path.joinpath('err.log')
 
         if output_path.exists():
             click.echo("[{}] {}: output exists, skipping".format(i, subjob_name))
@@ -91,10 +94,10 @@ def _run(job_name: str,
         last_job_id = last_job_slots.get(submitted % concurrent_jobs)
 
         job_id = submit_job(
-            error_path=error_path,
             # Folders are named "X_Y", we glob for all folders with the give X coord.
             input_folders=list(tile_path.glob('{}_*'.format(tile_x))),
             output_path=output_path,
+            error_path=error_path,
             cache_path=cache_path,
             subjob_name=subjob_name,
             require_job_id=last_job_id,
