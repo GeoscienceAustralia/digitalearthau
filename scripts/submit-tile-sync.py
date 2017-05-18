@@ -115,7 +115,7 @@ def submit_job(error_path: Path,
     if not dry_run:
         # For tile products like the current FC we trust the index over the filesystem.
         # (jobs that failed part-way-through left datasets on disk and were not indexed)
-        sync_opts.extend(['--trash-missing', '--trash-archived'])
+        sync_opts.extend(['--trash-missing', '--trash-archived', '--update-locations'])
         # Scene products are the opposite:
         # Only complete scenes are written to fs, so '--index-missing' instead of trash.
         # (also want to '--update-locations' to fix any moved datasets)
