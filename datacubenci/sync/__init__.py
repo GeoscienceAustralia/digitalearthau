@@ -159,7 +159,7 @@ def get_mismatches(cache_folder: str,
                    path_index: DatasetPathIndex,
                    job_count: int):
     if input_file:
-        yield from mismatches_from_file(Path(input_file))
+        yield from mismatches_from_file(Path(input_file), path_index)
     else:
         for collection, uri_prefix in resolve_collections(collection_specifiers):
             yield from scan.mismatches_for_collection(
@@ -171,8 +171,14 @@ def get_mismatches(cache_folder: str,
             )
 
 
-def mismatches_from_file(f: Path):
-    raise NotImplementedError("Loading mismatches from file")
+def mismatches_from_file(f: Path, path_index: DatasetPathIndex):
+    for line in f.open('r').readlines():
+        line = line.strip('\n ')
+
+        coll, mismatch_name, dataset_id, uri = line.split('\t')
+
+        mismatch_class = getattr(differences, strutils.under2camel(mismatch_name))
+        yield mismatch_class(path_index.get(dataset_id.strip()), uri.strip())
 
 
 def init_logging():
