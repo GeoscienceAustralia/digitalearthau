@@ -2,6 +2,7 @@
 
 
 import logging
+import os
 import time
 from pathlib import Path
 from subprocess import check_output
@@ -22,6 +23,10 @@ _LOG = logging.getLogger(__name__)
 @click.command()
 @click.argument('job_name')
 @click.argument('tile_folder', type=click.Path(exists=True, readable=True, writable=False))
+@click.option('--dry-run', is_flag=True, default=False)
+@click.option('--queue', '-q', default='normal',
+              type=click.Choice(['normal', 'express']))
+@click.option('--project', '-P', default='v10')
 @click.option('--run-folder',
               type=click.Path(exists=True, readable=True, writable=True),
               # 'cache' folder in current directory.
@@ -29,16 +34,30 @@ _LOG = logging.getLogger(__name__)
 @click.option('--submit-limit', type=int, default=None, help="Max number of jobs to submit (remaining tiles will "
                                                              "not be submitted)")
 @click.option('--concurrent-jobs', type=int, default=5, help="Number of PBS jobs to run concurrently")
-def main(job_name: str, tile_folder: str, run_folder: str, submit_limit: int, concurrent_jobs: int):
+def main(job_name: str,
+         tile_folder: str,
+         run_folder: str,
+         submit_limit: int,
+         concurrent_jobs: int,
+         dry_run: bool,
+         queue: str,
+         project: str):
     tile_path = Path(tile_folder).absolute()
     run_path = Path(run_folder).absolute()
 
     with index_connect(application_name='sync-' + job_name) as index:
         collections.init_nci_collections(AgdcDatasetPathIndex(index))
-        _run(job_name, tile_path, run_path, concurrent_jobs, submit_limit)
+        _run(job_name, tile_path, run_path, concurrent_jobs, submit_limit, dry_run, queue, project)
 
 
-def _run(job_name: str, tile_path: Path, run_path: Path, concurrent_jobs: int, submit_limit: int):
+def _run(job_name: str,
+         tile_path: Path,
+         run_path: Path,
+         concurrent_jobs: int,
+         submit_limit: int,
+         dry_run: bool,
+         queue: str,
+         project: str):
     cache_path = run_path.joinpath('cache')
 
     # Update cached path list ahead of time, so PBS jobs don't waste time doing it themselves.
@@ -78,7 +97,10 @@ def _run(job_name: str, tile_path: Path, run_path: Path, concurrent_jobs: int, s
             output_path=output_path,
             cache_path=cache_path,
             subjob_name=subjob_name,
-            require_job_id=last_job_id
+            require_job_id=last_job_id,
+            dry_run=dry_run,
+            project=project,
+            queue=queue
         )
         click.echo("[{}] {}: submitted {}".format(i, subjob_name, job_id))
         last_job_slots[submitted % concurrent_jobs] = job_id
@@ -105,7 +127,9 @@ def submit_job(error_path: Path,
                require_job_id: Optional[int],
                sync_workers=4,
                verbose=True,
-               dry_run=True):
+               dry_run=False,
+               project='v10',
+               queue='normal'):
     requirements = []
     sync_opts = []
     if require_job_id:
@@ -127,15 +151,22 @@ def submit_job(error_path: Path,
         *sync_opts,
         *(map(str, input_folders))
     ]
+    qsub_opts = []
+    notify_email = os.environ.get('COMPLETION_NOTIFY_EMAIL')
+    if notify_email:
+        qsub_opts.extend([
+            '-M', notify_email
+        ])
+
     command = [
         'qsub', '-V',
-        '-P', 'v10',
-        '-q', 'express',
+        '-P', project,
+        '-q', queue,
         '-l', 'walltime=20:00:00,mem=4GB,ncpus=2,jobfs=1GB,other=gdata',
         '-l', 'wd',
         '-N', 'sync-{}'.format(subjob_name),
         '-m', 'e',
-        '-M', 'jeremy.hooke@ga.gov.au',
+        *qsub_opts,
         '-e', str(error_path),
         '-o', str(output_path),
         *requirements,
