@@ -3,7 +3,7 @@ import os
 import uuid
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Iterable, Mapping
+from typing import Iterable, Mapping, Tuple
 
 import pytest
 import structlog
@@ -66,6 +66,9 @@ def syncable_environment():
 
     ls8_collection = Collection('ls8_scene_collection', {}, root.joinpath('ls8_scenes'), 'ls*/ga-metadata.yaml', [],
                                 index=MemoryDatasetPathIndex())
+
+    # register this as a base directory so that datasets can be trashed within it.
+    register_base_directory(root)
 
     return ls8_collection, on_disk, on_disk_uri, root
 
@@ -164,13 +167,33 @@ def test_index_disk_sync(syncable_environment):
 
 
 def test_detect_corrupt(syncable_environment):
+    # type: (Tuple[Collection, str, str, Path]) -> None
     """If a dataset exists but cannot be read, report as corrupt"""
     ls8_collection, on_disk, on_disk_uri, root = syncable_environment
     path = uri_to_local_path(on_disk_uri)
     os.unlink(str(path))
     with path.open('w') as f:
         f.write('corruption!')
+    assert path.exists()
 
+    # Another dataset exists in the same location
+    ls8_collection._index.add_dataset(DatasetLite(uuid.UUID("a2a51f76-3b67-11e7-9fa9-185e0f80a5c0")), on_disk_uri)
+    _check_sync(
+        collection=ls8_collection,
+        expected_paths=[on_disk_uri],
+        expected_mismatches=[
+            mm.UnreadableDataset(None, on_disk_uri)
+        ],
+        # Unmodified index
+        expected_index_result=ls8_collection._index.as_map(),
+        cache_path=root,
+        fix_settings=dict(trash_missing=True, trash_archived=True, update_locations=True)
+    )
+    # If a dataset is in the index pointing to the corrupt location, it shouldn't be trashed with trash_archived=True
+    assert path.exists(), "Corrupt dataset with sibling in index should not be trashed"
+
+    # No dataset in index at the corrupt location, so it should be trashed.
+    ls8_collection._index.reset()
     _check_sync(
         collection=ls8_collection,
         expected_paths=[on_disk_uri],
@@ -179,8 +202,9 @@ def test_detect_corrupt(syncable_environment):
         ],
         expected_index_result={},
         cache_path=root,
-        fix_settings=dict(index_missing=True, trash_archived=True, update_locations=True)
+        fix_settings=dict(trash_missing=True, trash_archived=True, update_locations=True)
     )
+    assert not path.exists(), "Corrupt dataset without sibling should be trashed with trash_archived=True"
 
 
 _TRASH_PREFIX = ('.trash', (datetime.utcnow().strftime('%Y-%m-%d')))

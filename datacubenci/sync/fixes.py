@@ -9,6 +9,7 @@ from dateutil import tz
 from datacube.utils import uri_to_local_path
 from datacubenci import paths
 from datacubenci.index import DatasetPathIndex
+from datacubenci.sync.differences import UnreadableDataset
 from .differences import DatasetNotIndexed, Mismatch, ArchivedDatasetOnDisk, LocationNotIndexed, LocationMissingOnDisk
 
 _LOG = structlog.get_logger()
@@ -78,6 +79,8 @@ def do_trash_missing(mismatch: Mismatch, index: DatasetPathIndex):
 
 
 @do_trash_missing.register(DatasetNotIndexed)
+# An unreadable dataset that passes the below sibling check should be considered missing from the index.
+@do_trash_missing.register(UnreadableDataset)
 def _(mismatch: DatasetNotIndexed, index: DatasetPathIndex):
     # If any (other) indexed datasets exist at the same location we can't trash it.
     datasets_at_location = list(index.get_datasets_for_uri(mismatch.uri))
