@@ -1,5 +1,9 @@
+import sys
+from pathlib import Path
 from typing import Optional
 from uuid import UUID
+
+from boltons import strutils
 
 from datacubenci.index import DatasetLite
 from datacubenci.utils import simple_object_repr
@@ -44,6 +48,26 @@ uri='/tmp/test')
 
     def __hash__(self):
         return hash(tuple(v for k, v in sorted(self.__dict__.items())))
+
+    def to_tsv_row(self):
+        return '\t'.join(map(str, (
+            strutils.camel2under(self.__class__.__name__),
+            self.dataset.id if self.dataset else None,
+            self.uri
+        )))
+
+    @staticmethod
+    def from_tsv_row(row: str):
+        mismatch_name, dataset_id, uri = row.strip('\n ').split('\t')
+
+        mismatch_class = getattr(sys.modules[__name__], strutils.under2camel(mismatch_name))
+        dataset_id = dataset_id.strip()
+
+        dataset = None
+        if dataset_id and dataset_id != 'None':
+            dataset = DatasetLite(UUID(dataset_id))
+
+        return mismatch_class(dataset, uri.strip())
 
 
 class LocationMissingOnDisk(Mismatch):
@@ -90,3 +114,14 @@ class InvalidDataset(Mismatch):
     An error was returned from validation
     """
     pass
+
+
+def mismatches_from_file(f: Path):
+    """
+    Load mismatches from a tsv file
+    """
+    for line in f.open('r').readlines():
+        line = line.strip('\n ')
+        if not line:
+            continue
+        yield Mismatch.from_tsv_row(line)

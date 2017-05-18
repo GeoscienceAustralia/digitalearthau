@@ -10,7 +10,6 @@ from typing import Iterable, List, Tuple
 
 import click
 import structlog
-from boltons import strutils
 
 import datacubenci.collections as cs
 from datacube.index._api import Index
@@ -18,7 +17,7 @@ from datacube.ui import click as ui
 from datacubenci.archive import CleanConsoleRenderer
 from datacubenci.index import AgdcDatasetPathIndex, DatasetPathIndex, MemoryDatasetPathIndex
 from datacubenci.sync import scan
-from . import fixes
+from . import fixes, differences
 from .differences import Mismatch
 
 _LOG = structlog.get_logger()
@@ -26,6 +25,7 @@ _LOG = structlog.get_logger()
 
 # This check is buggy when used with Tuple[] type: https://github.com/PyCQA/pylint/issues/867
 # pylint: disable=invalid-sequence-index
+
 
 @click.command()
 @ui.global_cli_options
@@ -82,13 +82,7 @@ def cli(index: Index, collections: Iterable[str], cache_folder: str, f: str, o: 
 
             def print_mismatch(mismatch):
                 click.echo(
-                    '\t'.join(map(str, (
-                        # TODO: mismatch.collection:
-                        None,
-                        strutils.camel2under(mismatch.__class__.__name__),
-                        mismatch.dataset.id if mismatch.dataset else None,
-                        mismatch.uri
-                    ))),
+                    mismatch.to_tsv_row(),
                     file=out_f
                 )
 
@@ -159,7 +153,7 @@ def get_mismatches(cache_folder: str,
                    path_index: DatasetPathIndex,
                    job_count: int):
     if input_file:
-        yield from mismatches_from_file(Path(input_file), path_index)
+        yield from differences.mismatches_from_file(Path(input_file))
     else:
         for collection, uri_prefix in resolve_collections(collection_specifiers):
             yield from scan.mismatches_for_collection(
@@ -169,16 +163,6 @@ def get_mismatches(cache_folder: str,
                 uri_prefix=uri_prefix,
                 workers=job_count
             )
-
-
-def mismatches_from_file(f: Path, path_index: DatasetPathIndex):
-    for line in f.open('r').readlines():
-        line = line.strip('\n ')
-
-        coll, mismatch_name, dataset_id, uri = line.split('\t')
-
-        mismatch_class = getattr(differences, strutils.under2camel(mismatch_name))
-        yield mismatch_class(path_index.get(dataset_id.strip()), uri.strip())
 
 
 def init_logging():
