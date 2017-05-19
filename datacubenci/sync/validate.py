@@ -56,14 +56,21 @@ def _compliance_check(nc_path: Path, results_path: Path = None):
     """
     Run cf and adcc checks with normal strictness, verbose text format to stdout
     """
-    was_success, errors_occurred = ComplianceChecker.run_checker(
-        ds_loc=str(nc_path),
-        checker_names=['cf'],
-        verbose=0,
-        criteria='lenient',
-        skip_checks=['check_dimension_order'],
-        # Specify a tempfile as a sink, as otherwise it will spew results into stdout.
-        output_filename=str(results_path) if results_path else tempfile.mktemp(prefix='compliance-log-'),
-        output_format='text'
-    )
+    # Specify a tempfile as a sink, as otherwise it will spew results into stdout.
+    out_file = str(results_path) if results_path else tempfile.mktemp(prefix='compliance-log-')
+
+    try:
+        was_success, errors_occurred = ComplianceChecker.run_checker(
+            ds_loc=str(nc_path),
+            checker_names=['cf'],
+            verbose=0,
+            criteria='lenient',
+            skip_checks=['check_dimension_order'],
+            output_filename=out_file,
+            output_format='text'
+        )
+    finally:
+        if not results_path and os.path.exists(out_file):
+            os.remove(out_file)
+
     return was_success, errors_occurred
