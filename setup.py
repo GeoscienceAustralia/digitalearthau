@@ -10,7 +10,7 @@ setup(
     version=versioneer.get_version(),
     cmdclass=versioneer.get_cmdclass(),
 
-    url='https://github.com/data-cube/agdc-v2',
+    url='https://github.com/GeoscienceAustralia/ga-datacube-env',
     author='AGDC Collaboration',
     license='Apache License 2.0',
 
@@ -25,7 +25,10 @@ setup(
     ],
     install_requires=[
         'click>=5.0',
+        'compliance-checker',
         'datacube',
+        'python-dateutil',
+        'gdal',
         'eodatasets',
         # dev module is used automatically when run interactively.
         'structlog[dev]',

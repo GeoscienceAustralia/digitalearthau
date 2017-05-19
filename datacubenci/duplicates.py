@@ -12,7 +12,7 @@ from uuid import UUID
 
 from dateutil import tz
 from psycopg2._range import Range
-from singledispatch import singledispatch
+from functools import singledispatch
 
 from datacube.index import index_connect
 from datacube.index._api import Index
