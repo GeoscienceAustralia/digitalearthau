@@ -208,12 +208,12 @@ def init_nci_collections(index: DatasetPathIndex):
     # LS5_TM_FC  LS7_ETM_FC  LS8_OLI_FC
     # /g/data/fk4/datacube/002/LS5_TM_FC/13_-22/LS5_TM_FC_3577_13_-22_20030901235428500000_v1490733226.nc
 
-    def add_albers_collections(name: str):
+    def add_albers_collections(name: str, project='rs0'):
         _add(
             Collection(
                 name='ls5_{}'.format(name),
                 query={'product': 'ls5_{}_albers'.format(name)},
-                base_path=Path('/g/data/fk4/datacube/002/LS5_TM_' + name.upper()),
+                base_path=Path('/g/data/{}/datacube/002/LS5_TM_{}'.format(project, name.upper())),
                 offset_pattern="*_*/LS5*{}*.nc".format(name.upper()),
                 unique=('time.lower.day', 'lat', 'lon'),
                 index=index,
@@ -221,7 +221,7 @@ def init_nci_collections(index: DatasetPathIndex):
             Collection(
                 name='ls7_{}'.format(name),
                 query={'product': 'ls7_{}_albers'.format(name)},
-                base_path=Path('/g/data/fk4/datacube/002/LS7_ETM_' + name.upper()),
+                base_path=Path('/g/data/{}/datacube/002/LS7_ETM_{}'.format(project, name.upper())),
                 offset_pattern="*_*/LS7*{}*.nc".format(name.upper()),
                 unique=('time.lower.day', 'lat', 'lon'),
                 index=index,
@@ -229,17 +229,18 @@ def init_nci_collections(index: DatasetPathIndex):
             Collection(
                 name='ls8_{}'.format(name),
                 query={'product': 'ls8_{}_albers'.format(name)},
-                base_path=Path('/g/data/fk4/datacube/002/LS8_OLI_' + name.upper()),
+                base_path=Path('/g/data/{}/datacube/002/LS8_OLI_{}'.format(project, name.upper())),
                 offset_pattern="*_*/LS8*{}*.nc".format(name.upper()),
                 unique=('time.lower.day', 'lat', 'lon'),
                 index=index,
             )
         )
 
-    add_albers_collections('fc')
     add_albers_collections('pq')
     add_albers_collections('nbar')
     add_albers_collections('nbart')
+    add_albers_collections('fc', project='fk4')
 
     assert get_collection('ls5_fc').base_path == Path('/g/data/fk4/datacube/002/LS5_TM_FC')
     assert get_collection('ls5_fc').offset_pattern == "*_*/LS5*FC*.nc"
+    assert get_collection('ls8_nbar').base_path == Path('/g/data/rs0/datacube/002/LS8_OLI_NBAR')
