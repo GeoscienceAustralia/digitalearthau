@@ -106,7 +106,7 @@ class SyncSubmission(object):
               default='runs')
 @click.option('--submit-limit', type=int, default=None, help="Max number of jobs to submit (remaining tiles will "
                                                              "not be submitted)")
-@click.option('--concurrent-jobs', type=int, default=5, help="Number of PBS jobs to run concurrently")
+@click.option('--concurrent-jobs', type=int, default=12, help="Number of PBS jobs to run concurrently")
 def main(job_name: str,
          tile_folder: str,
          run_folder: str,
