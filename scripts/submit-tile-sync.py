@@ -144,7 +144,7 @@ def _find_and_submit(job_name: str,
             click.echo("Submit limit ({}) reached, done.".format(submit_limit))
             break
 
-        subjob_name = "{}{}{:+04d}".format(job_name, i, tile_x)
+        subjob_name = "{}{:+04d}".format(job_name, tile_x)
         subjob_run_path = run_path.joinpath(job_name, subjob_name)
         fileutils.mkdir_p(subjob_run_path)
 
@@ -162,9 +162,9 @@ def _find_and_submit(job_name: str,
             require_job_id=(last_job_slots.get(submitted % concurrent_jobs)),
         )
 
-        click.echo("{}: submitted {}".format(subjob_name, job_id))
         last_job_slots[submitted % concurrent_jobs] = job_id
         submitted += 1
+        click.echo("[{}] {}: submitted {}".format(submitted, subjob_name, job_id))
 
         time.sleep(SUBMIT_THROTTLE_SECS)
 
