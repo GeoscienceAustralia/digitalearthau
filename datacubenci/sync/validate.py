@@ -21,7 +21,8 @@ def validate_dataset(md_path: Path, log: logging.Logger):
 
     for file in all_files:
         if file.suffix.lower() in ('.nc', '.tif'):
-            return validate_image(file, log)
+            if not validate_image(file, log):
+                return False
     return True
 
 
@@ -52,6 +53,8 @@ def validate_image(file: Path, log: logging.Logger):
         log.debug("validate.band.exception", exc_info=True)
         log.info("validate.open.fail", path=file, error_args=v.args)
         return False
+
+    return True
 
 
 def _compliance_check(nc_path: Path, results_path: Path = None):
