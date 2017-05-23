@@ -7,12 +7,12 @@ Find duplicate datasets
 import csv
 import sys
 from datetime import datetime
+from functools import singledispatch
 from typing import Iterable
 from uuid import UUID
 
 from dateutil import tz
 from psycopg2._range import Range
-from functools import singledispatch
 
 from datacube.index import index_connect
 from datacube.index._api import Index

@@ -21,6 +21,78 @@ SUBMIT_THROTTLE_SECS = 1
 _LOG = logging.getLogger(__name__)
 
 
+class SyncSubmission(object):
+    def __init__(self, cache_path: Path, project='v10', queue='normal', dry_run=False, verbose=True, workers=4) -> None:
+        self.project = project
+        self.queue = queue
+        self.dry_run = dry_run
+        self.verbose = verbose
+        self.workers = workers
+        self.cache_path = cache_path
+
+    def warm_cache(self, tile_path: Path):
+
+        # Update cached path list ahead of time, so PBS jobs don't waste time doing it themselves.
+        click.echo("Checking path list, this may take a few minutes...")
+        scan.build_pathset(get_collection(tile_path), cache_path=self.cache_path)
+
+    def submit(self,
+               input_folders: List[Path],
+               output_file: Path,
+               error_file: Path,
+               job_name: str,
+               require_job_id: Optional[int]) -> str:
+
+        requirements = []
+        sync_opts = []
+        if require_job_id:
+            requirements.extend(['-W', 'depend=afterok:{}'.format(str(require_job_id).strip())])
+        if self.verbose:
+            sync_opts.append('-v')
+        if not self.dry_run:
+            # For tile products like the current FC we trust the index over the filesystem.
+            # (jobs that failed part-way-through left datasets on disk and were not indexed)
+            sync_opts.extend(['--trash-missing', '--trash-archived', '--update-locations'])
+            # Scene products are the opposite:
+            # Only complete scenes are written to fs, so '--index-missing' instead of trash.
+            # (also want to '--update-locations' to fix any moved datasets)
+
+        sync_command = [
+            'python', '-m', 'datacubenci.sync',
+            '-j', str(self.workers),
+            '--cache-folder', str(self.cache_path),
+            *sync_opts,
+            *(map(str, input_folders))
+        ]
+        qsub_opts = []
+        notify_email = os.environ.get('COMPLETION_NOTIFY_EMAIL')
+        if notify_email:
+            qsub_opts.extend([
+                '-M', notify_email
+            ])
+
+        command = [
+            'qsub', '-V',
+            '-P', self.project,
+            '-q', self.queue,
+            '-l', 'walltime=20:00:00,mem=4GB,ncpus=2,jobfs=1GB,other=gdata',
+            '-l', 'wd',
+            '-N', 'sync-{}'.format(job_name),
+            '-m', 'e',
+            *qsub_opts,
+            '-e', str(error_file),
+            '-o', str(output_file),
+            *requirements,
+            '--',
+            *sync_command
+        ]
+
+        click.echo(' '.join(command))
+        output = check_output(command)
+        job_id = output.decode('utf-8').strip(' \\n')
+        return job_id
+
+
 @click.command()
 @click.argument('job_name')
 @click.argument('tile_folder', type=click.Path(exists=True, readable=True, writable=False))
@@ -48,71 +120,71 @@ def main(job_name: str,
 
     with index_connect(application_name='sync-' + job_name) as index:
         collections.init_nci_collections(AgdcDatasetPathIndex(index))
-        _run(job_name, tile_path, run_path, concurrent_jobs, submit_limit, dry_run, queue, project)
+
+        submitter = SyncSubmission(run_path.joinpath('cache'), project, queue, dry_run, verbose=True, workers=4)
+
+        _find_and_submit(job_name, tile_path, run_path, concurrent_jobs, submit_limit, submitter)
 
 
-def _run(job_name: str,
-         tile_path: Path,
-         run_path: Path,
-         concurrent_jobs: int,
-         submit_limit: int,
-         dry_run: bool,
-         queue: str,
-         project: str):
-    cache_path = run_path.joinpath('cache')
+def _find_and_submit(job_name: str,
+                     tile_path: Path,
+                     run_path: Path,
+                     concurrent_jobs: int,
+                     submit_limit: int,
+                     submitter: SyncSubmission):
+    submitter.warm_cache(tile_path)
 
-    # Update cached path list ahead of time, so PBS jobs don't waste time doing it themselves.
-    click.echo("Checking path list, this may take a few minutes...")
-    scan.build_pathset(get_collection(tile_path), cache_path=cache_path)
-
-    # For input tile_path, get list of unique tile X values
-    # They are named "X_Y", eg "-12_23"
-    tile_xs = set(int(p.name.split('_')[0]) for p in tile_path.iterdir() if p.name != 'ncml')
-    tile_xs = sorted(tile_xs)
-    click.echo("Found %s total jobs" % len(tile_xs))
     submitted = 0
     # To maintain concurrent_jobs limit, we set a pbs dependency on previous jobs.
     # mapping of concurrent slot number to the last job id to be submitted in it.
     # type: Mapping[int, str]
     last_job_slots = {}
-    for i, tile_x in enumerate(tile_xs):
+    for i, tile_x in enumerate(find_tile_xs(tile_path)):
         if submitted == submit_limit:
             click.echo("Submit limit ({}) reached, done.".format(submit_limit))
             break
 
-        subjob_name = "{}{:+04d}".format(job_name, tile_x)
+        subjob_name = "{}{}{:+04d}".format(job_name, i, tile_x)
         subjob_run_path = run_path.joinpath(job_name, subjob_name)
         fileutils.mkdir_p(subjob_run_path)
 
         output_path = subjob_run_path.joinpath('out.tsv')
-        error_path = subjob_run_path.joinpath('err.log')
-
         if output_path.exists():
-            click.echo("[{}] {}: output exists, skipping".format(i, subjob_name))
+            click.echo("{}: output exists, skipping".format(subjob_name))
             continue
 
-        last_job_id = last_job_slots.get(submitted % concurrent_jobs)
-
-        job_id = submit_job(
+        job_id = submitter.submit(
             # Folders are named "X_Y", we glob for all folders with the give X coord.
             input_folders=list(tile_path.glob('{}_*'.format(tile_x))),
-            output_path=output_path,
-            error_path=error_path,
-            cache_path=cache_path,
-            subjob_name=subjob_name,
-            require_job_id=last_job_id,
-            dry_run=dry_run,
-            project=project,
-            queue=queue
+            output_file=output_path,
+            error_file=(subjob_run_path.joinpath('err.log')),
+            job_name=subjob_name,
+            require_job_id=(last_job_slots.get(submitted % concurrent_jobs)),
         )
-        click.echo("[{}] {}: submitted {}".format(i, subjob_name, job_id))
+
+        click.echo("{}: submitted {}".format(subjob_name, job_id))
         last_job_slots[submitted % concurrent_jobs] = job_id
         submitted += 1
 
         time.sleep(SUBMIT_THROTTLE_SECS)
 
 
-def get_collection(tile_path):
+def find_tile_xs(tile_path):
+    """
+    For input tile_path, get list of unique tile X values.
+
+    Inner folders are named "X_Y", eg "-12_23"
+    """
+    tile_xs = set(int(p.name.split('_')[0]) for p in tile_path.iterdir() if p.name != 'ncml')
+    tile_xs = sorted(tile_xs)
+    click.echo("Found %s total jobs" % len(tile_xs))
+    return tile_xs
+
+
+def get_collection(tile_path: Path) -> collections.Collection:
+    """
+    Get the collection that covers the given path
+    """
     cs = list(collections.get_collections_in_path(tile_path))
     if not cs:
         raise click.UsageError("No collections found for path {}".format(tile_path))
@@ -120,66 +192,6 @@ def get_collection(tile_path):
         raise click.UsageError("Multiple collections found for path: too broad? {}".format(tile_path))
     collection = cs[0]
     return collection
-
-
-def submit_job(error_path: Path,
-               input_folders: List[Path],
-               output_path: Path,
-               cache_path: Path,
-               subjob_name: str,
-               require_job_id: Optional[int],
-               sync_workers=4,
-               verbose=True,
-               dry_run=False,
-               project='v10',
-               queue='normal'):
-    requirements = []
-    sync_opts = []
-    if require_job_id:
-        requirements.extend(['-W', 'depend=afterok:{}'.format(str(require_job_id).strip())])
-    if verbose:
-        sync_opts.append('-v')
-    if not dry_run:
-        # For tile products like the current FC we trust the index over the filesystem.
-        # (jobs that failed part-way-through left datasets on disk and were not indexed)
-        sync_opts.extend(['--trash-missing', '--trash-archived', '--update-locations'])
-        # Scene products are the opposite:
-        # Only complete scenes are written to fs, so '--index-missing' instead of trash.
-        # (also want to '--update-locations' to fix any moved datasets)
-
-    sync_command = [
-        'python', '-m', 'datacubenci.sync',
-        '-j', str(sync_workers),
-        '--cache-folder', str(cache_path),
-        *sync_opts,
-        *(map(str, input_folders))
-    ]
-    qsub_opts = []
-    notify_email = os.environ.get('COMPLETION_NOTIFY_EMAIL')
-    if notify_email:
-        qsub_opts.extend([
-            '-M', notify_email
-        ])
-
-    command = [
-        'qsub', '-V',
-        '-P', project,
-        '-q', queue,
-        '-l', 'walltime=20:00:00,mem=4GB,ncpus=2,jobfs=1GB,other=gdata',
-        '-l', 'wd',
-        '-N', 'sync-{}'.format(subjob_name),
-        '-m', 'e',
-        *qsub_opts,
-        '-e', str(error_path),
-        '-o', str(output_path),
-        *requirements,
-        '--',
-        *sync_command
-    ]
-    click.echo(' '.join(command))
-    output = check_output(command)
-    job_id = output.decode('utf-8').strip(' \\n')
-    return job_id
 
 
 if __name__ == '__main__':

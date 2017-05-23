@@ -74,7 +74,7 @@ def syncable_environment():
 
 
 def test_index_disk_sync(syncable_environment):
-    # type: (Tuple[Collection, str, str, Path]) -> None
+    # type: (Tuple[Collection, DatasetLite, str, Path]) -> None
     ls8_collection, on_disk, on_disk_uri, root = syncable_environment
 
     # An indexed file not on disk, and disk file not in index.
@@ -210,6 +210,7 @@ def test_detect_corrupt(syncable_environment):
 _TRASH_PREFIX = ('.trash', (datetime.utcnow().strftime('%Y-%m-%d')))
 
 
+# noinspection PyShadowingNames
 def test_remove_missing(syncable_environment):
     """An on-disk dataset that's not indexed should be trashed when trash_missing=True"""
     ls8_collection, on_disk, on_disk_uri, root = syncable_environment
