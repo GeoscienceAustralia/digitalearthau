@@ -90,7 +90,7 @@ then
     installrepo idlfunctions develop git@github.com:sixy6e/idl-functions.git
     installrepo eotools develop git@github.com:GeoscienceAustralia/eo-tools.git
     installrepo eodatasets ${eodatasets_head} git@github.com:GeoscienceAustralia/eo-datasets.git
-    installrepo gaip ${gaip_head} git@github.com:jeremyh/gaip.git
+    installrepo gaip ${gaip_head} git@github.com:GeoscienceAustralia/gaip.git
     installrepo gqa ${gqa_head} git@github.com:GeoscienceAustralia/gqa.git
 
     echo
