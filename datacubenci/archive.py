@@ -110,10 +110,12 @@ class MdssMoveTask:
 
         dataset = index.datasets.get(dataset_id)
         log.debug('found.is_indexed', is_indexed=dataset is not None)
+        # If it's not indexed in the cube yet, skip it. It's probably a new arrival.
         if not dataset:
             log.warn("skip.not_indexed")
             return None
 
+        # Count how many datasets have been processed from this one. If none, we don't want to archive yet.
         derived_count = len(tuple(index.datasets.get_derived(dataset_id)))
         log.debug("found.derived", derived_count=derived_count)
         if not derived_count:
@@ -144,7 +146,7 @@ def _archive_path(index, task, dry_run=True):
     mdss_uri = _copy_to_mdss(task.log, task.source_metadata_path, task.dataset.id, task.project,
                              dry_run=dry_run)
 
-    # Record mdss tar in index
+    # Record mdss tar location in index
     if not dry_run:
         index.datasets.add_location(task.dataset, uri=mdss_uri)
     task.log.info('index.mdss.removed', uri=mdss_uri)
