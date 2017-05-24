@@ -81,7 +81,7 @@ def append_credentials(pgpass, dbcreds):
     try:
         with pgpass.open() as fin:
             data = fin.read()
-    except FileNotFoundError:
+    except IOError:
         data = ''
 
     with atomic_save(str(pgpass.absolute()), file_perms=0o600, text_mode=True) as fout:
