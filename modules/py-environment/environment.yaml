@@ -5,7 +5,9 @@ dependencies:
 - bqplot
 - cachetools
 - cartopy
+- certifi
 - click
+- conda-build
 - cython
 - dask
 - distributed
@@ -21,6 +23,8 @@ dependencies:
 - glueviz
 - graphviz
 - gunicorn
+- h5py
+- hdf5
 - hypothesis
 - ipdb
 - ipyleaflet
@@ -41,6 +45,8 @@ dependencies:
 - numba
 - numexpr
 - numpy
+- openblas
+- openssl
 - pandas
 - pathlib
 - pathlib2
