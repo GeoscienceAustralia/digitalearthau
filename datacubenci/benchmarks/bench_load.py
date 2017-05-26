@@ -21,10 +21,10 @@ def open_unindexed_nc(fname, product, dc=None):
     uris = ['file://' + abspath(fname)]
 
     def mk_dataset(yaml_string):
-        return datacube.model.Dataset(product, yaml.load(yaml_string), uris=uris)
+        return datacube.model.Dataset(product, yaml.load(yaml_string, Loader=yaml.CSafeLoader), uris=uris)
 
     with xr.open_dataset(fname) as f:
-        datasets = [mk_dataset(f.dataset.values[i]) for i in range(f.dataset.shape[0])]
+        datasets = [mk_dataset(f.dataset.values[i].decode('utf-8')) for i in range(f.dataset.shape[0])]
 
     data_group = dc.group_datasets(datasets, datacube.api.query.query_group_by())
 
