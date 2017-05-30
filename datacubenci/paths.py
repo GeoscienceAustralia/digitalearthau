@@ -49,6 +49,32 @@ def get_trash_path(file_path):
     return root_path.joinpath('.trash', _TRASH_DAY, dir_offset)
 
 
+def get_original_path(trashed_file_path):
+    """
+    For a given path in the trash, get the original pre-trash path.
+
+    >>> str(get_original_path('/g/data/fk4/datacube/.trash/20170823/ls7/2003/something.nc'))
+    '/g/data/fk4/datacube/ls7/2003/something.nc'
+    >>> # Old trash structure (no second-level date folder)
+    >>> str(get_original_path('/g/data/fk4/datacube/.trash-20170823/ls7/2003/something.nc'))
+    '/g/data/fk4/datacube/ls7/2003/something.nc'
+    >>> get_original_path('/g/data/fk4/datacube/ls7/2003/something.nc')
+    Traceback (most recent call last):
+    ...
+    ValueError: Not a trashed location: '/g/data/fk4/datacube/ls7/2003/something.nc'
+    """
+    root_path, dir_offset = split_path_from_base(trashed_file_path)
+    dir_offsets = dir_offset.split('/')
+    # Old style, trash folder has date '.trash-YYYYMMDD/'
+    if dir_offset.startswith('.trash-'):
+        return root_path.joinpath(*dir_offsets[1:])
+    # New style, second-level folder with date '.trash/YYYYMMDD/'
+    elif dir_offset.startswith('.trash/'):
+        return root_path.joinpath(*dir_offsets[2:])
+    else:
+        raise ValueError("Not a trashed location: %r" % str(trashed_file_path))
+
+
 def split_path_from_base(file_path):
     """
     Split a dataset path into base directory and offset.
