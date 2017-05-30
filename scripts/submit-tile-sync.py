@@ -6,7 +6,7 @@ import os
 import time
 from pathlib import Path
 from subprocess import check_output
-from typing import Mapping, List, Optional
+from typing import Mapping, List, Optional, Tuple, Iterable
 
 import click
 from boltons import fileutils
@@ -17,6 +17,8 @@ from datacubenci.index import AgdcDatasetPathIndex
 from datacubenci.sync import scan
 
 SUBMIT_THROTTLE_SECS = 1
+
+FILES_PER_JOB_CUTOFF = 15000
 
 _LOG = logging.getLogger(__name__)
 
@@ -139,12 +141,15 @@ def _find_and_submit(job_name: str,
     # mapping of concurrent slot number to the last job id to be submitted in it.
     # type: Mapping[int, str]
     last_job_slots = {}
-    for i, tile_x in enumerate(find_tile_xs(tile_path)):
+    for task_name, input_folders in make_tile_jobs(tile_path):
+
+        subjob_name = '{}{}'.format(job_name, task_name)
         if submitted == submit_limit:
             click.echo("Submit limit ({}) reached, done.".format(submit_limit))
             break
 
-        subjob_name = "{}{:+04d}".format(job_name, tile_x)
+        require_job_id = last_job_slots.get(submitted % concurrent_jobs)
+
         subjob_run_path = run_path.joinpath(job_name, subjob_name)
         fileutils.mkdir_p(subjob_run_path)
 
@@ -155,16 +160,17 @@ def _find_and_submit(job_name: str,
 
         job_id = submitter.submit(
             # Folders are named "X_Y", we glob for all folders with the give X coord.
-            input_folders=list(tile_path.glob('{}_*'.format(tile_x))),
+            input_folders=list(input_folders),
             output_file=output_path,
             error_file=(subjob_run_path.joinpath('err.log')),
             job_name=subjob_name,
-            require_job_id=(last_job_slots.get(submitted % concurrent_jobs)),
+            require_job_id=require_job_id,
         )
 
-        last_job_slots[submitted % concurrent_jobs] = job_id
-        submitted += 1
-        click.echo("[{}] {}: submitted {}".format(submitted, subjob_name, job_id))
+        if job_id:
+            last_job_slots[submitted % concurrent_jobs] = job_id
+            submitted += 1
+            click.echo("[{}] {}: submitted {}".format(submitted, subjob_name, job_id))
 
         time.sleep(SUBMIT_THROTTLE_SECS)
 
@@ -179,6 +185,29 @@ def find_tile_xs(tile_path):
     tile_xs = sorted(tile_xs)
     click.echo("Found %s total jobs" % len(tile_xs))
     return tile_xs
+
+
+def make_tile_jobs(tile_path) -> Iterable[Tuple[str, Iterable[Path]]]:
+    for tile_x in find_tile_xs(tile_path):
+        tile_x_ys = tile_path.glob('{}_*'.format(tile_x))
+
+        task_number = 1
+        input_paths = []
+        input_paths_file_count = 0
+
+        for tile_x_y in tile_x_ys:
+            input_paths.append(tile_x_y)
+            input_paths_file_count += sum(1 for _ in tile_x_y.rglob('*.nc'))
+
+            # If this pushed us over the cutoff, yield a task with the folders so far.
+            if input_paths_file_count > FILES_PER_JOB_CUTOFF:
+                yield "{:+04d}-{}".format(tile_x, task_number), input_paths
+                task_number += 1
+                input_paths = []
+                input_paths_file_count = 0
+
+        if input_paths:
+            yield "{:+04d}-{}".format(tile_x, task_number), input_paths
 
 
 def get_collection(tile_path: Path) -> collections.Collection:
