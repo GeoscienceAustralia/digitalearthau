@@ -26,7 +26,8 @@ def restore(index: Index, trash_path: str, dry_run: bool):
 
         if restorable_path:
             _LOG.info("trash.restore", trash_path=trashed_nc, original_path=restorable_path)
-            dry_run or Path(trashed_nc).rename(restorable_path)
+            if not dry_run:
+                Path(trashed_nc).rename(restorable_path)
 
 
 def _should_restore(index, trashed_nc):
