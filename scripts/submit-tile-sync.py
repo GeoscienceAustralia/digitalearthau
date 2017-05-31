@@ -82,7 +82,7 @@ class SyncSubmission(object):
             '-l', 'walltime=20:00:00,mem=4GB,ncpus=2,jobfs=1GB,other=gdata',
             '-l', 'wd',
             '-N', 'sync-{}'.format(job_name),
-            '-m', 'e',
+            '-m', 'a',
             *qsub_opts,
             '-e', str(error_file),
             '-o', str(output_file),
@@ -129,7 +129,7 @@ def main(job_name: str,
 
         _find_and_submit(job_name, tile_path, run_path, concurrent_jobs, submit_limit, submitter)
 
-
+# Validate scenes:
 def _find_and_submit(job_name: str,
                      tile_path: Path,
                      run_path: Path,
