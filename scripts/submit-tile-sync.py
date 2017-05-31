@@ -162,7 +162,7 @@ def _find_and_submit(job_name: str,
             # Folders are named "X_Y", we glob for all folders with the give X coord.
             input_folders=list(input_folders),
             output_file=output_path,
-            error_file=(subjob_run_path.joinpath('err.log')),
+            error_file=subjob_run_path.joinpath('err.log'),
             job_name=subjob_name,
             require_job_id=require_job_id,
         )
@@ -188,6 +188,14 @@ def find_tile_xs(tile_path):
 
 
 def make_tile_jobs(tile_path) -> Iterable[Tuple[str, Iterable[Path]]]:
+    """
+    Tries to yield one job per x value (tiles are X_Y), but if the number of files
+    is above FILES_PER_JOB_CUTOFF it will split it up.
+
+    This could be much simpler if it ignored X entirely and just grouped X_Ys up to file count, but
+    our old ones were grouped purely by X, and this maintains backwards compat so that the already-completed
+    X-folders aren't rerun).
+    """
     for tile_x in find_tile_xs(tile_path):
         tile_x_ys = tile_path.glob('{}_*'.format(tile_x))
 
