@@ -45,10 +45,12 @@ class SyncSubmission(object):
                job_name: str,
                require_job_id: Optional[int]) -> str:
 
-        requirements = []
+        # Output files readable by others.
+        attributes = ['umask=33']
+
         sync_opts = []
         if require_job_id:
-            requirements.extend(['-W', 'depend=afterok:{}'.format(str(require_job_id).strip())])
+            attributes.extend(['depend=afterok:{}'.format(str(require_job_id).strip())])
         if self.verbose:
             sync_opts.append('-v')
         if not self.dry_run:
@@ -84,7 +86,7 @@ class SyncSubmission(object):
             *qsub_opts,
             '-e', str(error_file),
             '-o', str(output_file),
-            *requirements,
+            '-W', ','.join(attributes),
             '--',
             *sync_command
         ]
