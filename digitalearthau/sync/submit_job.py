@@ -1,5 +1,16 @@
 #!/usr/bin/env python
+"""
+Submit sync PBS jobs.
 
+The task_split function is currently specific to tiles, but can be generalised
+
+Example usage: submit_job.py 5fc /g/data/fk4/datacube/002/LS5_TM_FC
+
+5fc is just the name for the job: subsequent resubmissions will not rerun jobs with the same name
+if output files exist.
+
+A run folder is used (defaulting to `runs` in current dir) for output.
+"""
 
 import logging
 import os
@@ -129,6 +140,7 @@ def main(job_name: str,
 
         _find_and_submit(job_name, tile_path, run_path, concurrent_jobs, submit_limit, submitter)
 
+
 # Validate scenes:
 def _find_and_submit(job_name: str,
                      tile_path: Path,
@@ -234,5 +246,4 @@ def get_collection(tile_path: Path) -> collections.Collection:
 
 
 if __name__ == '__main__':
-    # Eg. scripts/submit-tile-sync.py 5fc /g/data/fk4/datacube/002/LS5_TM_FC
     main()
