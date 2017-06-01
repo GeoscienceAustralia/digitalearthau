@@ -12,11 +12,11 @@ from boltons import fileutils
 from boltons import strutils
 
 from datacube.utils import uri_to_local_path, InvalidDocException
-from datacubenci import paths
-from datacubenci.collections import Collection
-from datacubenci.index import DatasetPathIndex, DatasetLite
-from datacubenci.sync import validate
-from datacubenci.sync.differences import UnreadableDataset, InvalidDataset
+from digitalearthau import paths
+from digitalearthau.collections import Collection
+from digitalearthau.index import DatasetPathIndex, DatasetLite
+from digitalearthau.sync import validate
+from digitalearthau.sync.differences import UnreadableDataset, InvalidDataset
 from .differences import ArchivedDatasetOnDisk, Mismatch, LocationMissingOnDisk, LocationNotIndexed, \
     DatasetNotIndexed
 

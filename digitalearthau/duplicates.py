@@ -18,7 +18,7 @@ from datacube.index import index_connect
 from datacube.index._api import Index
 from datacube.index.fields import Field
 from datacube.model import DatasetType, MetadataType
-from datacubenci import collections
+from digitalearthau import collections
 
 
 def parse_field_expression(md: MetadataType, expression: str):

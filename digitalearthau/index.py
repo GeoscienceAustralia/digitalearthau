@@ -8,7 +8,7 @@ from datacube.index._api import Index
 from datacube.model import Dataset
 from datacube.scripts import dataset as dataset_script
 from datacube.utils import uri_to_local_path
-from datacubenci.utils import simple_object_repr
+from digitalearthau.utils import simple_object_repr
 
 
 class DatasetLite:
@@ -105,7 +105,7 @@ class AgdcDatasetPathIndex(DatasetPathIndex):
 
     @classmethod
     def connect(cls) -> 'AgdcDatasetPathIndex':
-        return cls(index_connect(application_name='datacubenci-pathsync'))
+        return cls(index_connect(application_name='digitalearthau-pathsync'))
 
     def get_datasets_for_uri(self, uri: str) -> Iterable[DatasetLite]:
         for d in self._index.datasets.get_datasets_for_location(uri=uri):

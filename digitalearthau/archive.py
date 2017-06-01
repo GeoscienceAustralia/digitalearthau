@@ -15,8 +15,8 @@ import shutil
 import sys
 
 from datacube.ui import click as ui
-from datacubenci import paths as path_utils
-from datacubenci.mdss import MDSSClient
+from digitalearthau import paths as path_utils
+from digitalearthau.mdss import MDSSClient
 
 from eodatasets import verify
 import structlog

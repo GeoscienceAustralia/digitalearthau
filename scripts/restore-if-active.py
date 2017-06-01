@@ -7,7 +7,7 @@ import structlog
 
 from datacube.index._api import Index
 from datacube.ui import click as ui
-from datacubenci import paths
+from digitalearthau import paths
 
 _LOG = structlog.get_logger()
 

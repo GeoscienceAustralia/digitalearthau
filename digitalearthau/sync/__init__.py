@@ -11,12 +11,12 @@ from typing import Iterable, List, Tuple
 import click
 import structlog
 
-import datacubenci.collections as cs
+import digitalearthau.collections as cs
 from datacube.index._api import Index
 from datacube.ui import click as ui
-from datacubenci.archive import CleanConsoleRenderer
-from datacubenci.index import AgdcDatasetPathIndex, DatasetPathIndex, MemoryDatasetPathIndex
-from datacubenci.sync import scan
+from digitalearthau.archive import CleanConsoleRenderer
+from digitalearthau.index import AgdcDatasetPathIndex, DatasetPathIndex, MemoryDatasetPathIndex
+from digitalearthau.sync import scan
 from . import fixes, differences
 from .differences import Mismatch
 

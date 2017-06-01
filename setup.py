@@ -6,12 +6,12 @@ from setuptools import setup, find_packages
 tests_require = ['pytest', 'pytest-cov', 'mock', 'pep8', 'pylint==1.6.4', 'hypothesis', 'compliance-checker']
 
 setup(
-    name='datacubenci',
+    name='digitalearthau',
     version=versioneer.get_version(),
     cmdclass=versioneer.get_cmdclass(),
 
-    url='https://github.com/GeoscienceAustralia/ga-datacube-env',
-    author='AGDC Collaboration',
+    url='https://github.com/GeoscienceAustralia/digitalearthau',
+    author='Geoscience Australia',
     license='Apache License 2.0',
 
     packages=find_packages(),
@@ -39,7 +39,7 @@ setup(
 
     entry_points={
         'console_scripts': [
-            'datacube-nci-archive = datacubenci.archive:main',
+            'dea-archive = digitalearthau.archive:main',
         ]
     },
 )

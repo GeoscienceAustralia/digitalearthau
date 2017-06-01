@@ -6,7 +6,7 @@ from pathlib import Path
 import gdal
 from compliance_checker.runner import ComplianceChecker, CheckSuite
 
-from datacubenci import paths
+from digitalearthau import paths
 
 # prevent aux.xml write
 os.environ["GDAL_PAM_ENABLED"] = "NO"

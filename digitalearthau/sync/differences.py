@@ -5,8 +5,8 @@ from uuid import UUID
 
 from boltons import strutils
 
-from datacubenci.index import DatasetLite
-from datacubenci.utils import simple_object_repr
+from digitalearthau.index import DatasetLite
+from digitalearthau.utils import simple_object_repr
 
 
 class Mismatch:

@@ -12,9 +12,9 @@ import click
 from boltons import fileutils
 
 from datacube.index import index_connect
-from datacubenci import collections
-from datacubenci.index import AgdcDatasetPathIndex
-from datacubenci.sync import scan
+from digitalearthau import collections
+from digitalearthau.index import AgdcDatasetPathIndex
+from digitalearthau.sync import scan
 
 SUBMIT_THROTTLE_SECS = 1
 
@@ -62,7 +62,7 @@ class SyncSubmission(object):
             # (also want to '--update-locations' to fix any moved datasets)
 
         sync_command = [
-            'python', '-m', 'datacubenci.sync',
+            'python', '-m', 'digitalearthau.sync',
             '-j', str(self.workers),
             '--cache-folder', str(self.cache_path),
             *sync_opts,

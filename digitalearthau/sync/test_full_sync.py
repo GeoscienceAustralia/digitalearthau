@@ -10,12 +10,12 @@ import structlog
 from dateutil import tz
 
 from datacube.utils import uri_to_local_path
-from datacubenci import paths
-from datacubenci.archive import CleanConsoleRenderer
-from datacubenci.collections import Collection
-from datacubenci.index import DatasetLite, MemoryDatasetPathIndex
-from datacubenci.paths import write_files, register_base_directory
-from datacubenci.sync import differences as mm, fixes, scan, Mismatch
+from digitalearthau import paths
+from digitalearthau.archive import CleanConsoleRenderer
+from digitalearthau.collections import Collection
+from digitalearthau.index import DatasetLite, MemoryDatasetPathIndex
+from digitalearthau.paths import write_files, register_base_directory
+from digitalearthau.sync import differences as mm, fixes, scan, Mismatch
 
 
 # These are ok in tests.

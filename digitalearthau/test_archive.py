@@ -1,4 +1,4 @@
-from datacubenci.paths import write_files
+from digitalearthau.paths import write_files
 
 
 def do_an_archive():

@@ -7,9 +7,9 @@ import structlog
 from dateutil import tz
 
 from datacube.utils import uri_to_local_path
-from datacubenci import paths
-from datacubenci.index import DatasetPathIndex
-from datacubenci.sync.differences import UnreadableDataset
+from digitalearthau import paths
+from digitalearthau.index import DatasetPathIndex
+from digitalearthau.sync.differences import UnreadableDataset
 from .differences import DatasetNotIndexed, Mismatch, ArchivedDatasetOnDisk, LocationNotIndexed, LocationMissingOnDisk
 
 _LOG = structlog.get_logger()

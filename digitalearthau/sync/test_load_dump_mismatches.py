@@ -1,8 +1,8 @@
 from uuid import UUID
 
-from datacubenci.index import DatasetLite
-from datacubenci.paths import write_files
-from datacubenci.sync.differences import DatasetNotIndexed, Mismatch, ArchivedDatasetOnDisk, UnreadableDataset, \
+from digitalearthau.index import DatasetLite
+from digitalearthau.paths import write_files
+from digitalearthau.sync.differences import DatasetNotIndexed, Mismatch, ArchivedDatasetOnDisk, UnreadableDataset, \
     mismatches_from_file
 
 

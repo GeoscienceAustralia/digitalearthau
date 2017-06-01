@@ -10,8 +10,8 @@ import fnmatch
 from pathlib import Path
 from typing import Iterable, Optional, Mapping
 
-from datacubenci.index import DatasetPathIndex, MemoryDatasetPathIndex
-from datacubenci.utils import simple_object_repr
+from digitalearthau.index import DatasetPathIndex, MemoryDatasetPathIndex
+from digitalearthau.utils import simple_object_repr
 
 
 class Collection:
