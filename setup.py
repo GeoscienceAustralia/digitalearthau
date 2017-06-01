@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 
-import versioneer
 from setuptools import setup, find_packages
+
+import versioneer
 
 tests_require = ['pytest', 'pytest-cov', 'mock', 'pep8', 'pylint==1.6.4', 'hypothesis', 'compliance-checker']
 
@@ -40,6 +41,9 @@ setup(
     entry_points={
         'console_scripts': [
             'dea-archive = digitalearthau.archive:main',
+            'dea-coherence = digitalearthau.coherence:main',
+            'dea-duplicates = digitalearthau.duplicates:main',
+            'dea-sync = digitalearthau.sync:cli',
         ]
     },
 )
