@@ -1,6 +1,6 @@
 * text=auto
 
-datacubenci/_version.py export-subst
+digitalearthau/_version.py export-subst
 
 *.sh text eol=lf
 *.bash text eol=lf
