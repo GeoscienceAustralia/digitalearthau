@@ -151,9 +151,9 @@ def _archive_path(index, task, dry_run=True):
         index.datasets.add_location(task.dataset, uri=mdss_uri)
     task.log.info('index.mdss.removed', uri=mdss_uri)
 
-    # Remove local file from index
+    # Archive local file in index (for deletion soon)
     if not dry_run:
-        index.datasets.remove_location(task.dataset, task.source_uri)
+        index.datasets.archive_location(task.dataset, task.source_uri)
     task.log.info('index.source.removed', uri=task.source_uri)
 
 
