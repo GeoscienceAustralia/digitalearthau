@@ -234,7 +234,7 @@ def _copy_to_mdss(log, metadata_path, dataset_id, destination_project, dry_run=T
 def _get_transferable_paths(log, all_files, dataset_path, tmp_dir):
     # If it's two files or less, copy them directly
     if len(all_files) <= 2:
-        log.debug("")
+        log.debug("tar.skip")
         return all_files
 
     # Otherwise tar all files
