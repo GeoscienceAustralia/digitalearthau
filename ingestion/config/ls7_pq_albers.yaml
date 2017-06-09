@@ -59,6 +59,7 @@ global_attributes:
   publisher_email: earth.observation@ga.gov.au
   publisher_name: Section Leader, Operations Section, NEMO, Geoscience Australia
   publisher_url: http://www.ga.gov.au
+  source: remotely observed surface reflectance and modelled cloud/shadow
   license: CC BY Attribution 4.0 International License
   cdm_data_type: Grid
   product_suite: Pixel Quality 25m
@@ -112,3 +113,6 @@ measurements:
       src_varname: pqa
       zlib: True
       fletcher32: True
+      attrs:
+          standard_name: surface_bidirectional_reflectance status_flag
+          coverage_content_type: qualityInformation
