@@ -73,8 +73,8 @@ global_attributes:
   publisher_email: earth.observation@ga.gov.au
   publisher_name: Section Leader, Operations Section, NEMO, Geoscience Australia
   publisher_url: 'http://www.ga.gov.au'
+  source: remotely observed surface reflectance
   license: CC BY Attribution 4.0 International License
-  coverage_content_type: physicalMeasurement
   cdm_data_type: Grid
   product_suite: Surface Reflectance NBAR+ 25m
   acknowledgment: Landsat data is provided by the United States Geological Survey (USGS) through direct reception of the data at Geoscience Australias satellite reception facility or download.
@@ -131,6 +131,7 @@ measurements:
       attrs:
           long_name: "Nadir BRDF Adjusted Reflectance 0.43-0.45 microns (Coastal Aerosol)"
           alias: "band_1"
+          coverage_content_type: physicalMeasurement
     - name: blue
       dtype: int16
       nodata: -999
@@ -141,6 +142,7 @@ measurements:
       attrs:
           long_name: "Nadir BRDF Adjusted Reflectance 0.45-0.51 microns (Blue)"
           alias: "band_2"
+          coverage_content_type: physicalMeasurement
     - name: green
       dtype: int16
       nodata: -999
@@ -151,6 +153,7 @@ measurements:
       attrs:
           long_name: "Nadir BRDF Adjusted Reflectance 0.53-0.59 microns (Green)"
           alias: "band_3"
+          coverage_content_type: physicalMeasurement
     - name: red
       dtype: int16
       nodata: -999
@@ -161,6 +164,7 @@ measurements:
       attrs:
           long_name: "Nadir BRDF Adjusted Reflectance 0.64-0.67 microns (Red)"
           alias: "band_4"
+          coverage_content_type: physicalMeasurement
     - name: nir
       dtype: int16
       nodata: -999
@@ -171,6 +175,7 @@ measurements:
       attrs:
           long_name: "Nadir BRDF Adjusted Reflectance 0.85-0.88 microns (Near Infrared)"
           alias: "band_5"
+          coverage_content_type: physicalMeasurement
     - name: swir1
       dtype: int16
       nodata: -999
@@ -181,6 +186,7 @@ measurements:
       attrs:
           long_name: "Nadir BRDF Adjusted Reflectance 1.57-1.65 microns (Short-wave Infrared)"
           alias: "band_6"
+          coverage_content_type: physicalMeasurement
     - name: swir2
       dtype: int16
       nodata: -999
@@ -191,3 +197,4 @@ measurements:
       attrs:
           long_name: "Nadir BRDF Adjusted Reflectance 2.11-2.29 microns (Short-wave Infrared)"
           alias: "band_7"
+          coverage_content_type: physicalMeasurement

@@ -73,6 +73,7 @@ global_attributes:
   publisher_email: earth.observation@ga.gov.au
   publisher_name: Section Leader, Operations Section, NEMO, Geoscience Australia
   publisher_url: 'http://www.ga.gov.au'
+  source: remotely observed surface reflectance
   license: CC BY Attribution 4.0 International License
   cdm_data_type: Grid
   product_suite: Surface Reflectance NBAR+ 25m
