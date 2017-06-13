@@ -39,7 +39,7 @@ cache: apt
 
 after_success:
  - pushd docs
- - deploy.sh
+ - bash ./deploy.sh
  - popd
 
 notifications:
