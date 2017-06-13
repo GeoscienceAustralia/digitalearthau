@@ -18,9 +18,6 @@ cache:
   directories:
     - $HOME/.cache/pip
 
-before_install:
- - openssl aes-256-cbc -K $encrypted_c4bf5207aec3_key -iv $encrypted_c4bf5207aec3_iv -in dea-docs-gen.enc -out dea-docs-gen -d
-
 install:
 - mkdir pdstools
 - pushd pdstools

@@ -5,6 +5,8 @@ cd "$(dirname "$0")" # cd into this directory
 
 SOURCE_BRANCH="wip-docs"  # Should be "master" when in production
 TARGET_BRANCH="gh-pages"
+COMMIT_AUTHOR_EMAIL=`git show --format="%aE" -s`
+ENCRYPTION_LABEL="c4bf5207aec3"
 
 function doCompile {
   make html
