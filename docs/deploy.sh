@@ -9,6 +9,8 @@ COMMIT_AUTHOR_EMAIL=`git show --format="%aE" -s`
 ENCRYPTION_LABEL="c4bf5207aec3"
 
 function doCompile {
+  conda install Sphinx
+  pip install sphinx_rtd_theme
   make html
 }
 
