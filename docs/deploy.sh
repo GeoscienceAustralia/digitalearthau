@@ -67,7 +67,7 @@ eval `ssh-agent -s`
 ssh-add deploy_key
 
 # Now that we're all set up, we can push.
-pushd $BUILD_DIR
+pushd $BUILD_PATH
 git push $SSH_REPO $TARGET_BRANCH
 popd
 
