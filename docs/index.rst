@@ -12,9 +12,25 @@
 Digital Earth Australia User Guide
 ==================================
 
+Digital Earth Australia is an analysis platform for satellite imagery and other Earth observations.
+
+Digital Earth Australia is currently in a private beta for Australian government and academic users eligible for
+accounts on National Computational Infrastructure (NCI).
+
+Publicly available data access and web services are currently in development.
+
+.. toctree::
+   :maxdepth: 3
+   :caption: Overview
+
+   about/intro.rst
+   about/glossary.rst
+
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :caption: Connect
 
-
+   connect/install.rst
+   connect/account.rst
+   connect/jupyter.rst
 
