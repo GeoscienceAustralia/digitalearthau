@@ -71,7 +71,7 @@ def main(index, dry_run, paths, destination):
 
 def move_all(index: Index, paths: Iterable[Path], destination_base_path: Path, dry_run=False):
     for path in paths:
-        task = FileMoveTask.evaluate_and_create(index, path, dest_path=destination_base_path)
+        task = FileMoveTask.evaluate_and_create(index, path, dest_base_path=destination_base_path)
         if not task:
             continue
 
@@ -81,9 +81,9 @@ def move_all(index: Index, paths: Iterable[Path], destination_base_path: Path, d
 class FileMoveTask:
     def __init__(self, source_path: Path, dest_path: Path, source_metadata_path: Path, dataset: Dataset):
         self.source_path = source_path
-        self.source_metadata_path = source_metadata_path
-        self.dataset = dataset
+        self.source_metadata_path =source_metadata_path
         self.dest_path = dest_path
+        self.dataset = dataset
 
     @property
     def source_uri(self):
@@ -94,7 +94,7 @@ class FileMoveTask:
         return _LOG.bind(source_path=self.source_path)
 
     @classmethod
-    def evaluate_and_create(cls, index: Index, path: Path, dest_path: Path):
+    def evaluate_and_create(cls, index: Index, path: Path, dest_base_path: Path):
         """
         Create a move task if this path is movable.
         """
@@ -103,6 +103,11 @@ class FileMoveTask:
 
         metadata_path = path_utils.get_metadata_path(path)
         log.debug("found.metadata_path", metadata_path=metadata_path)
+
+        dataset_path, dest_path = cls._source_dest_paths(log, metadata_path, dest_base_path)
+        if dest_path.exists():
+            log.info("skip.exists", dest_path=dest_path)
+            return None
 
         dataset_id = path_utils.get_path_dataset_id(metadata_path)
         log = log.bind(dataset_id=dataset_id)
@@ -116,7 +121,7 @@ class FileMoveTask:
             return None
 
         return FileMoveTask(
-            source_path=path,
+            source_path=dataset_path,
             dest_path=dest_path,
             source_metadata_path=metadata_path,
             dataset=dataset
@@ -128,13 +133,10 @@ class FileMoveTask:
         :type self: FileMoveTask
         :type dry_run: bool
         """
-        successful_checksum = _verify_checksum(self.log, self.source_metadata_path,
-                                               dry_run=dry_run)
-        self.log.info("checksum.complete", passes_checksum=successful_checksum)
-        if not successful_checksum:
-            raise RuntimeError("Checksum failure on " + str(self.source_metadata_path))
-
         dest_uri = self._do_copy(dry_run=dry_run)
+        if not dest_uri:
+            self.log.debug("index.skip")
+            return
 
         # Record destination location in index
         if not dry_run:
@@ -147,39 +149,45 @@ class FileMoveTask:
 
         self.log.info('index.source.archived', uri=self.source_uri)
 
-    def _do_copy(self, dry_run=True):
-        dataset_path, all_files = path_utils.get_dataset_paths(self.source_metadata_path)
-
-        log = self.log
-        assert all_files
-        assert all(f.is_file() for f in all_files)
-        log.debug("copy.verify", file_count=len(all_files))
+    @staticmethod
+    def _source_dest_paths(log, source_metadata_path, destination_base_path):
+        dataset_path, all_files = path_utils.get_dataset_paths(source_metadata_path)
         _, file_offset = path_utils.split_path_from_base(dataset_path)
-        new_dataset_location = self.dest_path.joinpath(file_offset)
+        new_dataset_location = destination_base_path.joinpath(file_offset)
 
-        if new_dataset_location.exists():
-            raise NotImplementedError(
-                "Destination already exists. Situation not implemented. %s" % new_dataset_location)
+        # We currently assume all files are contained in the dataset directory/path:
+        # we write the single dataset path atomically.
+        if not all(str(f).startswith(str(dataset_path)) for f in all_files):
+            raise NotImplementedError("Some dataset files are not contained in the dataset path. "
+                                      "Situation not yet implemented. %s" % dataset_path)
+
+        return dataset_path, new_dataset_location
+
+    def _do_copy(self, dry_run=True):
+        log = self.log
+        dest_path = self.dest_path
+        dataset_path = self.source_path
+
+        successful_checksum = _verify_checksum(self.log, self.source_metadata_path,
+                                               dry_run=dry_run)
+        self.log.info("checksum.complete", passes_checksum=successful_checksum)
+        if not successful_checksum:
+            raise RuntimeError("Checksum failure on " + str(self.source_metadata_path))
 
         if dataset_path.is_dir():
-            # Assume all files are in the dataset directory: we'll write the whole folder atomically.
-            if not all(str(f).startswith(str(dataset_path)) for f in all_files):
-                raise NotImplementedError("Some dataset files are not contained in the dataset folder. "
-                                          "Situation not implemented. %s" % dataset_path)
-
-            log.debug("copy.mkdir", dest=new_dataset_location.parent)
-            fileutils.mkdir_p(str(new_dataset_location.parent))
+            log.debug("copy.mkdir", dest=dest_path.parent)
+            fileutils.mkdir_p(str(dest_path.parent))
 
             # We don't want to risk partially-copied packaged left on disk, so we copy to a tmp dir in same
             # folder and then atomically rename into place.
-            tmp_dir = Path(tempfile.mkdtemp(prefix='.dea-mv-', dir=str(new_dataset_location.parent)))
+            tmp_dir = Path(tempfile.mkdtemp(prefix='.dea-mv-', dir=str(dest_path.parent)))
             try:
                 tmp_package = tmp_dir.joinpath(dataset_path.name)
                 log.info("copy.put", src=dataset_path, tmp_dest=tmp_package)
                 if not dry_run:
                     shutil.copytree(str(dataset_path), str(tmp_package))
                     log.debug("copy.put.done")
-                    os.rename(str(tmp_package), str(new_dataset_location))
+                    os.rename(str(tmp_package), str(dest_path))
                     log.debug("copy.rename.done")
             finally:
                 log.debug("tmp_dir.rm", tmp_dir=tmp_dir)
@@ -188,7 +196,7 @@ class FileMoveTask:
             # .nc files and sibling files
             raise NotImplementedError("TODO: dataset files not yet supported")
 
-        return new_dataset_location.as_uri()
+        return dest_path.as_uri()
 
 
 def _verify_checksum(log, metadata_path, dry_run=True):
@@ -209,6 +217,7 @@ def _verify_checksum(log, metadata_path, dry_run=True):
                 log.error("checksum.failure", file=file)
                 return False
 
+    log.debug("copy.verify", file_count=len(all_files))
     return True
 
 
