@@ -21,6 +21,7 @@ _BASE_DIRECTORIES = [
     '/g/data/v10/reprocess',
     '/g/data/rs0/scenes/pq-scenes-tmp',
     '/g/data/rs0/scenes/nbar-scenes-tmp',
+    '/short/v10/scenes/nbar-scenes-tmp',
 ]
 
 # Use a static variable so that trashed items in the same run will be in the same trash bin.
