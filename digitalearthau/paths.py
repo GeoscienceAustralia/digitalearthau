@@ -19,9 +19,8 @@ _BASE_DIRECTORIES = [
     '/g/data/fk4/datacube',
     '/g/data/rs0/datacube',
     '/g/data/v10/reprocess',
-    '/g/data/rs0/scenes/pq-scenes-tmp',
-    '/g/data/rs0/scenes/nbar-scenes-tmp',
-    '/short/v10/scenes/nbar-scenes-tmp',
+    '/g/data/rs0/scenes',
+    '/short/v10/scenes',
 ]
 
 # Use a static variable so that trashed items in the same run will be in the same trash bin.
