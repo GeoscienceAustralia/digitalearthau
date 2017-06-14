@@ -31,7 +31,6 @@ class CleanConsoleRenderer(structlog.dev.ConsoleRenderer):
 
 @click.command()
 @ui.global_cli_options
-@click.option('--project', required=True)
 @click.option('--dry-run', is_flag=True, default=False)
 @click.option('--destination', '-d',
               required=True,
@@ -92,7 +91,7 @@ class FileMoveTask:
 
     @property
     def log(self):
-        return _LOG.bind(path=self.source_path)
+        return _LOG.bind(source_path=self.source_path)
 
     @classmethod
     def evaluate_and_create(cls, index: Index, path: Path, dest_path: Path):
@@ -139,12 +138,12 @@ class FileMoveTask:
 
         # Record destination location in index
         if not dry_run:
-            index.datasets.add_location(self.dataset, uri=dest_uri)
+            index.datasets.add_location(self.dataset.id, uri=dest_uri)
         self.log.info('index.dest.added', uri=dest_uri)
 
         # Archive source file in index (for deletion soon)
         if not dry_run:
-            index.datasets.archive_location(self.dataset, self.source_uri)
+            index.datasets.archive_location(self.dataset.id, self.source_uri)
 
         self.log.info('index.source.archived', uri=self.source_uri)
 
@@ -169,22 +168,22 @@ class FileMoveTask:
                                           "Situation not implemented. %s" % dataset_path)
 
             log.debug("copy.mkdir", dest=new_dataset_location.parent)
-            fileutils.mkdir_p(new_dataset_location.parent)
+            fileutils.mkdir_p(str(new_dataset_location.parent))
 
             # We don't want to risk partially-copied packaged left on disk, so we copy to a tmp dir in same
             # folder and then atomically rename into place.
-            tmp_dir = tempfile.mkdtemp(prefix='.dea-mv-', dir=str(new_dataset_location.parent))
+            tmp_dir = Path(tempfile.mkdtemp(prefix='.dea-mv-', dir=str(new_dataset_location.parent)))
             try:
-                tmp_package = tmp_dir.join(dataset_path.name)
+                tmp_package = tmp_dir.joinpath(dataset_path.name)
                 log.info("copy.put", src=dataset_path, tmp_dest=tmp_package)
                 if not dry_run:
-                    shutil.copy2(str(dataset_path), str(tmp_package))
+                    shutil.copytree(str(dataset_path), str(tmp_package))
                     log.debug("copy.put.done")
                     os.rename(str(tmp_package), str(new_dataset_location))
                     log.debug("copy.rename.done")
             finally:
                 log.debug("tmp_dir.rm", tmp_dir=tmp_dir)
-                shutil.rmtree(tmp_dir, ignore_errors=True)
+                shutil.rmtree(str(tmp_dir), ignore_errors=True)
         else:
             # .nc files and sibling files
             raise NotImplementedError("TODO: dataset files not yet supported")
