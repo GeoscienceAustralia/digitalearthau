@@ -7,6 +7,7 @@ import shutil
 import sys
 import tempfile
 from pathlib import Path
+from typing import Iterable
 
 import click
 import structlog
@@ -17,18 +18,29 @@ from datacube.index._api import Index
 from datacube.model import Dataset
 from datacube.ui import click as ui
 from digitalearthau import paths as path_utils
-from digitalearthau.mdss import MDSSClient
 
 _LOG = structlog.get_logger()
+
+
+class CleanConsoleRenderer(structlog.dev.ConsoleRenderer):
+    def __init__(self, pad_event=25):
+        super().__init__(pad_event)
+        # Dim debug messages
+        self._level_to_color['debug'] = structlog.dev.DIM
 
 
 @click.command()
 @ui.global_cli_options
 @click.option('--project', required=True)
 @click.option('--dry-run', is_flag=True, default=False)
-@click.argument('paths', type=str, nargs=-1)
-@ui.pass_index('mdss-archival')
-def main(index, project, dry_run, paths):
+@click.option('--destination', '-d',
+              required=True,
+              type=click.Path(exists=True, writable=True))
+@click.argument('paths',
+                type=click.Path(exists=True, readable=True),
+                nargs=-1)
+@ui.pass_index('move')
+def main(index, dry_run, paths, destination):
     structlog.configure(
         processors=[
             structlog.stdlib.add_log_level,
@@ -45,51 +57,35 @@ def main(index, project, dry_run, paths):
     # TODO: @ui.executor_cli_options
     move_all(
         index,
-        project,
         [Path(path).absolute() for path in paths],
+        Path(destination),
         dry_run=dry_run,
     )
 
 
-class CleanConsoleRenderer(structlog.dev.ConsoleRenderer):
-    def __init__(self, pad_event=25):
-        super().__init__(pad_event)
-        # Dim debug messages
-        self._level_to_color['debug'] = structlog.dev.DIM
-
-
-def move_all(index, project, paths, dry_run=False):
-    """
-    :param str project: Which NCI project's mdss space to use
-    :type index: datacube.index._api.Index
-    :type dry_run: bool
-    :param paths:
-    """
-    if not MDSSClient.is_available():
-        raise RuntimeError("mdss is not available on this system")
-
+def move_all(index: Index, paths: Iterable[Path], destination_base_path: Path, dry_run=False):
     for path in paths:
-        task = FileMoveTask.evaluate_and_create(index, project, path)
+        task = FileMoveTask.evaluate_and_create(index, path, dest_path=destination_base_path)
         if not task:
             continue
 
-        _archive_path(index, task, dry_run=dry_run)
+        task.run(index, dry_run=dry_run)
 
 
 class FileMoveTask:
-    def __init__(self, source_path: Path, dest_path: Path, source_metadata_path: Path, dataset: Dataset, log=_LOG):
+    def __init__(self, source_path: Path, dest_path: Path, source_metadata_path: Path, dataset: Dataset):
         self.source_path = source_path
         self.source_metadata_path = source_metadata_path
         self.dataset = dataset
-        self.log = log.bind(path=source_path)
         self.dest_path = dest_path
 
     @property
     def source_uri(self):
         return self.source_path.as_uri()
 
-    def status(self, **vals):
-        self.log = self.log.bind(**vals)
+    @property
+    def log(self):
+        return _LOG.bind(path=self.source_path)
 
     @classmethod
     def evaluate_and_create(cls, index: Index, path: Path, dest_path: Path):
@@ -97,7 +93,7 @@ class FileMoveTask:
         Create a move task if this path is movable.
         """
         path = path.absolute()
-        log = _LOG.bind(input_path=path)
+        log = _LOG.bind(path=path)
 
         metadata_path = path_utils.get_metadata_path(path)
         log.debug("found.metadata_path", metadata_path=metadata_path)
@@ -113,22 +109,39 @@ class FileMoveTask:
             log.warn("skip.not_indexed")
             return None
 
-        # Count how many datasets have been processed from this one. If none, we don't want to archive yet.
-        derived_count = len(tuple(index.datasets.get_derived(dataset_id)))
-        log.debug("found.derived", derived_count=derived_count)
-        if not derived_count:
-            log.info("skip.no_derived_datasets")
-            return None
-
         return FileMoveTask(
             source_path=path,
             dest_path=dest_path,
             source_metadata_path=metadata_path,
-            dataset=dataset,
-            log=log
+            dataset=dataset
         )
 
-    def run(self, dry_run=True):
+    def run(self, index, dry_run=True):
+        """
+        :type index: datacube.index._api.Index
+        :type self: FileMoveTask
+        :type dry_run: bool
+        """
+        successful_checksum = _verify_checksum(self.log, self.source_metadata_path,
+                                               dry_run=dry_run)
+        self.log.info("checksum.complete", passes_checksum=successful_checksum)
+        if not successful_checksum:
+            raise RuntimeError("Checksum failure on " + str(self.source_metadata_path))
+
+        dest_uri = self._do_copy(dry_run=dry_run)
+
+        # Record destination location in index
+        if not dry_run:
+            index.datasets.add_location(self.dataset, uri=dest_uri)
+        self.log.info('index.dest.added', uri=dest_uri)
+
+        # Archive source file in index (for deletion soon)
+        if not dry_run:
+            index.datasets.archive_location(self.dataset, self.source_uri)
+
+        self.log.info('index.source.archived', uri=self.source_uri)
+
+    def _do_copy(self, dry_run=True):
         dataset_path, all_files = path_utils.get_dataset_paths(self.source_metadata_path)
 
         log = self.log
@@ -170,31 +183,6 @@ class FileMoveTask:
             raise NotImplementedError("TODO: dataset files not yet supported")
 
         return new_dataset_location.as_uri()
-
-
-def _archive_path(index, task, target_dir, dry_run=True):
-    """
-    :type index: datacube.index._api.Index
-    :type task: FileMoveTask
-    :type dry_run: bool
-    """
-    successful_checksum = _verify_checksum(task.log, task.source_metadata_path,
-                                           dry_run=dry_run)
-    task.log.info("checksum.complete", passes_checksum=successful_checksum)
-    if not successful_checksum:
-        raise RuntimeError("Checksum failure on " + str(task.source_metadata_path))
-
-    dest_uri = task.run(dry_run=dry_run)
-
-    # Record destination location in index
-    if not dry_run:
-        index.datasets.add_location(task.dataset, uri=dest_uri)
-    task.log.info('index.dest.added', uri=dest_uri)
-
-    # Archive source file in index (for deletion soon)
-    if not dry_run:
-        index.datasets.archive_location(task.dataset, task.source_uri)
-    task.log.info('index.source.archived', uri=task.source_uri)
 
 
 def _verify_checksum(log, metadata_path, dry_run=True):
