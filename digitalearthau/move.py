@@ -54,6 +54,13 @@ def main(index, dry_run, paths, destination):
         cache_logger_on_first_use=True,
     )
 
+    if not path_utils.is_base_directory(destination):
+        raise click.BadArgumentUsage(
+            'Not a known DEA base directory; {}\nExpected one of:\n\t{}'.format(
+                destination,
+                '\n\t'.join(path_utils.BASE_DIRECTORIES))
+        )
+
     # TODO: @ui.executor_cli_options
     move_all(
         index,

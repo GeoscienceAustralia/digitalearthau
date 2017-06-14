@@ -15,7 +15,7 @@ from datacube.utils import is_supported_document_type, read_documents, InvalidDo
 
 # This may eventually go to a config file...
 # ".trash" directories will be created at this level for any datasets contained within.
-_BASE_DIRECTORIES = [
+BASE_DIRECTORIES = [
     '/g/data/fk4/datacube',
     '/g/data/rs0/datacube',
     '/g/data/v10/reprocess',
@@ -28,7 +28,17 @@ _TRASH_DAY = datetime.datetime.utcnow().strftime('%Y-%m-%d')
 
 
 def register_base_directory(d: Union[str, Path]):
-    _BASE_DIRECTORIES.append(str(d))
+    BASE_DIRECTORIES.append(str(d))
+
+
+def is_base_directory(d: Path):
+    """
+    >>> is_base_directory(Path("/g/data/rs0/datacube"))
+    True
+    >>> is_base_directory(Path("/tmp/something"))
+    False
+    """
+    return str(d) in BASE_DIRECTORIES
 
 
 def get_trash_path(file_path):
@@ -93,7 +103,7 @@ def split_path_from_base(file_path):
     ValueError: Unknown location: can't calculate base directory: /short/unknown_location/something.nc
     """
 
-    for root_location in _BASE_DIRECTORIES:
+    for root_location in BASE_DIRECTORIES:
         if str(file_path).startswith(root_location):
             dir_offset = str(file_path)[len(root_location) + 1:]
             return Path(root_location), dir_offset
