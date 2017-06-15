@@ -43,6 +43,7 @@ setup(
             'dea-archive = digitalearthau.archive:main',
             'dea-coherence = digitalearthau.coherence:main',
             'dea-duplicates = digitalearthau.duplicates:main',
+            'dea-move = digitalearthau.move:main',
             'dea-sync = digitalearthau.sync:cli',
         ]
     },
