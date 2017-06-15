@@ -53,23 +53,23 @@ class Collection:
     def iter_index_uris(self):
         return map(str, self._index.iter_all_uris(self.query))
 
-    def _constrained_file_patterns(self, within_path: Path) -> List[str]:
+    def constrained_file_patterns(self, within_path: Path) -> List[str]:
         """
         Constrain the file glob pattern(s) to only match datasets within the given folder.
 
         >>> init_nci_collections(MemoryDatasetPathIndex())
-        >>> get_collection('telemetry')._constrained_file_patterns(Path('/g/data/v10/repackaged'))
+        >>> get_collection('telemetry').constrained_file_patterns(Path('/g/data/v10/repackaged'))
         ['/g/data/v10/repackaged/rawdata/0/[0-9][0-9][0-9][0-9]/[0-9][0-9]/*/ga-metadata.yaml']
-        >>> get_collection('ls8_level1_scene')._constrained_file_patterns(
+        >>> get_collection('ls8_level1_scene').constrained_file_patterns(
         ...     Path('/g/data/v10/reprocess/ls8/level1/2016/04')
         ... )
         ['/g/data/v10/reprocess/ls8/level1/2016/04/LS*/ga-metadata.yaml']
         >>> # Constrain all the way: a specific dataset.
-        >>> get_collection('telemetry')._constrained_file_patterns(
+        >>> get_collection('telemetry').constrained_file_patterns(
         ...     Path('/g/data/v10/repackaged/rawdata/0/2016/04/LS8_SOMETHING/ga-metadata.yaml')
         ... )
         ['/g/data/v10/repackaged/rawdata/0/2016/04/LS8_SOMETHING/ga-metadata.yaml']
-        >>> get_collection('ls8_level1_scene')._constrained_file_patterns(Path('/g/data/some/fake/path'))
+        >>> get_collection('ls8_level1_scene').constrained_file_patterns(Path('/g/data/some/fake/path'))
         Traceback (most recent call last):
         ...
         ValueError: Pattern '/g/data/v10/reprocess/ls8/level1/[0-9][0-9][0-9][0-9]/[0-9][0-9]/LS*/ga-metadata.yaml' \
@@ -85,7 +85,7 @@ does not match the folder: /g/data/some/fake/path
     def iter_fs_paths_within(self, p: Path):
         return (
             Path(path).absolute()
-            for file_pattern in self._constrained_file_patterns(p)
+            for file_pattern in self.constrained_file_patterns(p)
             for path in glob.iglob(file_pattern)
         )
 
@@ -104,7 +104,7 @@ def _constain_pattern(within_path: Path, pattern: str):
     ...
     ValueError: Pattern '/tmp/test/[0-9][0-9]' does not match the folder: /tmp/non-matching-dir
     """
-    # Does it match the whole pattern? Expty suffix
+    # Does it match the whole pattern? Return verbatim (constrained all the way)
     if fnmatch.fnmatch(str(within_path), pattern):
         return str(within_path)
     else:
@@ -167,13 +167,13 @@ def get_collections_in_path(p: Path) -> Iterable[Collection]:
     []
     """
     for c in get_collections():
-        for pat in c.file_patterns:
-            # Match either the whole pattern parent folders of it.
-            if fnmatch.fnmatch(str(p), str(pat)) or \
-                    any(fnmatch.fnmatch(str(p), str(subpat)) for subpat in Path(pat).parents):
+        try:
+            patterns = c.constrained_file_patterns(p)
+            if patterns:
                 yield c
-                # Break from the pattern loop so that we don't return the same collection multiple times
-                break
+        except ValueError:
+            # Path does not match this collection's patterns.
+            continue
 
 
 def init_nci_collections(index: DatasetPathIndex):
