@@ -87,15 +87,32 @@ def move_all(index: Index, paths: Iterable[Path], destination_base_path: Path, d
 
 
 class FileMoveTask:
-    def __init__(self, source_path: Path, dest_path: Path, source_metadata_path: Path, dataset: Dataset):
+    def __init__(self,
+                 source_path: Path,
+                 dest_path: Path,
+                 source_metadata_path: Path,
+                 dest_metadata_path: Path,
+                 dataset: Dataset):
         self.source_path = source_path
-        self.source_metadata_path = source_metadata_path
         self.dest_path = dest_path
+        self.source_metadata_path = source_metadata_path
+        self.dest_metadata_path = dest_metadata_path
         self.dataset = dataset
+
+        if not str(self.source_metadata_path).startswith(str(self.source_path)):
+            # We only currently support copying when metadata is stored within the dataset.
+            # Eg.
+            # - an '.nc' file (same md path and dataset path)
+            # - '*-metadata.yaml' file (inside the dataset path folder)
+            raise NotImplementedError("Only metadata stored within a dataset is currently supported ")
 
     @property
     def source_uri(self):
-        return self.source_path.as_uri()
+        return self.source_metadata_path.as_uri()
+
+    @property
+    def dest_uri(self):
+        return self.dest_metadata_path.as_uri()
 
     @property
     def log(self):
@@ -112,8 +129,8 @@ class FileMoveTask:
         metadata_path = path_utils.get_metadata_path(path)
         log.debug("found.metadata_path", metadata_path=metadata_path)
 
-        dataset_path, dest_path = cls._source_dest_paths(log, metadata_path, dest_base_path)
-        if dest_path.exists():
+        dataset_path, dest_path, dest_md_path = cls._source_dest_paths(log, metadata_path, dest_base_path)
+        if dest_path.exists() or dest_md_path.exists():
             log.info("skip.exists", dest_path=dest_path)
             return None
 
@@ -132,6 +149,7 @@ class FileMoveTask:
             source_path=dataset_path,
             dest_path=dest_path,
             source_metadata_path=metadata_path,
+            dest_metadata_path=dest_md_path,
             dataset=dataset
         )
 
@@ -141,15 +159,15 @@ class FileMoveTask:
         :type self: FileMoveTask
         :type dry_run: bool
         """
-        dest_uri = self._do_copy(dry_run=dry_run)
-        if not dest_uri:
+        dest_metadata_uri = self._do_copy(dry_run=dry_run)
+        if not dest_metadata_uri:
             self.log.debug("index.skip")
             return
 
         # Record destination location in index
         if not dry_run:
-            index.datasets.add_location(self.dataset.id, uri=dest_uri)
-        self.log.info('index.dest.added', uri=dest_uri)
+            index.datasets.add_location(self.dataset.id, uri=dest_metadata_uri)
+        self.log.info('index.dest.added', uri=dest_metadata_uri)
 
         # Archive source file in index (for deletion soon)
         if not dry_run:
@@ -160,8 +178,10 @@ class FileMoveTask:
     @staticmethod
     def _source_dest_paths(log, source_metadata_path, destination_base_path):
         dataset_path, all_files = path_utils.get_dataset_paths(source_metadata_path)
-        _, file_offset = path_utils.split_path_from_base(dataset_path)
-        new_dataset_location = destination_base_path.joinpath(file_offset)
+        _, dataset_offset = path_utils.split_path_from_base(dataset_path)
+        new_dataset_location = destination_base_path.joinpath(dataset_offset)
+        _, metadata_offset = path_utils.split_path_from_base(source_metadata_path)
+        new_metadata_location = destination_base_path.joinpath(metadata_offset)
 
         # We currently assume all files are contained in the dataset directory/path:
         # we write the single dataset path atomically.
@@ -169,7 +189,7 @@ class FileMoveTask:
             raise NotImplementedError("Some dataset files are not contained in the dataset path. "
                                       "Situation not yet implemented. %s" % dataset_path)
 
-        return dataset_path, new_dataset_location
+        return dataset_path, new_dataset_location, new_metadata_location
 
     def _do_copy(self, dry_run=True):
         log = self.log
@@ -197,6 +217,9 @@ class FileMoveTask:
                     log.debug("copy.put.done")
                     os.rename(str(tmp_package), str(dest_path))
                     log.debug("copy.rename.done")
+
+                    # It should have been contained within the dataset, see the check in the constructor.
+                    assert self.dest_metadata_path.exists()
             finally:
                 log.debug("tmp_dir.rm", tmp_dir=tmp_dir)
                 shutil.rmtree(str(tmp_dir), ignore_errors=True)
@@ -204,7 +227,7 @@ class FileMoveTask:
             # .nc files and sibling files
             raise NotImplementedError("TODO: dataset files not yet supported")
 
-        return dest_path.as_uri()
+        return self.dest_uri
 
 
 def _verify_checksum(log, metadata_path, dry_run=True):
