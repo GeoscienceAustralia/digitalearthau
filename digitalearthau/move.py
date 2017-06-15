@@ -17,7 +17,7 @@ from eodatasets import verify
 from datacube.index._api import Index
 from datacube.model import Dataset
 from datacube.ui import click as ui
-from digitalearthau import paths as path_utils
+from digitalearthau import paths as path_utils, collections
 
 _LOG = structlog.get_logger()
 
@@ -52,6 +52,7 @@ def main(index, dry_run, paths, destination):
         context_class=dict,
         cache_logger_on_first_use=True,
     )
+    collections.init_nci_collections(None)
 
     if not path_utils.is_base_directory(destination):
         raise click.BadArgumentUsage(
@@ -63,7 +64,14 @@ def main(index, dry_run, paths, destination):
     # TODO: @ui.executor_cli_options
     move_all(
         index,
-        [Path(path).absolute() for path in paths],
+        (
+            # We want to iterate all datasets in the given input folder, so we find collections that exist in
+            # that folder and then iterate through all the collection datasets within that folder. Simple :)
+            path.absolute()
+            for input_path in map(Path, paths)
+            for collection in collections.get_collections_in_path(input_path)
+            for path in collection.iter_fs_paths_within(input_path)
+        ),
         Path(destination),
         dry_run=dry_run,
     )
@@ -81,7 +89,7 @@ def move_all(index: Index, paths: Iterable[Path], destination_base_path: Path, d
 class FileMoveTask:
     def __init__(self, source_path: Path, dest_path: Path, source_metadata_path: Path, dataset: Dataset):
         self.source_path = source_path
-        self.source_metadata_path =source_metadata_path
+        self.source_metadata_path = source_metadata_path
         self.dest_path = dest_path
         self.dataset = dataset
 
