@@ -9,7 +9,7 @@ that should contain the same set of datasets.
 import fnmatch
 import glob
 from pathlib import Path
-from typing import Iterable, Optional, Mapping
+from typing import Iterable, Optional, Mapping, List
 
 from digitalearthau.index import DatasetPathIndex, MemoryDatasetPathIndex
 from digitalearthau.utils import simple_object_repr
@@ -52,6 +52,71 @@ class Collection:
 
     def iter_index_uris(self):
         return map(str, self._index.iter_all_uris(self.query))
+
+    def _constrained_file_patterns(self, within_path: Path) -> List[str]:
+        """
+        Constrain the file glob pattern(s) to only match datasets within the given folder.
+
+        >>> init_nci_collections(MemoryDatasetPathIndex())
+        >>> get_collection('telemetry')._constrained_file_patterns(Path('/g/data/v10/repackaged'))
+        ['/g/data/v10/repackaged/rawdata/0/[0-9][0-9][0-9][0-9]/[0-9][0-9]/*/ga-metadata.yaml']
+        >>> get_collection('ls8_level1_scene')._constrained_file_patterns(
+        ...     Path('/g/data/v10/reprocess/ls8/level1/2016/04')
+        ... )
+        ['/g/data/v10/reprocess/ls8/level1/2016/04/LS*/ga-metadata.yaml']
+        >>> # Constrain all the way: a specific dataset.
+        >>> get_collection('telemetry')._constrained_file_patterns(
+        ...     Path('/g/data/v10/repackaged/rawdata/0/2016/04/LS8_SOMETHING/ga-metadata.yaml')
+        ... )
+        ['/g/data/v10/repackaged/rawdata/0/2016/04/LS8_SOMETHING/ga-metadata.yaml']
+        >>> get_collection('ls8_level1_scene')._constrained_file_patterns(Path('/g/data/some/fake/path'))
+        Traceback (most recent call last):
+        ...
+        ValueError: Pattern '/g/data/v10/reprocess/ls8/level1/[0-9][0-9][0-9][0-9]/[0-9][0-9]/LS*/ga-metadata.yaml' \
+does not match the folder: /g/data/some/fake/path
+        """
+        out = []
+        for pat in self.file_patterns:
+            pattern = _constain_pattern(within_path, pat)
+            if pattern:
+                out.append(pattern)
+        return out
+
+    def iter_fs_paths_within(self, p: Path):
+        return (
+            Path(path).absolute()
+            for file_pattern in self._constrained_file_patterns(p)
+            for path in glob.iglob(file_pattern)
+        )
+
+
+def _constain_pattern(within_path: Path, pattern: str):
+    """
+    >>> _constain_pattern(Path('/tmp/test'), '/tmp/test/[0-9]')
+    '/tmp/test/[0-9]'
+    >>> _constain_pattern(Path('/tmp/test-5'), '/tmp/test-[0-9]/[0-9]/file.txt')
+    '/tmp/test-5/[0-9]/file.txt'
+    >>> # Constrain all the way.
+    >>> _constain_pattern(Path('/tmp/test/09'), '/tmp/test/[0-9][0-9]')
+    '/tmp/test/09'
+    >>> _constain_pattern(Path('/tmp/non-matching-dir'), '/tmp/test/[0-9][0-9]')
+    Traceback (most recent call last):
+    ...
+    ValueError: Pattern '/tmp/test/[0-9][0-9]' does not match the folder: /tmp/non-matching-dir
+    """
+    # Does it match the whole pattern? Expty suffix
+    if fnmatch.fnmatch(str(within_path), pattern):
+        return str(within_path)
+    else:
+        pattern = Path(pattern)
+        # Otherwise move up the directory tree until we find a matching base
+        suffix = [pattern.name]
+        for subpat in pattern.parents:
+            if fnmatch.fnmatch(str(within_path), str(subpat)):
+                return str(within_path.joinpath(*reversed(suffix)))
+            else:
+                suffix.append(subpat.name)
+    raise ValueError('Pattern {!r} does not match the folder: {}'.format(str(pattern), within_path))
 
 
 class SceneCollection(Collection):
