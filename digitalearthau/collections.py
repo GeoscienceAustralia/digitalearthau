@@ -161,13 +161,14 @@ def init_nci_collections(index: DatasetPathIndex):
     #           LS7_ETM_NBAR_P54_GANBAR01-002_089_078_20040816/ga-metadata.yaml
     # /g/data/rs0/scenes/nbar-scenes-tmp/ls7/2004/07/output/nbart/
     #           LS7_ETM_NBART_P54_GANBART01-002_114_078_20040731/ga-metadata.yaml
+    nbar_scene_offset = '[0-9][0-9][0-9][0-9]/[0-9][0-9]/output/nbar*/LS*/ga-metadata.yaml'
     _add(
         SceneCollection(
             name='ls5_nbar_scene',
             query={'product': ['ls5_nbar_scene', 'ls5_nbart_scene']},
             file_patterns=[
-                '/g/data/rs0/scenes/nbar-scenes-tmp/ls5/'
-                '[0-9][0-9][0-9][0-9]/[0-9][0-9]/output/nbar*/LS*/ga-metadata.yaml',
+                '/g/data/rs0/scenes/nbar-scenes-tmp/ls5/' + nbar_scene_offset,
+                '/short/v10/scenes/nbar-scenes-tmp/ls5/' + nbar_scene_offset,
             ],
             index=index,
         ),
@@ -175,8 +176,8 @@ def init_nci_collections(index: DatasetPathIndex):
             name='ls7_nbar_scene',
             query={'product': ['ls7_nbar_scene', 'ls7_nbart_scene']},
             file_patterns=[
-                '/g/data/rs0/scenes/nbar-scenes-tmp/ls7/'
-                '[0-9][0-9][0-9][0-9]/[0-9][0-9]/output/nbar*/LS*/ga-metadata.yaml',
+                '/g/data/rs0/scenes/nbar-scenes-tmp/ls7/' + nbar_scene_offset,
+                '/short/v10/scenes/nbar-scenes-tmp/ls7/' + nbar_scene_offset,
             ],
             index=index,
         ),
@@ -184,8 +185,8 @@ def init_nci_collections(index: DatasetPathIndex):
             name='ls8_nbar_scene',
             query={'product': ['ls8_nbar_scene', 'ls8_nbart_scene']},
             file_patterns=[
-                '/g/data/rs0/scenes/nbar-scenes-tmp/ls8/'
-                '[0-9][0-9][0-9][0-9]/[0-9][0-9]/output/nbar*/LS*/ga-metadata.yaml',
+                '/g/data/rs0/scenes/nbar-scenes-tmp/ls8/' + nbar_scene_offset,
+                '/short/v10/scenes/nbar-scenes-tmp/ls8/' + nbar_scene_offset,
             ],
             index=index,
         )
