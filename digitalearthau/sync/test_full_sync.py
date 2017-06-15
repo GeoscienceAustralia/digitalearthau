@@ -64,8 +64,13 @@ def syncable_environment():
     on_disk_uri = root.joinpath('ls8_scenes', 'ls8_test_dataset', 'ga-metadata.yaml').as_uri()
     on_disk_uri2 = root.joinpath('ls7_scenes', 'ls7_test_dataset', 'ga-metadata.yaml').as_uri()
 
-    ls8_collection = Collection('ls8_scene_collection', {}, root.joinpath('ls8_scenes'), 'ls*/ga-metadata.yaml', [],
-                                index=MemoryDatasetPathIndex())
+    ls8_collection = Collection(
+        name='ls8_scene_collection',
+        query={},
+        file_patterns=[str(root.joinpath('ls8_scenes', 'ls*/ga-metadata.yaml'))],
+        unique=[],
+        index=MemoryDatasetPathIndex()
+    )
 
     # register this as a base directory so that datasets can be trashed within it.
     register_base_directory(root)

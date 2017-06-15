@@ -7,6 +7,7 @@ that should contain the same set of datasets.
 (Our sync script will compare/"sync" the two)
 """
 import fnmatch
+import glob
 from pathlib import Path
 from typing import Iterable, Optional, Mapping
 
@@ -18,16 +19,17 @@ class Collection:
     def __init__(self,
                  name: str,
                  query: dict,
-                 base_path: Path,
-                 offset_pattern: str,
+                 file_patterns: Iterable[str],
                  unique: Iterable[str],
                  index: DatasetPathIndex = None,
                  delete_archived_after_days=None,
                  expected_parents=None):
         self.name = name
+        # The query args needed to get all of this collection from the datacube index
         self.query = query
-        self.base_path = base_path
-        self.offset_pattern = offset_pattern
+        # The file glob patterns to iterate all files on disk (NCI collections are all file:// locations)
+        self.file_patterns = file_patterns
+
         self.unique = unique
         self.delete_archived_after_days = delete_archived_after_days
         self.expected_parents = expected_parents
@@ -38,7 +40,11 @@ class Collection:
         return simple_object_repr(self)
 
     def iter_fs_paths(self):
-        return (path.absolute() for path in self.base_path.glob(self.offset_pattern))
+        return (
+            Path(path).absolute()
+            for file_pattern in self.file_patterns
+            for path in glob.iglob(file_pattern)
+        )
 
     def iter_fs_uris(self):
         for path in self.iter_fs_paths():
@@ -47,21 +53,16 @@ class Collection:
     def iter_index_uris(self):
         return map(str, self._index.iter_all_uris(self.query))
 
-    @property
-    def file_pattern(self):
-        return self.base_path.joinpath(self.offset_pattern)
-
 
 class SceneCollection(Collection):
     def __init__(self,
                  name: str,
                  query: dict,
-                 base_path: Path,
-                 offset_pattern: str,
+                 file_patterns: Iterable[str],
                  index: Optional[DatasetPathIndex],
                  delete_archived_after_days=None,
                  expected_parents: Iterable[str] = None):
-        super().__init__(name, query, base_path, offset_pattern, index=index,
+        super().__init__(name, query, file_patterns=file_patterns, index=index,
                          unique=('time.lower.day', 'sat_path.lower', 'sat_row.lower'),
                          delete_archived_after_days=delete_archived_after_days,
                          expected_parents=expected_parents)
@@ -101,10 +102,13 @@ def get_collections_in_path(p: Path) -> Iterable[Collection]:
     []
     """
     for c in get_collections():
-        pat = Path(c.file_pattern)
-        if fnmatch.fnmatch(str(p), str(pat)) or \
-                any(fnmatch.fnmatch(str(p), str(subpat)) for subpat in pat.parents):
-            yield c
+        for pat in c.file_patterns:
+            # Match either the whole pattern parent folders of it.
+            if fnmatch.fnmatch(str(p), str(pat)) or \
+                    any(fnmatch.fnmatch(str(p), str(subpat)) for subpat in Path(pat).parents):
+                yield c
+                # Break from the pattern loop so that we don't return the same collection multiple times
+                break
 
 
 def init_nci_collections(index: DatasetPathIndex):
@@ -114,8 +118,9 @@ def init_nci_collections(index: DatasetPathIndex):
         Collection(
             name='telemetry',
             query={'metadata_type': 'telemetry'},
-            base_path=Path('/g/data/v10/repackaged/rawdata/0'),
-            offset_pattern="[0-9][0-9][0-9][0-9]/[0-9][0-9]/*/ga-metadata.yaml",
+            file_patterns=[
+                '/g/data/v10/repackaged/rawdata/0/[0-9][0-9][0-9][0-9]/[0-9][0-9]/*/ga-metadata.yaml',
+            ],
             unique=('time.lower.day', 'platform'),
             index=index
         )
@@ -128,22 +133,25 @@ def init_nci_collections(index: DatasetPathIndex):
         SceneCollection(
             name='ls8_level1_scene',
             query={'product': ['ls8_level1_scene', 'ls8_level1_oli_scene']},
-            base_path=Path('/g/data/v10/reprocess/ls8/level1'),
-            offset_pattern="[0-9][0-9][0-9][0-9]/[0-9][0-9]/LS*/ga-metadata.yaml",
+            file_patterns=[
+                '/g/data/v10/reprocess/ls8/level1/[0-9][0-9][0-9][0-9]/[0-9][0-9]/LS*/ga-metadata.yaml',
+            ],
             index=index,
         ),
         SceneCollection(
             name='ls7_level1_scene',
             query={'product': 'ls7_level1_scene'},
-            base_path=Path('/g/data/v10/reprocess/ls7/level1'),
-            offset_pattern="[0.-9][0-9][0-9][0-9]/[0-9][0-9]/LS*/ga-metadata.yaml",
+            file_patterns=[
+                '/g/data/v10/reprocess/ls7/level1/[0.-9][0-9][0-9][0-9]/[0-9][0-9]/LS*/ga-metadata.yaml',
+            ],
             index=index,
         ),
         SceneCollection(
             name='ls5_level1_scene',
             query={'product': 'ls5_level1_scene'},
-            base_path=Path('/g/data/v10/reprocess/ls5/level1'),
-            offset_pattern="[0-9][0-9][0-9][0-9]/[0-9][0-9]/LS*/ga-metadata.yaml",
+            file_patterns=[
+                '/g/data/v10/reprocess/ls5/level1/[0-9][0-9][0-9][0-9]/[0-9][0-9]/LS*/ga-metadata.yaml',
+            ],
             index=index,
         )
     )
@@ -157,22 +165,28 @@ def init_nci_collections(index: DatasetPathIndex):
         SceneCollection(
             name='ls5_nbar_scene',
             query={'product': ['ls5_nbar_scene', 'ls5_nbart_scene']},
-            base_path=Path('/g/data/rs0/scenes/nbar-scenes-tmp/ls5'),
-            offset_pattern="[0-9][0-9][0-9][0-9]/[0-9][0-9]/output/nbar*/LS*/ga-metadata.yaml",
+            file_patterns=[
+                '/g/data/rs0/scenes/nbar-scenes-tmp/ls5/'
+                '[0-9][0-9][0-9][0-9]/[0-9][0-9]/output/nbar*/LS*/ga-metadata.yaml',
+            ],
             index=index,
         ),
         SceneCollection(
             name='ls7_nbar_scene',
             query={'product': ['ls7_nbar_scene', 'ls7_nbart_scene']},
-            base_path=Path('/g/data/rs0/scenes/nbar-scenes-tmp/ls7'),
-            offset_pattern="[0-9][0-9][0-9][0-9]/[0-9][0-9]/output/nbar*/LS*/ga-metadata.yaml",
+            file_patterns=[
+                '/g/data/rs0/scenes/nbar-scenes-tmp/ls7/'
+                '[0-9][0-9][0-9][0-9]/[0-9][0-9]/output/nbar*/LS*/ga-metadata.yaml',
+            ],
             index=index,
         ),
         SceneCollection(
             name='ls8_nbar_scene',
             query={'product': ['ls8_nbar_scene', 'ls8_nbart_scene']},
-            base_path=Path('/g/data/rs0/scenes/nbar-scenes-tmp/ls8'),
-            offset_pattern="[0-9][0-9][0-9][0-9]/[0-9][0-9]/output/nbar*/LS*/ga-metadata.yaml",
+            file_patterns=[
+                '/g/data/rs0/scenes/nbar-scenes-tmp/ls8/'
+                '[0-9][0-9][0-9][0-9]/[0-9][0-9]/output/nbar*/LS*/ga-metadata.yaml',
+            ],
             index=index,
         )
     )
@@ -184,22 +198,25 @@ def init_nci_collections(index: DatasetPathIndex):
         SceneCollection(
             name='ls5_pq_scene',
             query={'product': 'ls5_pq_scene'},
-            base_path=Path('/g/data/rs0/scenes/pq-scenes-tmp/ls5'),
-            offset_pattern="[0-9][0-9][0-9][0-9]/[0-9][0-9]/output/pqa/LS*/ga-metadata.yaml",
+            file_patterns=[
+                '/g/data/rs0/scenes/pq-scenes-tmp/ls5/[0-9][0-9][0-9][0-9]/[0-9][0-9]/output/pqa/LS*/ga-metadata.yaml',
+            ],
             index=index,
         ),
         SceneCollection(
             name='ls7_pq_scene',
             query={'product': 'ls7_pq_scene'},
-            base_path=Path('/g/data/rs0/scenes/pq-scenes-tmp/ls7'),
-            offset_pattern="[0-9][0-9][0-9][0-9]/[0-9][0-9]/output/pqa/LS*/ga-metadata.yaml",
+            file_patterns=[
+                '/g/data/rs0/scenes/pq-scenes-tmp/ls7/[0-9][0-9][0-9][0-9]/[0-9][0-9]/output/pqa/LS*/ga-metadata.yaml',
+            ],
             index=index,
         ),
         SceneCollection(
             name='ls8_pq_scene',
             query={'product': 'ls8_pq_scene'},
-            base_path=Path('/g/data/rs0/scenes/pq-scenes-tmp/ls8'),
-            offset_pattern="[0-9][0-9][0-9][0-9]/[0-9][0-9]/output/pqa/LS*/ga-metadata.yaml",
+            file_patterns=[
+                '/g/data/rs0/scenes/pq-scenes-tmp/ls8/[0-9][0-9][0-9][0-9]/[0-9][0-9]/output/pqa/LS*/ga-metadata.yaml',
+            ],
             index=index,
         )
     )
@@ -213,24 +230,33 @@ def init_nci_collections(index: DatasetPathIndex):
             Collection(
                 name='ls5_{}'.format(name),
                 query={'product': 'ls5_{}_albers'.format(name)},
-                base_path=Path('/g/data/{}/datacube/002/LS5_TM_{}'.format(project, name.upper())),
-                offset_pattern="*_*/LS5*{}*.nc".format(name.upper()),
+                file_patterns=[
+                    '/g/data/{project}/datacube/002/'
+                    'LS5_TM_{name}/*_*/LS5*{name}*.nc'.format(project=project,
+                                                              name=name.upper()),
+                ],
                 unique=('time.lower.day', 'lat', 'lon'),
                 index=index,
             ),
             Collection(
                 name='ls7_{}'.format(name),
                 query={'product': 'ls7_{}_albers'.format(name)},
-                base_path=Path('/g/data/{}/datacube/002/LS7_ETM_{}'.format(project, name.upper())),
-                offset_pattern="*_*/LS7*{}*.nc".format(name.upper()),
+                file_patterns=[
+                    '/g/data/{project}/datacube/002/LS7_ETM_{name}/'
+                    '*_*/LS7*{name}*.nc'.format(project=project,
+                                                name=name.upper()),
+                ],
                 unique=('time.lower.day', 'lat', 'lon'),
                 index=index,
             ),
             Collection(
                 name='ls8_{}'.format(name),
                 query={'product': 'ls8_{}_albers'.format(name)},
-                base_path=Path('/g/data/{}/datacube/002/LS8_OLI_{}'.format(project, name.upper())),
-                offset_pattern="*_*/LS8*{}*.nc".format(name.upper()),
+                file_patterns=[
+                    '/g/data/{project}/datacube/002/LS8_OLI_{name}/'
+                    '*_*/LS8*{name}*.nc'.format(project=project,
+                                                name=name.upper()),
+                ],
                 unique=('time.lower.day', 'lat', 'lon'),
                 index=index,
             )
@@ -241,6 +267,5 @@ def init_nci_collections(index: DatasetPathIndex):
     add_albers_collections('nbart')
     add_albers_collections('fc', project='fk4')
 
-    assert get_collection('ls5_fc').base_path == Path('/g/data/fk4/datacube/002/LS5_TM_FC')
-    assert get_collection('ls5_fc').offset_pattern == "*_*/LS5*FC*.nc"
-    assert get_collection('ls8_nbar').base_path == Path('/g/data/rs0/datacube/002/LS8_OLI_NBAR')
+    assert get_collection('ls5_fc').file_patterns == ['/g/data/fk4/datacube/002/LS5_TM_FC/*_*/LS5*FC*.nc']
+    assert get_collection('ls8_nbar').file_patterns == ['/g/data/rs0/datacube/002/LS8_OLI_NBAR/*_*/LS8*NBAR*.nc']
