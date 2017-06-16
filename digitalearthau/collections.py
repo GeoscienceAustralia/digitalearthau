@@ -72,14 +72,22 @@ class Collection:
         >>> get_collection('ls8_level1_scene').constrained_file_patterns(Path('/g/data/some/fake/path'))
         Traceback (most recent call last):
         ...
-        ValueError: Pattern '/g/data/v10/reprocess/ls8/level1/[0-9][0-9][0-9][0-9]/[0-9][0-9]/LS*/ga-metadata.yaml' \
-does not match the folder: /g/data/some/fake/path
+        ValueError: Folder does not match collection 'ls8_level1_scene': /g/data/some/fake/path
+        >>> # Collection has two patterns, only one matches.
+        >>> get_collection('ls8_nbar_scene').constrained_file_patterns(
+        ...     Path('/g/data/rs0/scenes/nbar-scenes-tmp/ls8/2015/01/output/nbar')
+        ... )
+        ['/g/data/rs0/scenes/nbar-scenes-tmp/ls8/2015/01/output/nbar/LS*/ga-metadata.yaml']
         """
         out = []
         for pat in self.file_patterns:
-            pattern = _constain_pattern(within_path, pat)
+            pattern = _constrain_pattern(within_path, pat)
             if pattern:
                 out.append(pattern)
+
+        if not out:
+            raise ValueError('Folder does not match collection {!r}: {}'.format(self.name, within_path))
+
         return out
 
     def iter_fs_paths_within(self, p: Path):
@@ -90,19 +98,17 @@ does not match the folder: /g/data/some/fake/path
         )
 
 
-def _constain_pattern(within_path: Path, pattern: str):
+def _constrain_pattern(within_path: Path, pattern: str):
     """
-    >>> _constain_pattern(Path('/tmp/test'), '/tmp/test/[0-9]')
+    >>> _constrain_pattern(Path('/tmp/test'), '/tmp/test/[0-9]')
     '/tmp/test/[0-9]'
-    >>> _constain_pattern(Path('/tmp/test-5'), '/tmp/test-[0-9]/[0-9]/file.txt')
+    >>> _constrain_pattern(Path('/tmp/test-5'), '/tmp/test-[0-9]/[0-9]/file.txt')
     '/tmp/test-5/[0-9]/file.txt'
     >>> # Constrain all the way.
-    >>> _constain_pattern(Path('/tmp/test/09'), '/tmp/test/[0-9][0-9]')
+    >>> _constrain_pattern(Path('/tmp/test/09'), '/tmp/test/[0-9][0-9]')
     '/tmp/test/09'
-    >>> _constain_pattern(Path('/tmp/non-matching-dir'), '/tmp/test/[0-9][0-9]')
-    Traceback (most recent call last):
-    ...
-    ValueError: Pattern '/tmp/test/[0-9][0-9]' does not match the folder: /tmp/non-matching-dir
+    >>> # Doesn't match pattern: None
+    >>> _constrain_pattern(Path('/tmp/non-matching-dir'), '/tmp/test/[0-9][0-9]')
     """
     # Does it match the whole pattern? Return verbatim (constrained all the way)
     if fnmatch.fnmatch(str(within_path), pattern):
@@ -116,7 +122,7 @@ def _constain_pattern(within_path: Path, pattern: str):
                 return str(within_path.joinpath(*reversed(suffix)))
             else:
                 suffix.append(subpat.name)
-    raise ValueError('Pattern {!r} does not match the folder: {}'.format(str(pattern), within_path))
+    return None
 
 
 class SceneCollection(Collection):
@@ -165,15 +171,17 @@ def get_collections_in_path(p: Path) -> Iterable[Collection]:
     ['ls8_level1_scene']
     >>> [c.name for c in get_collections_in_path(Path('/g/data/some/fake/path'))]
     []
+    >>> [c.name for c in get_collections_in_path(Path('/g/data/rs0/scenes/nbar-scenes-tmp/ls8/2015/01/output/nbar'))]
+    ['ls8_nbar_scene']
     """
     for c in get_collections():
-        try:
-            patterns = c.constrained_file_patterns(p)
-            if patterns:
+        for pat in c.file_patterns:
+            # Match either the whole pattern parent folders of it.
+            if fnmatch.fnmatch(str(p), str(pat)) or \
+                    any(fnmatch.fnmatch(str(p), str(subpat)) for subpat in Path(pat).parents):
                 yield c
-        except ValueError:
-            # Path does not match this collection's patterns.
-            continue
+                # Break from the pattern loop so that we don't return the same collection multiple times
+                break
 
 
 def init_nci_collections(index: DatasetPathIndex):
