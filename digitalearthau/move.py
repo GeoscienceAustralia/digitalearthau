@@ -17,7 +17,8 @@ from eodatasets import verify
 from datacube.index._api import Index
 from datacube.model import Dataset
 from datacube.ui import click as ui
-from digitalearthau import paths as path_utils, collections
+from digitalearthau import paths as path_utils
+from digitalearthau import collections
 
 _LOG = structlog.get_logger()
 
@@ -61,17 +62,30 @@ def main(index, dry_run, paths, destination):
                 '\n\t'.join(path_utils.BASE_DIRECTORIES))
         )
 
+    # We want to iterate all datasets in the given input folder, so we find collections that exist in
+    # that folder and then iterate through all the collection datasets within that folder. Simple :)
+
+    # We do this aggressively to find errors in arguments immediately. (with the downside of `paths` memory usage)
+    resulting_paths = []
+    for input_path in map(Path, paths):
+        cs = list(collections.get_collections_in_path(input_path))
+        if not cs:
+            raise click.BadArgumentUsage("Directory doesn't match any known collections: {}".format(input_path))
+
+        for collection in cs:
+            found_paths = list(collection.iter_fs_paths_within(input_path))
+
+            if not found_paths:
+                raise click.BadArgumentUsage("No datasets found in {}".format(input_path))
+
+            resulting_paths.extend(found_paths)
+
+    _LOG.info("dataset.count", input_count=len(paths), dataset_count=len(resulting_paths))
+
     # TODO: @ui.executor_cli_options
     move_all(
         index,
-        (
-            # We want to iterate all datasets in the given input folder, so we find collections that exist in
-            # that folder and then iterate through all the collection datasets within that folder. Simple :)
-            path.absolute()
-            for input_path in map(Path, paths)
-            for collection in collections.get_collections_in_path(input_path)
-            for path in collection.iter_fs_paths_within(input_path)
-        ),
+        (path.absolute() for path in resulting_paths),
         Path(destination),
         dry_run=dry_run,
     )
