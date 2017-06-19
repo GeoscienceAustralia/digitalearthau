@@ -1,4 +1,9 @@
 #!/bin/bash
+
+# Deploy script for http://geoscienceaustralia.github.io/digitalearthau/
+# Builds sphinx docs and pushes to gh-pages branch
+# Based on https://gist.github.com/domenic/ec8b0fc8ab45f39403dd
+
 set -e # Exit with nonzero exit code if anything fails
 
 cd "$(dirname "$0")" # cd into this directory
@@ -10,7 +15,7 @@ COMMIT_AUTHOR_EMAIL=`git show --format="%aE" -s`
 ENCRYPTION_LABEL="c4bf5207aec3"
 
 function doCompile {
-  pip install Sphinx sphinx_rtd_theme
+  pip install Sphinx sphinx_rtd_theme nbsphinx
   make html
 }
 

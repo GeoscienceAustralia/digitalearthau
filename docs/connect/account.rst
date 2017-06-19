@@ -2,53 +2,28 @@
 
 .. _account:
 
-NCI Account
-===========
+Register
+========
 
-.. note::
-    These instructions are only relevant to using the :term:`AGDC` on the :term:`NCI` in Australia.
+Digital Earth Australia is currently in a private beta for Australian government and academic users
+eligible for accounts on National Computational Infrastructure (NCI).
 
-    For details on accessing the NCI, see http://nci.org.au/.
+You can sign up with your government or academic institutional email address here:
 
-    For details on accessing the :term:`VDI` at NCI, see http://vdi.nci.org.au/help.
+https://my.nci.org.au/mancini/signup/
 
-To use the modules on ``raijin`` or ``VDI``, add the datacube module path::
+The easiest way to use Digital Earth Australia is to connect using a remote desktop at NCI,
+called :term:`VDI`. (It is also possible to run on NCI's ``raijin`` HPC cluster, but is recommended
+that you prototype on VDI first.)
 
-    $ module use /g/data/v10/public/modules/modulefiles/
+Your NCI account will need to be linked to a VDI project. You can view your linked projects
+at https://my.nci.org.au/.  If you do not already have access to a VDI project, you can request
+to join the **wd8** project.  Once approved, you will be a member of the project and able to
+access DEA through the VDI.
 
-(you can add the above to your ``.bash_profile`` to avoid running it every time)
+The DEA environment can also be accessed within the High Performance Computing (HPC) environment
+(i.e. Raijin). This will require compute and storage quota allocations to be made via NCI's Allocation
+Scheme processes, on a per-project basis.  This does not need to be specific to DEA – all users with
+computing capabilities on Raijin are able to access DEA through the HPC system.
 
-You should now have access to the following modules:
-
- * **agdc-py2-prod** - Python 2.7
- * **agdc-py3-prod** - Python 3.5
-
-To load the production module with Python 3 (which is highly recommended over 2), run::
-
-    $ module load agdc-py3-prod
-
-The first time you load the module, it will register your account with the datacube, granting you read-only access.
-
-It will store your password in the file `~/.pgpass`.
-
-.. note::
-    VDI and Raijin have separate home directories, so you must copy your pgpass to the other if
-    you use both environments.
-
-    You can push the contents of your pgpass file from VDI to Raijin by running on a terminal window in VDI::
-
-        remote-hpc-cmd init
-        ssh raijin "cat >> ~/.pgpass" < ~/.pgpass
-        ssh raijin "chmod 0600 ~/.pgpass"
-
-
-    You will most likely be prompted for your NCI password.
-
-    To pull the contents of your pgpass from Raijin to VDI instead, run ::
-
-        ssh raijin "cat ~/.pgpass" >> ~/.pgpass
-        chmod 0600 ~/.pgpass
-
-.. warning::
-    If you have created a ``.datacube.conf`` file in your home folder from early Data Cube betas, you should rename or remove it
-    to avoid it conflicting with the settings loaded by the module.
+This guide focuses on accessing and exploring DEA via the VDI environment.
