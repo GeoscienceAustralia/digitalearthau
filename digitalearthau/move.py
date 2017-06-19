@@ -74,12 +74,7 @@ def main(index, dry_run, paths, destination, checksum):
             raise click.BadArgumentUsage("Directory doesn't match any known collections: {}".format(input_path))
 
         for collection in cs:
-            found_paths = list(collection.iter_fs_paths_within(input_path))
-
-            if not found_paths:
-                raise click.BadArgumentUsage("No datasets found in {}".format(input_path))
-
-            resulting_paths.extend(found_paths)
+            resulting_paths.extend(list(collection.iter_fs_paths_within(input_path)))
 
     _LOG.info("dataset.count", input_count=len(paths), dataset_count=len(resulting_paths))
 
