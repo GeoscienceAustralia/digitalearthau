@@ -17,8 +17,8 @@ from eodatasets import verify
 from datacube.index._api import Index
 from datacube.model import Dataset
 from datacube.ui import click as ui
-from digitalearthau import paths as path_utils
 from digitalearthau import collections
+from digitalearthau import paths as path_utils
 
 _LOG = structlog.get_logger()
 
@@ -33,6 +33,7 @@ class CleanConsoleRenderer(structlog.dev.ConsoleRenderer):
 @click.command()
 @ui.global_cli_options
 @click.option('--dry-run', is_flag=True, default=False)
+@click.option('--checksum/--no-checksum', is_flag=True, default=True)
 @click.option('--destination', '-d',
               required=True,
               type=click.Path(exists=True, writable=True))
@@ -40,7 +41,7 @@ class CleanConsoleRenderer(structlog.dev.ConsoleRenderer):
                 type=click.Path(exists=True, readable=True),
                 nargs=-1)
 @ui.pass_index('move')
-def main(index, dry_run, paths, destination):
+def main(index, dry_run, paths, destination, checksum):
     structlog.configure(
         processors=[
             structlog.stdlib.add_log_level,
@@ -88,16 +89,17 @@ def main(index, dry_run, paths, destination):
         (path.absolute() for path in resulting_paths),
         Path(destination),
         dry_run=dry_run,
+        checksum=checksum
     )
 
 
-def move_all(index: Index, paths: Iterable[Path], destination_base_path: Path, dry_run=False):
+def move_all(index: Index, paths: Iterable[Path], destination_base_path: Path, dry_run=False, checksum=True):
     for path in paths:
         task = FileMoveTask.evaluate_and_create(index, path, dest_base_path=destination_base_path)
         if not task:
             continue
 
-        task.run(index, dry_run=dry_run)
+        task.run(index, dry_run=dry_run, checksum=checksum)
 
 
 class FileMoveTask:
@@ -167,13 +169,8 @@ class FileMoveTask:
             dataset=dataset
         )
 
-    def run(self, index, dry_run=True):
-        """
-        :type index: datacube.index._api.Index
-        :type self: FileMoveTask
-        :type dry_run: bool
-        """
-        dest_metadata_uri = self._do_copy(dry_run=dry_run)
+    def run(self, index: Index, dry_run=True, checksum=True):
+        dest_metadata_uri = self._do_copy(dry_run=dry_run, checksum=checksum)
         if not dest_metadata_uri:
             self.log.debug("index.skip")
             return
@@ -205,16 +202,17 @@ class FileMoveTask:
 
         return dataset_path, new_dataset_location, new_metadata_location
 
-    def _do_copy(self, dry_run=True):
+    def _do_copy(self, dry_run=True, checksum=True):
         log = self.log
         dest_path = self.dest_path
         dataset_path = self.source_path
 
-        successful_checksum = _verify_checksum(self.log, self.source_metadata_path,
-                                               dry_run=dry_run)
-        self.log.info("checksum.complete", passes_checksum=successful_checksum)
-        if not successful_checksum:
-            raise RuntimeError("Checksum failure on " + str(self.source_metadata_path))
+        if checksum:
+            successful_checksum = _verify_checksum(self.log, self.source_metadata_path,
+                                                   dry_run=dry_run)
+            self.log.info("checksum.complete", passes_checksum=successful_checksum)
+            if not successful_checksum:
+                raise RuntimeError("Checksum failure on " + str(self.source_metadata_path))
 
         if dataset_path.is_dir():
             log.debug("copy.mkdir", dest=dest_path.parent)
