@@ -1,4 +1,3 @@
-import os
 from datetime import datetime, timedelta
 from functools import singledispatch
 from typing import Iterable, Callable
@@ -6,9 +5,8 @@ from typing import Iterable, Callable
 import structlog
 from dateutil import tz
 
-from datacube.utils import uri_to_local_path
-from digitalearthau import paths
 from digitalearthau.index import DatasetPathIndex
+from digitalearthau.paths import trash_uri
 from digitalearthau.sync.differences import UnreadableDataset
 from .differences import DatasetNotIndexed, Mismatch, ArchivedDatasetOnDisk, LocationNotIndexed, LocationMissingOnDisk
 
@@ -70,7 +68,7 @@ def _(mismatch: ArchivedDatasetOnDisk, index: DatasetPathIndex, min_age_hours: i
             _LOG.info("do_trash_archived.too_young", dataset_id=mismatch.dataset.id)
             return
 
-    _trash(mismatch, index)
+    trash_uri(mismatch.uri)
 
 
 @singledispatch
@@ -88,25 +86,7 @@ def _(mismatch: DatasetNotIndexed, index: DatasetPathIndex):
         _LOG.warning("do_trash_missing.indexed_siblings_exist", uri=mismatch.uri)
         return
 
-    _trash(mismatch, index)
-
-
-def _trash(mismatch: Mismatch, index: DatasetPathIndex):
-    local_path = uri_to_local_path(mismatch.uri)
-
-    if not local_path.exists():
-        _LOG.warning("trash.not_exist", path=local_path)
-        return
-
-    # TODO: to handle sibling-metadata we should trash "all_dataset_paths" too.
-    base_path, all_dataset_files = paths.get_dataset_paths(local_path)
-
-    trash_path = paths.get_trash_path(base_path)
-
-    _LOG.info("trashing", base_path=base_path, trash_path=trash_path)
-    if not trash_path.parent.exists():
-        os.makedirs(str(trash_path.parent))
-    os.rename(str(base_path), str(trash_path))
+    trash_uri(mismatch.uri)
 
 
 def fix_mismatches(mismatches: Iterable[Mismatch],

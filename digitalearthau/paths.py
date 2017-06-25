@@ -7,11 +7,14 @@ import uuid
 from pathlib import Path
 from typing import List, Iterable, Union, Tuple
 
-from datacube.utils import is_supported_document_type, read_documents, InvalidDocException
+import structlog
+
+from datacube.utils import is_supported_document_type, read_documents, InvalidDocException, uri_to_local_path
+
+_LOG = structlog.getLogger()
 
 # This check is buggy when used with Tuple[] type: https://github.com/PyCQA/pylint/issues/867
 # pylint: disable=invalid-sequence-index
-
 
 # This may eventually go to a config file...
 # ".trash" directories will be created at this level for any datasets contained within.
@@ -276,3 +279,23 @@ def _find_any_metadata_suffix(path):
         raise ValueError('Multiple matched metadata files: {!r}'.format(existing_paths))
 
     return existing_paths[0]
+
+
+def trash_uri(uri: str, dry_run=False, log=_LOG):
+    local_path = uri_to_local_path(uri)
+
+    if not local_path.exists():
+        log.warning("trash.not_exist", path=local_path)
+        return
+
+    # TODO: to handle sibling-metadata we should trash "all_dataset_paths" too.
+    base_path, all_dataset_files = get_dataset_paths(local_path)
+
+    trash_path = get_trash_path(base_path)
+
+    log.info("trashing", base_path=base_path, trash_path=trash_path)
+
+    if not dry_run:
+        if not trash_path.parent.exists():
+            os.makedirs(str(trash_path.parent))
+        os.rename(str(base_path), str(trash_path))
