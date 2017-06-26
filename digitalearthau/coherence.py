@@ -29,7 +29,7 @@ _LOG = structlog.getLogger('archive-locationless')
               help='Check if ancestor datasets have other children of the same type (they may be duplicates)')
 @click.option('--dry-run',
               is_flag=True,
-              help="Don't Make any changes (ie. don't archive anything)")
+              help="Don't make any changes (ie. don't archive anything)")
 @ui.parsed_search_expressions
 def main(expressions, dry_run, debug, check_locationless, check_ancestors, check_siblings):
     with Datacube() as dc:

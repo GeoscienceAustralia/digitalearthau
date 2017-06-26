@@ -19,7 +19,7 @@ _LOG = structlog.getLogger('cleanup-archived')
               help='Only trash locations with a second active location')
 @click.option('--dry-run',
               is_flag=True,
-              help="Don't Make any changes (ie. don't archive anything)")
+              help="Don't make any changes (ie. don't trash anything)")
 @ui.parsed_search_expressions
 def main(expressions, dry_run, only_redundant):
     with Datacube() as dc:
