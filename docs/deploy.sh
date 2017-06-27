@@ -8,7 +8,7 @@ set -e # Exit with nonzero exit code if anything fails
 
 cd "$(dirname "$0")" # cd into this directory
 
-SOURCE_BRANCH="wip-docs"  # Should be "master" when in production
+SOURCE_BRANCH="develop"
 TARGET_BRANCH="gh-pages"
 BUILD_PATH="_build/html"
 COMMIT_AUTHOR_EMAIL=`git show --format="%aE" -s`
