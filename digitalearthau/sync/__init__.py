@@ -14,7 +14,7 @@ import structlog
 import digitalearthau.collections as cs
 from datacube.index._api import Index
 from datacube.ui import click as ui
-from digitalearthau.archive import CleanConsoleRenderer
+from digitalearthau import uiutil
 from digitalearthau.index import AgdcDatasetPathIndex, DatasetPathIndex, MemoryDatasetPathIndex
 from digitalearthau.sync import scan
 from . import fixes, differences
@@ -63,7 +63,7 @@ _LOG = structlog.get_logger()
 @ui.pass_index(expect_initialised=False)
 def cli(index: Index, collections: Iterable[str], cache_folder: str, f: str, o: str,
         min_trash_age_hours: bool, jobs: int, **fix_settings):
-    init_logging()
+    uiutil.init_logging()
 
     if fix_settings['index_missing'] and fix_settings['trash_missing']:
         click.echo('Can either index missing datasets (--index-missing) , or trash them (--trash-missing), '
@@ -164,25 +164,6 @@ def get_mismatches(cache_folder: str,
                 workers=job_count
             )
 
-
-def init_logging():
-    # Direct structlog into standard logging.
-    structlog.configure(
-        processors=[
-            structlog.stdlib.filter_by_level,
-            structlog.stdlib.add_logger_name,
-            structlog.stdlib.add_log_level,
-            structlog.processors.TimeStamper(fmt="%Y-%m-%d %H:%M.%S"),
-            structlog.processors.StackInfoRenderer(),
-            structlog.processors.format_exc_info,
-            # Coloured output if to terminal.
-            CleanConsoleRenderer() if sys.stdout.isatty() else structlog.processors.KeyValueRenderer(),
-        ],
-        context_class=dict,
-        logger_factory=structlog.stdlib.LoggerFactory(),
-        wrapper_class=structlog.stdlib.BoundLogger,
-        cache_logger_on_first_use=True,
-    )
 
 
 if __name__ == '__main__':

@@ -29,6 +29,7 @@ _LOG = structlog.getLogger('archive-locationless')
               help="Don't make any changes (ie. don't archive anything)")
 @ui.parsed_search_expressions
 def main(expressions, dry_run, debug, check_locationless, check_ancestors, check_siblings):
+    uiutil.init_logging()
     with Datacube() as dc:
         _LOG.info('query', query=expressions)
         count = 0

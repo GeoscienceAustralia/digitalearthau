@@ -20,7 +20,7 @@ import shutil
 import sys
 
 from datacube.ui import click as ui
-from digitalearthau import paths as path_utils
+from digitalearthau import paths as path_utils, uiutil
 from digitalearthau.mdss import MDSSClient
 
 from eodatasets import verify
@@ -36,18 +36,7 @@ _LOG = structlog.get_logger()
 @click.argument('paths', type=str, nargs=-1)
 @ui.pass_index('mdss-archival')
 def main(index, project, dry_run, paths):
-    structlog.configure(
-        processors=[
-            structlog.stdlib.add_log_level,
-            structlog.processors.TimeStamper(fmt="%Y-%m-%d %H:%M.%S"),
-            structlog.processors.StackInfoRenderer(),
-            structlog.processors.format_exc_info,
-            # Coloured output if to terminal.
-            CleanConsoleRenderer() if sys.stdout.isatty() else structlog.processors.JSONRenderer(),
-        ],
-        context_class=dict,
-        cache_logger_on_first_use=True,
-    )
+    uiutil.init_logging()
 
     # TODO: @ui.executor_cli_options
     archive_all(
