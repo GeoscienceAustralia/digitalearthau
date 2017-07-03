@@ -1,4 +1,9 @@
 #!/usr/bin/env python3
+"""
+Archive datasets to tape (NCI's mdss).
+
+TODO: merge with move.py. They have the same logic, they just move to a different type of destination.
+"""
 
 from __future__ import print_function
 
@@ -24,7 +29,7 @@ import structlog
 _LOG = structlog.get_logger()
 
 
-@click.command()
+@click.command(help="Archive datasets to tape (NCI's mdss).")
 @ui.global_cli_options
 @click.option('--project', required=True)
 @click.option('--dry-run', is_flag=True, default=False)
