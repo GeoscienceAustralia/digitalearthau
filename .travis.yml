@@ -13,6 +13,7 @@ addons:
     - gfortran
     - gdal-bin
     - libgdal1-dev
+    - pandoc
 
 cache:
   directories:
@@ -36,6 +37,12 @@ install:
 script:
 - ./check-code.sh
 cache: apt
+
+after_success:
+ - pushd docs
+ - bash ./deploy.sh
+ - popd
+
 notifications:
   slack:
     on_success: change
