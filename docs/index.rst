@@ -42,9 +42,9 @@ Publicly available data access and web services are currently in development.
    :maxdepth: 1
    :caption: User Guide
 
-   guide/query.ipynb
-   guide/analyse.ipynb
-   guide/export.ipynb
+   query/Getting Started.ipynb
+   query/List Products.ipynb
+   query/Loading Data.ipynb
 
 .. toctree::
    :maxdepth: 1
