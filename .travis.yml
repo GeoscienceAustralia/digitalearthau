@@ -6,13 +6,15 @@ sudo: true
 addons:
   apt:
     packages:
-    - libatlas-dev
+    - gdal-bin
+    - gfortran
     - libatlas-base-dev
+    - libatlas-dev
+    - libgdal1-dev
     - liblapack-dev
     - libproj-dev
-    - gfortran
-    - gdal-bin
-    - libgdal1-dev
+    - libxml2-dev
+    - libxslt-dev
     - pandoc
     - shellcheck
 
