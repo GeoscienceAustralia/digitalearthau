@@ -1,5 +1,6 @@
 from __future__ import print_function
 
+import os
 from yaml import load, dump
 try:
     from yaml import CLoader as Loader, CDumper as Dumper
@@ -39,15 +40,22 @@ def clean_text(text):
     return text.replace(u'\xa0', u' ').encode('ascii').decode('utf-8')
 
 
+def local_file(filename):
+    """ Returns an absolute path of a filepath relative to this script. """
+    return os.path.join(os.path.split(os.path.realpath(__file__))[0], filename)
+
+
 @click.command()
-@click.option('mapping', '-m', help='Mapping file of global attributes to xpath queries',
-              type=click.Path(exists=True, readable=True), default='mapping.yaml', show_default=True)
+@click.option('mapping', '-m', help='Mapping file of global attributes to xpath queries.',
+              type=click.Path(exists=True, readable=True), default=local_file('mapping.yaml'))
 @click.argument('iso', callback=convert_cmi_node, required=True)
-@click.argument('output', type=click.Path(writable=True), required=False, default=None)
-def main(mapping, iso, output=None):
+@click.argument('output_path', type=click.Path(writable=True), required=False, default=None)
+def main(mapping, iso, output_path=None):
     """Convert an ISO19115 metadata document to a list of NetCDF global attributes
     
     The ISO19115 metadata document can specified by a URL, filepath or CMI node ID.
+    
+    If no output_path is given, the output is printed to screen.
     """
     mapping_table = load_mapping_table(mapping)
 
@@ -66,8 +74,8 @@ def main(mapping, iso, output=None):
                                err=True)
 
     output_yaml = dump({'global_attributes': found_global_attrs}, Dumper=Dumper, default_flow_style=False)
-    if output:
-        with open(output, 'w') as out_file:
+    if output_path:
+        with open(output_path, 'w') as out_file:
             out_file.write(output_yaml)
     else:
         click.echo(output_yaml)
