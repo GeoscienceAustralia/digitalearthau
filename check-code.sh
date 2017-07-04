@@ -10,6 +10,8 @@ pylint -j 2 --reports no digitalearthau scripts/**/*.py
 # 'continuation line' has too many spurious errors.
 pep8 --ignore=E122 --max-line-length 120  digitalearthau scripts/**/*.py
 
+shellcheck modules/**/*.sh check-code.sh
+
 # Users can specify extra folders as arguments.
 py.test -r sx --durations=5 digitalearthau scripts/**/*.py "$@"
 
