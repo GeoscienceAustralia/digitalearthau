@@ -2,22 +2,23 @@
 
 set -eu
 
+script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
 umask 002
 
-variant=dev
 export module_dir=/g/data/v10/public/modules
 export agdc_env_module=agdc-py2-env/anaconda2-2.5.0
 
 export LC_ALL=en_AU.utf8
 export LANG=C.UTF-8
 
-while [[ $# > 0 ]]
+while [[ $# -gt 0 ]]
 do
     key="$1"
 
     case $key in
     --help)
-        echo Usage: $0 --env ${agdc_env_module} --moduledir ${module_dir} --version 1.1.9
+        echo "Usage: $0 --env ${agdc_env_module} --moduledir ${module_dir} --version 1.1.9"
         echo "  Options:"
         echo "    --env agdc_env_module     Python module to use."
         echo "    --moduledir module_dir    Destination module path."
@@ -45,32 +46,37 @@ do
 shift # past argument or value
 done
 
-module use ${module_dir}/modulefiles
-module load ${agdc_env_module}
-python_version=`python -c 'from __future__ import print_function; import sys; print("%s.%s"%sys.version_info[:2])'`
-python_major=`python -c 'from __future__ import print_function; import sys; print(sys.version_info[0])'`
-subvariant=py${python_major}
+module use "${module_dir}/modulefiles"
+module load "${agdc_env_module}"
+python_version=$(python -c 'from __future__ import print_function; import sys; print("%s.%s"%sys.version_info[:2])')
+python_major=$(python -c 'from __future__ import print_function; import sys; print(sys.version_info[0])')
+subvariant="py${python_major}"
 
+
+temp_dir="$(mktemp -d)"
+cd "${temp_dir}"
 rm -rf agdc-v2 > /dev/null 2>&1
 git clone -b develop https://github.com/data-cube/agdc-v2.git
 pushd agdc-v2
-if [ ! -z ${version+x} ]
+if [ ! -z "${version+x}" ]
 then
-  git checkout tags/datacube-${version} -b module_package
+  git checkout "tags/datacube-${version}" -b module_package
 fi
 
 # run tests TODO: integration tests?
 python setup.py test
 
-export version=`python setup.py --version`
+version="$(python setup.py --version)"
 
-export package_name=agdc-${subvariant}
-export package_description=`python setup.py --description`
+package_name=agdc-${subvariant}
+package_description="$(python setup.py --description)"
 
-export package_dest=${module_dir}/${package_name}/${version}
-export python_dest=${package_dest}/lib/python${python_version}/site-packages
+package_dest=${module_dir}/${package_name}/${version}
+python_dest=${package_dest}/lib/python${python_version}/site-packages
 
-echo '# Packaging '$package_name' v '$version' to '$package_dest' #'
+export version package_name package_description package_dest python_dest
+
+printf '# Packaging "%s %s" to "%s" #\n' "$package_name" "$version" "$package_dest"
 
 read -p "Continue? [y/N]" -n 1 -r
 echo    # (optional) move to a new line
@@ -83,20 +89,16 @@ then
 
     echo "Installing:"
     python setup.py sdist
-    pip install dist/datacube-${version}.tar.gz --no-deps --prefix "${package_dest}"
-    #python setup.py install "--prefix=${package_dest}"
+    pip install "dist/datacube-${version}.tar.gz" --no-deps --prefix "${package_dest}"
 
     modulefile_dir="${module_dir}/modulefiles/${package_name}"
     mkdir -v -p "${modulefile_dir}"
 
-    popd
-
     modulefile_dest="${modulefile_dir}/${version}"
-    envsubst < modulefile.template > "${modulefile_dest}"
+    envsubst < "${script_dir}/modulefile.template" > "${modulefile_dest}"
     echo "Wrote modulefile to ${modulefile_dest}"
 fi
-
-rm -rf agdc-v2 > /dev/null 2>&1
+popd
 
 
 read -p "Do you want to also install datacube-stats? [y/N]" -n 1 -r

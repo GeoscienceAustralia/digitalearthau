@@ -25,14 +25,14 @@ pushd "${dir}/py-environment"
     then
         echo
         echo "Creating PY3 Environment"
-        ./package-module.sh --variant py3 --moduledir ${module_dir};
+        ./package-module.sh --variant py3 --moduledir "${module_dir}";
     fi
 
     if [ ! -e "${module_dir}/modulefiles/agdc-py2-env/${py_module_version}" ];
     then
         echo
         echo "Creating PY2 Environment"
-        ./package-module.sh --variant py2 --moduledir ${module_dir};
+        ./package-module.sh --variant py2 --moduledir "${module_dir}";
     fi
 popd
 
@@ -42,18 +42,18 @@ pushd "${dir}/agdc"
         echo
         echo "Creating PY3 AGDC ${agdc_version}"
         ./package-module.sh \
-            --env agdc-py3-env/${py_module_version} \
-            --moduledir ${module_dir} \
-            --version ${agdc_version}
+            --env "agdc-py3-env/${py_module_version}" \
+            --moduledir "${module_dir}" \
+            --version "${agdc_version}"
     fi
     if [ ! -e "${module_dir}/modulefiles/agdc-py2/${agdc_version}" ];
     then
         echo
         echo "Creating PY2 AGDC ${agdc_version}"
         ./package-module.sh \
-            --env agdc-py2-env/${py_module_version} \
-            --moduledir ${module_dir} \
-            --version ${agdc_version}
+            --env "agdc-py2-env/${py_module_version}" \
+            --moduledir "${module_dir}" \
+            --version "${agdc_version}"
     fi
 popd
 
@@ -61,7 +61,7 @@ popd
 pushd "${dir}/agdc-instances"
     echo
     echo "Creating instances"
-    ./package-all-instances.sh ${py_module_version} ${agdc_version}
+    ./package-all-instances.sh "${py_module_version}" "${agdc_version}"
 popd
 
 echo
