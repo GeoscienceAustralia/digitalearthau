@@ -4,18 +4,17 @@ set -eu
 
 umask 002
 
-variant=dev
 export module_dir=/g/data/v10/public/modules
 export agdc_module=agdc-py3-prod
 export module_description="Datacube ingester utilities and configuration"
 
-while [[ $# > 0 ]]
+while [[ $# -gt 0 ]]
 do
     key="$1"
 
     case $key in
     --help)
-        echo Usage: $0 --moduledir ${module_dir} --agdc ${agdc_module}
+        echo "Usage: $0 --moduledir ${module_dir} --agdc ${agdc_module}"
         exit 0
         ;;
     --agdc)
@@ -33,18 +32,20 @@ do
 shift # past argument or value
 done
 
-export module_name=agdc-ingester
-export version=`git describe --tags --always`
+module_name=agdc-ingester
+version=$(git describe --tags --always)
+module_dest=${module_dir}/${module_name}/${version}
+export module_name version module_dest
 
-export module_dest=${module_dir}/${module_name}/${version}
+printf '# Packaging "%s %s" to "%s" #\n' "$module_name" "$version" "$module_dest"
 
-echo '# Packaging '$module_name' v '$version' to '$module_dest' #'
 read -p "Continue? " -n 1 -r
 echo    # (optional) move to a new line
 
 function render {
+    # shellcheck disable=SC2016
     vars='$module_dir:$agdc_module:$module_description:$module_name:$version:$module_dest'
-    envsubst $vars < "$1" > "$2"
+    envsubst "$vars" < "$1" > "$2"
     echo Wrote "$2"
 }
 
@@ -60,13 +61,13 @@ cp -v -r products "${module_dest}/"
 render scripts/distributed.sh "${module_dest}/scripts/distributed.sh"
 
 mkdir -v "${module_dest}/config"
-for i in `ls config`
+for i in config/*.yaml
 do
-  render config/${i} ${module_dest}/config/${i}
+  render "${i}" "${module_dest}/${i}"
 done
 
 echo module use "${module_dir}/modulefiles" > "${module_dest}/scripts/environment.sh"
-echo module load ${agdc_module} >> "${module_dest}/scripts/environment.sh"
+echo module load "${agdc_module}" >> "${module_dest}/scripts/environment.sh"
 
 modulefile_dir="${module_dir}/modulefiles/${module_name}"
 mkdir -v -p "${modulefile_dir}"

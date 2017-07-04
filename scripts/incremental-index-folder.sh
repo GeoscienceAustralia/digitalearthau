@@ -20,7 +20,7 @@ paths_file="${lists_offset}possible-paths-$(date +%Y%m%d-%H%M%S).txt"
 
 if [ ! -e "${locations_file}" ]; then
     echo "Loading existing path list"
-    time psql -h 130.56.244.227 -p 6432 datacube -c "\\copy (select substring(uri_body from 3) from agdc.dataset_location dl 
+    time psql -h 130.56.244.227 -p 6432 datacube -c "\\copy (select substring(uri_body from 3) from agdc.dataset_location dl
         inner join dataset d on d.id = dl.dataset_ref where d.archived is null) to '${locations_file}.tmp' with csv"
     echo "Sorting"
     date
@@ -30,20 +30,18 @@ if [ ! -e "${locations_file}" ]; then
 fi
 echo "Searching $# paths"
 
-time lfs find "$@" -name ga-metadata.yaml | grep -v '.packagetmp.' | sort >> ${paths_file}
+time lfs find "$@" -name ga-metadata.yaml | grep -v '.packagetmp.' | sort >> "${paths_file}"
 
 echo "Finding missing paths"
 # Find lines that only exist in paths_file
-time comm -23 ${paths_file} ${locations_file} > ${index_queue_file}
+time comm -23 "${paths_file}" "${locations_file}" > "${index_queue_file}"
 
-echo "Paths to index: $(wc -l ${index_queue_file}) (list: ${index_queue_file})"
+echo "Paths to index: $(wc -l "${index_queue_file}") (list: ${index_queue_file})"
 
 echo
 echo "Indexing..."
 
-run_ingest="datacube -vv dataset add --auto-match "
-
-< ${index_queue_file} time parallel -j 3 -m ${run_ingest}
+< "${index_queue_file}" time parallel -j 3 -m datacube -vv dataset add --auto-match
 
 echo "Done"
 

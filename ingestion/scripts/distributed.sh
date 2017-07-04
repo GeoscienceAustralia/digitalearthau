@@ -1,16 +1,20 @@
 #!/usr/bin/env bash
 
+# !! This file is a template that has envsubst applied in package-module.sh !!
+
+# "module_dest" comes from envsubst: disable unknown variable
+# shellcheck disable=SC2154
 env_script=${module_dest}/scripts/environment.sh
 ppn=1
 tpp=1
 umask=0027
 
-while [[ $# > 0 ]]
+while [[ $# -gt 0 ]]
 do
     key="$1"
     case $key in
     --help)
-        echo Usage: $0 --env ${env_script} --umask ${umask} --ppn ${ppn} --tpp ${tpp} script args
+        echo "Usage: $0 --env ${env_script} --umask ${umask} --ppn ${ppn} --tpp ${tpp} script args"
         exit 0
         ;;
     --env)
@@ -39,16 +43,16 @@ done
 init_env="umask ${umask}; source /etc/bashrc; source ${env_script}"
 
 echo "*** ENVIRONMENT ***"
-cat ${env_script}
+cat "${env_script}"
 
-eval ${init_env}
+eval "${init_env}"
 
-SCHEDULER_NODE=`sed '1q;d' $PBS_NODEFILE`
-SCHEDULER_PORT=`shuf -i 2000-65000 -n 1`
+SCHEDULER_NODE=$(sed '1q;d' "$PBS_NODEFILE")
+SCHEDULER_PORT=$(shuf -i 2000-65000 -n 1)
 SCHEDULER_ADDR=$SCHEDULER_NODE:$SCHEDULER_PORT
 
-n0ppn=$(( $ppn < $NCPUS-2 ? $ppn : $NCPUS-2 ))
-n0ppn=$(( $n0ppn > 0 ? $n0ppn : 1 ))
+n0ppn=$(( ppn < NCPUS-2 ? ppn : NCPUS-2 ))
+n0ppn=$(( n0ppn > 0 ? n0ppn : 1 ))
 
 pbsdsh -n 0 -- /bin/bash -c "${init_env}; dask-scheduler --port $SCHEDULER_PORT"&
 sleep 5s
