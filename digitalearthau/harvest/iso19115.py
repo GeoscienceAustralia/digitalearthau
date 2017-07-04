@@ -40,6 +40,21 @@ def clean_text(text):
     return text.replace(u'\xa0', u' ').encode('ascii').decode('utf-8')
 
 
+def find_attrs_in_tree(tree, mapping_table):
+    found_global_attrs = {}
+    for key, xpaths in mapping_table.items():
+        for xpath in xpaths:
+            val = query_xpath(xpath, tree)
+            if val:
+                try:
+                    found_global_attrs[key] = clean_text(val)
+                    break
+                except UnicodeEncodeError as err:
+                    click.echo('{key} had the error {err}, with the text:\n{val}'.format(key=key, err=err, val=val),
+                               err=True)
+    return found_global_attrs
+
+
 def local_file(filename):
     """ Returns an absolute path of a filepath relative to this script. """
     return os.path.join(os.path.split(os.path.realpath(__file__))[0], filename)
@@ -61,19 +76,10 @@ def main(mapping, iso, output_path=None):
 
     tree = open_iso_tree(iso)
 
-    found_global_attrs = {}
-    for key, xpaths in mapping_table.items():
-        for xpath in xpaths:
-            val = query_xpath(xpath, tree)
-            if val:
-                try:
-                    found_global_attrs[key] = clean_text(val)
-                    break
-                except UnicodeEncodeError as err:
-                    click.echo('{key} had the error {err}, with the text:\n{val}'.format(key=key, err=err, val=val),
-                               err=True)
+    global_attrs = find_attrs_in_tree(tree, mapping_table)
 
-    output_yaml = dump({'global_attributes': found_global_attrs}, Dumper=Dumper, default_flow_style=False)
+    output_yaml = dump({'global_attributes': global_attrs}, Dumper=Dumper, default_flow_style=False)
+
     if output_path:
         with open(output_path, 'w') as out_file:
             out_file.write(output_yaml)
