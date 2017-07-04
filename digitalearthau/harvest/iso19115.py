@@ -67,9 +67,9 @@ def local_file(filename):
 @click.argument('output_path', type=click.Path(writable=True), required=False, default=None)
 def main(mapping, iso, output_path=None):
     """Convert an ISO19115 metadata document to a list of NetCDF global attributes
-    
+
     The ISO19115 metadata document can specified by a URL, filepath or CMI node ID.
-    
+
     If no output_path is given, the output is printed to screen.
     """
     mapping_table = load_mapping_table(mapping)
