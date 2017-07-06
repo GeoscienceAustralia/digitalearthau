@@ -5,7 +5,7 @@ import pytest
 from digitalearthau.harvest import iso19115
 
 # These are ok in tests.
-# pylint: redefined-outer-name
+# pylint: disable=redefined-outer-name
 
 
 @pytest.fixture
@@ -18,7 +18,7 @@ def sample_iso19115_doc():
     return os.path.join(os.path.split(os.path.realpath(__file__))[0], 'test_iso19115_doc.xml')
 
 
-def test_load_mapping_table(mapping_yaml):
+def test_harvest_load_mapping_table(mapping_yaml):
     mapping_table = iso19115.load_mapping_table(mapping_yaml)
 
     assert 'title' in mapping_table.keys()
@@ -34,7 +34,7 @@ def test_harvest_attrs(sample_iso19115_doc, mapping_yaml):
     assert global_attrs['license'] == 'CC BY Attribution 4.0 International License'
 
 
-def test_cmi_xml(mapping_yaml):
+def test_harvest_from_cmi_xml(mapping_yaml):
     url = 'http://cmi.ga.gov.au/ecat/115'
 
     mapping_table = iso19115.load_mapping_table(mapping_yaml)
