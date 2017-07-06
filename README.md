@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/GeoscienceAustralia/digitalearthau.svg?branch=master)](https://travis-ci.org/GeoscienceAustralia/digitalearthau)
+[![Build Status](https://travis-ci.org/GeoscienceAustralia/digitalearthau.svg?branch=develop)](https://travis-ci.org/GeoscienceAustralia/digitalearthau)
 
 ## Digital Earth Australia 
 

@@ -20,7 +20,7 @@ echoerr() { echo "$@" 1>&2; }
 
 if [[ $# != 1 ]] || [[ "$1" == "--help" ]];
 then
-    echoerr 
+    echoerr
     echoerr "Usage: $0 <version>"
     echoerr "Overriding any above variables as needed."
     echoerr "  eg. pyvariant=py3 variant=prod dbhost=130.56.244.225 agdc_env_module=agdc-py3-env/20161201 $0 1.1.17"
@@ -33,7 +33,7 @@ export module_name=agdc-${pyvariant}-${variant}
 export module_dest=${module_dir}/${module_name}/${version}
 export module_description="AGDC ${variant} instance"
 
-echo '# Packaging '$module_name' version '$version' to '$module_dest' #'
+printf '# Packaging "%s %s" to "%s" #\n' "$module_name" "$version" "$module_dest"
 read -p "Continue? " -n 1 -r
 echo    # (optional) move to a new line
 
@@ -53,10 +53,12 @@ mkdir -v -p "${module_dest}"
 cp -v datacube-ensure-user.py "${module_dest}/"
 chmod 775 "${module_dest}/datacube-ensure-user.py"
 
-echo "[datacube]" > "${module_dest}/datacube.conf"
-echo db_hostname: ${dbhost} >> "${module_dest}/datacube.conf"
-echo db_port: ${dbport} >> "${module_dest}/datacube.conf"
-echo db_database: ${dbname} >> "${module_dest}/datacube.conf"
+{
+    echo "[datacube]"
+    echo db_hostname: ${dbhost}
+    echo db_port: ${dbport}
+    echo db_database: ${dbname}
+} >> "${module_dest}/datacube.conf"
 
 modulefile_dir="${module_dir}/modulefiles/${module_name}"
 mkdir -v -p "${modulefile_dir}"

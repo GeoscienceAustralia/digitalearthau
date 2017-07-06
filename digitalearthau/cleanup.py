@@ -7,7 +7,7 @@ import structlog
 
 from datacube import Datacube
 from datacube.ui import click as ui
-from digitalearthau import paths
+from digitalearthau import paths, uiutil
 
 _LOG = structlog.getLogger('cleanup-archived')
 
@@ -22,6 +22,7 @@ _LOG = structlog.getLogger('cleanup-archived')
               help="Don't make any changes (ie. don't trash anything)")
 @ui.parsed_search_expressions
 def main(expressions, dry_run, only_redundant):
+    uiutil.init_logging()
     with Datacube() as dc:
         _LOG.info('query', query=expressions)
         count = 0

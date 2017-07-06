@@ -7,7 +7,6 @@ dependencies:
 - cartopy
 - certifi
 - click
-- conda-build
 - cython
 - dask
 - distributed
