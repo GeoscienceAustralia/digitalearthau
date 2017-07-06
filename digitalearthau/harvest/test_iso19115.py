@@ -4,10 +4,14 @@ import pytest
 
 from digitalearthau.harvest import iso19115
 
+# These are ok in tests.
+# pylint: redefined-outer-name
+
 
 @pytest.fixture
 def mapping_yaml():
     return os.path.join(os.path.split(os.path.realpath(__file__))[0], 'mapping.yaml')
+
 
 @pytest.fixture
 def sample_iso19115_doc():
