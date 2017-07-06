@@ -15,6 +15,8 @@ addons:
     - libgdal1-dev
     - libxml2-dev
     - libxslt-dev
+    - pandoc
+    - shellcheck
 
 cache:
   directories:
@@ -38,6 +40,12 @@ install:
 script:
 - ./check-code.sh
 cache: apt
+
+after_success:
+ - pushd docs
+ - bash ./deploy.sh
+ - popd
+
 notifications:
   slack:
     on_success: change

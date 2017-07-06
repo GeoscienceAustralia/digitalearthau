@@ -1,19 +1,16 @@
-"""
-Post-sync (when filesystem and index is consistent), scan the index to archive
-off duplicates and defunct/replaced datasets
-"""
-
 import click
 import structlog
 
 from datacube import Datacube
 from datacube.model import Dataset
 from datacube.ui import click as ui
+from digitalearthau import uiutil
 
 _LOG = structlog.getLogger('archive-locationless')
 
 
-@click.command()
+@click.command(help="Scan the index to archive duplicates and defunct/replaced datasets. "
+                    "Intended to be used after running sync: when filesystem and index is consistent")
 @click.option('--debug',
               is_flag=True,
               help='Enable debug logging')
@@ -32,6 +29,7 @@ _LOG = structlog.getLogger('archive-locationless')
               help="Don't make any changes (ie. don't archive anything)")
 @ui.parsed_search_expressions
 def main(expressions, dry_run, debug, check_locationless, check_ancestors, check_siblings):
+    uiutil.init_logging()
     with Datacube() as dc:
         _LOG.info('query', query=expressions)
         count = 0

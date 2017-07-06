@@ -16,8 +16,8 @@ full_name="${module_name}/${module_version}"
 module_path="${prefix}/${full_name}"
 modulefile_path="${prefix}/modulefiles/${full_name}"
 
-echo ${module_path}
-echo ${modulefile_path}
+echo "${module_path}"
+echo "${modulefile_path}"
 
 [ -e "${module_path}" ] || ( echo "No module found ${full_name}"; exit 1)
 [ -e "${modulefile_path}" ] || ( echo "No modulefile found called ${full_name}"; exit 1)
@@ -25,7 +25,7 @@ echo ${modulefile_path}
 # Create tar with module and modulefile
 tar_path="${module_path}.tar"
 echo "Tarring to ${tar_path}"
-time tar -cf "${tar_path}"  ${module_path} ${modulefile_path}
+time tar -cf "${tar_path}" "${module_path}" "${modulefile_path}"
 
 # Remove originals.
 echo "Cleaning up"

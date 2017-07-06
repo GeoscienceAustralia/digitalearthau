@@ -4,7 +4,6 @@ from __future__ import print_function
 
 import os
 import shutil
-import sys
 import tempfile
 from pathlib import Path
 from typing import Iterable
@@ -17,17 +16,10 @@ from eodatasets import verify
 from datacube.index._api import Index
 from datacube.model import Dataset
 from datacube.ui import click as ui
-from digitalearthau import collections
+from digitalearthau import collections, uiutil
 from digitalearthau import paths as path_utils
 
 _LOG = structlog.get_logger()
-
-
-class CleanConsoleRenderer(structlog.dev.ConsoleRenderer):
-    def __init__(self, pad_event=25):
-        super().__init__(pad_event)
-        # Dim debug messages
-        self._level_to_color['debug'] = structlog.dev.DIM
 
 
 @click.command()
@@ -42,18 +34,7 @@ class CleanConsoleRenderer(structlog.dev.ConsoleRenderer):
                 nargs=-1)
 @ui.pass_index('move')
 def main(index, dry_run, paths, destination, checksum):
-    structlog.configure(
-        processors=[
-            structlog.stdlib.add_log_level,
-            structlog.processors.TimeStamper(fmt="%Y-%m-%d %H:%M.%S"),
-            structlog.processors.StackInfoRenderer(),
-            structlog.processors.format_exc_info,
-            # Coloured output if to terminal.
-            CleanConsoleRenderer() if sys.stdout.isatty() else structlog.processors.JSONRenderer(),
-        ],
-        context_class=dict,
-        cache_logger_on_first_use=True,
-    )
+    uiutil.init_logging()
     collections.init_nci_collections(None)
 
     if not path_utils.is_base_directory(destination):

@@ -36,8 +36,8 @@ module use ${module_dir}/modulefiles
 module use -a ${agdc_module_dir}/modulefiles
 module load ${agdc_instance_module}
 
-python_version=`python -c 'from __future__ import print_function; import sys; print("%s.%s"%sys.version_info[:2])'`
-python_major=`python -c 'from __future__ import print_function; import sys; print(sys.version_info[0])'`
+python_version=$(python -c 'from __future__ import print_function; import sys; print("%s.%s"%sys.version_info[:2])')
+python_major=$(python -c 'from __future__ import print_function; import sys; print(sys.version_info[0])')
 subvariant=py${python_major}
 
 
@@ -59,7 +59,7 @@ function installrepo() {
 
     build_dest="build/${destination_name}"
     [ -e "${build_dest}" ] && rm -rf "${build_dest}"
-    git clone -b $head "${repo_cache}" "${build_dest}"
+    git clone -b "${head}" "${repo_cache}" "${build_dest}"
 
     pushd "${build_dest}"
         rm -r dist build > /dev/null 2>&1 || true
@@ -68,13 +68,13 @@ function installrepo() {
     popd
 }
 
-export package_name=galpgs-${subvariant}-${instance}
-export package_description="GA lpgs processing"
+package_name=galpgs-${subvariant}-${instance}
+package_description="GA lpgs processing"
+package_dest=${module_dir}/${package_name}/${version}
+python_dest=${package_dest}/lib/python${python_version}/site-packages
+export package_name package_description package_dest python_dest
 
-export package_dest=${module_dir}/${package_name}/${version}
-export python_dest=${package_dest}/lib/python${python_version}/site-packages
-
-echo '# Packaging '$package_name' '$version' to '$package_dest' #'
+printf '# Packaging "%s %s" to "%s" #\n' "$package_name" "$version" "$package_dest"
 
 read -p "Continue? [y/N]" -n 1 -r
 echo    # (optional) move to a new line
@@ -87,15 +87,15 @@ then
 
     echo
     echo "Installing dependencies"
-    installrepo idlfunctions develop git@github.com:sixy6e/idl-functions.git
-    installrepo eotools develop git@github.com:GeoscienceAustralia/eo-tools.git
-    installrepo eodatasets ${eodatasets_head} git@github.com:GeoscienceAustralia/eo-datasets.git
-    installrepo gaip ${gaip_head} git@github.com:GeoscienceAustralia/gaip.git
-    installrepo gqa ${gqa_head} git@github.com:GeoscienceAustralia/gqa.git
+    installrepo idlfunctions develop              git@github.com:sixy6e/idl-functions.git
+    installrepo eotools      develop              git@github.com:GeoscienceAustralia/eo-tools.git
+    installrepo eodatasets   "${eodatasets_head}" git@github.com:GeoscienceAustralia/eo-datasets.git
+    installrepo gaip         "${gaip_head}"       git@github.com:GeoscienceAustralia/gaip.git
+    installrepo gqa          "${gqa_head}"        git@github.com:GeoscienceAustralia/gqa.git
 
     echo
     echo "Installing galpgs"
-    installrepo galpgs ${version} git@github.com:jeremyh/galpgs.git
+    installrepo galpgs      "${version}"          git@github.com:jeremyh/galpgs.git
 
     echo
     echo "Writing modulefile"
