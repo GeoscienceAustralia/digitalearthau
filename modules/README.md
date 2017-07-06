@@ -1,18 +1,46 @@
-[![Build Status](https://travis-ci.org/GeoscienceAustralia/ga-datacube-env.svg?branch=master)](https://travis-ci.org/GeoscienceAustralia/ga-datacube-env)
+[![Build Status](https://travis-ci.org/GeoscienceAustralia/ga-datacube-env.svg?branch=develop)](https://travis-ci.org/GeoscienceAustralia/ga-datacube-env)
 
-# Building a release
+# Building a Release
 
 The `package-release.sh` script will build all modules for a given datacube version:
 
-    modules/package-release.sh 1.2.0
+    ./package-release.sh 1.2.0
 
-(Note that it's interactive: each section will ask for confirmation of options before starting)
+(Note that it's currently interactive: each section will ask for confirmation
+of options before starting)
+
+### Usage
+
+    module load agdc-py3-prod
+    datacube system check
+
+This will load `agdc-py3-env/<build_date>`, `agdc-py3/<version>` and
+`agdc-py3-prod/<version>` modules
+
+# Update the Default Version
+
+Once a module has been tested and approved, it can be made the default.
+
+Edit the `.version` file in the modulefiles directory.
+
+Eg. For agdc-py2-prod this is: `/g/data/v10/public/modules/modulefiles/agdc-py2-prod/.version`
 
 # Individual Modules
-## Environment module
 
-The environment module contains all Data Cube dependencies and libraries but
-not the Data Cube itself. See [environment.yaml](environment-module/environment.yaml) for the list of packages
+You probably don't have to care about any of the commands below: they are all
+run by the `./package-release.sh` command above.
+
+But if you want to build modules individually, or know what they are, keep
+reading:
+
+## Python "Environment" Module
+
+The Python module contains all Data Cube dependencies and libraries but not the
+Data Cube itself. See [environment.yaml](py-environment/environment.yaml)
+for the list of packages.
+
+The module version number is the current date in format YYYYMMDD, as it is a snapshot
+of all of our pip/conda dependencies on that date.
 
 ### Creation
 
@@ -22,7 +50,7 @@ Running this from Raijin is highly recommended as we've seen some issues come up
     ./package-module.sh --help
     ./package-module.sh --variant py3 --moduledir /g/data/v10/public/modules
 
-This will create a new environment module in /g/data/v10/public/modules/agdc-py3-env/\<date\>.
+This will create a new environment module in `/g/data/v10/public/modules/agdc-py3-env/\<date\>`.
 
 ### Use
 
@@ -34,9 +62,11 @@ Loading the module might conflict with other python modules you have loaded.
 
 The module will disable locally installed python packages to prevent conflicts by setting `PYTHONNOUSERSITE`
 
-## Data Cube module
+## Data Cube Module
 
-The data cube module contains the Data Cube code. It is built against a specific environment module.
+The data cube module contains the Open Data Cube library. It is built against a
+specific Python envionment module (ie. frozen to specific versions of each of
+our dependencies)
 
 ### Creation
 
@@ -50,7 +80,10 @@ The data cube module contains the Data Cube code. It is built against a specific
 
     ./package-module.sh --env agdc-py3-env/21121221 --moduledir /g/data/v10/public/modules
 
-This will create a new data cube module in /g/data/v10/public/modules/agdc-py3/\<version\>. Where `<version>` is the version of the latest code in [agdc-v2/develop](https://github.com/data-cube/agdc-v2/tree/develop) (e.g. 1.1.6+12.abcdefgh).
+This will create a new data cube module in
+`/g/data/v10/public/modules/agdc-py3/<version>`. Where `<version>` is the
+version of the latest code in
+[agdc-v2/develop](https://github.com/data-cube/agdc-v2/tree/develop) (e.g.  1.1.6+12.abcdefgh).
 
 To specify a particular version, use the version number portion of the GitHub tag.
 Specifying `--version 1.1.9` will use the [datacube-1.1.9](https://github.com/data-cube/agdc-v2/tree/datacube-1.1.9) tag.
@@ -61,13 +94,16 @@ Specifying `--version 1.1.9` will use the [datacube-1.1.9](https://github.com/da
 
 This will load `agdc-py3-env/21121221` and `agdc-py3/<version>` modules
 
-## Instance configuration module
+## Instance Module
 
-This module sets up data cube runtime configuration by setting `DATACUBE_CONFIG_PATH` environment variable.
+This module combines a Data Cube module with specific config (prod, test, dev...)
 
-The module requires `agdc-py3` module of matching version
+It includes a config file, which it specifies by setting the
+`DATACUBE_CONFIG_PATH` environment variable.
 
-### Create all instances
+The version number matches the datacube version.
+
+### Create All Instances
 
     cd modules/agdc-instances
     ./package-all-instances.sh 20161201 1.1.17
@@ -75,23 +111,13 @@ The module requires `agdc-py3` module of matching version
 This will interactively create a module for each GA instance (dev, prod etc) at
 NCI, confirming each one before creation.
 
-The first argument is the version of `agdc-py\*-env` modules to use, the second is the datacube version.
+The first argument is the version of `agdc-py*-env` modules to use, the second is the datacube version.
 
-### Create custon instance.
+### Create Custon Instance.
 
     cd modules/agdc-instances
     ./package-instance-module.sh  --help
 
 See the example and directions in the above help output.
 
-### Update default version
-
-Update `/g/data/v10/public/modules/modulefiles/agdc-py3/prod/.version` to make the last version the default one.
-
-### Use
-
-    module load agdc-py3-prod
-    datacube system check
-
-This will load `agdc-py3-env/21121221`, `agdc-py3/<version>` and `agdc-py3-prod/<version>` modules
 
