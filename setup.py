@@ -35,6 +35,7 @@ setup(
         'structlog[dev]',
         'DAWG',
         'boltons',
+        'lxml',
     ],
     tests_require=tests_require,
 
@@ -46,6 +47,7 @@ setup(
             'dea-duplicates = digitalearthau.duplicates:main',
             'dea-move = digitalearthau.move:main',
             'dea-sync = digitalearthau.sync:cli',
+            'dea-harvest = digitalearthau.harvest.iso19115:main'
         ]
     },
 )
