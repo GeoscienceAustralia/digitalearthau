@@ -11,7 +11,7 @@ import click
 import lxml.etree
 
 
-def load_mapping_table(mapping_yaml='mapping.yaml'):
+def load_mapping_table(mapping_yaml):
     with open(mapping_yaml) as mapping_stream:
         return load(mapping_stream, Loader=Loader)
 
