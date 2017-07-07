@@ -1,0 +1,8 @@
+extends: default
+
+rules:
+  # Not worth the effort, many tools (eg. secure keys don't output wrapped)
+  line-length: disable
+
+  # don't bother me with this rule
+  # indentation: disable
