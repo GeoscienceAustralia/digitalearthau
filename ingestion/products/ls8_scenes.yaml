@@ -1,4 +1,4 @@
-
+---
 name: ls8_satellite_telemetry_data
 description: Landsat 8 Satellite Telemetry Data
 metadata_type: telemetry
@@ -498,4 +498,3 @@ measurements:
           description: Best Quality Pixel
           values:
             16383: true
-

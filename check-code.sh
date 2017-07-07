@@ -20,7 +20,7 @@ pep8 --ignore=E122 --max-line-length 120  \
     scripts/**/*.py
 
 shellcheck ./**/*.sh 
-yamllint .travis.yml
+yamllint ./**/*.yaml
 
 # Users can specify extra folders (ie. integration_tests) as arguments.
 py.test -r sx --durations=5 digitalearthau scripts/**/*.py "$@"

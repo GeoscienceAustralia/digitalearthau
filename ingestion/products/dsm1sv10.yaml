@@ -1,3 +1,4 @@
+---
 name: dsm1sv10
 description: DSM 1sec Version 1.0
 metadata_type: eo
@@ -23,4 +24,3 @@ measurements:
         dtype: float32
         nodata: .nan
         units: 'metre'
-
