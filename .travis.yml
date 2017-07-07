@@ -17,10 +17,17 @@ addons:
     - libxslt-dev
     - pandoc
     - shellcheck
+  postgresql: "9.6"
+  services:
+    - postgresql
 
 cache:
+  apt: true
   directories:
     - $HOME/.cache/pip
+
+before_install:
+  - createdb dea_integration
 
 install:
 - mkdir pdstools
@@ -38,8 +45,7 @@ install:
 - travis_retry pip install .
 
 script:
-- ./check-code.sh
-cache: apt
+- ./check-code.sh integration_tests
 
 after_success:
  - pushd docs
