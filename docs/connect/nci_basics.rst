@@ -11,12 +11,12 @@ To manually use the modules on ``raijin`` or ``VDI``, add the datacube module pa
 
     $ module use /g/data/v10/public/modules/modulefiles/
 
-(you can add the above to your ``.bash_profile`` to avoid running it every time)
+(you can add the above to your ``.bashrc`` to avoid running it every time)
 
 You should now have access to the following modules:
 
  * **agdc-py2-prod** - Python 2.7
- * **agdc-py3-prod** - Python 3.5::
+ * **agdc-py3-prod** - Python 3.5
 
 You can see a list of available modules by running::
 
