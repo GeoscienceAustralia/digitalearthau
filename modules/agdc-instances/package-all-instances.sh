@@ -17,10 +17,10 @@ export version="$2"
 
 export agdc_env_module=agdc-py3-env/${py_module_version}
 
-pyvariant=py3 variant=dev dbhost=130.56.244.225 ./package-instance-module.sh "$version"
-pyvariant=py3 variant=oldprod dbhost=130.56.244.227 ./package-instance-module.sh "$version"
-pyvariant=py3 variant=prod dbhost=130.56.244.105 ./package-instance-module.sh "$version"
+pyvariant=py3 variant=dev dbhost=agdcdev-db.nci.org.au ./package-instance-module.sh "$version"
 
+# We can't use the new hostnames because existing users only have the IP in their pgpass file
+pyvariant=py3 variant=prod dbhost=130.56.244.105 ./package-instance-module.sh "$version"
 
 export agdc_env_module=agdc-py2-env/${py_module_version}
 

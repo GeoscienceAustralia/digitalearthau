@@ -12,12 +12,12 @@ ncml_path_template: 'LS7_ETM_PQ/LS7_ETM_PQ_3577_{tile_index[0]}_{tile_index[1]}.
 global_attributes:
   title: Pixel Quality 25 v2
   summary: |
-    The PQ25 product facilitates interpretation and processing of Surface Reflectance (SR-N/NT),  Fractional Cover 25 (FC25) 
+    The PQ25 product facilitates interpretation and processing of Surface Reflectance (SR-N/NT),  Fractional Cover 25 (FC25)
     and derivative products.
 
     PQ25 is an assessment of each image pixel to determine if it is an unobscured, unsaturated observation
-    of the Earth surface and also whether the pixel is represented in each spectral band. The PQ product allows 
-    users to produce masks which can be used to exclude pixels which do not meet their quality criteria from analysis . 
+    of the Earth surface and also whether the pixel is represented in each spectral band. The PQ product allows
+    users to produce masks which can be used to exclude pixels which do not meet their quality criteria from analysis .
     The capacity to automatically exclude such pixels is essential for emerging multi-temporal analysis techniques that
     make use of every quality assured pixel within a time series of observations.\nUsers can choose to process only land pixels,
     or only sea pixels depending on their analytical requirements, leading to enhanced computationally efficient.
@@ -31,18 +31,18 @@ global_attributes:
 
     As Landsat Imagery becomes more readily available, there has been a rapid increase in the amount of analyses undertaken
     by researchers around the globe.  Most researchers use some form of quality masking schema in order to remove undesirable
-    pixels from analysis, whether that be cloud, cloud shadow, observations over the ocean, or  saturated pixels.  In the past, 
+    pixels from analysis, whether that be cloud, cloud shadow, observations over the ocean, or  saturated pixels.  In the past,
     researchers would reject partly cloud-affected scenes in favour of cloud-free scenes.  However, Landsat time series analysis
-    using all cloud-free pixels has become a valuable technique and has increased the demand for automation of cloud, cloud 
+    using all cloud-free pixels has become a valuable technique and has increased the demand for automation of cloud, cloud
     shadow and saturation detection.  Emergency response applications such as flood mapping typically have to contend with
     individual cloud affected scenes and therefore rely on effective cloud and cloud shadow removal techniques.
 
-    The PQ25 product combines established algorithms that detect clouds including the Automated Cloud Cover Assessment 
-    (ACCA) (Irish et al. 2006) and Function of mask (Fmask) (Zhu and Woodcock 2012) . ACCA is already widely used within the 
-    remote sensing community; it is fast and relatively accurate.  Fmask on the other hand is newer, but is rapidly becoming 
+    The PQ25 product combines established algorithms that detect clouds including the Automated Cloud Cover Assessment
+    (ACCA) (Irish et al. 2006) and Function of mask (Fmask) (Zhu and Woodcock 2012) . ACCA is already widely used within the
+    remote sensing community; it is fast and relatively accurate.  Fmask on the other hand is newer, but is rapidly becoming
     more established, and can provide a more accurate cloud mask than ACCA in certain cloud environments.
 
-    The sensor saturation flagging protocols developed for the Web Enabled Landsat Data (WELD) product as described 
+    The sensor saturation flagging protocols developed for the Web Enabled Landsat Data (WELD) product as described
     in Roy et al. (2011) are used to flag sensor saturation.\nThe PQ25 product has similarities to the QAB layer packaged
     with OLI data, however it uses additional algorithms to detect cloud and cloud shadow, and is available for Landsat 5, 7 and 8.
   comment: |
@@ -63,7 +63,7 @@ global_attributes:
   cdm_data_type: Grid
   product_suite: Pixel Quality 25m
   acknowledgment: Landsat data is provided by the United States Geological Survey (USGS) through direct reception of the data at Geoscience Australias satellite reception facility or download.
-  references: | 
+  references: |
     - Berk, A., Anderson, G.P., Acharya, P.K., Hoke, M.L., Chetwynd, J.H., Bernstein, L.S., Shettle, E.P., Matthew, M.W., and Adler-Golden, S.M. (2003) Modtran 4 Version 3 Revision 1 User s manual. Airforce Research Laboratory, Hanscom, MA, USA.
     - Chander, G., Markham, B.L., and Helder, D.L. (2009) Summary of current radiometric calibration coefficients for Landsat MSS, TM, ETM+, and EO-1 ALI sensors. Remote Sensing of Environment 113, 893-903.
     - Edberg, R., and Oliver, S. (2013) Projection-Independent Earth-Solar-Sensor Geometry for Surface Reflectance Correction. Submitted to IGARSS 2013, Melbourne.
@@ -76,7 +76,7 @@ global_attributes:
     - Li, F., Jupp, D.L.B., Thankappan, M., Lymburner, L., Mueller, N., Lewis, A., and Held, A. (2012) A physics-based atmopheric and BRDF correction for Landsat data over mountainous terrain. Remote Sensing of Environment 124, 756-70.
     - Lubke, M. (2012) Landsat Geometry Calibration/Validation Update. Presentation at LTWG #21, 25 September 2012, Sioux Falls. USGS, USA.
     - OGC (2006) OpenGIS Web Map Server Implementation Specification (Ed: Jeff de la Beaujardiere) Ref. OGC 06-042.
-    - OGC (2010) OGC WCS 2.0 Interface Standard - Core. (Ed: Peter Baumann) Ref. OGC 09-110r3. 
+    - OGC (2010) OGC WCS 2.0 Interface Standard - Core. (Ed: Peter Baumann) Ref. OGC 09-110r3.
     - OGC (2013) CF-netCDF3 Data Model Extension Standard (Eds: Ben Domenico and Stefano Nativi) Ref. OGC 11-165r2.
     - Roy, D.P., Ju, J., Kline, K., Scaramuzza, P.L., Kovalskyy, V., Hansen, M., Loveland, T.R., Vermote, E., & Zhang, C. (2010). Web-enabled Landsat Data (WELD): Landsat ETM+ composited mosaics of the conterminous United States. Remote Sensing of Environment, 114, 35-49.
     - Sixsmith, J., Oliver, S., & Lymburner, L. (2013). A hybrid approach to automated Landsat pixel quality. In, Geoscience and Remote Sensing Symposium (IGARSS), 2013 IEEE International (pp. 4146-4149).
@@ -84,7 +84,7 @@ global_attributes:
     - TM World Borders vector file: http://thematicmapping.org/downloads/world_borders.php
     - USGS (2012a) Landsat Thematic Mapper (TM) Level 1 (L1) Data Format Control Book (DFCB). LS-DFCB-20 Version 4.0. USGS, USA. http://landsat.usgs.gov/documents/LS-DFCB-20.pdf
     - USGS (2012b) Landsat 7 ETM+ Level 1 Product Data Format Control Book (DFCB). LS-DFCB-04 Version 15.0.  http://landsat.usgs.gov/documents/LS-DFCB-04.pdf
-    - Vincenty, T. (1975) Direct and Inverse Solutions of Geodesies on the Ellipsoid with Application of Nested Equations. Survey Review 23, 88-93. 
+    - Vincenty, T. (1975) Direct and Inverse Solutions of Geodesies on the Ellipsoid with Application of Nested Equations. Survey Review 23, 88-93.
     - Zhu, Z. and Woodcock, C. E. (2012) Object-based cloud and cloud shadow detection in Landsat imagery. Remote Sensing of Environment 118, 83-94.
     - http://dx.doi.org/10.4225/25/55EF55788BAC1
 

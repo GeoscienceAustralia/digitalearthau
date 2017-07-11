@@ -9,35 +9,35 @@ file_path_template: 'LS5_TM_NBAR/{tile_index[0]}_{tile_index[1]}/LS5_TM_NBAR_357
 partial_ncml_path_template: 'LS5_TM_NBAR/{tile_index[0]}_{tile_index[1]}/LS5_TM_NBAR_3577_{tile_index[0]}_{tile_index[1]}_{start_time}.ncml'
 ncml_path_template: 'LS5_TM_NBAR/LS5_TM_NBAR_3577_{tile_index[0]}_{tile_index[1]}.ncml'
 
-global_attributes: 
+global_attributes:
   title: Surface Reflectance NBAR+ 25 v2
   summary: |
-    Surface Reflectance (SR) is a suite of Earth Observation (EO) products from GA. The SR product suite provides standardised optical surface reflectance datasets using robust 
+    Surface Reflectance (SR) is a suite of Earth Observation (EO) products from GA. The SR product suite provides standardised optical surface reflectance datasets using robust
     physical models to correct for variations in image radiance values due to atmospheric properties, and sun and sensor geometry. The resulting stack of surface reflectance
     grids are consistent over space and time which is instrumental in identifying and quantifying environmental change. SR is based on radiance data from the Landsat TM/ETM+
     and OLI sensors.
 
-    The standardised SR data products deliver calibrated optical surface reflectance data across land and coastal fringes. SR is a medium resolution (~25 m) grid based on the 
+    The standardised SR data products deliver calibrated optical surface reflectance data across land and coastal fringes. SR is a medium resolution (~25 m) grid based on the
     Landsat TM/ETM+/OLI archive and presents surface reflectance data in 25 square metre grid cells.
 
-    Radiance measurements from EO sensors do not directly quantify the surface reflectance of the Earth. Such measurements are modified by variations in atmospheric 
+    Radiance measurements from EO sensors do not directly quantify the surface reflectance of the Earth. Such measurements are modified by variations in atmospheric
     properties, sun position, sensor view angle, surface slope and surface aspect. To obtain consistent and comparable measures of Earth surface reflectance from EO,
-    these variations need to be reduced or removed from the radiance measurements (Li et al., 2010). This is especially important when comparing imagery acquired in 
+    these variations need to be reduced or removed from the radiance measurements (Li et al., 2010). This is especially important when comparing imagery acquired in
     different seasons and geographic regions.
 
-    The SR product is created using a physics-based, coupled BRDF and atmospheric correction model that can be applied to both flat and inclined surfaces (Li et al., 2012). 
+    The SR product is created using a physics-based, coupled BRDF and atmospheric correction model that can be applied to both flat and inclined surfaces (Li et al., 2012).
     The resulting surface reflectance values are comparable both within individual images and between images acquired at different times and/or with different sensors.
     This product does not include terrain illumination reflectance correction (see SR-NT_25).
 
     Landsat Archive
 
-    GA has acquired Landsat imagery over Australia since 1979, including  TM, ETM+ and OLI imagery. While this data has been used extensively for numerous 
-    land and coastal mapping studies, its utility for accurate monitoring of environmental resources has been limited by the processing methods that have been traditionally 
-    used to correct for inherent geometric and radiometric distortions in EO imagery. To improve access to Australia s archive of Landsat TM/ETM+/OLI data, several 
-    collaborative projects have been undertaken in conjunction with industry, government and academic partners. These projects have enabled implementation of a 
-    more integrated approach to image data correction that incorporates normalising models to account for atmospheric effects, BRDF and topographic shading (Li et al., 2012). 
-    The approach has been applied to Landsat TM/ETM+ and OLI imagery to create the SR products. The advanced supercomputing facilities provided by the National 
-    Computational Infrastructure (NCI) at the Australian National University (ANU) have been instrumental in handling the considerable data volumes and processing 
+    GA has acquired Landsat imagery over Australia since 1979, including  TM, ETM+ and OLI imagery. While this data has been used extensively for numerous
+    land and coastal mapping studies, its utility for accurate monitoring of environmental resources has been limited by the processing methods that have been traditionally
+    used to correct for inherent geometric and radiometric distortions in EO imagery. To improve access to Australia s archive of Landsat TM/ETM+/OLI data, several
+    collaborative projects have been undertaken in conjunction with industry, government and academic partners. These projects have enabled implementation of a
+    more integrated approach to image data correction that incorporates normalising models to account for atmospheric effects, BRDF and topographic shading (Li et al., 2012).
+    The approach has been applied to Landsat TM/ETM+ and OLI imagery to create the SR products. The advanced supercomputing facilities provided by the National
+    Computational Infrastructure (NCI) at the Australian National University (ANU) have been instrumental in handling the considerable data volumes and processing
     complexities involved with production of this product.
 
     Surface Reflectance Correction Models
@@ -45,17 +45,17 @@ global_attributes:
     Image radiance values recorded by passive EO sensors are a composite of
     -   surface reflectance;
     -	atmospheric condition;
-    -	interaction between surface land cover, solar radiation and sensor view angle; 
+    -	interaction between surface land cover, solar radiation and sensor view angle;
     -	land surface orientation relative to the imaging sensor.
-    
-    It has been traditionally assumed that Landsat imagery display negligible variation in sun and sensor view angles, however these can vary significantly both within 
+
+    It has been traditionally assumed that Landsat imagery display negligible variation in sun and sensor view angles, however these can vary significantly both within
     and between scenes, especially in different seasons and geographic regions (Li et al., 2012). The SR product delivers modeled surface reflectance from Landsat TM/ETM+/OLI
-    data using physical rather than empirical models. Accordingly, this product will ensure that reflective value differences between imagery acquired at different times by 
+    data using physical rather than empirical models. Accordingly, this product will ensure that reflective value differences between imagery acquired at different times by
     different sensors will be primarily due to on-ground changes in biophysical parameters rather than artifacts of the imaging environment.
 
     Integrated Time Series Data
 
-    Once consistent and comparable measures of surface reflectance have been retrieved from EO data, it is possible to quantify changes 
+    Once consistent and comparable measures of surface reflectance have been retrieved from EO data, it is possible to quantify changes
     in Earth surface features through time.
 
     Given the growing time series of EO imagery, this landmark facility will streamline the process of reliably monitoring long-term  chnges in land and water resources.

@@ -1,3 +1,4 @@
+---
 name: ls5_satellite_telemetry_data
 description: Landsat 5 Satellite Telemetry Data
 metadata_type: telemetry
@@ -236,4 +237,3 @@ measurements:
           description: Best Quality Pixel
           values:
             16383: true
-

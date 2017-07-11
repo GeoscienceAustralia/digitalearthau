@@ -62,6 +62,8 @@ dependencies:
 - python-dateutil
 - pyyaml
 - rasterio >=0.34
+- redis
+- redis-py
 - rtree
 - scikit-image
 - scikit-learn
@@ -75,6 +77,7 @@ dependencies:
 - xarray
 - pip:
   - boltons
+  - celery >= 4
   - ciso8601
   - compliance-checker
   - DAWG
