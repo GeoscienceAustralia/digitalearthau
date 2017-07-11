@@ -55,7 +55,7 @@ From the **Applications** menu in the top left of the screen, choose **System** 
 
 In the terminal window run the command::
 
-   cp /g/data/v10/public/modules/digitalearthau/dea.desktop ~
+   sh /g/data/v10/public/digitalearthau/install.sh
 
 You can then launch the Digital Earth Australia Jupyter Notebook by double-clicking the icon.
 
