@@ -6,6 +6,11 @@ import versioneer
 
 tests_require = ['pytest', 'pytest-cov', 'mock', 'pep8', 'pylint==1.6.4', 'hypothesis', 'compliance-checker']
 
+extras_require = {
+    'doc': ['Sphinx', 'setuptools', 'sphinx_rtd_theme'],
+    'test': tests_require,
+}
+
 setup(
     name='digitalearthau',
     version=versioneer.get_version(),
@@ -38,6 +43,7 @@ setup(
         'lxml',
     ],
     tests_require=tests_require,
+    extras_require=extras_require,
 
     entry_points={
         'console_scripts': [
