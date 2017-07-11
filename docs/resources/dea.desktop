@@ -1,0 +1,13 @@
+#!/usr/bin/env xdg-open
+
+[Desktop Entry]
+Version=1.0
+Type=Application
+Terminal=true
+Icon[en_AU]=/g/data/v10/public/digitalearthau/dea-icon.png
+Name[en_AU]=Digital Earth Australia
+Comment[en_AU]=Jupyter Notebooks for Digital Earth Australia
+Exec=bash -c "module use /g/data/v10/public/modules/modulefiles && module load agdc-py3-prod && jupyter notebook ~/dea_examples/Digital\\ Earth\\ Australia.ipynb"
+Name=Digital Earth Australia
+Comment=Jupyter Notebooks for Digital Earth Australia
+Icon=/g/data/v10/public/digitalearthau/dea-icon.png
