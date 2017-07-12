@@ -51,9 +51,10 @@ setup(
             'dea-clean = digitalearthau.cleanup:main',
             'dea-coherence = digitalearthau.coherence:main',
             'dea-duplicates = digitalearthau.duplicates:main',
+            'dea-harvest = digitalearthau.harvest.iso19115:main',
             'dea-move = digitalearthau.move:main',
+            'dea-submit-ingest = digitalearthau.submit_ingest:main',
             'dea-sync = digitalearthau.sync:cli',
-            'dea-harvest = digitalearthau.harvest.iso19115:main'
         ]
     },
 )

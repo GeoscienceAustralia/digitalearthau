@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 
-# !! This file is a template that has envsubst applied in package-module.sh !!
+set -eu
 
-# "module_dest" comes from envsubst: disable unknown variable
-# shellcheck disable=SC2154
-env_script=${module_dest}/scripts/environment.sh
+# The specific module+version that each node should load.
+module_name=$1
+shift
+
 ppn=1
 tpp=1
 umask=0027
@@ -14,12 +15,8 @@ do
     key="$1"
     case $key in
     --help)
-        echo "Usage: $0 --env ${env_script} --umask ${umask} --ppn ${ppn} --tpp ${tpp} script args"
+        echo "Usage: $0 <dea_module> --umask ${umask} --ppn ${ppn} --tpp ${tpp} script args"
         exit 0
-        ;;
-    --env)
-        env_script="$2"
-        shift
         ;;
     --umask)
         umask="$2"
@@ -40,10 +37,9 @@ do
 shift
 done
 
-init_env="umask ${umask}; source /etc/bashrc; source ${env_script}"
+init_env="umask ${umask}; source /etc/bashrc; module load ${module_name}"
 
-echo "*** ENVIRONMENT ***"
-cat "${env_script}"
+echo "Using DEA module: ${module_name}"
 
 eval "${init_env}"
 

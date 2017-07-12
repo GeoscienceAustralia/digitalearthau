@@ -6,9 +6,11 @@ import subprocess
 import click
 from pathlib import Path
 
-ROOT_DIR = Path(__file__).absolute().parent.parent
-CONFIG_DIR = ROOT_DIR / 'config'
-SCRIPT_DIR = ROOT_DIR / 'scripts'
+from digitalearthau import get_this_module
+
+THIS_DIR = Path(__file__).absolute().parent
+SCRIPT_DIR = THIS_DIR
+CONFIG_DIR = THIS_DIR / 'config'
 
 
 @click.group()
@@ -59,10 +61,11 @@ def qsub(config, year, queue, project, nodes, walltime, name):
     name = name or taskfile.stem
     qsub = 'qsub -q %(queue)s -N %(name)s -P %(project)s ' \
            '-l ncpus=%(ncpus)d,mem=%(mem)dgb,walltime=%(walltime)d:00:00 ' \
-           '-- /bin/bash "%(distr)s" --ppn 16 ' \
+           '-- /bin/bash "%(distr)s" "$(dea_module)s" --ppn 16 ' \
            'datacube -v ingest --load-tasks "%(taskfile)s" --executor distributed DSCHEDULER'
     cmd = qsub % dict(taskfile=taskfile,
-                      distr=SCRIPT_DIR / 'distributed.sh',
+                      distr=SCRIPT_DIR / 'run_distributed.sh',
+                      dea_module=get_this_module(),
                       queue=queue,
                       name=name,
                       project=project,
