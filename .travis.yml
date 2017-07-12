@@ -43,7 +43,7 @@ install:
     # Dask.array seems to need this?
     - travis_retry pip install cloudpickle
     - travis_retry pip install git+https://github.com/GeoscienceAustralia/eo-datasets.git
-    - travis_retry pip install .
+    - travis_retry pip install -e .
 
 script:
     - ./check-code.sh integration_tests
