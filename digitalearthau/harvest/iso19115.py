@@ -37,7 +37,15 @@ def query_xpath(xpath, tree):
 
 
 def clean_text(text):
-    return text.replace(u'\xa0', u' ').encode('ascii').decode('utf-8')
+    replacements = [
+        (u'\xa0', u' '),
+        (u'\u00A0', u' '),
+        (u'\u2013', u'-')
+    ]
+    for replacement in replacements:
+        text = text.replace(*replacement)
+
+    return text.encode('ascii').decode('utf-8')
 
 
 def find_attrs_in_tree(tree, mapping_table):
