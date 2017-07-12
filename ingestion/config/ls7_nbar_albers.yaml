@@ -73,9 +73,10 @@ global_attributes:
   publisher_email: earth.observation@ga.gov.au
   publisher_name: Section Leader, Operations Section, NEMO, Geoscience Australia
   publisher_url: 'http://www.ga.gov.au'
+  source: remotely observed surface reflectance
   license: CC BY Attribution 4.0 International License
   cdm_data_type: Grid
-  product_suite: Surface Reflectance NBAR+ 25m
+  product_suite: Surface Reflectance NBAR 25m
   acknowledgment: Landsat data is provided by the United States Geological Survey (USGS) through direct reception of the data at Geoscience Australias satellite reception facility or download.
   references: |
     -	Berk, A., Anderson, G.P., Acharya, P.K., Hoke, M.L., Chetwynd, J.H., Bernstein, L.S., Shettle, E.P., Matthew, M.W., and Adler-Golden, S.M. (2003) Modtran 4 Version 3 Revision 1 User s manual. Airforce Research Laboratory, Hanscom, MA, USA.
