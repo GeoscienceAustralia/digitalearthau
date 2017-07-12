@@ -11,7 +11,8 @@ cd "$(dirname "$0")" # cd into this directory
 SOURCE_BRANCH="develop"
 TARGET_BRANCH="gh-pages"
 BUILD_PATH="_build/html"
-COMMIT_AUTHOR_EMAIL=$(git show --format="%aE" -s)
+COMMITTER_EMAIL=$(git show --format="%aE" -s)
+AUTHOR_NAME_EMAIL=$(git show --format="%aN <%aE>" -s)
 ENCRYPTION_LABEL="c4bf5207aec3"
 
 function doCompile {
@@ -46,7 +47,7 @@ doCompile
 # Now let's go have some fun with the cloned repo
 pushd $BUILD_PATH
 git config user.name "Travis CI"
-git config user.email "$COMMIT_AUTHOR_EMAIL"
+git config user.email "$COMMITTER_EMAIL"
 
 # If there are no changes to the compiled out (e.g. this is a README update) then just bail.
 if git diff --quiet; then
@@ -58,7 +59,7 @@ fi
 # Commit the "changes", i.e. the new version.
 # The delta will show diffs between new and old versions.
 git add -A .
-git commit -m "Deploy to GitHub Pages: ${SHA}"
+git commit --author="${AUTHOR_NAME_EMAIL}" -m "Deploy to GitHub Pages: ${SHA}"
 popd
 
 # Get the deploy key by using Travis's stored variables to decrypt deploy_key.enc
