@@ -7,6 +7,7 @@ from pathlib import Path
 import pytest
 import yaml
 
+import digitalearthau
 from datacube.config import LocalConfig
 from datacube.index._api import Index
 from datacube.index.postgres import PostgresDb
@@ -23,10 +24,9 @@ INTEGRATION_DEFAULT_CONFIG_PATH = Path(__file__).parent.joinpath('deaintegration
 INTEGRATION_TEST_DATA = Path(__file__) / 'data'
 
 PROJECT_ROOT = Path(__file__).parents[1]
-INGESTION_ROOT = PROJECT_ROOT / 'ingestion'
 
-DEA_MD_TYPES = INGESTION_ROOT / 'metadata-types.yaml'
-DEA_PRODUCTS_DIR = INGESTION_ROOT / 'products'
+DEA_MD_TYPES = digitalearthau.CONFIG_DIR / 'metadata-types.yaml'
+DEA_PRODUCTS_DIR = digitalearthau.CONFIG_DIR / 'products'
 
 
 def load_yaml_file(path):

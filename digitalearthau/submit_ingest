@@ -3,14 +3,14 @@
 from __future__ import print_function
 
 import subprocess
-import click
 from pathlib import Path
 
-from digitalearthau import get_this_module
+import click
 
-THIS_DIR = Path(__file__).absolute().parent
-SCRIPT_DIR = THIS_DIR
-CONFIG_DIR = THIS_DIR / 'config'
+import digitalearthau
+
+DISTRIBUTED_SCRIPT = digitalearthau.SCRIPT_DIR / 'run_distributed.sh'
+INGEST_CONFIG_DIR = digitalearthau.CONFIG_DIR / 'ingestion'
 
 
 @click.group()
@@ -21,7 +21,7 @@ def cli():
 @cli.command()
 def list():
     """List available products to ingest."""
-    for cfg in CONFIG_DIR.glob('*.yaml'):
+    for cfg in INGEST_CONFIG_DIR.glob('*.yaml'):
         print(cfg.name)
 
 
@@ -40,7 +40,7 @@ def list():
 @click.argument('year')
 def qsub(config, year, queue, project, nodes, walltime, name):
     """Submits an ingest job to qsub."""
-    config = CONFIG_DIR / config
+    config = INGEST_CONFIG_DIR / config
     taskfile = Path(config.stem + '_' + year.replace('-', '_') + '.bin').absolute()
     if not config.exists():
         print('%s is not a valid config' % config)
@@ -64,8 +64,8 @@ def qsub(config, year, queue, project, nodes, walltime, name):
            '-- /bin/bash "%(distr)s" "$(dea_module)s" --ppn 16 ' \
            'datacube -v ingest --load-tasks "%(taskfile)s" --executor distributed DSCHEDULER'
     cmd = qsub % dict(taskfile=taskfile,
-                      distr=SCRIPT_DIR / 'run_distributed.sh',
-                      dea_module=get_this_module(),
+                      distr=DISTRIBUTED_SCRIPT,
+                      dea_module=digitalearthau.MODULE_NAME,
                       queue=queue,
                       name=name,
                       project=project,
@@ -91,7 +91,7 @@ def qsub(config, year, queue, project, nodes, walltime, name):
 @click.argument('year')
 def stack(config, year, queue, project, nodes, walltime, name):
     """Stacks a year of tiles into a single NetCDF."""
-    config = CONFIG_DIR / config
+    config = INGEST_CONFIG_DIR / config
     taskfile = Path(config.stem + '_' + year.replace('-', '_') + '.bin').absolute()
     if not config.exists():
         print('%s is not a valid config' % config)
@@ -114,10 +114,11 @@ def stack(config, year, queue, project, nodes, walltime, name):
     name = name or taskfile.stem
     qsub = 'qsub -q %(queue)s -N %(name)s -P %(project)s ' \
            '-l ncpus=%(ncpus)d,mem=%(mem)dgb,walltime=%(walltime)d:00:00 ' \
-           '-- /bin/bash "%(distr)s" --ppn 16 ' \
+           '-- /bin/bash "%(distr)s" "$(dea_module)s" --ppn 16 ' \
            'datacube-stacker -v --load-tasks "%(taskfile)s" --executor distributed DSCHEDULER'
     cmd = qsub % dict(taskfile=taskfile,
-                      distr=SCRIPT_DIR / 'distributed.sh',
+                      distr=DISTRIBUTED_SCRIPT,
+                      dea_module=digitalearthau.MODULE_NAME,
                       queue=queue,
                       name=name,
                       project=project,
@@ -143,8 +144,9 @@ def stack(config, year, queue, project, nodes, walltime, name):
 @click.argument('year')
 def fix(config, year, queue, project, nodes, walltime, name):
     """Rewrites files with metadata from the config."""
-    config = CONFIG_DIR / config
     taskfile = Path(config.stem + '_' + year.replace('-', '_') + '.bin').absolute()
+    config = INGEST_CONFIG_DIR / config
+
     if not config.exists():
         print('%s is not a valid config' % config)
         return 1
@@ -159,10 +161,11 @@ def fix(config, year, queue, project, nodes, walltime, name):
     name = name or taskfile.stem
     qsub = 'qsub -q %(queue)s -N %(name)s -P %(project)s ' \
            '-l ncpus=%(ncpus)d,mem=%(mem)dgb,walltime=%(walltime)d:00:00 ' \
-           '-- /bin/bash "%(distr)s" --ppn 16 ' \
+           '-- /bin/bash "%(distr)s" "$(dea_module)s" --ppn 16 ' \
            'datacube-fixer -v --load-tasks "%(taskfile)s" --executor distributed DSCHEDULER'
     cmd = qsub % dict(taskfile=taskfile,
-                      distr=SCRIPT_DIR / 'distributed.sh',
+                      distr=DISTRIBUTED_SCRIPT,
+                      dea_module=digitalearthau.MODULE_NAME,
                       queue=queue,
                       name=name,
                       project=project,
