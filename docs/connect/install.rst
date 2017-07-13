@@ -57,8 +57,8 @@ In the terminal window run the command::
 
    sh /g/data/v10/public/digitalearthau/install.sh
 
-You can then launch the Digital Earth Australia Jupyter Notebook by double-clicking the icon.
-
+You can then launch Jupyter Notebooks, with the Digital Earth Australia environment preconfigured, by double-clicking the icon.
+From within this environment you can access the notebooks from the User Guide below, or create your own notebooks to work with Digital Earth Australia.
 
 Shutting Down VDI
 -----------------
