@@ -54,6 +54,7 @@ setup(
             'dea-harvest = digitalearthau.harvest.iso19115:main',
             'dea-move = digitalearthau.move:main',
             'dea-submit-ingest = digitalearthau.submit_ingest:cli',
+            'dea-submit-ncmler = digitalearthau.submit_ncmler:cli',
             'dea-sync = digitalearthau.sync:cli',
         ]
     },

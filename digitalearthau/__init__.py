@@ -11,3 +11,4 @@ MODULE_NAME = 'dea-prod/{}'.format(__version__)
 BASE_DIR = Path(__file__).absolute().parent
 SCRIPT_DIR = BASE_DIR
 CONFIG_DIR = BASE_DIR / 'config'
+INGEST_CONFIG_DIR = CONFIG_DIR / 'ingestion'

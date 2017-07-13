@@ -8,6 +8,8 @@ import click
 from pathlib import Path
 import yaml
 
+from digitalearthau import INGEST_CONFIG_DIR
+
 ROOT_DIR = Path(__file__).absolute().parent.parent
 CONFIG_DIR = ROOT_DIR / 'config'
 SCRIPT_DIR = ROOT_DIR / 'scripts'
@@ -41,13 +43,13 @@ def list():
               type=click.IntRange(1, 10))
 @click.option('--data-subfolder-count', default=1)
 @click.option('--name', help='Job name to use')
-@click.argument('config')
-def full(config, queue, project, walltime, name, data_subfolder_count):
+@click.argument('product', help='Product name to ingest')
+def full(product, queue, project, walltime, name, data_subfolder_count):
     """Submit a job to create the full stack of ncml
-    
-    datacube-ncml-launcher full ls5_nabr_albers.yaml
+
+    submit_ncmler full ls5_nabr_albers.yaml
     """
-    qsub_ncml('full', config, queue, project, walltime, name, data_subfolder_count, years=[])
+    qsub_ncml('full', product, queue, project, walltime, name, data_subfolder_count, years=[])
 
 
 @cli.command(help='Submit a job to create a nested ncml stack')
@@ -59,11 +61,11 @@ def full(config, queue, project, walltime, name, data_subfolder_count):
               type=click.IntRange(1, 10))
 @click.option('--data-subfolder-count', default=1)
 @click.option('--name', help='Job name to use')
-@click.argument('config')
+@click.argument('product', help='Product name to ingest')
 @click.argument('nested_years', nargs=-1, type=click.INT)
-def nest(config, queue, project, walltime, name, data_subfolder_count, nested_years):
+def nest(product, queue, project, walltime, name, data_subfolder_count, nested_years):
     """Submit a job to create a stack of ncml with nested years
-    
+
     NCML file
      - ls8_nbar_albers_2003.nc
      - ls8_nbar_albers_2004.nc
@@ -71,10 +73,10 @@ def nest(config, queue, project, walltime, name, data_subfolder_count, nested_ye
      - ls8_nbar_albers_2015.nc
      - ls8_nbar_albers_2016.ncml
      - ls8_nbar_albers_2017.ncml
-    
-    datacube-ncml-launcher nest ls8_nbar_albers.yaml 2016 2017
+
+    submit_ncmler nest ls8_nbar_albers.yaml 2016 2017
     """
-    qsub_ncml('nest', config, queue, project, walltime, name, data_subfolder_count, years=nested_years)
+    qsub_ncml('nest', product, queue, project, walltime, name, data_subfolder_count, years=nested_years)
 
 
 @cli.command(help='Submit a job to update a single nested year')
@@ -86,33 +88,34 @@ def nest(config, queue, project, walltime, name, data_subfolder_count, nested_ye
               type=click.IntRange(1, 10))
 @click.option('--data-subfolder-count', default=1)
 @click.option('--name', help='Job name to use')
-@click.argument('config')
+@click.argument('product', help='Product name to ingest')
 @click.argument('year', type=click.INT)
-def update(config, year, queue, project, walltime, name, data_subfolder_count):
+def update(product, year, queue, project, walltime, name, data_subfolder_count):
     """Submit a job to update a single nested year
-    
-    datacube-ncml-launcher update ls5_nbar_albers.yaml 2016
+
+    submit_ncmler update ls5_nbar_albers.yaml 2016
     """
-    qsub_ncml('update', config, queue, project, walltime, name, data_subfolder_count, years=[year])
+    qsub_ncml('update', product, queue, project, walltime, name, data_subfolder_count, years=[year])
 
 
-def qsub_ncml(command, config, queue, project, walltime, name, data_subfolder_count, years):
-    config = CONFIG_DIR / config
-    if not config.exists():
-        print('%s is not a valid config' % config)
-        return 1
-    cell_index_file = Path(config.stem + '_ncml_cells.txt').absolute()
+def qsub_ncml(command, product, queue, project, walltime, name, data_subfolder_count, years):
+    config_path = INGEST_CONFIG_DIR / '{}.yaml'.format(product)
+
+    if not config_path.exists():
+        raise click.BadParameter("No config found for product {!r}".format(product))
+
+    cell_index_file = Path(product + '_ncml_cells.txt').absolute()
 
     subprocess.check_call('datacube -v system check', shell=True)
 
-    config_dict = yaml.load(open(config))
+    config_dict = yaml.load(config_path.open())
     sample_path = Path(config_dict['location']) / config_dict['file_path_template']
     cull_parts = 1 + data_subfolder_count
     cells_folder = Path().joinpath(*sample_path.parts[:-cull_parts])
     cell_list = cell_list_from_path(cells_folder)
     cell_list_to_file(cell_index_file, cell_list)
 
-    name = name or 'ncml_full_' + config.stem
+    name = name or 'ncml_full_' + product
     qsub = 'qsub -q %(queue)s -N %(name)s -P %(project)s ' \
            '-l ncpus=%(ncpus)d,mem=%(mem)dgb,walltime=%(walltime)d:00:00 ' \
            '-- /bin/bash "%(distr)s" --ppn 1 ' \

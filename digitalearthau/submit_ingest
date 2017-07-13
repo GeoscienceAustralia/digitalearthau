@@ -9,9 +9,9 @@ import click
 from click import echo
 
 import digitalearthau
+from digitalearthau import INGEST_CONFIG_DIR
 
 DISTRIBUTED_SCRIPT = digitalearthau.SCRIPT_DIR / 'run_distributed.sh'
-INGEST_CONFIG_DIR = digitalearthau.CONFIG_DIR / 'ingestion'
 
 
 @click.group()
