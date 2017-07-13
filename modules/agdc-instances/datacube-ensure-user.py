@@ -177,7 +177,7 @@ Warning: we may discontinue Python 2 support in the near future.
 Please consider moving to our Python 3 module: agdc-py3-prod
                                                                                                                                                        
   -> If you have a hard requirement on Python 2 that makes the change 
-     difficult, please notify us at simon.oliver@ga.gov.au
+     difficult, please notify us at earth.observation@ga.gov.au
   -> The python-modernize command is available to ease conversions, 
      see: https://python-modernize.readthedocs.io
 """)
