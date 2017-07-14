@@ -97,6 +97,9 @@ then
     echo "Installing digitalearthau"
     installrepo dea "${version}" git@github.com:GeoscienceAustralia/digitalearthau.git
 
+    # Should be immutable once built.
+    chmod -R a-w "${package_dest}"
+
     echo
     echo "Writing modulefile"
     modulefile_dir="${module_dir}/modulefiles/${package_name}"
