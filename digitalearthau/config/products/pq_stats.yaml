@@ -1,0 +1,35 @@
+name: pq_count_albers
+description: Pixel Quality Statistics 25m
+
+metadata_type: eo
+
+metadata:
+  product_type: pixel_quality_statistical_summary
+  format:
+    name: NetCDF
+
+storage:
+  driver: NetCDFCF
+  crs: EPSG:3577
+  tile_size:
+    x: 100000.0
+    y: 100000.0
+  resolution:
+    x: 25
+    y: -25
+  chunking:
+    x: 200
+    y: 200
+    time: 1
+  dimension_order: [time, y, x]
+
+measurements:
+  - name: clear_observation_count
+    dtype: uint16
+    nodata: 65535
+    units: '1'
+
+  - name: total_observation_count
+    dtype: uint16
+    nodata: 65535
+    units: '1'
