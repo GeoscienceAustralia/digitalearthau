@@ -42,7 +42,7 @@ def get_config():
     cfg = VersioneerConfig()
     cfg.VCS = "git"
     cfg.style = "pep440"
-    cfg.tag_prefix = "digitalearthau-"
+    cfg.tag_prefix = "dea-"
     cfg.parentdir_prefix = "None"
     cfg.versionfile_source = "digitalearthau/_version.py"
     cfg.verbose = False
