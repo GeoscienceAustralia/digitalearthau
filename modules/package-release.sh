@@ -53,12 +53,6 @@ function build_variant() {
         fi
     popd
 
-    pushd "${dir}/agdc-instances"
-        echo
-        echo "Creating instances"
-        ./package-all-instances.sh "${py_module_version}" "${agdc_version}"
-    popd
-
     echo
     echo "=========================="
     echo "= Variant ${py} completed. ="
@@ -68,6 +62,12 @@ function build_variant() {
 
 build_variant py3
 build_variant py2
+
+pushd "${dir}/agdc-instances"
+    echo
+    echo "Creating instances"
+    ./package-all-instances.sh "${py_module_version}" "${agdc_version}"
+popd
 
 echo
 echo "All done."
