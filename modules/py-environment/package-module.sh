@@ -56,7 +56,7 @@ tmp_dir="$(mktemp -d)"
 
 package_name=agdc-${variant}-env
 module_path=${module_dir}/modulefiles
-version=$(date +'%Y%m%d')
+version=${version:-$(date +'%Y%m%d')}
 package_description="Datacube environment module"
 package_dest="${module_dir}/${package_name}/${version}"
 

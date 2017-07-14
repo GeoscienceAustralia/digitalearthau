@@ -7,17 +7,18 @@ dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 echoerr() { echo "$@" 1>&2; }
 
-if [[ $# != 1 ]] || [[ "$1" == "--help" ]];
+if [[ $# < 1 ]] || [[ "$1" == "--help" ]];
 then
     echoerr
-    echoerr "Usage: $0 <datacube-version>"
+    echoerr "Usage: $0 <datacube-version> [py-env-version]"
     echoerr
     echoerr "eg. $0 1.1.17"
+    echoerr "or  $0 1.1.17 20170704"
     exit 1
 fi
 
 agdc_version="$1"
-py_module_version=$(date +'%Y%m%d')
+py_module_version=${2:-$(date +'%Y%m%d')}
 module_dir="/g/data/v10/public/modules"
 
 pushd "${dir}/py-environment"
@@ -25,14 +26,14 @@ pushd "${dir}/py-environment"
     then
         echo
         echo "Creating PY3 Environment"
-        ./package-module.sh --variant py3 --moduledir "${module_dir}";
+        version="${py_module_version}" ./package-module.sh --variant py3 --moduledir "${module_dir}";
     fi
 
     if [ ! -e "${module_dir}/modulefiles/agdc-py2-env/${py_module_version}" ];
     then
         echo
         echo "Creating PY2 Environment"
-        ./package-module.sh --variant py2 --moduledir "${module_dir}";
+        version="${py_module_version}" ./package-module.sh --variant py2 --moduledir "${module_dir}";
     fi
 popd
 
