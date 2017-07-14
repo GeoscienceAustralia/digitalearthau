@@ -91,9 +91,6 @@ then
     python setup.py sdist
     pip install "dist/datacube-${version}.tar.gz" --no-deps --prefix "${package_dest}"
 
-    # Should be immutable once built.
-    chmod -R a-w "${package_dest}"
-
     modulefile_dir="${module_dir}/modulefiles/${package_name}"
     mkdir -v -p "${modulefile_dir}"
 
@@ -117,6 +114,10 @@ then
     pip install dist/*.tar.gz --no-deps --prefix "${package_dest}"
     popd
 fi
+
+
+# Should be immutable once built.
+chmod -R a-w "${package_dest}"
 
 echo
 echo 'Done.'
