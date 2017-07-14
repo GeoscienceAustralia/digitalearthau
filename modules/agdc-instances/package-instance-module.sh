@@ -58,7 +58,7 @@ chmod 775 "${module_dest}/datacube-ensure-user.py"
     echo db_hostname: ${dbhost}
     echo db_port: ${dbport}
     echo db_database: ${dbname}
-} >> "${module_dest}/datacube.conf"
+} > "${module_dest}/datacube.conf"
 
 modulefile_dir="${module_dir}/modulefiles/${module_name}"
 mkdir -v -p "${modulefile_dir}"
