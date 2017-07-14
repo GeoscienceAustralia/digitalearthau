@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
-set -eu
 
 # This script's directory
 dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -16,6 +15,15 @@ then
     echoerr "or  $0 1.1.17 20170704"
     exit 1
 fi
+
+
+if [ -n "${PYTHONPATH}" ];
+then
+    echoerr "ERROR: PYTHONPATH is already set. Please build from a clean shell without modules loaded."
+    exit 1
+fi
+
+set -eu
 
 agdc_version="$1"
 py_module_version=${2:-$(date +'%Y%m%d')}
