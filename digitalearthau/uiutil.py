@@ -20,7 +20,7 @@ def init_logging():
             structlog.processors.StackInfoRenderer(),
             structlog.processors.format_exc_info,
             # Coloured output if to terminal.
-            CleanConsoleRenderer() if sys.stdout.isatty() else structlog.processors.KeyValueRenderer(),
+            CleanConsoleRenderer() if sys.stdout.isatty() else structlog.processors.JSONRenderer(),
         ],
         context_class=dict,
         logger_factory=structlog.stdlib.LoggerFactory(),
