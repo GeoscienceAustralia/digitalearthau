@@ -1,0 +1,40 @@
+colors:
+    blue: 2.0
+    green: 167.0
+    red: 0.0
+    teal: 3.0
+    yellow: 0.0
+error_message: no errors
+final_gcp_count: 112
+ref_date: 2014-08-04
+ref_source: GQA_v3
+ref_source_path: /g/data/v10/eoancillarydata/GCP/GQA_v3/wrs2/114/080/LC81140802014216LGN00_B6.TIF
+residual:
+    abs:
+        x: 0.12
+        xy: 0.17
+        y: 0.12
+    abs_iterative_mean:
+        x: 0.06
+        xy: 0.09
+        y: 0.07
+    cep90: 0.18
+    iterative_mean:
+        x: -0.02
+        xy: 0.02
+        y: -0.0
+    iterative_stddev:
+        x: 0.07
+        xy: 0.11
+        y: 0.09
+    mean:
+        x: -0.02
+        xy: 0.02
+        y: -0.02
+    stddev:
+        x: 0.16
+        xy: 0.26
+        y: 0.2
+scene_id: LS8_OLITIRS_OTH_P51_GALPGS01-032_114_080_20150924
+software_repository: https://github.com/GeoscienceAustralia/gqa.git
+software_version: 0.9.1

@@ -1,0 +1,68 @@
+<?xml version="1.0" ?>
+<LandsatProcessingRequest id="LS8-20150924" version="2">
+    <Input format="MD" satellite="Landsat8" sensor="OLI_TIRS">
+    <WorkingFolder cleanAfter="yes"
+                   cleanBefore="yes">/jobfs/local/6654022.r-man2/lpgs-work427KPU/LS8_OLITIRS_STD-MD_P00_LC81140740812015267LGN00_114_074-081_20150924T031413Z20150924T031604/lpgs-work/pm</WorkingFolder>
+    <InputPath linkInput="yes">/jobfs/local/6654022.r-man2/lpgs-work427KPU/LS8_OLITIRS_STD-MD_P00_LC81140740812015267LGN00_114_074-081_20150924T031413Z20150924T031604/lpgs-work/source</InputPath>
+    <Segment></Segment>
+    </Input>
+
+    
+        <ProcessControl>
+            <MaxProcessingTime hours="3"
+                               minutes="0"
+                               seconds="0"/>
+        </ProcessControl>
+    
+
+    <L0RaProcessing>
+        <CalibrationFile useDownloader="false">
+            /g/data/v10/eoancillarydata/sensor-specific/LANDSAT8/CalibrationParameterFile
+        </CalibrationFile>
+        <Parameters mayFallBackSensor="true"/>
+    </L0RaProcessing>
+
+    <L0RpProcessing maxConcurrentScenes="15">
+        <CalibrationFile useDownloader="false">
+            /g/data/v10/eoancillarydata/sensor-specific/LANDSAT8/CalibrationParameterFile
+        </CalibrationFile>
+    </L0RpProcessing>
+
+    <L1Processing maxConcurrentScenes="15">
+
+        <Parameters
+                datum="GDA94"
+                fallBackResampling="CC"
+                fallBackToL1G="false"
+                fallBackToL1Gt="true"
+                fallBackToL1R="false"
+                hemisphere="S"
+                mayPostDownloadBpfs="true"
+                orientationL1G="NUP"
+                orientationL1GT="NUP"
+                orientationL1T="NUP"
+                outputFormat="GeoTIFF"
+                panchromaticResolution="12.5"
+                pixelOrigin="UL"
+                productType="L1T"
+                projection="UTM"
+                reflectiveResolution="25.0"
+                resampling="CC"
+                scenePadding="1"
+                thermalResolution="25.0"
+        />
+        <L1T>
+            <Parameters minimumRequiredGCPs="10"/>
+            <DEM format="srtm90">/g/data/v10/eoancillarydata/elevation/1secDSM-S_Jupp-Li</DEM>
+            <GCP format="chips_30">/g/data/v10/eoancillarydata/GCP/Phase2_GCP</GCP>
+        </L1T>
+        <RlutFile useDownloader="false">/g/data/v10/eoancillarydata/sensor-specific/LANDSAT8/RLUT</RlutFile>
+        <BPFTirsFile
+                useDownloader="false">/g/data/v10/eoancillarydata/sensor-specific/LANDSAT8/BiasParameterFile/2015/09</BPFTirsFile>
+        <BPFOliFile
+                useDownloader="false">/g/data/v10/eoancillarydata/sensor-specific/LANDSAT8/BiasParameterFile/2015/09</BPFOliFile>
+        <TirsSsmPositionFile
+                useDownloader="false">/g/data/v10/eoancillarydata/sensor-specific/LANDSAT8/TIRS-SSM/20160601.l8_tirs_estimated_ssm_position.txt</TirsSsmPositionFile>
+        <OutputPath additionalMetadata="false">/jobfs/local/6654022.r-man2/lpgs-work427KPU/LS8_OLITIRS_STD-MD_P00_LC81140740812015267LGN00_114_074-081_20150924T031413Z20150924T031604/scenes</OutputPath>
+    </L1Processing>
+</LandsatProcessingRequest>

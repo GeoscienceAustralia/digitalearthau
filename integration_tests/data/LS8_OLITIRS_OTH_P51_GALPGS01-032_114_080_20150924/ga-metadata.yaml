@@ -1,0 +1,292 @@
+id: 10c4a9fe-2890-11e6-8ec8-a0000100fe80
+ga_label: LS8_OLITIRS_OTH_P51_GALPGS01-032_114_080_20150924
+product_type: level1
+product_level: L1T
+creation_dt: 2016-06-02 06:48:56
+size_bytes: 1210276617
+checksum_path: package.sha1
+platform:
+    code: LANDSAT_8
+instrument:
+    name: OLI_TIRS
+format:
+    name: GeoTIFF
+usgs:
+    scene_id: LC81140802015267LGN00
+acquisition:
+    groundstation:
+        code: LGN
+        label: Landsat Ground Network
+        eods_domain_code: '032'
+extent:
+    coord:
+        ul:
+            lat: -27.804571
+            lon: 113.163914
+        ur:
+            lat: -27.849492
+            lon: 115.475987
+        ll:
+            lat: -29.881907
+            lon: 113.086817
+        lr:
+            lat: -29.930836
+            lon: 115.445278
+    from_dt: 2015-09-24 02:16:45
+    center_dt: 2015-09-24 02:17:01.114309
+    to_dt: 2015-09-24 02:17:16
+grid_spatial:
+    projection:
+        geo_ref_points:
+            ul:
+                x: 121987.5
+                y: 6918537.5
+            ur:
+                x: 349937.5
+                y: 6918537.5
+            ll:
+                x: 121987.5
+                y: 6687862.5
+            lr:
+                x: 349937.5
+                y: 6687862.5
+        datum: GDA94
+        ellipsoid: GRS80
+        map_projection: UTM
+        orientation: NORTH_UP
+        resampling_option: CUBIC_CONVOLUTION
+        zone: -50
+gqa:
+    colors:
+        blue: 2.0
+        green: 167.0
+        red: 0.0
+        teal: 3.0
+        yellow: 0.0
+    error_message: no errors
+    final_gcp_count: 112
+    ref_date: 2014-08-04
+    ref_source: GQA_v3
+    ref_source_path: /g/data/v10/eoancillarydata/GCP/GQA_v3/wrs2/114/080/LC81140802014216LGN00_B6.TIF
+    residual:
+        abs:
+            x: 0.12
+            xy: 0.17
+            y: 0.12
+        abs_iterative_mean:
+            x: 0.06
+            xy: 0.09
+            y: 0.07
+        cep90: 0.18
+        iterative_mean:
+            x: -0.02
+            xy: 0.02
+            y: -0.0
+        iterative_stddev:
+            x: 0.07
+            xy: 0.11
+            y: 0.09
+        mean:
+            x: -0.02
+            xy: 0.02
+            y: -0.02
+        stddev:
+            x: 0.16
+            xy: 0.26
+            y: 0.2
+browse:
+    full:
+        path: browse.fr.jpg
+        file_type: image/jpg
+        cell_size: 25.0
+        shape:
+            x: 9119
+            y: 9228
+        red_band: '7'
+        green_band: '5'
+        blue_band: '2'
+    medium:
+        path: browse.jpg
+        file_type: image/jpg
+        cell_size: 222.6318359375
+        shape:
+            x: 1024
+            y: 1037
+        red_band: '7'
+        green_band: '5'
+        blue_band: '2'
+image:
+    satellite_ref_point_start:
+        x: 114
+        y: 80
+    cloud_cover_percentage: 0.83
+    sun_azimuth: 49.84140288
+    sun_elevation: 49.86169573
+    sun_earth_distance: 1.0033144
+    ground_control_points_model: 275
+    geometric_rmse_model: 6.648
+    geometric_rmse_model_x: 4.355
+    geometric_rmse_model_y: 5.023
+    bands:
+        '1':
+            path: product/LC81140802015267LGN00_B1.TIF
+            type: reflective
+            label: Coastal Aerosol
+            number: '1'
+            cell_size: 25.0
+        '10':
+            path: product/LC81140802015267LGN00_B10.TIF
+            type: thermal
+            label: Thermal Infrared 1
+            number: '10'
+            cell_size: 25.0
+        '11':
+            path: product/LC81140802015267LGN00_B11.TIF
+            type: thermal
+            label: Thermal Infrared 2
+            number: '11'
+            cell_size: 25.0
+        '2':
+            path: product/LC81140802015267LGN00_B2.TIF
+            type: reflective
+            label: Visible Blue
+            number: '2'
+            cell_size: 25.0
+        '3':
+            path: product/LC81140802015267LGN00_B3.TIF
+            type: reflective
+            label: Visible Green
+            number: '3'
+            cell_size: 25.0
+        '4':
+            path: product/LC81140802015267LGN00_B4.TIF
+            type: reflective
+            label: Visible Red
+            number: '4'
+            cell_size: 25.0
+        '5':
+            path: product/LC81140802015267LGN00_B5.TIF
+            type: reflective
+            label: Near Infrared
+            number: '5'
+            cell_size: 25.0
+        '6':
+            path: product/LC81140802015267LGN00_B6.TIF
+            type: reflective
+            label: Short-wave Infrared 1
+            number: '6'
+            cell_size: 25.0
+        '7':
+            path: product/LC81140802015267LGN00_B7.TIF
+            type: reflective
+            label: Short-wave Infrared 2
+            number: '7'
+            cell_size: 25.0
+        '8':
+            path: product/LC81140802015267LGN00_B8.TIF
+            type: panchromatic
+            label: Panchromatic
+            number: '8'
+            cell_size: 12.5
+        '9':
+            path: product/LC81140802015267LGN00_B9.TIF
+            type: atmosphere
+            label: Cirrus
+            number: '9'
+            cell_size: 25.0
+        qa:
+            path: product/LC81140802015267LGN00_BQA.TIF
+            type: quality
+            label: Quality
+            number: qa
+            cell_size: 25.0
+lineage:
+    algorithm:
+        name: LPGS
+        version: 2.6.2
+        parameters: {}
+    machine:
+        hostname: r928
+        runtime_id: c279b02e-2889-11e6-8ec8-a0000100fe80
+        software_versions:
+            eodatasets:
+                repo_url: https://github.com/GeoscienceAustralia/eo-datasets.git
+                version: '0.5'
+            galpgs:
+                repo_url: https://github.com/GeoscienceAustralia/galpgs.git
+                version: '1.2'
+            gqa:
+                repo_url: https://github.com/GeoscienceAustralia/gqa.git
+                version: 0.9.1
+            pinkmatter: 4.1.4110
+        uname: 'Linux r928 2.6.32-573.22.1.el6.x86_64 #1 SMP Wed Mar 23 03:35:39 UTC
+            2016 x86_64'
+    ancillary:
+        bpf_oli:
+            name: LO8BPF20150924014805_20150924022908.01
+            uri: /g/data/v10/eoancillarydata/sensor-specific/LANDSAT8/BiasParameterFile/2015/09/LO8BPF20150924014805_20150924022908.01
+            access_dt: 2016-06-02 17:01:21
+            modification_dt: 2015-09-24 14:15:54
+            checksum_sha1: ded547a8712c27502a4bbb898a5be2343c546aab
+        bpf_tirs:
+            name: LT8BPF20150924014411_20150924023017.01
+            uri: /g/data/v10/eoancillarydata/sensor-specific/LANDSAT8/BiasParameterFile/2015/09/LT8BPF20150924014411_20150924023017.01
+            access_dt: 2016-06-02 17:01:21
+            modification_dt: 2015-09-24 14:00:05
+            checksum_sha1: b3304f26ea6adfd8765f81d3097417b4f91f6b86
+        cpf:
+            name: L8CPF20150701_20150930.03
+            uri: /g/data/v10/eoancillarydata/sensor-specific/LANDSAT8/CalibrationParameterFile/L8CPF20150701_20150930.03
+            access_dt: 2016-06-02 17:01:20
+            modification_dt: 2015-09-30 02:31:46
+            checksum_sha1: eddf7b63b7d2e783de906ce05650711dc30b15ef
+        rlut:
+            name: L8RLUT20150303_20431231v11.h5
+            uri: /g/data/v10/eoancillarydata/sensor-specific/LANDSAT8/RLUT/L8RLUT20150303_20431231v11.h5
+            access_dt: 2016-06-02 17:01:21
+            modification_dt: 2015-05-01 10:02:39
+            checksum_sha1: ac3782a2af8c5dd170d72127f003685b18325417
+        tirs_ssm_position:
+            name: 20160601.l8_tirs_estimated_ssm_position.txt
+            uri: /g/data/v10/eoancillarydata/sensor-specific/LANDSAT8/TIRS-SSM/20160601.l8_tirs_estimated_ssm_position.txt
+            access_dt: 2016-06-02 17:01:21
+            modification_dt: 2016-06-02 04:45:01
+            checksum_sha1: 1f4d87a54dc3a275ba98ffd7942660e179c9f383
+            properties:
+                model: ACTUAL
+                position_status: NOMINAL
+    source_datasets:
+        satellite_telemetry_data:
+            id: e930486c-df9c-11e5-85f3-ac162d791418
+            ga_label: LS8_OLITIRS_STD-MD_P00_LC81140740812015267LGN00_114_074-081_20150924T031413Z20150924T031604
+            ga_level: P00
+            product_type: satellite_telemetry_data
+            creation_dt: 2016-03-01 11:01:03.715888
+            size_bytes: 3306973217
+            checksum_path: package.sha1
+            platform:
+                code: LANDSAT_8
+            instrument:
+                name: OLI_TIRS
+            format:
+                name: MD
+            usgs:
+                interval_id: LC81140740812015267LGN00
+            acquisition:
+                aos: 2015-09-24 03:14:13.338000
+                los: 2015-09-24 03:16:04.287000
+                groundstation:
+                    code: LGN
+                    label: Landsat Ground Network
+                    eods_domain_code: '032'
+            image:
+                satellite_ref_point_start:
+                    x: 114
+                    y: 74
+                satellite_ref_point_end:
+                    x: 114
+                    y: 81
+                bands: {}
+            lineage:
+                machine: {}
+                source_datasets: {}

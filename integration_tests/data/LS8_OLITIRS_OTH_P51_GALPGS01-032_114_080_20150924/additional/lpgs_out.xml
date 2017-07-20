@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<LandsatProcessingResult status="success">
+	<Message>Processing was successful</Message>
+	<LandsatProcessingRequest id="LS8-20150924" version="2">
+		<Input format="MD" satellite="LANDSAT8" sensor="OLI_TIRS">
+			<WorkingFolder cleanBefore="TRUE" cleanAfter="TRUE">/jobfs/local/6654022.r-man2/lpgs-work427KPU/LS8_OLITIRS_STD-MD_P00_LC81140740812015267LGN00_114_074-081_20150924T031413Z20150924T031604/lpgs-work/pm</WorkingFolder>
+			<InputPath linkInput="TRUE">/jobfs/local/6654022.r-man2/lpgs-work427KPU/LS8_OLITIRS_STD-MD_P00_LC81140740812015267LGN00_114_074-081_20150924T031413Z20150924T031604/lpgs-work/source</InputPath>
+		</Input>
+	</LandsatProcessingRequest>
+	<Version>4.1.4110</Version>
+	<HostName>r928</HostName>
+	<StartTime>2016-06-02T16:20:03</StartTime>
+	<StopTime>2016-06-02T16:52:08</StopTime>
+	<TotalTime>00:32:05</TotalTime>
+	<L0RaProcessing status="succeeded"/>
+	<L0RpProcessing maxConcurrentScenes="15" fail="0" busy="0" queued="0" success="10" canceled="0" timedout="0">
+		<Succeeded sceneType="partial">114_073_073</Succeeded>
+		<Succeeded sceneType="full">114_074_074</Succeeded>
+		<Succeeded sceneType="full">114_075_075</Succeeded>
+		<Succeeded sceneType="full">114_076_076</Succeeded>
+		<Succeeded sceneType="full">114_077_077</Succeeded>
+		<Succeeded sceneType="full">114_078_078</Succeeded>
+		<Succeeded sceneType="full">114_079_079</Succeeded>
+		<Succeeded sceneType="full">114_080_080</Succeeded>
+		<Succeeded sceneType="full">114_081_081</Succeeded>
+		<Succeeded sceneType="partial">114_082_082</Succeeded>
+	</L0RpProcessing>
+	<L1Processing maxConcurrentScenes="15" fail="0" busy="0" queued="0" success="10" canceled="0" timedout="0" L1R="0" L1G="0" L1Gt="2" L1T="8">
+		<Succeeded sceneType="full" level="L1T">114_076_076</Succeeded>
+		<Succeeded sceneType="partial" level="L1GT">114_082_082</Succeeded>
+		<Succeeded sceneType="full" level="L1T">114_078_078</Succeeded>
+		<Succeeded sceneType="full" level="L1T">114_079_079</Succeeded>
+		<Succeeded sceneType="full" level="L1T">114_075_075</Succeeded>
+		<Succeeded sceneType="partial" level="L1GT">114_073_073</Succeeded>
+		<Succeeded sceneType="full" level="L1T">114_080_080</Succeeded>
+		<Succeeded sceneType="full" level="L1T">114_077_077</Succeeded>
+		<Succeeded sceneType="full" level="L1T">114_081_081</Succeeded>
+		<Succeeded sceneType="full" level="L1T">114_074_074</Succeeded>
+	</L1Processing>
+</LandsatProcessingResult>

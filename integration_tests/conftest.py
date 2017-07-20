@@ -5,6 +5,7 @@ from contextlib import contextmanager
 from pathlib import Path
 
 import pytest
+import shutil
 import yaml
 
 import digitalearthau
@@ -21,7 +22,7 @@ except ImportError:
 
 INTEGRATION_DEFAULT_CONFIG_PATH = Path(__file__).parent.joinpath('deaintegration.conf')
 
-INTEGRATION_TEST_DATA = Path(__file__) / 'data'
+INTEGRATION_TEST_DATA = Path(__file__).parent / 'data'
 
 PROJECT_ROOT = Path(__file__).parents[1]
 
@@ -32,6 +33,13 @@ DEA_PRODUCTS_DIR = digitalearthau.CONFIG_DIR / 'products'
 def load_yaml_file(path):
     with path.open() as f:
         return list(yaml.load_all(f, Loader=SafeLoader))
+
+
+@pytest.fixture
+def integration_test_data(tmpdir):
+    d = tmpdir.join('integration_data')
+    shutil.copytree(str(INTEGRATION_TEST_DATA), str(d))
+    return Path(str(d))
 
 
 @pytest.fixture
