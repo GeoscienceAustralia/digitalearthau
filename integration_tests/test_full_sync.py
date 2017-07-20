@@ -6,15 +6,16 @@ from pathlib import Path
 from typing import Iterable, Mapping, Tuple
 
 import pytest
+import shutil
 import structlog
 from dateutil import tz
 
 from datacube.utils import uri_to_local_path
-from digitalearthau import paths
+from digitalearthau import paths, collections
 from digitalearthau.archive import CleanConsoleRenderer
 from digitalearthau.collections import Collection
 from digitalearthau.index import DatasetLite, MemoryDatasetPathIndex
-from digitalearthau.paths import write_files, register_base_directory
+from digitalearthau.paths import register_base_directory
 from digitalearthau.sync import differences as mm, fixes, scan, Mismatch
 
 
@@ -38,44 +39,48 @@ def configure_log_output(request):
     )
 
 
-@pytest.fixture
-def syncable_environment():
-    on_disk = DatasetLite(uuid.UUID('1e47df58-de0f-11e6-93a4-185e0f80a5c0'))
-    on_disk2 = DatasetLite(uuid.UUID('3604ee9c-e1e8-11e6-8148-185e0f80a5c0'))
-    root = write_files(
-        {
-            'ls8_scenes': {
-                'ls8_test_dataset': {
-                    'ga-metadata.yaml':
-                        ('id: %s\n' % on_disk.id),
-                    'dummy-file.txt': ''
-                }
-            },
-            'ls7_scenes': {
-                'ls7_test_dataset': {
-                    'ga-metadata.yaml':
-                        ('id: %s\n' % on_disk2.id)
-                }
-            }
-        }
-    )
-    cache_path = root.joinpath('cache')
-    cache_path.mkdir()
-    on_disk_uri = root.joinpath('ls8_scenes', 'ls8_test_dataset', 'ga-metadata.yaml').as_uri()
-    on_disk_uri2 = root.joinpath('ls7_scenes', 'ls7_test_dataset', 'ga-metadata.yaml').as_uri()
+ON_DISK1_ID = DatasetLite(uuid.UUID('86150afc-b7d5-4938-a75e-3445007256d3'))
+ON_DISK2_ID = DatasetLite(uuid.UUID('10c4a9fe-2890-11e6-8ec8-a0000100fe80'))
 
+ON_DISK1_OFFSET = ('LS8_OLITIRS_OTH_P51_GALPGS01-032_114_080_20160926', 'ga-metadata.yaml')
+ON_DISK2_OFFSET = ('LS8_OLITIRS_OTH_P51_GALPGS01-032_114_080_20150924', 'ga-metadata.yaml')
+
+
+@pytest.fixture
+def syncable_environment(integration_test_data):
+    test_data = integration_test_data
+
+    # Tests assume one dataset for the collection, so delete the second.
+    shutil.rmtree(str(test_data.joinpath('LS8_OLITIRS_OTH_P51_GALPGS01-032_114_080_20150924')))
+
+    index = MemoryDatasetPathIndex()
     ls8_collection = Collection(
-        name='ls8_scene_collection',
+        name='ls8_scene_test',
         query={},
-        file_patterns=[str(root.joinpath('ls8_scenes', 'ls*/ga-metadata.yaml'))],
+        file_patterns=[str(test_data.joinpath('LS8*/ga-metadata.yaml'))],
         unique=[],
-        index=MemoryDatasetPathIndex()
+        index=index
     )
+    collections._add(ls8_collection)
+
+    ls5_nc_collection = Collection(
+        name='ls5_nc_test',
+        query={},
+        file_patterns=[str(test_data.joinpath('LS5*.nc'))],
+        unique=[],
+        index=index
+    )
+    collections._add(ls8_collection)
 
     # register this as a base directory so that datasets can be trashed within it.
-    register_base_directory(root)
+    register_base_directory(str(test_data))
 
-    return ls8_collection, on_disk, on_disk_uri, root
+    cache_path = test_data.joinpath('cache')
+    cache_path.mkdir()
+
+    on_disk_uri = test_data.joinpath(*ON_DISK1_OFFSET).as_uri()
+
+    return ls8_collection, ON_DISK1_ID, on_disk_uri, Path(str(test_data))
 
 
 def test_index_disk_sync(syncable_environment):
@@ -221,13 +226,13 @@ def test_remove_missing(syncable_environment):
     ls8_collection, on_disk, on_disk_uri, root = syncable_environment
 
     register_base_directory(root)
-    on_disk_path = root.joinpath('ls8_scenes', 'ls8_test_dataset', 'ga-metadata.yaml')
-    trashed_path = root.joinpath(*_TRASH_PREFIX, 'ls8_scenes', 'ls8_test_dataset', 'ga-metadata.yaml')
+    on_disk_path = root.joinpath(*ON_DISK1_OFFSET)
+    trashed_path = root.joinpath(*_TRASH_PREFIX, *ON_DISK1_OFFSET)
 
-    # Add a second dataset outside of the collection folder. Should not be touched!
+    # Add a second dataset that's indexed. Should not be touched!
     paths.write_files(
         {
-            'ls8_test_dataset2': {
+            'LS8_TEST_DATASET2': {
                 'ga-metadata.yaml': 'id: 5294efa6-348d-11e7-a079-185e0f80a5c0\n',
                 'dummy-file.txt': ''
             }
@@ -235,20 +240,28 @@ def test_remove_missing(syncable_environment):
         containing_dir=root
     )
 
-    outside_path = root.joinpath('ls8_test_dataset2')
+    outside_path = root.joinpath('LS8_TEST_DATASET2', 'ga-metadata.yaml')
     assert outside_path.exists()
+
+    outside_uuid = uuid.UUID('5294efa6-348d-11e7-a079-185e0f80a5c0')
+    ls8_collection._index.add_dataset(
+        DatasetLite(outside_uuid),
+        outside_path.as_uri()
+    )
 
     assert on_disk_path.exists(), "On-disk location should exist before test begins."
     assert not trashed_path.exists(), "Trashed file shouldn't exit."
     _check_sync(
         collection=ls8_collection,
         expected_paths=[
-            on_disk_uri
+            on_disk_uri,
+            outside_path.as_uri(),
         ],
         expected_mismatches=[
             mm.DatasetNotIndexed(on_disk, on_disk_uri)
         ],
-        expected_index_result={},
+        # Unmodified index
+        expected_index_result=ls8_collection._index.as_map(),
         cache_path=root,
         fix_settings=dict(trash_missing=True, update_locations=True)
     )
@@ -279,9 +292,9 @@ def test_is_trashed(syncable_environment, archived_dt, expect_to_be_trashed):
     register_base_directory(root)
     archived_on_disk = DatasetLite(on_disk.id, archived_time=archived_dt)
     ls8_collection._index.add_dataset(archived_on_disk, on_disk_uri)
-    on_disk_path = root.joinpath('ls8_scenes', 'ls8_test_dataset', 'ga-metadata.yaml')
+    on_disk_path = root.joinpath(*ON_DISK1_OFFSET)
 
-    trashed_path = root.joinpath(*_TRASH_PREFIX, 'ls8_scenes', 'ls8_test_dataset', 'ga-metadata.yaml')
+    trashed_path = root.joinpath(*_TRASH_PREFIX, *ON_DISK1_OFFSET)
     # Before the test, file is in place and nothing trashed.
     assert on_disk_path.exists(), "On-disk location should exist before test begins."
     assert not trashed_path.exists(), "Trashed file shouldn't exit."
