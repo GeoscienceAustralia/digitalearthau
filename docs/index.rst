@@ -28,7 +28,7 @@ Publicly available data access and web services are currently in development.
 
    about/intro.rst
    about/glossary.rst
-
+   about/required_software.rst
 .. toctree::
    :maxdepth: 1
    :caption: Connect
@@ -43,6 +43,7 @@ Publicly available data access and web services are currently in development.
    :caption: User Guide
 
    query/Getting Started.ipynb
+   query/cube_dash.rst
    query/List Products.ipynb
    query/Loading Data.ipynb
 

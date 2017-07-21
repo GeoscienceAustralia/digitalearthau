@@ -5,6 +5,8 @@
 Jupyter Notebook
 ================
 
+The Jupyter Notebook is a web application that allows you to create and share documents that contain live code, equations, visualizations and explanatory text. Jupyter Notebooks does not require high level python developer skills as it is a simplified interface for development and therefore can be a playground for exploring the Data Cube.
+
 **Executing a notebook**
 
 The Digital Earth Australia link on your VDI desktop (described in Install step) will start Jupyter Notebooks in the dea_examples folder.
