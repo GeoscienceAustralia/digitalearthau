@@ -43,6 +43,7 @@ def main(index, expressions, dry_run, only_redundant, min_trash_age_hours):
 
         archived_uri_times = index.datasets.get_archived_location_times(dataset.id)
         if not archived_uri_times:
+            log.debug('dataset.nothing_archived')
             continue
 
         if only_redundant:
