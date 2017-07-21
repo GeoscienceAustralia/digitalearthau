@@ -13,13 +13,14 @@ pylint -j 2 --reports no \
 # We check the integration tests even though they aren't run by default here.
 pylint --rcfile=integration_tests/pylintrc integration_tests/**/*.py
 
-# 'continuation line' has too many spurious errors.
-pep8 --ignore=E122 --max-line-length 120  \
+# E122: 'continuation line' has too many spurious errors.
+# E711: "is None" instead of "= None". Duplicates pylint check.
+pep8 --ignore=E122,E711 --max-line-length 120  \
     digitalearthau \
     integration_tests \
     scripts/**/*.py
 
-shellcheck ./**/*.sh 
+shellcheck ./**/*.sh
 yamllint ./**/*.yaml
 
 # Users can specify extra folders (ie. integration_tests) as arguments.

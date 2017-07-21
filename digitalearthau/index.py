@@ -87,6 +87,10 @@ class DatasetPathIndex:
     def add_dataset(self, dataset: DatasetLite, uri: str):
         raise NotImplementedError
 
+    def as_map(self) -> Mapping[DatasetLite, Iterable[str]]:
+        """Map of all datasets to their uri list. Convenience method for tests"""
+        raise NotImplementedError
+
     def close(self):
         """Do any clean-up as needed before forking."""
         # Default implementation: no-op
@@ -135,6 +139,18 @@ class AgdcDatasetPathIndex(DatasetPathIndex):
 
     def close(self):
         self._index.close()
+
+    def as_map(self) -> Mapping[DatasetLite, Iterable[str]]:
+        """
+        All contained (dataset, [location]) values, to check test results.
+        """
+        return dict(
+            (
+                DatasetLite(dataset.id),
+                tuple(dataset.uris)
+            )
+            for dataset in self._index.datasets.search()
+        )
 
     def __enter__(self):
         return self
