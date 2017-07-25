@@ -47,7 +47,7 @@ def list():
 def full(product, queue, project, walltime, name, data_subfolder_count):
     """Submit a job to create the full stack of ncml
 
-    submit_ncmler full ls5_nabr_albers.yaml
+    ncmler full ls5_nabr_albers.yaml
     """
     qsub_ncml('full', product, queue, project, walltime, name, data_subfolder_count, years=[])
 
@@ -74,7 +74,7 @@ def nest(product, queue, project, walltime, name, data_subfolder_count, nested_y
      - ls8_nbar_albers_2016.ncml
      - ls8_nbar_albers_2017.ncml
 
-    submit_ncmler nest ls8_nbar_albers.yaml 2016 2017
+    ncmler nest ls8_nbar_albers.yaml 2016 2017
     """
     qsub_ncml('nest', product, queue, project, walltime, name, data_subfolder_count, years=nested_years)
 
@@ -93,7 +93,7 @@ def nest(product, queue, project, walltime, name, data_subfolder_count, nested_y
 def update(product, year, queue, project, walltime, name, data_subfolder_count):
     """Submit a job to update a single nested year
 
-    submit_ncmler update ls5_nbar_albers.yaml 2016
+    ncmler update ls5_nbar_albers.yaml 2016
     """
     qsub_ncml('update', product, queue, project, walltime, name, data_subfolder_count, years=[year])
 
