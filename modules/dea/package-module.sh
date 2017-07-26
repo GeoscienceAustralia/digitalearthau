@@ -1,15 +1,20 @@
 #!/usr/bin/env bash
 
-set -eu
+echoerr() { echo "$@" 1>&2; }
 
+if [ -n "${PYTHONPATH}" ];
+then
+    echoerr "ERROR: PYTHONPATH is already set. Please build from a clean shell without modules loaded."
+    exit 1
+fi
+
+set -eu
 umask 002
-unset PYTHONPATH
 
 # Default module dirs. You can set the variables before calling this script to override them.
 agdc_module_dir="${agdc_module_dir:-/g/data/v10/public/modules}"
 module_dir="${module_dir:-/g/data/v10/private/modules}"
 
-echoerr() { echo "$@" 1>&2; }
 
 if [[ $# -lt 1 ]] || [[ "$1" == "--help" ]];
 then
