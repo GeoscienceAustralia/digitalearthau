@@ -46,6 +46,7 @@ Publicly available data access and web services are currently in development.
    query/cube_dash.rst
    query/List Products.ipynb
    query/Loading Data.ipynb
+   query/Pixel Drill.ipynb
 
 .. toctree::
    :maxdepth: 1
