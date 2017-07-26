@@ -4,8 +4,10 @@ from __future__ import print_function
 
 import re
 import subprocess
-import click
 from pathlib import Path
+from typing import Iterable
+
+import click
 import yaml
 
 from digitalearthau import INGEST_CONFIG_DIR
@@ -61,9 +63,9 @@ def full(product, queue, project, walltime, name, data_subfolder_count):
               type=click.IntRange(1, 10))
 @click.option('--data-subfolder-count', default=1)
 @click.option('--name', help='Job name to use')
-@click.argument('product', help='Product name to ingest')
+@click.argument('product_name')
 @click.argument('nested_years', nargs=-1, type=click.INT)
-def nest(product, queue, project, walltime, name, data_subfolder_count, nested_years):
+def nest(product_name, queue, project, walltime, name, data_subfolder_count, nested_years):
     """Submit a job to create a stack of ncml with nested years
 
     NCML file
@@ -76,7 +78,7 @@ def nest(product, queue, project, walltime, name, data_subfolder_count, nested_y
 
     ncmler nest ls8_nbar_albers.yaml 2016 2017
     """
-    qsub_ncml('nest', product, queue, project, walltime, name, data_subfolder_count, years=nested_years)
+    qsub_ncml('nest', product_name, queue, project, walltime, name, data_subfolder_count, years=nested_years)
 
 
 @cli.command(help='Submit a job to update a single nested year')
@@ -88,23 +90,30 @@ def nest(product, queue, project, walltime, name, data_subfolder_count, nested_y
               type=click.IntRange(1, 10))
 @click.option('--data-subfolder-count', default=1)
 @click.option('--name', help='Job name to use')
-@click.argument('product', help='Product name to ingest')
+@click.argument('product_name')
 @click.argument('year', type=click.INT)
-def update(product, year, queue, project, walltime, name, data_subfolder_count):
+def update(product_name, year, queue, project, walltime, name, data_subfolder_count):
     """Submit a job to update a single nested year
 
     ncmler update ls5_nbar_albers.yaml 2016
     """
-    qsub_ncml('update', product, queue, project, walltime, name, data_subfolder_count, years=[year])
+    qsub_ncml('update', product_name, queue, project, walltime, name, data_subfolder_count, years=[year])
 
 
-def qsub_ncml(command, product, queue, project, walltime, name, data_subfolder_count, years):
-    config_path = INGEST_CONFIG_DIR / '{}.yaml'.format(product)
+def qsub_ncml(command: str,
+              product_name: str,
+              queue: str,
+              project: str,
+              walltime: int,
+              name: str,
+              data_subfolder_count: int,
+              years: Iterable[int]):
+    config_path = INGEST_CONFIG_DIR / '{}.yaml'.format(product_name)
 
     if not config_path.exists():
-        raise click.BadParameter("No config found for product {!r}".format(product))
+        raise click.BadParameter("No config found for product_name {!r}".format(product_name))
 
-    cell_index_file = Path(product + '_ncml_cells.txt').absolute()
+    cell_index_file = Path(product_name + '_ncml_cells.txt').absolute()
 
     subprocess.check_call('datacube -v system check', shell=True)
 
@@ -115,7 +124,7 @@ def qsub_ncml(command, product, queue, project, walltime, name, data_subfolder_c
     cell_list = cell_list_from_path(cells_folder)
     cell_list_to_file(cell_index_file, cell_list)
 
-    name = name or 'ncml_full_' + product
+    name = name or 'ncml_full_' + product_name
     qsub = 'qsub -q %(queue)s -N %(name)s -P %(project)s ' \
            '-l ncpus=%(ncpus)d,mem=%(mem)dgb,walltime=%(walltime)d:00:00 ' \
            '-- /bin/bash "%(distr)s" --ppn 1 ' \

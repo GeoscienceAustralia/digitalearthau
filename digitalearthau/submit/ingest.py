@@ -37,15 +37,15 @@ def list():
               help='Number of hours to request',
               type=click.IntRange(1, 48))
 @click.option('--name', help='Job name to use')
-@click.argument('product', help='Product name to ingest')
+@click.argument('product_name')
 @click.argument('year')
-def qsub(product, year, queue, project, nodes, walltime, name):
+def qsub(product_name, year, queue, project, nodes, walltime, name):
     """Submits an ingest job to qsub."""
-    config_path = INGEST_CONFIG_DIR / '{}.yaml'.format(product)
-    taskfile = Path(product + '_' + year.replace('-', '_') + '.bin').absolute()
+    config_path = INGEST_CONFIG_DIR / '{}.yaml'.format(product_name)
+    taskfile = Path(product_name + '_' + year.replace('-', '_') + '.bin').absolute()
 
     if not config_path.exists():
-        raise click.BadParameter("No config found for product {!r}".format(product))
+        raise click.BadParameter("No config found for product {!r}".format(product_name))
 
     subprocess.check_call('datacube -v system check', shell=True)
 
@@ -88,20 +88,20 @@ def qsub(product, year, queue, project, nodes, walltime, name):
               help='Number of hours to request',
               type=click.IntRange(1, 48))
 @click.option('--name', help='Job name to use')
-@click.argument('product', help='Product name to ingest')
+@click.argument('product_name')
 @click.argument('year')
-def stack(product, year, queue, project, nodes, walltime, name):
+def stack(product_name, year, queue, project, nodes, walltime, name):
     """Stacks a year of tiles into a single NetCDF."""
-    config_path = INGEST_CONFIG_DIR / '{}.yaml'.format(product)
+    config_path = INGEST_CONFIG_DIR / '{}.yaml'.format(product_name)
     if not config_path.exists():
-        raise click.BadParameter("No config found for product {!r}".format(product))
+        raise click.BadParameter("No config found for product {!r}".format(product_name))
 
-    taskfile = Path(product + '_' + year.replace('-', '_') + '.bin').absolute()
+    taskfile = Path(product_name + '_' + year.replace('-', '_') + '.bin').absolute()
 
     subprocess.check_call('datacube -v system check', shell=True)
 
     prep = 'datacube-stacker -v --app-config "%(config)s" --year %(year)s --save-tasks "%(taskfile)s"'
-    cmd = prep % dict(config=product, taskfile=taskfile, year=year)
+    cmd = prep % dict(config=product_name, taskfile=taskfile, year=year)
     if click.confirm('\n' + cmd + '\nRUN?', default=True):
         try:
             subprocess.check_call(cmd, shell=True)
@@ -141,14 +141,14 @@ def stack(product, year, queue, project, nodes, walltime, name):
               help='Number of hours to request',
               type=click.IntRange(1, 48))
 @click.option('--name', help='Job name to use')
-@click.argument('product', help='Product name to ingest')
+@click.argument('product_name')
 @click.argument('year')
-def fix(product, year, queue, project, nodes, walltime, name):
+def fix(product_name, year, queue, project, nodes, walltime, name):
     """Rewrites files with metadata from the config."""
-    taskfile = Path(product + '_' + year.replace('-', '_') + '.bin').absolute()
-    config_path = INGEST_CONFIG_DIR / '{}.yaml'.format(product)
+    taskfile = Path(product_name + '_' + year.replace('-', '_') + '.bin').absolute()
+    config_path = INGEST_CONFIG_DIR / '{}.yaml'.format(product_name)
     if not config_path.exists():
-        raise click.BadParameter("No config found for product {!r}".format(product))
+        raise click.BadParameter("No config found for product {!r}".format(product_name))
 
     subprocess.check_call('datacube -v system check', shell=True)
 
