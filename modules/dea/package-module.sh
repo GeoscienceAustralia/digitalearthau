@@ -10,7 +10,7 @@ echo
 echo "module_dir = ${module_dir:=/g/data/v10/private/modules}"
 echo "agdc_module_dir = ${agdc_module_dir:=/g/data/v10/public/modules}"
 echo
-echo "agdc_instance_module = ${agdc_instance_module:=agdc-py3-prod/1.4.1}"
+echo "agdc_instance_module = ${agdc_instance_module:=agdc-py3-prod/1.5.1}"
 agdc_instance_module_name=${agdc_instance_module%/*}
 instance=${agdc_instance_module_name##*-}
 echo "instance = ${instance}"
@@ -97,8 +97,8 @@ then
     echo "Installing digitalearthau"
     installrepo dea "${version}" git@github.com:GeoscienceAustralia/digitalearthau.git
 
-    # Should be immutable once built.
-    chmod -R a-w "${package_dest}"
+    # Releases should be immutable once built.
+    [[ "${version}" == 'develop' ]] || chmod -R a-w "${package_dest}"
 
     echo
     echo "Writing modulefile"
