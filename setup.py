@@ -24,6 +24,7 @@ setup(
     package_data={
         '': ['*.yaml', '*/*.yaml'],
     },
+    include_package_data=True,
     scripts=[
     ],
     setup_requires=[
