@@ -28,8 +28,8 @@ def cli():
     pass
 
 
-@cli.command()
-def list():
+@cli.command('list')
+def list_products():
     """List available products
     """
     for cfg in CONFIG_DIR.glob('*.yaml'):

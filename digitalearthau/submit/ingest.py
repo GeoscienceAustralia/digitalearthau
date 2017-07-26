@@ -19,14 +19,14 @@ def cli():
     pass
 
 
-@cli.command()
-def list():
+@cli.command('list')
+def list_products():
     """List available products to ingest."""
     for cfg in INGEST_CONFIG_DIR.glob('*.yaml'):
         echo(cfg.name)
 
 
-@cli.command()
+@cli.command('qsub')
 @click.option('--queue', '-q', default='normal',
               type=click.Choice(['normal', 'express']))
 @click.option('--project', '-P', default='v10')
@@ -39,7 +39,7 @@ def list():
 @click.option('--name', help='Job name to use')
 @click.argument('product_name')
 @click.argument('year')
-def qsub(product_name, year, queue, project, nodes, walltime, name):
+def do_qsub(product_name, year, queue, project, nodes, walltime, name):
     """Submits an ingest job to qsub."""
     config_path = INGEST_CONFIG_DIR / '{}.yaml'.format(product_name)
     taskfile = Path(product_name + '_' + year.replace('-', '_') + '.bin').absolute()
