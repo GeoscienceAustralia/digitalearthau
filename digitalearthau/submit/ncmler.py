@@ -45,13 +45,13 @@ def list():
               type=click.IntRange(1, 10))
 @click.option('--data-subfolder-count', default=1)
 @click.option('--name', help='Job name to use')
-@click.argument('product', help='Product name to ingest')
-def full(product, queue, project, walltime, name, data_subfolder_count):
+@click.argument('product_name')
+def full(product_name, queue, project, walltime, name, data_subfolder_count):
     """Submit a job to create the full stack of ncml
 
     ncmler full ls5_nabr_albers.yaml
     """
-    qsub_ncml('full', product, queue, project, walltime, name, data_subfolder_count, years=[])
+    qsub_ncml('full', product_name, queue, project, walltime, name, data_subfolder_count, years=[])
 
 
 @cli.command(help='Submit a job to create a nested ncml stack')
