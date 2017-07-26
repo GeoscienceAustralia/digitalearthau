@@ -143,13 +143,39 @@ def qsub_ncml(command: str,
         subprocess.check_call(cmd, shell=True)
 
 
+def _cell_from_filename(name):
+    """
+    >>> _cell_from_filename('-17_-23')
+    (-17, -23)
+    >>> _cell_from_filename('2_-12')
+    (2, -12)
+    >>> _cell_from_filename('-13_3')
+    (-13, 3)
+    >>> _cell_from_filename('-3_12')
+    (-3, 12)
+    >>> _cell_from_filename('3 -4')
+    (3, -4)
+    >>> _cell_from_filename('requirements.txt')
+    >>> _cell_from_filename('a_b')
+    """
+    cell_matcher = re.compile(r'(-?\d+)\s*[,_ ]\s*(-?\d+)')
+
+    match = cell_matcher.match(name)
+    if not match:
+        return None
+
+    return tuple(int(i) for i in match.groups())
+
+
 def cell_list_from_path(path):
-    cell_matcher = re.compile('(\-?\d+)(?:\s*(?:,|_|\s)\s*)(\-?\d+)')
+    """
+    Example expected input path: /g/data/rs0/datacube/002//g/data/rs0/datacube/002
+    """
     base_path = Path(path)
     for folder_path in base_path.iterdir():
-        match = cell_matcher.match(folder_path.name)
-        if match:
-            yield tuple(int(i) for i in match.groups())
+        cell = _cell_from_filename(folder_path.name)
+        if cell:
+            yield cell
 
 
 if __name__ == '__main__':
