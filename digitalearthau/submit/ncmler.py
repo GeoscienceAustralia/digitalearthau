@@ -16,8 +16,8 @@ from digitalearthau import INGEST_CONFIG_DIR
 DISTRIBUTED_SCRIPT_PATH = digitalearthau.SCRIPT_DIR / 'run_distributed.sh'
 
 
-def cell_list_to_file(filename, cell_list):
-    with open('cell_index.txt', 'w') as cell_file:
+def cell_list_to_file(filename: Path, cell_list):
+    with filename.open('w') as cell_file:
         for cell in cell_list:
             cell_file.write('{0},{1}\n'.format(*cell))
 
@@ -112,8 +112,6 @@ def qsub_ncml(command: str,
     if not config_path.exists():
         raise click.BadParameter("No config found for product_name {!r}".format(product_name))
 
-    cell_index_file = Path(product_name + '_ncml_cells.txt').absolute()
-
     subprocess.check_call('datacube -v system check', shell=True)
 
     config_dict = yaml.load(config_path.open())
@@ -121,7 +119,7 @@ def qsub_ncml(command: str,
     cull_parts = 1 + data_subfolder_count
     cells_folder = Path().joinpath(*sample_path.parts[:-cull_parts])
     cell_list = cell_list_from_path(cells_folder)
-    cell_list_to_file(cell_index_file, cell_list)
+    cell_list_to_file(Path(product_name + '_ncml_cells.txt').absolute(), cell_list)
 
     name = name or 'ncml_full_' + product_name
     args = [
