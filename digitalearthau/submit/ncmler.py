@@ -10,11 +10,10 @@ from typing import Iterable
 import click
 import yaml
 
+import digitalearthau
 from digitalearthau import INGEST_CONFIG_DIR
 
-ROOT_DIR = Path(__file__).absolute().parent.parent
-CONFIG_DIR = ROOT_DIR / 'config'
-SCRIPT_DIR = ROOT_DIR / 'scripts'
+DISTRIBUTED_SCRIPT_PATH = digitalearthau.SCRIPT_DIR / 'run_distributed.sh'
 
 
 def cell_list_to_file(filename, cell_list):
@@ -32,7 +31,7 @@ def cli():
 def list_products():
     """List available products
     """
-    for cfg in CONFIG_DIR.glob('*.yaml'):
+    for cfg in INGEST_CONFIG_DIR.glob('*.yaml'):
         print(cfg.name)
 
 
@@ -125,22 +124,28 @@ def qsub_ncml(command: str,
     cell_list_to_file(cell_index_file, cell_list)
 
     name = name or 'ncml_full_' + product_name
-    qsub = 'qsub -q %(queue)s -N %(name)s -P %(project)s ' \
-           '-l ncpus=%(ncpus)d,mem=%(mem)dgb,walltime=%(walltime)d:00:00 ' \
-           '-- /bin/bash "%(distr)s" --ppn 1 ' \
-           'datacube-ncml -v --executor distributed DSCHEDULER ' \
-           '%(command)s %(years)s'
-    cmd = qsub % dict(distr=SCRIPT_DIR / 'distributed.sh',
-                      command=command,
-                      years=' '.join([str(year) for year in years]),
-                      queue=queue,
-                      name=name,
-                      project=project,
-                      ncpus=2,
-                      mem=4,
-                      walltime=walltime)
-    if click.confirm('\n' + cmd + '\nRUN?', default=True):
-        subprocess.check_call(cmd, shell=True)
+    args = [
+        'qsub',
+        '-q', queue,
+        '-N', name,
+        '-P', project,
+        '-l',
+        'ncpus={ncpus},mem={mem}gb,walltime={walltime}:00:00'.format(
+            ncpus=2,
+            mem=4,
+            walltime=walltime
+        ),
+        '--',
+        '/bin/bash',
+        str(DISTRIBUTED_SCRIPT_PATH),
+        digitalearthau.MODULE_NAME,
+        '--ppn', '1',
+        'datacube-ncml', '-v', '--executor', 'distributed', 'DSCHEDULER',
+        command,
+        ' '.join([str(year) for year in years])
+    ]
+    if click.confirm('\n%s\n\nRUN?' % (args,), default=True):
+        subprocess.check_call(args, shell=True)
 
 
 def _cell_from_filename(name):
