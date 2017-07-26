@@ -32,7 +32,7 @@ def list_products():
     """List available products
     """
     for cfg in INGEST_CONFIG_DIR.glob('*.yaml'):
-        print(cfg.name)
+        print(cfg.stem)
 
 
 @cli.command(help='Submit a job to create the full stack of ncml')

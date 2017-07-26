@@ -23,7 +23,7 @@ def cli():
 def list_products():
     """List available products to ingest."""
     for cfg in INGEST_CONFIG_DIR.glob('*.yaml'):
-        echo(cfg.name)
+        echo(cfg.stem)
 
 
 @cli.command('qsub')
