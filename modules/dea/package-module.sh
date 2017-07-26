@@ -5,34 +5,57 @@ set -eu
 umask 002
 unset PYTHONPATH
 
-echo "##########################"
-echo
-echo "module_dir = ${module_dir:=/g/data/v10/private/modules}"
-echo "agdc_module_dir = ${agdc_module_dir:=/g/data/v10/public/modules}"
-echo
-echo "agdc_instance_module = ${agdc_instance_module:=agdc-py3-prod/1.5.1}"
-agdc_instance_module_name=${agdc_instance_module%/*}
-instance=${agdc_instance_module_name##*-}
-echo "instance = ${instance}"
-echo
-echo "eodatasets_head = ${eodatasets_head:=develop}"
-echo
-echo "##########################"
-export module_dir agdc_instance_module
+# Default module dirs. You can set the variables before calling this script to override them.
+agdc_module_dir="${agdc_module_dir:-/g/data/v10/public/modules}"
+module_dir="${module_dir:-/g/data/v10/private/modules}"
 
 echoerr() { echo "$@" 1>&2; }
 
-if [[ $# != 1 ]] || [[ "$1" == "--help" ]];
+if [[ $# -lt 1 ]] || [[ "$1" == "--help" ]];
 then
     echoerr
-    echoerr "Usage: $0 <version>"
+    echoerr "Usage: $0 <dea_head> [<datacube_module]"
+    echoerr
+    echoerr "Examples:"
+    echoerr "   $0 develop"
+    echoerr "   $0 2017.1 agdc-py3-prod/1.5.1"
     exit 1
 fi
 export version="$1"
+agdc_instance_module="${2:-agdc-py3-prod}"
 
-module use ${module_dir}/modulefiles
-module use -a ${agdc_module_dir}/modulefiles
-module load ${agdc_instance_module}
+
+if [ ! -e "${agdc_module_dir}/modulefiles/${agdc_instance_module}" ];
+then
+    echoerr "No module found for '${agdc_instance_module}' in '${agdc_module_dir}'"
+    echoerr
+    echoerr "Expected something like 'agdc-py3-prod/1.5.1'"
+    exit 1
+fi
+
+agdc_instance_module_name=${agdc_instance_module%/*}
+instance=${agdc_instance_module_name##*-}
+
+echo "####################################################"
+echo "- DEA"
+echo "-      instance: ${instance}"
+echo "-       version: ${version}"
+echo "-           dir: ${module_dir}"
+echo "----------------------------------------------------"
+echo "- Dependencies"
+echo "-"
+echo "- agdc"
+echo "-        module: ${agdc_instance_module}"
+echo "-           dir: ${agdc_module_dir}"
+echo "- eo-datasets"
+echo "-          head: ${eodatasets_head:=develop}"
+echo "####################################################"
+export module_dir agdc_instance_module
+
+
+module use "${module_dir}/modulefiles"
+module use -a "${agdc_module_dir}/modulefiles"
+module load "${agdc_instance_module}"
 
 python_version=$(python -c 'from __future__ import print_function; import sys; print("%s.%s"%sys.version_info[:2])')
 
@@ -97,7 +120,7 @@ then
     echo "Installing digitalearthau"
     installrepo dea "${version}" git@github.com:GeoscienceAustralia/digitalearthau.git
 
-    # Releases should be immutable once built.
+    # Releases should be immutable once built (other than develop)
     [[ "${version}" == 'develop' ]] || chmod -R a-w "${package_dest}"
 
     echo
@@ -107,6 +130,9 @@ then
     modulefile_dest="${modulefile_dir}/${version}"
     envsubst < modulefile.template > "${modulefile_dest}"
     echo "Wrote modulefile to ${modulefile_dest}"
+
+    # Modulefile should be immutable once built (other than develop)
+    [[ "${version}" == 'develop' ]] || chmod -R a-w "${modulefile_dest}"
 fi
 
 rm -rf build > /dev/null 2>&1
