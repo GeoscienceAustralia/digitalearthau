@@ -20,6 +20,7 @@ dependencies:
 - geopandas
 - geopy
 - glueviz
+# This is only graphviz itself, not the python bindings. The latter are in the pip section.
 - graphviz
 - gunicorn
 - h5py
@@ -81,6 +82,7 @@ dependencies:
   - ciso8601
   - compliance-checker
   - DAWG
+  - graphviz
   - hdmedians
   - modernize
   - pudb
