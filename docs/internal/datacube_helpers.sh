@@ -53,3 +53,14 @@ mk_overviews_ls_pq () {
     done
     popd
 }
+
+example_use () {
+
+DB_NAME="${USER}_dev" # change to your liking
+mk_db_sql "${DB_NAME}" | psql -h agdcdev-db.nci.org.au -p 6432 datacube
+
+mk_dev_config "${DB_NAME}"
+
+mk_overviews_ls_pq /g/data/u46/users/kk7182/PQ/ 2014
+
+}

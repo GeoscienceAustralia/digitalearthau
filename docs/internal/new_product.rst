@@ -39,49 +39,15 @@ database as in the main.
 
 First create empty database
 
-.. code-block:: bash
-
-    mk_db_sql () {
-       local db_name=${1}
-       cat <<EOF
-    CREATE DATABASE ${db_name}
-    WITH
-    OWNER = agdc_admin
-    ENCODING = 'UTF8'
-    LC_COLLATE = 'en_AU.UTF-8'
-    LC_CTYPE = 'en_AU.UTF-8'
-    TABLESPACE = pg_default
-    CONNECTION LIMIT = -1;
-
-    GRANT ALL ON DATABASE ${db_name} TO agdc_admin;
-    GRANT CONNECT, TEMPORARY ON DATABASE ${db_name} TO PUBLIC;
-    GRANT ALL ON DATABASE ${db_name} TO test;
-    ALTER DATABASE ${db_name} SET search_path TO "\$user", public, agdc;
-
-    EOF
-    }
-
-    DB_NAME="${USER}_dev" # change to your liking
-    mk_db_sql ${DB_NAME} | psql -h agdcdev-db.nci.org.au -p 6432 datacube
-
+.. literalinclude:: datacube_helpers.sh
+   :language: bash
+   :lines: 3-21, 58-60
 
 Create datacube config file that uses new database
 
-.. code-block:: bash
-
-    mk_dev_config () {
-        local db_name=$1
-        local f_name=${2-"${db_name}.conf"}
-        cat > "${f_name}" <<EOF
-    [datacube]
-    db_hostname: agdcdev-db.nci.org.au
-    db_port: 6432
-    db_database: ${db_name}
-    EOF
-    }
-
-    mk_dev_config ${DB_NAME}
-
+.. literalinclude:: datacube_helpers.sh
+   :language: bash
+   :lines: 23-32, 61-62
 
 Tell datacube to use dev config via environment variable
 
@@ -294,32 +260,9 @@ script for PQ stats. Customise for your needs:
 #. Field names
 #. Glob for file names and grouping by time
 
-.. code-block:: bash
-
-    nc_ls () {
-        glob=$1
-        field=$2
-        for f in $glob; do
-            echo "NETCDF:${f}:${field}"
-        done
-    }
-
-    mk_overviews_ls_pq () {
-        P="${1-'.'}"
-        Y="${2-2014}"
-
-        VARS="clear_observation_count total_observation_count"
-        glob="LS_PQ_COUNT/**/LS_PQ_COUNT_3577_*_${Y}*nc"
-
-        pushd "${P}"
-        for var in $VARS; do
-            nc_ls "${glob}" "${var}" | xargs gdalbuildvrt "${var}_${Y}.vrt"
-            gdaladdo -r average "${var}_${Y}.vrt" 16 32 64 128 256
-        done
-        popd
-    }
-
-    mk_overviews_ls_pq /g/data/u46/users/kk7182/PQ/ 2014
+.. literalinclude:: datacube_helpers.sh
+   :language: bash
+   :lines: 34-55, 63-64
 
 Create empty QGIS project and add generated ``*.vrt`` files to it. In the menu
 select ``Layer> Add from Layer Definition File...`` navigate to
