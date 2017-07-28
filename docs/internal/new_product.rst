@@ -72,7 +72,7 @@ Create datacube config file that uses new database
     mk_dev_config () {
         local db_name=$1
         local f_name=${2-"${db_name}.conf"}
-        cat > ${f_name} <<EOF
+        cat > "${f_name}" <<EOF
     [datacube]
     db_hostname: agdcdev-db.nci.org.au
     db_port: 6432
@@ -299,7 +299,7 @@ script for PQ stats. Customise for your needs:
     nc_ls () {
         glob=$1
         field=$2
-        for f in $(ls $glob); do
+        for f in $glob; do
             echo "NETCDF:${f}:${field}"
         done
     }
@@ -314,7 +314,7 @@ script for PQ stats. Customise for your needs:
         pushd "${P}"
         for var in $VARS; do
             nc_ls "${glob}" "${var}" | xargs gdalbuildvrt "${var}_${Y}.vrt"
-            gdaladdo -r average ${var}_${Y}.vrt 16 32 64 128 256
+            gdaladdo -r average "${var}_${Y}.vrt" 16 32 64 128 256
         done
         popd
     }
