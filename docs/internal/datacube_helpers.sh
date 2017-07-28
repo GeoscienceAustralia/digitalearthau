@@ -29,3 +29,25 @@ db_database: ${db_name}
 EOF
 }
 
+nc_ls () {
+    glob=$1
+    field=$2
+    for f in $(ls $glob); do
+        echo "NETCDF:${f}:${field}"
+    done
+}
+
+mk_overviews_ls_pq () {
+    P="${1-'.'}"
+    Y="${2-2014}"
+
+    VARS="clear_observation_count total_observation_count"
+    glob="LS_PQ_COUNT/**/LS_PQ_COUNT_3577_*_${Y}*nc"
+
+    pushd "${P}"
+    for var in $VARS; do
+        nc_ls "${glob}" "${var}" | xargs gdalbuildvrt "${var}_${Y}.vrt"
+        gdaladdo -r average ${var}_${Y}.vrt 16 32 64 128 256
+    done
+    popd
+}

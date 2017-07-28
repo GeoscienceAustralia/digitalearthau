@@ -1,8 +1,11 @@
+.. highlight:: console
 .. internal_new_product
 
 =============================================
-Notes for adding new products to NCI datacube
+Creating New Product [for devs]
 =============================================
+
+Notes for adding new products to NCI datacube
 
 .. warning ::
     This is still work in progress
@@ -258,11 +261,70 @@ error message.
 Role of Metadata
 ^^^^^^^^^^^^^^^^
 
+Each dataset has a metadata document attached to it, for files produced by the
+datacube tools this metadata is automatically generated. See `Metadata
+<http://datacube-core.readthedocs.io/en/latest/ops/config.html#dataset-metadata-document>`_
+documentation online for a detailed overview.
+
+Metadata embedded inside the NetCDF file is used during indexing process for two purposes
+
+#. To associate dataset to a product
+#. To populate database search fields (lat/lon, time etc.)
+
+When creating product description it is important that ``metadata`` section is
+filled in a way consistent with the metadata present in data files. Usually this
+means getting ``product_type`` right. If your new product is based on data from
+one sensor at a time, then you should fill ``metadata.platform`` and
+``metadata.instrument``, failing that you won't be able to create similar
+products for other sensors and still re-use ``product_type``. If your product
+combines data from multiple sensors/platforms then you should omit
+platform/instrument from metadata section.
 
 
-Reviewing Product Data
-----------------------
+Reviewing Results
+-----------------
 
+#. Create Virtual Raster files
+#. Create overview files for zoomed out view
+#. Review in QGIS
+
+We don't have generic tools for generating overviews, but here is an example
+script for PQ stats. Customise for your needs:
+
+#. Field names
+#. Glob for file names and grouping by time
+
+.. code-block:: bash
+
+    nc_ls () {
+        glob=$1
+        field=$2
+        for f in $(ls $glob); do
+            echo "NETCDF:${f}:${field}"
+        done
+    }
+
+    mk_overviews_ls_pq () {
+        P="${1-'.'}"
+        Y="${2-2014}"
+
+        VARS="clear_observation_count total_observation_count"
+        glob="LS_PQ_COUNT/**/LS_PQ_COUNT_3577_*_${Y}*nc"
+
+        pushd "${P}"
+        for var in $VARS; do
+            nc_ls "${glob}" "${var}" | xargs gdalbuildvrt "${var}_${Y}.vrt"
+            gdaladdo -r average ${var}_${Y}.vrt 16 32 64 128 256
+        done
+        popd
+    }
+
+    mk_overviews_ls_pq /g/data/u46/users/kk7182/PQ/ 2014
+
+Create empty QGIS project and add generated ``*.vrt`` files to it. In the menu
+select ``Layer> Add from Layer Definition File...`` navigate to
+``/g/data/u46/users/kk7182/public/qgis/`` and select ``au.qlr``. This will add
+vector layer that makes analysis easier.
 
 Appendix
 --------
