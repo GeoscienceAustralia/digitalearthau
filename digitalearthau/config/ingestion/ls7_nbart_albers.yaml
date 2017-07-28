@@ -1,6 +1,7 @@
 source_type: ls7_nbart_scene
 output_type: ls7_nbart_albers
 version: ${version}
+metadata_type: eo
 
 description: Landsat 7 Surface Reflectance NBART 25 metre, 100km tile, Australian Albers Equal Area projection (EPSG:3577)
 

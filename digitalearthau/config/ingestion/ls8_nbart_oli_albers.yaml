@@ -1,6 +1,7 @@
 source_type: ls8_nbart_oli_scene
 output_type: ls8_nbart_oli_albers
 version: ${version}
+metadata_type: eo
 
 description: Landsat 8 Surface Relfectance NBART 25 metre, 100km tile, Australian Albers Equal Area projection (EPSG:3577)
 
