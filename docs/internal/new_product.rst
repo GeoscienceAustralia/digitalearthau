@@ -2,7 +2,7 @@
 .. internal_new_product
 
 =============================================
-Creating New Product [for devs]
+Creating New Product
 =============================================
 
 Notes for adding new products to NCI datacube
