@@ -48,6 +48,12 @@ Publicly available data access and web services are currently in development.
 
 .. toctree::
    :maxdepth: 1
+   :caption: Developer Guide
+
+   internal/new_product.rst
+
+.. toctree::
+   :maxdepth: 1
    :caption: Data
 
    data/data.rst
