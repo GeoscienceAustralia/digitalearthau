@@ -1,3 +1,4 @@
 include versioneer.py
 include digitalearthau/_version.py
 recursive-include digitalearthau/config *.yaml
+recursive-include digitalearthau/harvest *.yaml
