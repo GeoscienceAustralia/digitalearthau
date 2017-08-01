@@ -115,7 +115,7 @@ def stack(product_name, year, queue, project, nodes, walltime, name):
     name = name or taskfile.stem
     qsub = 'qsub -q %(queue)s -N %(name)s -P %(project)s ' \
            '-l ncpus=%(ncpus)d,mem=%(mem)dgb,walltime=%(walltime)d:00:00 ' \
-           '-- /bin/bash "%(distr)s" "$(dea_module)s" --ppn 16 ' \
+           '-- /bin/bash "%(distr)s" "%(dea_module)s" --ppn 16 ' \
            'datacube-stacker -v --load-tasks "%(taskfile)s" --executor distributed DSCHEDULER'
     cmd = qsub % dict(taskfile=taskfile,
                       distr=DISTRIBUTED_SCRIPT,
