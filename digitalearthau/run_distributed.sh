@@ -37,7 +37,7 @@ do
 shift
 done
 
-init_env="umask ${umask}; source /etc/bashrc; module load ${module_name}"
+init_env="umask ${umask}; source /etc/bashrc; module use /g/data/v10/public/modules/modulefiles/; module use module use /g/data/v10/private/modules/modulefiles/; module load ${module_name}"
 
 echo "Using DEA module: ${module_name}"
 
