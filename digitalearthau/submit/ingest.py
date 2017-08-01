@@ -101,7 +101,7 @@ def stack(product_name, year, queue, project, nodes, walltime, name):
     subprocess.check_call('datacube -v system check', shell=True)
 
     prep = 'datacube-stacker -v --app-config "%(config)s" --year %(year)s --save-tasks "%(taskfile)s"'
-    cmd = prep % dict(config=product_name, taskfile=taskfile, year=year)
+    cmd = prep % dict(config=config_path, taskfile=taskfile, year=year)
     if click.confirm('\n' + cmd + '\nRUN?', default=True):
         try:
             subprocess.check_call(cmd, shell=True)
