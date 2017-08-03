@@ -37,11 +37,14 @@ do
 shift
 done
 
-init_env="umask ${umask}; source /etc/bashrc; module use /g/data/v10/public/modules/modulefiles/; module use module use /g/data/v10/private/modules/modulefiles/; module load ${module_name}"
+init_env="umask ${umask}; source /etc/bashrc; module use /g/data/v10/public/modules/modulefiles/; module use /g/data/v10/private/modules/modulefiles/; module load ${module_name}"
 
 echo "Using DEA module: ${module_name}"
 
+# Make lenient temporarily: global bashrc/etc can reference unassigned variables.
+set +u
 eval "${init_env}"
+set -u
 
 SCHEDULER_NODE=$(sed '1q;d' "$PBS_NODEFILE")
 SCHEDULER_PORT=$(shuf -i 2000-65000 -n 1)
