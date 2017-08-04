@@ -77,6 +77,7 @@ dependencies:
 - tqdm
 - xarray
 - pip:
+  - autopep8
   - boltons
   - celery >= 4
   - ciso8601
@@ -90,3 +91,4 @@ dependencies:
   - skyfield
   - structlog[dev]
   - yappi
+  - yamllint
