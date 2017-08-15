@@ -85,6 +85,7 @@ dependencies:
   - DAWG
   - graphviz
   - hdmedians
+  - ipython-sql
   - modernize
   - pudb
   - pypeg2
