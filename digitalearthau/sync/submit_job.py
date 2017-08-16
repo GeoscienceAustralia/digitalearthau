@@ -11,16 +11,20 @@ if output files exist.
 
 A run folder is used (defaulting to `runs` in current dir) for output.
 """
-
+import datetime
 import logging
 import os
 import time
+from collections import defaultdict
 from pathlib import Path
 from subprocess import check_output
 from typing import Mapping, List, Optional, Tuple, Iterable
 
 import click
+import typing
+
 from boltons import fileutils
+from itertools import chain
 
 from datacube.index import index_connect
 from digitalearthau import collections
@@ -33,24 +37,67 @@ FILES_PER_JOB_CUTOFF = 15000
 
 _LOG = logging.getLogger(__name__)
 
+DEFAULT_WORK_FOLDER = '/g/data/v10/work/sync/{collection.name}/{work_time:%Y-%m-%dT%H%M}'
+DEFAULT_CACHE_FOLDER = '/g/data/v10/work/sync/{collection.name}/cache'
+
+# All tasks submitted during this session will have the same work timestamp
+TASK_TIME = datetime.datetime.now()
+
+
+class Task:
+    def __init__(self, input_paths: List[Path], dataset_count: int) -> None:
+        self.input_paths = input_paths
+        self.dataset_count = dataset_count
+
+        if not input_paths:
+            raise ValueError("Minimum of one input path in a task")
+
+        # Sanity check: all provided input paths should resolve to the same single collection
+        all_collections = set(get_collection(input_path) for input_path in input_paths)
+        if not len(all_collections) == 1:
+            raise ValueError("A task path should match exactly one collection. Got %r" % (collections,))
+
+        self._collection = all_collections.pop()
+
+    @property
+    def collection(self):
+        return self._collection
+
+    def resolve_path(self, pattern: str) -> Path:
+        return Path(pattern.format(
+            collection=self.collection,
+            work_time=TASK_TIME
+        ))
+
 
 class SyncSubmission(object):
-    def __init__(self, cache_path: Path, project='v10', queue='normal', dry_run=False, verbose=True, workers=4) -> None:
+    def __init__(self, cache_folder: str, project='v10', queue='normal', dry_run=False, verbose=True,
+                 workers=4) -> None:
         self.project = project
         self.queue = queue
         self.dry_run = dry_run
         self.verbose = verbose
         self.workers = workers
-        self.cache_path = cache_path
+        self.cache_folder = cache_folder
 
-    def warm_cache(self, tile_path: Path):
-
-        # Update cached path list ahead of time, so PBS jobs don't waste time doing it themselves.
+    def warm_cache(self, tasks: Iterable[Task]):
+        # Update the cached path list ahead of time, so PBS jobs don't waste time doing it themselves.
         click.echo("Checking path list, this may take a few minutes...")
-        scan.build_pathset(get_collection(tile_path), cache_path=self.cache_path)
+
+        done_collections = set()
+
+        for task in tasks:
+            if task.collection in done_collections:
+                continue
+            cache_path = Path(task.resolve_path(self.cache_folder))
+            click.echo("{0:>20}...".format(task.collection.name), nl=False)
+            scan.build_pathset(task.collection, cache_path=cache_path)
+            click.echo("done")
+
+            done_collections.add(task.collection)
 
     def submit(self,
-               input_folders: List[Path],
+               task: Task,
                output_file: Path,
                error_file: Path,
                job_name: str,
@@ -75,9 +122,9 @@ class SyncSubmission(object):
         sync_command = [
             'python', '-m', 'digitalearthau.sync',
             '-j', str(self.workers),
-            '--cache-folder', str(self.cache_path),
+            '--cache-folder', str(task.resolve_path(self.cache_folder)),
             *sync_opts,
-            *(map(str, input_folders))
+            *(map(str, task.input_paths))
         ]
         qsub_opts = []
         notify_email = os.environ.get('COMPLETION_NOTIFY_EMAIL')
@@ -109,127 +156,163 @@ class SyncSubmission(object):
 
 
 @click.command()
-@click.argument('job_name')
-@click.argument('tile_folder', type=click.Path(exists=True, readable=True, writable=False))
+@click.argument('folders',
+                type=click.Path(exists=True, readable=True),
+                nargs=-1)
 @click.option('--dry-run', is_flag=True, default=False)
-@click.option('--queue', '-q', default='normal',
+@click.option('--queue', '-q',
+              default='normal',
               type=click.Choice(['normal', 'express']))
-@click.option('--project', '-P', default='v10')
-@click.option('--run-folder',
-              type=click.Path(exists=True, readable=True, writable=True),
-              # 'cache' folder in current directory.
-              default='runs')
-@click.option('--submit-limit', type=int, default=None, help="Max number of jobs to submit (remaining tiles will "
-                                                             "not be submitted)")
-@click.option('--concurrent-jobs', type=int, default=12, help="Number of PBS jobs to run concurrently")
-def main(job_name: str,
-         tile_folder: str,
-         run_folder: str,
-         submit_limit: int,
-         concurrent_jobs: int,
+@click.option('--project', '-P',
+              default='v10')
+@click.option('--work-folder',
+              type=click.Path(readable=True, writable=True),
+              default=DEFAULT_WORK_FOLDER)
+@click.option('--cache-folder',
+              type=click.Path(readable=True, writable=True),
+              default=DEFAULT_CACHE_FOLDER)
+@click.option('--max-jobs',
+              type=int,
+              default=50,
+              help="Maximum number of PBS jobs to allow (paths will be grouped to get under this limit)")
+@click.option('--concurrent-jobs',
+              type=int,
+              default=12,
+              help="Number of PBS jobs to allow to *run* concurrently. The latter jobs will be submitted "
+                   "with run dependencies on earlier ones.")
+@click.option('--submit-limit',
+              type=int,
+              default=None,
+              help="Stop submitting after this many jobs. Useful for testing.")
+def main(folders: Iterable[str],
          dry_run: bool,
          queue: str,
-         project: str):
-    tile_path = Path(tile_folder).absolute()
-    run_path = Path(run_folder).absolute()
+         project: str,
+         work_folder: str,
+         cache_folder: str,
+         max_jobs: int,
+         concurrent_jobs: int,
+         submit_limit: int):
+    input_paths = [Path(folder).absolute() for folder in folders]
 
-    with index_connect(application_name='sync-' + job_name) as index:
+    with index_connect(application_name='sync-submit') as index:
         collections.init_nci_collections(AgdcDatasetPathIndex(index))
+        submitter = SyncSubmission(cache_folder, project, queue, dry_run, verbose=True, workers=4)
 
-        submitter = SyncSubmission(run_path.joinpath('cache'), project, queue, dry_run, verbose=True, workers=4)
+        tasks = _paths_to_tasks(input_paths)
+        tasks = group_tasks(tasks, maximum=max_jobs)
+        _find_and_submit(tasks, work_folder, concurrent_jobs, submit_limit, submitter)
 
-        _find_and_submit(job_name, tile_path, run_path, concurrent_jobs, submit_limit, submitter)
+
+def _paths_to_tasks(input_paths: List[Path]) -> List[Task]:
+    # Remove duplicates
+    normalised_input_paths = set(p.absolute() for p in input_paths)
+
+    # Get their dataset's parent folders: (typically the "x_y" for tiles, the month for scenes)
+    parent_folder_counts = uniq_counts(dataset_path.parent
+                                       for input_path in normalised_input_paths
+                                       for collection in collections.get_collections_in_path(input_path)
+                                       for dataset_path in collection.iter_fs_paths_within(input_path))
+
+    # Sanity check: Each of these parent folders should still be within an input path
+    for path, count in parent_folder_counts:
+        if not any(str(input_path).startswith(str(path))
+                   for input_path in normalised_input_paths):
+            raise NotImplementedError("Giving a specific dataset rather than a folder of datasets?")
+
+    return [Task([p], c) for p, c in parent_folder_counts]
 
 
-# Validate scenes:
-def _find_and_submit(job_name: str,
-                     tile_path: Path,
-                     run_path: Path,
+def group_tasks(tasks: List[Task], maximum) -> List[Task]:
+    """
+    >>> two = [Task(['a', 'b'], 3), Task(['c'], 2)]
+    >>> group_tasks(two, maximum=2)
+    [Task(['a', 'b'], 3), Task(['c'], 2)]
+    >>> group_tasks(two, maximum=1)
+    [Task(['a', 'b', 'c'], 5)]
+    """
+    # Combine the two smallest repeatedly until under the limit.
+    while len(tasks) >= maximum:
+        # Ordered: most datasets to least
+        tasks.sort(key=lambda s: s.dataset_count, reverse=True)
+
+        max_count = tasks[-1].dataset_count
+        if max_count > FILES_PER_JOB_CUTOFF:
+            _LOG.warning('Unusually large number of datasets in a single folder: %s', max_count)
+
+        a = tasks.pop()
+        b = tasks.pop()
+        tasks.append(
+            Task(input_paths=a.input_paths + b.input_paths,
+                 dataset_count=a.dataset_count + b.dataset_count)
+        )
+
+    return tasks
+
+
+T = typing.TypeVar('T')
+
+
+def uniq_counts(paths: Iterable[T]) -> List[Tuple[T, int]]:
+    """
+    Group unique items, retuning them with a count of instances.
+
+    >>> uniq_counts([])
+    []
+    >>> uniq_counts(['a'])
+    [('a', 1)]
+    >>> uniq_counts(['a', 'b', 'b'])
+    [('a', 1), ('b', 2)]
+    """
+    s = defaultdict(int)
+    for p in paths:
+        s[p] += 1
+    return list(sorted(s.items(), key=lambda t: t[1]))
+
+
+def _find_and_submit(tasks: List[Task],
+                     work_folder: str,
                      concurrent_jobs: int,
                      submit_limit: int,
                      submitter: SyncSubmission):
-    submitter.warm_cache(tile_path)
+    submitter.warm_cache(chain(*(task.input_paths for task in tasks)))
 
     submitted = 0
     # To maintain concurrent_jobs limit, we set a pbs dependency on previous jobs.
     # mapping of concurrent slot number to the last job id to be submitted in it.
     # type: Mapping[int, str]
     last_job_slots = {}
-    for task_name, input_folders in make_tile_jobs(tile_path):
-
-        subjob_name = '{}{}'.format(job_name, task_name)
+    for task in tasks:
         if submitted == submit_limit:
             click.echo("Submit limit ({}) reached, done.".format(submit_limit))
             break
 
         require_job_id = last_job_slots.get(submitted % concurrent_jobs)
 
-        subjob_run_path = run_path.joinpath(job_name, subjob_name)
-        fileutils.mkdir_p(subjob_run_path)
+        run_path = task.resolve_path(work_folder).joinpath('{:3d}'.format(submitted))
+        if run_path.exists():
+            raise RuntimeError("Calculated job folder should be unique? Got %r" % (run_path,))
 
-        output_path = subjob_run_path.joinpath('out.tsv')
-        if output_path.exists():
-            click.echo("{}: output exists, skipping".format(subjob_name))
-            continue
+        fileutils.mkdir_p(run_path)
+
+        # Not used by the job, but useful for our reference; to know what has been submitted already.
+        with run_path.joinpath('inputs.txt', 'wc') as f:
+            f.write_text('\n'.join(map(str, task.input_paths)))
 
         job_id = submitter.submit(
-            # Folders are named "X_Y", we glob for all folders with the give X coord.
-            input_folders=list(input_folders),
-            output_file=output_path,
-            error_file=subjob_run_path.joinpath('err.log'),
-            job_name=subjob_name,
+            task=task,
+            output_file=(run_path.joinpath('out.tsv')),
+            error_file=run_path.joinpath('err.log'),
+            job_name='{}-{:2}'.format(task.collection, submitted),
             require_job_id=require_job_id,
         )
 
         if job_id:
             last_job_slots[submitted % concurrent_jobs] = job_id
             submitted += 1
-            click.echo("[{}] {}: submitted {}".format(submitted, subjob_name, job_id))
+            click.echo("[{:2} {}]: submitted {}".format(submitted, task.collection, job_id))
 
         time.sleep(SUBMIT_THROTTLE_SECS)
-
-
-def find_tile_xs(tile_path):
-    """
-    For input tile_path, get list of unique tile X values.
-
-    Inner folders are named "X_Y", eg "-12_23"
-    """
-    tile_xs = set(int(p.name.split('_')[0]) for p in tile_path.iterdir() if p.name != 'ncml')
-    tile_xs = sorted(tile_xs)
-    click.echo("Found %s total jobs" % len(tile_xs))
-    return tile_xs
-
-
-def make_tile_jobs(tile_path) -> Iterable[Tuple[str, Iterable[Path]]]:
-    """
-    Tries to yield one job per x value (tiles are X_Y), but if the number of files
-    is above FILES_PER_JOB_CUTOFF it will split it up.
-
-    This could be much simpler if it ignored X entirely and just grouped X_Ys up to file count, but
-    our old ones were grouped purely by X, and this maintains backwards compat so that the already-completed
-    X-folders aren't rerun).
-    """
-    for tile_x in find_tile_xs(tile_path):
-        tile_x_ys = tile_path.glob('{}_*'.format(tile_x))
-
-        task_number = 1
-        input_paths = []
-        input_paths_file_count = 0
-
-        for tile_x_y in tile_x_ys:
-            input_paths.append(tile_x_y)
-            input_paths_file_count += sum(1 for _ in tile_x_y.rglob('*.nc'))
-
-            # If this pushed us over the cutoff, yield a task with the folders so far.
-            if input_paths_file_count > FILES_PER_JOB_CUTOFF:
-                yield "{:+04d}-{}".format(tile_x, task_number), input_paths
-                task_number += 1
-                input_paths = []
-                input_paths_file_count = 0
-
-        if input_paths:
-            yield "{:+04d}-{}".format(tile_x, task_number), input_paths
 
 
 def get_collection(tile_path: Path) -> collections.Collection:

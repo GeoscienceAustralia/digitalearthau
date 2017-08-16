@@ -97,6 +97,13 @@ class Collection:
             for path in glob.iglob(file_pattern)
         )
 
+    # Treated as singletons
+    def __eq__(self, o: object) -> bool:
+        return self is o
+
+    def __hash__(self):
+        return hash(self.name)
+
 
 def _constrain_pattern(within_path: Path, pattern: str):
     """
