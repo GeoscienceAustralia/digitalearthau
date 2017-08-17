@@ -97,9 +97,7 @@ class SyncSubmission(object):
             if task.collection in done_collections:
                 continue
             cache_path = Path(task.resolve_path(self.cache_folder))
-            click.echo("{0:>20}...".format(task.collection.name), nl=False)
             scan.build_pathset(task.collection, cache_path=cache_path)
-            click.echo("done")
 
             done_collections.add(task.collection)
 
