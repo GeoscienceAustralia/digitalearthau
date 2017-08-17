@@ -23,7 +23,7 @@ def init_logging():
             CleanConsoleRenderer() if sys.stdout.isatty() else structlog.processors.JSONRenderer(),
         ],
         context_class=dict,
-        logger_factory=structlog.stdlib.LoggerFactory(),
+        logger_factory=structlog.PrintLoggerFactory(),
         wrapper_class=structlog.stdlib.BoundLogger,
         cache_logger_on_first_use=True,
     )
