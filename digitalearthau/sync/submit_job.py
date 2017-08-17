@@ -119,12 +119,24 @@ class SyncSubmission(object):
         if self.verbose:
             sync_opts.append('-v')
         if not self.dry_run:
-            # For tile products like the current FC we trust the index over the filesystem.
-            # (jobs that failed part-way-through left datasets on disk and were not indexed)
-            sync_opts.extend(['--trash-missing', '--trash-archived', '--update-locations'])
-            # Scene products are the opposite:
-            # Only complete scenes are written to fs, so '--index-missing' instead of trash.
-            # (also want to '--update-locations' to fix any moved datasets)
+            # Defaults. Trash things archived a while ago, and update the index's locations to match disk.
+            sync_opts.extend(['--trash-archived', '--update-locations'])
+
+            # Do we trust the index or disk when there are unknown files?
+            if task.collection.trust:
+                # For tile products like the current FC we trust the index over the filesystem.
+                # (jobs that failed part-way-through left datasets on disk and were not indexed)
+
+                # Scene products are the opposite:
+                # Only complete scenes are written to fs, so '--index-missing' instead of trash.
+
+                trust_options = {
+                    'disk': ['--index-missing'],
+                    'index': ['--trash-missing'],
+                }
+                if task.collection.trust not in trust_options:
+                    raise RuntimeError("Unknown trust type %r", task.collection.trust)
+                sync_opts.extend(trust_options[task.collection.trust])
 
         sync_command = [
             'python', '-m', 'digitalearthau.sync',

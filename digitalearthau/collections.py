@@ -23,7 +23,8 @@ class Collection:
                  unique: Iterable[str],
                  index: DatasetPathIndex = None,
                  delete_archived_after_days=None,
-                 expected_parents=None):
+                 expected_parents=None,
+                 trust: Optional[str] = None):
         self.name = name
         # The query args needed to get all of this collection from the datacube index
         self.query = query
@@ -35,6 +36,13 @@ class Collection:
         self.expected_parents = expected_parents
 
         self._index = index
+
+        # Which side do we trust in a sync? The disk, or the index?
+        # 'None' means don't do anything when there's an unknown dataset (they'll have to be indexed elsewhere)
+        trust_types = ('index', 'disk')
+        if trust and (trust not in trust_types):
+            raise ValueError('Unknown type of trust %r, expected one of %r or None' % (trust, trust_types))
+        self.trust = trust
 
     def __repr__(self):
         return simple_object_repr(self)
@@ -143,7 +151,10 @@ class SceneCollection(Collection):
         super().__init__(name, query, file_patterns=file_patterns, index=index,
                          unique=('time.lower.day', 'sat_path.lower', 'sat_row.lower'),
                          delete_archived_after_days=delete_archived_after_days,
-                         expected_parents=expected_parents)
+                         expected_parents=expected_parents,
+                         # Scenes default to trusting disk. They're atomically written to the destination,
+                         # and the jobs themselves wont index.
+                         trust='disk')
 
 
 # type: Mapping[str, Collection]
@@ -202,7 +213,8 @@ def init_nci_collections(index: DatasetPathIndex):
                 '/g/data/v10/repackaged/rawdata/0/[0-9][0-9][0-9][0-9]/[0-9][0-9]/*/ga-metadata.yaml',
             ],
             unique=('time.lower.day', 'platform'),
-            index=index
+            index=index,
+            trust='disk'
         )
     )
 
@@ -318,6 +330,9 @@ def init_nci_collections(index: DatasetPathIndex):
                 ],
                 unique=('time.lower.day', 'lat', 'lon'),
                 index=index,
+                # Tiles default to trusting index over the disk: they were indexed at the end of the job,
+                # so unfinished tiles could be left on disk.
+                trust='index'
             ),
             Collection(
                 name='ls7_{}'.format(name),
@@ -329,6 +344,9 @@ def init_nci_collections(index: DatasetPathIndex):
                 ],
                 unique=('time.lower.day', 'lat', 'lon'),
                 index=index,
+                # Tiles default to trusting index over the disk: they were indexed at the end of the job,
+                # so unfinished tiles could be left on disk.
+                trust='index'
             ),
             Collection(
                 name='ls8_{}'.format(name),
@@ -340,6 +358,9 @@ def init_nci_collections(index: DatasetPathIndex):
                 ],
                 unique=('time.lower.day', 'lat', 'lon'),
                 index=index,
+                # Tiles default to trusting index over the disk: they were indexed at the end of the job,
+                # so unfinished tiles could be left on disk.
+                trust='index'
             )
         )
 
