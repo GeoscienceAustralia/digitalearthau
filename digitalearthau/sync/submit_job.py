@@ -24,6 +24,7 @@ import click
 import typing
 
 from boltons import fileutils
+from click import style
 
 from datacube.index import index_connect
 from digitalearthau import collections
@@ -215,9 +216,33 @@ def main(folders: Iterable[str],
     with index_connect(application_name='sync-submit') as index:
         collections.init_nci_collections(AgdcDatasetPathIndex(index))
         submitter = SyncSubmission(cache_folder, project, queue, dry_run, verbose=True, workers=4)
-
+        click.echo(
+            "{} input path(s)".format(len(input_paths))
+        )
         tasks = _paths_to_tasks(input_paths)
+        click.echo(
+            "Found {} tasks across collection(s): {}".format(
+                len(tasks),
+                ', '.join(set(t.collection.name for t in tasks))
+            )
+        )
+
+        if len(tasks) > max_jobs:
+            click.echo(
+                "Grouping (max_jobs={})".format(max_jobs)
+            )
         tasks = group_tasks(tasks, maximum=max_jobs)
+
+        total_datasets = sum(t.dataset_count for t in tasks)
+        click.secho(
+            "Submitting {} total jobs with {} datasets (avg {:.2f} each)...".format(
+                len(tasks),
+                total_datasets,
+                total_datasets / len(tasks)
+            ),
+            bold=True
+        )
+
         _find_and_submit(tasks, work_folder, concurrent_jobs, submit_limit, submitter)
 
 
@@ -242,7 +267,7 @@ def _paths_to_tasks(input_paths: List[Path]) -> List[Task]:
 
     # Sanity check: Each of these parent folders should still be within an input path
     for path, count in parent_folder_counts:
-        if not any(str(input_path).startswith(str(path))
+        if not any(str(path).startswith(str(input_path))
                    for input_path in normalised_input_paths):
             raise NotImplementedError("Giving a specific dataset rather than a folder of datasets?")
 
@@ -309,6 +334,7 @@ def _find_and_submit(tasks: List[Task],
     # mapping of concurrent slot number to the last job id to be submitted in it.
     # type: Mapping[int, str]
     last_job_slots = {}
+
     for task in tasks:
         if submitted == submit_limit:
             click.echo("Submit limit ({}) reached, done.".format(submit_limit))
@@ -338,11 +364,18 @@ def _find_and_submit(tasks: List[Task],
 
             last_job_slots[submitted % concurrent_jobs] = job_id
             submitted += 1
-            click.echo("[{count:2} {collection.name}]: submitted {job_id}".format(
-                count=submitted,
-                collection=task.collection,
-                job_id=job_id
-            ))
+
+            click.echo(
+                "{prefix}: submitted {job_id} with {dataset_count} datasets using directory {run_path}".format(
+                    prefix=style(
+                        "[{:02d} {}]".format(submitted, task.collection.name),
+                        fg='blue', bold=True
+                    ),
+                    job_id=style(job_id, bold=True),
+                    dataset_count=style(str(task.dataset_count), bold=True),
+                    run_path=style(str(run_path), bold=True)
+                )
+            )
 
         time.sleep(SUBMIT_THROTTLE_SECS)
 
