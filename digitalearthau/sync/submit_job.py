@@ -306,28 +306,31 @@ def _find_and_submit(tasks: List[Task],
 
         require_job_id = last_job_slots.get(submitted % concurrent_jobs)
 
-        run_path = task.resolve_path(work_folder).joinpath('{:3d}'.format(submitted))
+        run_path = task.resolve_path(work_folder).joinpath('{:03d}'.format(submitted))
         if run_path.exists():
             raise RuntimeError("Calculated job folder should be unique? Got %r" % (run_path,))
 
         fileutils.mkdir_p(run_path)
 
         # Not used by the job, but useful for our reference; to know what has been submitted already.
-        with run_path.joinpath('inputs.txt', 'wc') as f:
-            f.write_text('\n'.join(map(str, task.input_paths)))
+        run_path.joinpath('inputs.txt').write_text('\n'.join(map(str, task.input_paths)) + '\n')
 
         job_id = submitter.submit(
             task=task,
             output_file=(run_path.joinpath('out.tsv')),
             error_file=run_path.joinpath('err.log'),
-            job_name='{}-{:2}'.format(task.collection, submitted),
+            job_name='{}-{:02}'.format(task.collection.name, submitted),
             require_job_id=require_job_id,
         )
 
         if job_id:
             last_job_slots[submitted % concurrent_jobs] = job_id
             submitted += 1
-            click.echo("[{:2} {}]: submitted {}".format(submitted, task.collection, job_id))
+            click.echo("[{count:2} {collection.name}]: submitted {job_id}".format(
+                count=submitted,
+                collection=task.collection,
+                job_id=job_id
+            ))
 
         time.sleep(SUBMIT_THROTTLE_SECS)
 
