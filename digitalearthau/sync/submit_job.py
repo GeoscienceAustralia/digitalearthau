@@ -24,11 +24,11 @@ import click
 import typing
 
 from boltons import fileutils
-from itertools import chain
 
 from datacube.index import index_connect
 from digitalearthau import collections
 from digitalearthau.index import AgdcDatasetPathIndex
+from digitalearthau.paths import get_dataset_paths
 from digitalearthau.sync import scan
 
 SUBMIT_THROTTLE_SECS = 1
@@ -215,8 +215,17 @@ def _paths_to_tasks(input_paths: List[Path]) -> List[Task]:
     # Remove duplicates
     normalised_input_paths = set(p.absolute() for p in input_paths)
 
-    # Get their dataset's parent folders: (typically the "x_y" for tiles, the month for scenes)
-    parent_folder_counts = uniq_counts(dataset_path.parent
+    def dataset_folder_path(dataset_path):
+        # Get their dataset's parent folders: (typically the "x_y" for tiles, the month for scenes)
+
+        # Get the base path for the dataset.
+        # eg. "LS8_SOME_SCENE_1/ga-metadata.yaml" to "LS8_SOME_SCENE_1"
+        #  or "LS7_SOME_TILE.nc" to itself
+        base_path, _ = get_dataset_paths(dataset_path)
+
+        return base_path.parent
+
+    parent_folder_counts = uniq_counts(dataset_folder_path(dataset_path)
                                        for input_path in normalised_input_paths
                                        for collection in collections.get_collections_in_path(input_path)
                                        for dataset_path in collection.iter_fs_paths_within(input_path))
@@ -283,7 +292,7 @@ def _find_and_submit(tasks: List[Task],
                      concurrent_jobs: int,
                      submit_limit: int,
                      submitter: SyncSubmission):
-    submitter.warm_cache(chain(*(task.input_paths for task in tasks)))
+    submitter.warm_cache(tasks)
 
     submitted = 0
     # To maintain concurrent_jobs limit, we set a pbs dependency on previous jobs.
