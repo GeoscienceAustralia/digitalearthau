@@ -171,6 +171,7 @@ class SyncSubmission(object):
         click.echo(' '.join(command))
         output = check_output(command)
         job_id = output.decode('utf-8').strip(' \\n')
+
         return job_id
 
 
@@ -336,6 +337,8 @@ def _find_and_submit(tasks: List[Task],
         )
 
         if job_id:
+            run_path.joinpath('job.txt').write_text('{}\n'.format(job_id))
+
             last_job_slots[submitted % concurrent_jobs] = job_id
             submitted += 1
             click.echo("[{count:2} {collection.name}]: submitted {job_id}".format(
