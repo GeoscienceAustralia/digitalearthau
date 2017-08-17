@@ -46,6 +46,7 @@ TASK_TIME = datetime.datetime.now()
 
 
 class Task:
+    # A task has a list of paths from a single collection.
     def __init__(self, input_paths: List[Path], dataset_count: int) -> None:
         self.input_paths = input_paths
         self.dataset_count = dataset_count
@@ -114,7 +115,7 @@ class SyncSubmission(object):
 
         sync_opts = []
         if require_job_id:
-            attributes.extend(['depend=afterok:{}'.format(str(require_job_id).strip())])
+            attributes.extend(['depend=afterany:{}'.format(str(require_job_id).strip())])
         if self.verbose:
             sync_opts.append('-v')
         if not self.dry_run:
