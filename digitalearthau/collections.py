@@ -321,7 +321,7 @@ def init_nci_collections(index: DatasetPathIndex):
     def add_albers_collections(name: str, project='rs0'):
         _add(
             Collection(
-                name='ls5_{}'.format(name),
+                name='ls5_{}_albers'.format(name),
                 query={'product': 'ls5_{}_albers'.format(name)},
                 file_patterns=[
                     '/g/data/{project}/datacube/002/'
@@ -335,7 +335,7 @@ def init_nci_collections(index: DatasetPathIndex):
                 trust='index'
             ),
             Collection(
-                name='ls7_{}'.format(name),
+                name='ls7_{}_albers'.format(name),
                 query={'product': 'ls7_{}_albers'.format(name)},
                 file_patterns=[
                     '/g/data/{project}/datacube/002/LS7_ETM_{name}/'
@@ -349,7 +349,7 @@ def init_nci_collections(index: DatasetPathIndex):
                 trust='index'
             ),
             Collection(
-                name='ls8_{}'.format(name),
+                name='ls8_{}_albers'.format(name),
                 query={'product': 'ls8_{}_albers'.format(name)},
                 file_patterns=[
                     '/g/data/{project}/datacube/002/LS8_OLI_{name}/'
@@ -369,5 +369,5 @@ def init_nci_collections(index: DatasetPathIndex):
     add_albers_collections('nbart')
     add_albers_collections('fc', project='fk4')
 
-    assert get_collection('ls5_fc').file_patterns == ['/g/data/fk4/datacube/002/LS5_TM_FC/*_*/LS5*FC*.nc']
-    assert get_collection('ls8_nbar').file_patterns == ['/g/data/rs0/datacube/002/LS8_OLI_NBAR/*_*/LS8*NBAR*.nc']
+    assert get_collection('ls5_fc_albers').file_patterns == ['/g/data/fk4/datacube/002/LS5_TM_FC/*_*/LS5*FC*.nc']
+    assert get_collection('ls8_nbar_albers').file_patterns == ['/g/data/rs0/datacube/002/LS8_OLI_NBAR/*_*/LS8*NBAR*.nc']
