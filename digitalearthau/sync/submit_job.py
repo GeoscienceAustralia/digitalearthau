@@ -69,6 +69,13 @@ class Task:
             work_time=TASK_TIME
         ))
 
+    def __repr__(self) -> str:
+        return '%s(%r, %r)' % (
+            self.__class__.__name__,
+            self.input_paths,
+            self.dataset_count
+        )
+
 
 class SyncSubmission(object):
     def __init__(self, cache_folder: str, project='v10', queue='normal', dry_run=False, verbose=True,
@@ -225,14 +232,15 @@ def _paths_to_tasks(input_paths: List[Path]) -> List[Task]:
 
 def group_tasks(tasks: List[Task], maximum) -> List[Task]:
     """
-    >>> two = [Task(['a', 'b'], 3), Task(['c'], 2)]
+    >>> collections._add(collections.Collection('test', {}, ['/test/*'], ()))
+    >>> two = [Task(['/test/a', '/test/b'], 3), Task(['/test/c'], 2)]
     >>> group_tasks(two, maximum=2)
-    [Task(['a', 'b'], 3), Task(['c'], 2)]
+    [Task(['/test/a', '/test/b'], 3), Task(['/test/c'], 2)]
     >>> group_tasks(two, maximum=1)
-    [Task(['a', 'b', 'c'], 5)]
+    [Task(['/test/a', '/test/b', '/test/c'], 5)]
     """
     # Combine the two smallest repeatedly until under the limit.
-    while len(tasks) >= maximum:
+    while len(tasks) > maximum:
         # Ordered: most datasets to least
         tasks.sort(key=lambda s: s.dataset_count, reverse=True)
 
@@ -243,7 +251,7 @@ def group_tasks(tasks: List[Task], maximum) -> List[Task]:
         a = tasks.pop()
         b = tasks.pop()
         tasks.append(
-            Task(input_paths=a.input_paths + b.input_paths,
+            Task(input_paths=sorted(a.input_paths + b.input_paths),
                  dataset_count=a.dataset_count + b.dataset_count)
         )
 
