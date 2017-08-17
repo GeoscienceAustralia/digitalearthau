@@ -170,8 +170,7 @@ class SyncSubmission(object):
 
         click.echo(' '.join(command))
         output = check_output(command)
-        job_id = output.decode('utf-8').strip(' \\n')
-
+        job_id = output.decode('utf-8').strip(' \n')
         return job_id
 
 
