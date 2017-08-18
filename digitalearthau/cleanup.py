@@ -1,5 +1,5 @@
 """
-Find and trash archived locations.
+Find and trash archived locations of active datasets.
 """
 from datetime import datetime, timedelta
 
@@ -12,31 +12,45 @@ from digitalearthau import paths, uiutil
 
 _LOG = structlog.getLogger('cleanup-archived')
 
+trash_options = ui.compose(
+    click.option('--only-redundant/--all',
+                 is_flag=True,
+                 default=True,
+                 help='Only trash locations with a second active location'),
+    click.option('--min-trash-age-hours',
+                 type=int,
+                 default=72,
+                 help="Only trash locations that were archive at least this many hours ago."),
+    click.option('--dry-run',
+                 is_flag=True,
+                 help="Don't make any changes (ie. don't trash anything)"),
+)
 
-@click.command(help='Find and trash archived locations for the given search terms.')
+
+@click.group(help='Find and trash archived locations.')
 @ui.global_cli_options
-@click.option('--only-redundant/--all',
-              is_flag=True,
-              default=True,
-              help='Only trash locations with a second active location')
-@click.option('--min-trash-age-hours',
-              type=int,
-              default=72,
-              help="Only trash locations that were archive at least this many hours ago.")
-@click.option('--dry-run',
-              is_flag=True,
-              help="Don't make any changes (ie. don't trash anything)")
-@ui.parsed_search_expressions
+def main():
+    pass
+
+
+@main.command('indexed', help="Search the index for archived locations")
 @ui.pass_index()
-def main(index, expressions, dry_run, only_redundant, min_trash_age_hours):
+@ui.parsed_search_expressions
+@trash_options
+def indexed(index, expressions, dry_run, only_redundant, min_trash_age_hours):
+    _LOG.info('query', query=expressions)
+    datasets = index.datasets.search(**expressions)
+    _do_trash(datasets, index, dry_run, only_redundant, min_trash_age_hours)
+
+
+def _do_trash(datasets, index, dry_run, only_redundant, min_trash_age_hours):
     uiutil.init_logging()
 
     latest_time_to_archive = _as_utc(datetime.utcnow()) - timedelta(hours=min_trash_age_hours)
 
-    _LOG.info('query', query=expressions)
     count = 0
     trash_count = 0
-    for dataset in index.datasets.search(**expressions):
+    for dataset in datasets:
         count += 1
 
         log = _LOG.bind(dataset_id=str(dataset.id))
