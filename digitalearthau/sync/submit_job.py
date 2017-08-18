@@ -14,6 +14,7 @@ A run folder is used (defaulting to `runs` in current dir) for output.
 import datetime
 import logging
 import os
+import shlex
 import time
 from collections import defaultdict
 from pathlib import Path
@@ -23,6 +24,7 @@ from typing import Mapping, List, Optional, Tuple, Iterable
 import click
 import typing
 
+import yaml
 from boltons import fileutils
 from click import style
 
@@ -108,7 +110,7 @@ class SyncSubmission(object):
                output_file: Path,
                error_file: Path,
                job_name: str,
-               require_job_id: Optional[int]) -> str:
+               require_job_id: Optional[int]) -> Tuple[str, List]:
 
         # Output files readable by others.
         attributes = ['umask=33']
@@ -168,10 +170,10 @@ class SyncSubmission(object):
             *sync_command
         ]
 
-        click.echo(' '.join(command))
+        click.echo(' '.join(shlex.quote(arg) for arg in command))
         output = check_output(command)
         job_id = output.decode('utf-8').strip(' \n')
-        return job_id
+        return job_id, command
 
 
 @click.command()
@@ -349,19 +351,29 @@ def _find_and_submit(tasks: List[Task],
 
         fileutils.mkdir_p(run_path)
 
-        # Not used by the job, but useful for our reference; to know what has been submitted already.
-        run_path.joinpath('inputs.txt').write_text('\n'.join(map(str, task.input_paths)) + '\n')
-
-        job_id = submitter.submit(
+        job_id, command = submitter.submit(
             task=task,
-            output_file=(run_path.joinpath('out.tsv')),
+            output_file=(run_path.joinpath('out.log')),
             error_file=run_path.joinpath('err.log'),
             job_name='{}-{:02}'.format(task.collection.name, submitted),
             require_job_id=require_job_id,
         )
 
         if job_id:
-            run_path.joinpath('job.txt').write_text('{}\n'.format(job_id))
+            # Not used by the job, but useful for our reference, and potentially by future monitoring.
+            run_path.joinpath('submission-info.yaml').write_text(
+                yaml.safe_dump(
+                    {
+                        'pbs_command': ' '.join(shlex.quote(arg) for arg in command),
+                        'pbs_job_id': job_id,
+                        'input_paths': [str(p) for p in task.input_paths],
+                        'file_dataset_count': task.dataset_count,
+                        'collection_name': task.collection.name
+                    },
+                    default_flow_style=False,
+                    indent=4
+                )
+            )
 
             last_job_slots[submitted % concurrent_jobs] = job_id
             submitted += 1
