@@ -37,7 +37,7 @@ def cache_is_too_old(path):
 def build_pathset(
         collection: Collection,
         cache_path: Path = None,
-        log: logging.Logger = _LOG) -> dawg.CompletionDAWG:
+        log=_LOG) -> dawg.CompletionDAWG:
     """
     Build a combined set (in dawg form) of all dataset paths in the given index and filesystem.
 
@@ -47,6 +47,7 @@ def build_pathset(
     if locations_cache:
         fileutils.mkdir_p(str(locations_cache.parent))
 
+    log = log.bind(collection_name=collection.name)
     if locations_cache and not cache_is_too_old(locations_cache):
         path_set = dawg.CompletionDAWG()
         log.debug("paths.trie.cache.load", file=locations_cache)
