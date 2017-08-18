@@ -26,11 +26,11 @@ def validate_dataset(md_path: Path, log: logging.Logger):
     return True
 
 
-def validate_image(file: Path, log: logging.Logger):
+def validate_image(file: Path, log: logging.Logger, compliance_check=False):
     try:
         storage_unit = gdal.Open(str(file), gdal.gdalconst.GA_ReadOnly)
 
-        if storage_unit.GetDriver().ShortName == 'netCDF':
+        if compliance_check and storage_unit.GetDriver().ShortName == 'netCDF':
             is_compliant, errors_occurred = _compliance_check(file)
 
             if (not is_compliant) or errors_occurred:
