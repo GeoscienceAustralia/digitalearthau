@@ -1,0 +1,50 @@
+description: Low Tide 20 percentage composites for entire coastline
+managed: true
+measurements:
+- dtype: float32
+  name: blue
+  nodata: -999
+  units: '1'
+- dtype: float32
+  name: green
+  nodata: -999
+  units: '1'
+- dtype: float32
+  name: red
+  nodata: -999
+  units: '1'
+- dtype: float32
+  name: nir
+  nodata: -999
+  units: '1'
+- dtype: float32
+  name: swir1
+  nodata: -999
+  units: '1'
+- dtype: float32
+  name: swir2
+  nodata: -999
+  units: '1'
+metadata:
+  format:
+    name: NetCDF
+  product_type: HLTC
+metadata_type: eo
+name: low_tide_comp_20p
+storage:
+  chunking:
+    time: 1
+    x: 200
+    y: 200
+  crs: EPSG:3577
+  dimension_order:
+  - time
+  - y
+  - x
+  driver: NetCDFCF
+  resolution:
+    x: 25
+    y: -25
+  tile_size:
+    x: 100000.0
+    y: 100000.0

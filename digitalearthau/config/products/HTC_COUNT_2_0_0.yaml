@@ -1,0 +1,30 @@
+description: High Tide 20 percentage pixel count
+managed: true
+measurements:
+- dtype: int16
+  name: count_observations
+  nodata: 0
+  units: '1'
+metadata:
+  format:
+    name: NetCDF
+  product_type: HLTC
+metadata_type: eo
+name: high_tide_comp_count
+storage:
+  chunking:
+    time: 1
+    x: 200
+    y: 200
+  crs: EPSG:3577
+  dimension_order:
+  - time
+  - y
+  - x
+  driver: NetCDFCF
+  resolution:
+    x: 25
+    y: -25
+  tile_size:
+    x: 100000.0
+    y: 100000.0
