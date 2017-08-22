@@ -87,9 +87,10 @@ dependencies:
   - hdmedians
   - ipython-sql
   - modernize
+  - perf
   - pudb
   - pypeg2
   - skyfield
   - structlog[dev]
-  - yappi
   - yamllint
+  - yappi
