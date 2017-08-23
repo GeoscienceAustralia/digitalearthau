@@ -1,7 +1,10 @@
+#!/usr/bin/env bash
 # script for loading new products and datasets
+
 module load agdc-py3-prod/1.4.1
 IDIR="/g/data/u46/users/bxb547/INDEX_SCRIPTS/"
-cd $IDIR
+cd $IDIR || exit
+
 echo "adding product details"
 #datacube product add ITEM_2_0_0.yaml
 #datacube product add ITEM_CONF_2_0_0.yaml
