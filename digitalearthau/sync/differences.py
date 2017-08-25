@@ -4,6 +4,7 @@ from typing import Optional
 from uuid import UUID
 
 from boltons import strutils
+from boltons.jsonutils import JSONLIterator
 
 from digitalearthau.index import DatasetLite
 from digitalearthau.utils import simple_object_repr
@@ -49,25 +50,24 @@ uri='/tmp/test')
     def __hash__(self):
         return hash(tuple(v for k, v in sorted(self.__dict__.items())))
 
-    def to_tsv_row(self):
-        return '\t'.join(map(str, (
-            strutils.camel2under(self.__class__.__name__),
-            self.dataset.id if self.dataset else None,
-            self.uri
-        )))
+    def to_dict(self):
+        return dict(
+            name=strutils.camel2under(self.__class__.__name__),
+            dataset_id=str(self.dataset.id) if self.dataset else None,
+            uri=self.uri
+        )
 
     @staticmethod
-    def from_tsv_row(row: str):
-        mismatch_name, dataset_id, uri = row.strip('\n ').split('\t')
+    def from_dict(row: dict):
 
-        mismatch_class = getattr(sys.modules[__name__], strutils.under2camel(mismatch_name))
-        dataset_id = dataset_id.strip()
+        mismatch_class = getattr(sys.modules[__name__], strutils.under2camel(row['name']))
+        dataset_id = row['dataset_id'].strip()
 
         dataset = None
         if dataset_id and dataset_id != 'None':
             dataset = DatasetLite(UUID(dataset_id))
 
-        return mismatch_class(dataset, uri.strip())
+        return mismatch_class(dataset, row['uri'].strip())
 
 
 class LocationMissingOnDisk(Mismatch):
@@ -116,12 +116,13 @@ class InvalidDataset(Mismatch):
     pass
 
 
-def mismatches_from_file(f: Path):
+def mismatches_from_file(path: Path):
     """
-    Load mismatches from a tsv file
+    Load mismatches from a json lines file
     """
-    for line in f.open('r').readlines():
-        line = line.strip('\n ')
-        if not line:
-            continue
-        yield Mismatch.from_tsv_row(line)
+    with path.open('r') as f:
+        for row in JSONLIterator(f):
+            if not row:
+                continue
+
+            yield Mismatch.from_dict(row)

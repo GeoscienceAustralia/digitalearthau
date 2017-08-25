@@ -20,7 +20,7 @@ def init_logging():
     structlog.configure(
         processors=[
             structlog.stdlib.add_log_level,
-            structlog.processors.TimeStamper(fmt="%Y-%m-%d %H:%M.%S"),
+            structlog.processors.TimeStamper(fmt="ISO"),
             structlog.processors.StackInfoRenderer(),
             structlog.processors.format_exc_info,
             # Coloured output if to terminal.
@@ -65,5 +65,9 @@ def _json_fallback(obj):
     if isinstance(obj, set):
         return list(obj)
 
-    # Same behaviour to structlog default: we always want to log the event
-    return repr(obj)
+    try:
+        # Allow class to define their own.
+        return obj.to_dict()
+    except AttributeError:
+        # Same behaviour to structlog default: we always want to log the event
+        return repr(obj)
