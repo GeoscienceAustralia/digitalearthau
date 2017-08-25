@@ -26,108 +26,110 @@ from concurrent.futures import ProcessPoolExecutor
 def prepare_datasets_netcdf(nc_file, prod_val, prod_type_val):
 
     image = netCDF4.Dataset(nc_file)
-    times = image['time']
     projection = str(image.geospatial_bounds_crs)
     left, right = float(image.geospatial_lon_min), float(image.geospatial_lon_max)
     bottom, top = float(image.geospatial_lat_min), float(image.geospatial_lat_max)
     from_dt = datetime(2016, 10, 31, 23, 59, 58)
     to_dt = datetime(2016, 10, 31, 23, 59, 59)
-    gl_dict = {'id': str(uuid.uuid4()), 'name': prod_val,
-               'product_type': prod_type_val,
-               'creation_dt': parse(image.date_created).isoformat(),
-               'extent': {
-                   'coord': {
-                       'ul': {'lon': left, 'lat': top},
-                       'ur': {'lon': right, 'lat': top},
-                       'll': {'lon': left, 'lat': bottom},
-                       'lr': {'lon': right, 'lat': bottom},
-                   },
-                   'from_dt': from_dt,
-                   'to_dt': to_dt,
-                   'center_dt': from_dt
-               },
-               'format': {'name': 'NETCDF'},
-               'grid_spatial': {
-                   'projection': {
-                       'spatial_reference': projection,
-                       'geo_ref_points': {
-                           'ul': {'x': left, 'y': top},
-                           'ur': {'x': right, 'y': top},
-                           'll': {'x': left, 'y': bottom},
-                           'lr': {'x': right, 'y': bottom},
-                       },
-                   }
-               }
-    }  
-    if prod_val == "item_v2":
-        loc_dict = {'image': {
-                       'bands': {
-                            'relative': {
-                                 'path': str(Path(nc_file).absolute()),
-                                 'layer': 'relative',
-                            }
-                       }
-                    }
-        }         
-        return dict(itertools.chain(gl_dict.items(), loc_dict.items())) 
-
-    else if prod_val == "item_v2_conf":
-        loc_dict = {'image': {
-                       'bands': {
-                            'stddev': {
-                                 'path': str(Path(nc_file).absolute()),
-                                 'layer': 'stddev',
-                            }
-                       }
-                    }
-        }         
-        return dict(itertools.chain(gl_dict.items(), loc_dict.items())) 
-
-    else if "count" in prod_val:
-        loc_dict = {'image': {
-                       'bands': {
-                            'count_observations': {
-                                 'path': str(Path(nc_file).absolute()),
-                                 'layer': 'count_observations',
-                            }
-                       }
-                    }
-        }         
-        return dict(itertools.chain(gl_dict.items(), loc_dict.items())) 
-
-    else  # assuming product has six bands
-        loc_dict = {'image': {
-                       'bands': {
-                           'blue': {
-                                'path': str(Path(nc_file).absolute()),
-                                'layer': 'blue'
-                           },
-                           'green': {
-                               'path': str(Path(nc_file).absolute()),
-                               'layer': 'green'
-                           },
-                           'red': {
-                               'path': str(Path(nc_file).absolute()),
-                               'layer': 'red'
-                           },
-                           'nir': {
-                               'path': str(Path(nc_file).absolute()),
-                               'layer': 'nir'
-                           },
-                           'swir1': {
-                               'path': str(Path(nc_file).absolute()),
-                               'layer': 'swir1'
-                           },
-                           'swir2': {
-                               'path': str(Path(nc_file).absolute()),
-                               'layer': 'swir2'
-                           }   
-                       }
-                   },
-                   'lineage': {'source_datasets': {}},
+    gl_dict = {
+        'id': str(uuid.uuid4()),
+        'name': prod_val,
+        'product_type': prod_type_val,
+        'creation_dt': parse(image.date_created).isoformat(),
+        'extent': {
+            'coord': {
+                'ul': {'lon': left, 'lat': top},
+                'ur': {'lon': right, 'lat': top},
+                'll': {'lon': left, 'lat': bottom},
+                'lr': {'lon': right, 'lat': bottom},
+            },
+            'from_dt': from_dt,
+            'to_dt': to_dt,
+            'center_dt': from_dt
+        },
+        'format': {'name': 'NETCDF'},
+        'grid_spatial': {
+            'projection': {
+                'spatial_reference': projection,
+                'geo_ref_points': {
+                    'ul': {'x': left, 'y': top},
+                    'ur': {'x': right, 'y': top},
+                    'll': {'x': left, 'y': bottom},
+                    'lr': {'x': right, 'y': bottom},
+                },
+            }
         }
-        return dict(itertools.chain(gl_dict.items(), loc_dict.items())) 
-                         
+    }
+    if prod_val == "item_v2":
+        loc_dict = {
+            'image': {
+                'bands': {
+                    'relative': {
+                        'path': str(Path(nc_file).absolute()),
+                        'layer': 'relative',
+                        }
+                    }
+                }
+            }
+        return dict(itertools.chain(gl_dict.items(), loc_dict.items()))
+    elif prod_val == "item_v2_conf":
+        loc_dict = {
+            'image': {
+                'bands': {
+                    'stddev': {
+                        'path': str(Path(nc_file).absolute()),
+                        'layer': 'stddev',
+                        }
+                    }
+                }
+            }
+        return dict(itertools.chain(gl_dict.items(), loc_dict.items()))
+    elif "count" in prod_val:
+        loc_dict = {
+            'image': {
+                'bands': {
+                    'count_observations': {
+                        'path': str(Path(nc_file).absolute()),
+                        'layer': 'count_observations',
+                        }
+                    }
+                }
+            }
+        return dict(itertools.chain(gl_dict.items(), loc_dict.items()))
+    else:  # assuming product has six bands
+        loc_dict = {
+            'image': {
+                'bands': {
+                    'blue': {
+                        'path': str(Path(nc_file).absolute()),
+                        'layer': 'blue'
+                        },
+                    'green': {
+                        'path': str(Path(nc_file).absolute()),
+                        'layer': 'green'
+                        },
+                    'red': {
+                        'path': str(Path(nc_file).absolute()),
+                        'layer': 'red'
+                        },
+                    'nir': {
+                        'path': str(Path(nc_file).absolute()),
+                        'layer': 'nir'
+                        },
+                    'swir1': {
+                        'path': str(Path(nc_file).absolute()),
+                        'layer': 'swir1'
+                        },
+                    'swir2': {
+                        'path': str(Path(nc_file).absolute()),
+                        'layer': 'swir2'
+                        }
+                    }
+                },
+            'lineage': {'source_datasets': {}},
+            }
+        return dict(itertools.chain(gl_dict.items(), loc_dict.items()))
+
 
 @click.command(help="Prepare datasets for indexation into the Data Cube.")
 @click.argument('datasets',
