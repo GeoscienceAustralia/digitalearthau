@@ -115,5 +115,4 @@ def fix_mismatches(mismatches: Iterable[Mismatch],
             do_trash_missing(mismatch, index)
 
         if trash_archived:
-            _LOG.info('mismatch.trash', mismatch=mismatch)
             do_trash_archived(mismatch, index, min_age_hours=min_trash_age_hours)
