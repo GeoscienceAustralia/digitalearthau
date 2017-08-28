@@ -285,7 +285,7 @@ def time_query(start_date, end_date):
 
 # pylint: disable=no-value-for-parameter
 @click.command(help=__doc__)
-@click.argument('products', nargs=-1, type=str)
+@click.argument('products', nargs=-1, type=str, required=True)
 @click.option('--output-file', '-o',
               type=click.File('wt'),
               default='-',
