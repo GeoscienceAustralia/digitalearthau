@@ -52,6 +52,10 @@ class Dataset:
         """ String representation by ID. """
         return str(self)
 
+    def to_dict(self):
+        """ `dict` representation. """
+        return dict(id=self.id_, **self.keys)
+
 
 class Tally:
     """ Tally of mismatches. """
@@ -71,7 +75,7 @@ class Tally:
         """ Summary as a dictionary. """
         return {
             'mismatch_count': len(self.misses),
-            'mismatches': [str(data) for data in self.misses],
+            'mismatches': [data.to_dict() for data in self.misses],
             'total_count': self.total
         }
 
@@ -142,10 +146,16 @@ def mismatches(datacube, product1, product2, grid_workflow, query):
 
     def unique_scenes(product):
         """ Identify scenes by their time, path and row. """
-        every = [Dataset(id_=dataset.id,
-                         time=dataset.center_time,
-                         path=dataset.metadata.sat_path,
-                         row=dataset.metadata.sat_row)
+
+        def extract(path_or_row):
+            """ Make satellite path or row entry `yaml` friendly. """
+            assert path_or_row.begin == path_or_row.end
+            return int(path_or_row.begin)
+
+        every = [Dataset(id_=str(dataset.id),
+                         time=str(dataset.center_time),
+                         path=extract(dataset.metadata.sat_path),
+                         row=extract(dataset.metadata.sat_row))
                  for dataset in datasets.search(product=product, **query)]
         unique = set(every)
 
@@ -156,9 +166,9 @@ def mismatches(datacube, product1, product2, grid_workflow, query):
     def unique_tiles(product):
         """ Identify tiles by their time and index. """
         cells = grid_workflow.cell_observations(product=product, **query)
-        every = [Dataset(id_=dataset.id,
-                         time=dataset.center_time,
-                         index=index)
+        every = [Dataset(id_=str(dataset.id),
+                         time=str(dataset.center_time),
+                         index=str(index))
                  for index in cells
                  for dataset in cells[index]['datasets']]
         unique = set(every)
@@ -303,7 +313,7 @@ def main(products, output_file, start_date, end_date, time_divs):
     summary = find_gaps(datacube, products,
                         time_query(start_date, end_date), time_divs)
 
-    yaml.dump(summary, output_file)
+    yaml.dump(summary, output_file, default_flow_style=False)
 
 
 if __name__ == '__main__':
