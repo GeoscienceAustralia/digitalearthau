@@ -80,17 +80,10 @@ def cli(index: Index, collections: Iterable[str], cache_folder: str, f: str, o: 
             if o:
                 out_f = open(o, 'w')
 
-            def print_mismatch(mismatch):
-                click.echo(
-                    mismatch.to_tsv_row(),
-                    file=out_f
-                )
-
             fixes.fix_mismatches(
                 mismatches,
                 path_index,
                 min_trash_age_hours=min_trash_age_hours,
-                pre_fix=print_mismatch,
                 **fix_settings
             )
         finally:

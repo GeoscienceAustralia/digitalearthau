@@ -24,7 +24,6 @@ from concurrent.futures import ProcessPoolExecutor
 
 
 def prepare_datasets_netcdf(nc_file, prod_val, prod_type_val):
-
     image = netCDF4.Dataset(nc_file)
     projection = str(image.geospatial_bounds_crs)
     left, right = float(image.geospatial_lon_min), float(image.geospatial_lon_max)
@@ -67,10 +66,10 @@ def prepare_datasets_netcdf(nc_file, prod_val, prod_type_val):
                     'relative': {
                         'path': str(Path(nc_file).absolute()),
                         'layer': 'relative',
-                        }
                     }
                 }
             }
+        }
         return dict(itertools.chain(gl_dict.items(), loc_dict.items()))
     elif prod_val == "item_v2_conf":
         loc_dict = {
@@ -79,10 +78,10 @@ def prepare_datasets_netcdf(nc_file, prod_val, prod_type_val):
                     'stddev': {
                         'path': str(Path(nc_file).absolute()),
                         'layer': 'stddev',
-                        }
                     }
                 }
             }
+        }
         return dict(itertools.chain(gl_dict.items(), loc_dict.items()))
     elif "count" in prod_val:
         loc_dict = {
@@ -91,10 +90,10 @@ def prepare_datasets_netcdf(nc_file, prod_val, prod_type_val):
                     'count_observations': {
                         'path': str(Path(nc_file).absolute()),
                         'layer': 'count_observations',
-                        }
                     }
                 }
             }
+        }
         return dict(itertools.chain(gl_dict.items(), loc_dict.items()))
     else:  # assuming product has six bands
         loc_dict = {
@@ -103,31 +102,31 @@ def prepare_datasets_netcdf(nc_file, prod_val, prod_type_val):
                     'blue': {
                         'path': str(Path(nc_file).absolute()),
                         'layer': 'blue'
-                        },
+                    },
                     'green': {
                         'path': str(Path(nc_file).absolute()),
                         'layer': 'green'
-                        },
+                    },
                     'red': {
                         'path': str(Path(nc_file).absolute()),
                         'layer': 'red'
-                        },
+                    },
                     'nir': {
                         'path': str(Path(nc_file).absolute()),
                         'layer': 'nir'
-                        },
+                    },
                     'swir1': {
                         'path': str(Path(nc_file).absolute()),
                         'layer': 'swir1'
-                        },
+                    },
                     'swir2': {
                         'path': str(Path(nc_file).absolute()),
                         'layer': 'swir2'
-                        }
                     }
-                },
+                }
+            },
             'lineage': {'source_datasets': {}},
-            }
+        }
         return dict(itertools.chain(gl_dict.items(), loc_dict.items()))
 
 
