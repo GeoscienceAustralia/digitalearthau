@@ -23,6 +23,7 @@ def do_index_missing(mismatch: Mismatch, index: DatasetPathIndex):
 
 @do_index_missing.register(DatasetNotIndexed)
 def _(mismatch: DatasetNotIndexed, index: DatasetPathIndex):
+    _LOG.info("index_dataset", mismatch=mismatch)
     index.add_dataset(mismatch.dataset, mismatch.uri)
 
 
@@ -33,11 +34,13 @@ def do_update_locations(mismatch: Mismatch, index: DatasetPathIndex):
 
 @do_update_locations.register(LocationMissingOnDisk)
 def _(mismatch: LocationMissingOnDisk, index: DatasetPathIndex):
+    _LOG.info("remove_location", mismatch=mismatch)
     index.remove_location(mismatch.dataset, mismatch.uri)
 
 
 @do_update_locations.register(LocationNotIndexed)
 def _(mismatch: LocationNotIndexed, index: DatasetPathIndex):
+    _LOG.info("add_location", mismatch=mismatch)
     index.add_location(mismatch.dataset, mismatch.uri)
 
 
