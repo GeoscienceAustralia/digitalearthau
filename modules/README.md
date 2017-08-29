@@ -31,7 +31,7 @@ You probably don't have to care about any of the commands below: they are all
 run by the `./package-release.sh` command above.
 
 But if you want to build modules individually, or know what they are, keep
-reading:
+reading.
 
 ## Python "Environment" Module
 
@@ -102,16 +102,6 @@ It includes a config file, which it specifies by setting the
 `DATACUBE_CONFIG_PATH` environment variable.
 
 The version number matches the datacube version.
-
-### Create All Instances
-
-    cd modules/agdc-instances
-    ./package-all-instances.sh 20161201 1.1.17
-
-This will interactively create a module for each GA instance (dev, prod etc) at
-NCI, confirming each one before creation.
-
-The first argument is the version of `agdc-py*-env` modules to use, the second is the datacube version.
 
 ### Create Custon Instance.
 
