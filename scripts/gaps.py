@@ -299,13 +299,14 @@ def time_query(start_date, end_date):
 @click.option('--output-file', '-o',
               type=click.File('wt'),
               default='-',
-              help="output .yaml file to write report to (default: stdout)")
+              help="Output .yaml file to write report to (default: stdout).")
 @click.option('--start-date', type=str,
-              help="start of date range (YYYY, YYYY-MM, or YYYY-MM-DD)")
+              help="Start of date range (YYYY-MM-DD, YYYY-MM, or YYYY).")
 @click.option('--end-date', type=str,
-              help="end of date range (YYYY, YYYY-MM, or YYYY-MM-DD)")
+              help="End of date range (YYYY-MM-DD, YYYY-MM, or YYYY).")
 @click.option('--time-divs', type=int,
-              help="divide the date range (computational)")
+              help="Split up the computation into number of segments"
+                   " of the date range.")
 def main(products, output_file, start_date, end_date, time_divs):
     """ Entry point. """
     datacube = Datacube(app='find-those-gaps')
