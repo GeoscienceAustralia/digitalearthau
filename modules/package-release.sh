@@ -69,7 +69,7 @@ function build_variant() {
 }
 
 build_variant py3
-build_variant py2
+# build_variant py2
 
 echo
 echo "All done."
