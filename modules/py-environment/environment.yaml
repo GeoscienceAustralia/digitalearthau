@@ -73,6 +73,7 @@ dependencies:
 - shapely
 - singledispatch
 - sphinx
+- spyder
 - sqlalchemy
 - tqdm
 - xarray
