@@ -55,9 +55,11 @@ function build_variant() {
 
     export agdc_env_module=agdc-${py}-env/${py_module_version}
 
-    pyvariant=${py} variant=dev dbhost=agdcdev-db.nci.org.au ./package-instance-module.sh "${agdc_version}"
-    # We can't use the new hostnames because existing users only have the IP in their pgpass file
-    pyvariant=${py} variant=prod dbhost=130.56.244.105 ./package-instance-module.sh "${agdc_version}"
+    pushd "${dir}/agdc-instances"
+        pyvariant=${py} variant=dev dbhost=agdcdev-db.nci.org.au ./package-instance-module.sh "${agdc_version}"
+        # We can't use the new hostnames because existing users only have the IP in their pgpass file
+        pyvariant=${py} variant=prod dbhost=130.56.244.105 ./package-instance-module.sh "${agdc_version}"
+    popd
 
     echo
     echo "=========================="
