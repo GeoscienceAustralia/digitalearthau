@@ -56,7 +56,6 @@ dependencies:
 - psutil
 - psycopg2
 - py6s
-- pydash
 - pylint = 1.6.4
 - pytables
 - pytest
@@ -92,6 +91,7 @@ dependencies:
   - modernize
   - perf
   - pudb
+  - pydash
   - pypeg2
   - skyfield
   - structlog[dev]
