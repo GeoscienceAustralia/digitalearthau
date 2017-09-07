@@ -163,7 +163,7 @@ class SyncSubmission(object):
             'qsub', '-V',
             '-P', self.project,
             '-q', self.queue,
-            '-l', 'walltime=20:00:00,mem=4GB,ncpus=2,jobfs=1GB,other=gdata',
+            '-l', 'walltime=20:00:00,mem=1GB,ncpus=4,jobfs=256MB,other=gdata',
             '-l', 'wd',
             '-N', 'sync-{}'.format(job_name),
             '-m', 'a',

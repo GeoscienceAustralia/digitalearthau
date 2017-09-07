@@ -35,7 +35,7 @@ _LOG = structlog.get_logger()
               default='cache')
 @click.option('-j', '--jobs',
               type=int,
-              default=2,
+              default=4,
               help="Number of worker processes to use")
 @click.option('-f',
               type=click.Path(exists=True, readable=True, dir_okay=False),
