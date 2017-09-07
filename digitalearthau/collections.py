@@ -9,7 +9,7 @@ that should contain the same set of datasets.
 import fnmatch
 import glob
 from pathlib import Path
-from typing import Iterable, Optional, Mapping, List
+from typing import Iterable, Optional, List, Dict
 
 from digitalearthau.index import DatasetPathIndex, MemoryDatasetPathIndex
 from digitalearthau.utils import simple_object_repr
@@ -24,7 +24,7 @@ class Collection:
                  index: DatasetPathIndex = None,
                  delete_archived_after_days=None,
                  expected_parents=None,
-                 trust: Optional[str] = None):
+                 trust: Optional[str] = None) -> None:
         self.name = name
         # The query args needed to get all of this collection from the datacube index
         self.query = query
@@ -129,10 +129,10 @@ def _constrain_pattern(within_path: Path, pattern: str):
     if fnmatch.fnmatch(str(within_path), pattern):
         return str(within_path)
     else:
-        pattern = Path(pattern)
+        pathtern = Path(pattern)
         # Otherwise move up the directory tree until we find a matching base
-        suffix = [pattern.name]
-        for subpat in pattern.parents:
+        suffix = [pathtern.name]
+        for subpat in pathtern.parents:
             if fnmatch.fnmatch(str(within_path), str(subpat)):
                 return str(within_path.joinpath(*reversed(suffix)))
             else:
@@ -147,7 +147,7 @@ class SceneCollection(Collection):
                  file_patterns: Iterable[str],
                  index: Optional[DatasetPathIndex],
                  delete_archived_after_days=None,
-                 expected_parents: Iterable[str] = None):
+                 expected_parents: Iterable[str] = None) -> None:
         super().__init__(name, query, file_patterns=file_patterns, index=index,
                          unique=('time.lower.day', 'sat_path.lower', 'sat_row.lower'),
                          delete_archived_after_days=delete_archived_after_days,
@@ -157,8 +157,7 @@ class SceneCollection(Collection):
                          trust='disk')
 
 
-# type: Mapping[str, Collection]
-_COLLECTIONS = {}
+_COLLECTIONS = {}  # type: Dict[str, Collection]
 
 
 def _add(*cs: Collection):

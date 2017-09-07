@@ -84,7 +84,7 @@ class FileMoveTask:
                  dest_path: Path,
                  source_metadata_path: Path,
                  dest_metadata_path: Path,
-                 dataset: Dataset):
+                 dataset: Dataset) -> None:
         self.source_path = source_path
         self.dest_path = dest_path
         self.source_metadata_path = source_metadata_path

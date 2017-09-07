@@ -19,7 +19,7 @@ import time
 from collections import defaultdict
 from pathlib import Path
 from subprocess import check_output
-from typing import Mapping, List, Optional, Tuple, Iterable
+from typing import List, Optional, Tuple, Iterable, Dict, Set
 
 import click
 import typing
@@ -95,7 +95,7 @@ class SyncSubmission(object):
         # Update the cached path list ahead of time, so PBS jobs don't waste time doing it themselves.
         click.echo("Checking path list, this may take a few minutes...")
 
-        done_collections = set()
+        done_collections = set()  # type: Set[collections.Collection]
 
         for task in tasks:
             if task.collection in done_collections:
@@ -110,7 +110,7 @@ class SyncSubmission(object):
                output_file: Path,
                error_file: Path,
                job_name: str,
-               require_job_id: Optional[int]) -> Tuple[str, List]:
+               require_job_id: Optional[str]) -> Tuple[str, List]:
 
         # Output files readable by others.
         attributes = ['umask=33']
@@ -319,7 +319,7 @@ def uniq_counts(paths: Iterable[T]) -> List[Tuple[T, int]]:
     >>> uniq_counts(['a', 'b', 'b'])
     [('a', 1), ('b', 2)]
     """
-    s = defaultdict(int)
+    s = defaultdict(int)  # type: Dict[T, int]
     for p in paths:
         s[p] += 1
     return list(sorted(s.items(), key=lambda t: t[1]))
@@ -335,8 +335,7 @@ def _find_and_submit(tasks: List[Task],
     submitted = 0
     # To maintain concurrent_jobs limit, we set a pbs dependency on previous jobs.
     # mapping of concurrent slot number to the last job id to be submitted in it.
-    # type: Mapping[int, str]
-    last_job_slots = {}
+    last_job_slots = {}  # type: Dict[int, str]
 
     for task in tasks:
         if submitted == submit_limit:

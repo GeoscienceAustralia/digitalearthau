@@ -17,7 +17,7 @@ class Mismatch:
     See the implementations for different types of mismataches.
     """
 
-    def __init__(self, dataset: Optional[DatasetLite], uri: str):
+    def __init__(self, dataset: Optional[DatasetLite], uri: str) -> None:
         super().__init__()
         self.dataset = dataset
         self.uri = uri

@@ -5,7 +5,7 @@ import time
 from functools import partial
 from itertools import chain
 from pathlib import Path
-from typing import Iterable, Any, Mapping, List
+from typing import Iterable, Any, Mapping, List, Set
 
 import structlog
 from boltons import fileutils
@@ -89,7 +89,7 @@ def _find_uri_mismatches(index: DatasetPathIndex, uri: str, validate_data=True) 
     log.debug("index.get_dataset_ids_for_uri")
     indexed_datasets = set(index.get_datasets_for_uri(uri))
 
-    datasets_in_file = set()
+    datasets_in_file = set()  # type: Set[DatasetLite]
     if path.exists():
         try:
             datasets_in_file = set(map(DatasetLite, paths.get_path_dataset_ids(path)))

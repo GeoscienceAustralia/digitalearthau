@@ -21,7 +21,7 @@ class DatasetLite:
     bugs could occur if the core framework made changes to it.
     """
 
-    def __init__(self, id_: uuid.UUID, archived_time: datetime = None):
+    def __init__(self, id_: uuid.UUID, archived_time: datetime = None) -> None:
         # Sanity check of the type, as our equality checks are quietly wrong if the types don't match,
         # and we've previously had problems with libraries accidentally switching string/uuid types...
         assert isinstance(id_, uuid.UUID)
@@ -98,7 +98,7 @@ class DatasetPathIndex:
 
 
 class AgdcDatasetPathIndex(DatasetPathIndex):
-    def __init__(self, index: Index):
+    def __init__(self, index: Index) -> None:
         super().__init__()
         self._index = index
         self._rules = dataset_script.load_rules_from_types(self._index)
@@ -173,8 +173,7 @@ class MemoryDatasetPathIndex(DatasetPathIndex):
     def __init__(self):
         super().__init__()
         # Map of dataset to locations.
-        # type: Mapping[DatasetLite, List[str]]
-        self._records = collections.defaultdict(list)
+        self._records = collections.defaultdict(list)  # type: Mapping[DatasetLite, List[str]]
 
     def reset(self):
         self._records = collections.defaultdict(list)
@@ -204,6 +203,7 @@ class MemoryDatasetPathIndex(DatasetPathIndex):
             return False
         # We never remove the dataset key, only the uris.
         self._records[dataset].remove(uri)
+        return True
 
     def get_datasets_for_uri(self, uri: str) -> Iterable[DatasetLite]:
         for dataset, uris in self._records.items():
