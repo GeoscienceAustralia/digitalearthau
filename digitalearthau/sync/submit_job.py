@@ -82,7 +82,12 @@ class Task:
 
 
 class SyncSubmission(object):
-    def __init__(self, cache_folder: str, project='v10', queue='normal', dry_run=False, verbose=True,
+    def __init__(self,
+                 cache_folder: str,
+                 project='v10',
+                 queue='normal',
+                 dry_run=False,
+                 verbose=True,
                  workers=4) -> None:
         self.project = project
         self.queue = queue

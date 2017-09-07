@@ -61,8 +61,16 @@ _LOG = structlog.get_logger()
                 # type=click.Choice(cs.registered_collection_names()),
                 nargs=-1, )
 @ui.pass_index(expect_initialised=False)
-def cli(index: Index, collections: Iterable[str], cache_folder: str, f: str, o: str,
-        min_trash_age_hours: bool, jobs: int, **fix_settings):
+def cli(index: Index,
+        collections: Iterable[str],
+        cache_folder: str,
+        # format
+        f: str,
+        # output file
+        o: str,
+        min_trash_age_hours: bool,
+        jobs: int,
+        **fix_settings):
     uiutil.init_logging()
 
     if fix_settings['index_missing'] and fix_settings['trash_missing']:
