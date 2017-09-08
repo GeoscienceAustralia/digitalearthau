@@ -89,6 +89,7 @@ dependencies:
   - hdmedians
   - ipython-sql
   - modernize
+  - mypy
   - perf
   - pudb
   - pydash
