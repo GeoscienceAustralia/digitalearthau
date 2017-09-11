@@ -7,6 +7,7 @@ products.
 from sys import stderr
 from datetime import datetime
 from itertools import combinations
+from functools import total_ordering
 
 import yaml
 import click
@@ -17,6 +18,7 @@ from datacube.model import Range
 from datacube.api import GridWorkflow
 
 
+@total_ordering
 class Dataset:
     """
     Simplified representation of a dataset.
@@ -40,17 +42,13 @@ class Dataset:
         """ Uniqueness determined by location. """
         return self.keys == other.keys
 
-    def __ne__(self, other):
-        """ Uniqueness determined by location. """
-        return not self.__eq__(other)
+    def __lt__(self, other):
+        """ Ordering determined by time. """
+        return self.keys['time'] < other.keys['time']
 
     def __str__(self):
         """ String representation by ID. """
         return str(self.id_)
-
-    def __repr__(self):
-        """ String representation by ID. """
-        return str(self)
 
     def to_dict(self):
         """ `dict` representation. """
@@ -75,7 +73,8 @@ class Tally:
         """ Summary as a dictionary. """
         return {
             'mismatch_count': len(self.misses),
-            'mismatches': [data.to_dict() for data in self.misses],
+            'mismatches': [data.to_dict()
+                           for data in sorted(list(self.misses))],
             'total_count': self.total
         }
 
@@ -88,7 +87,13 @@ def common_product_kind(datacube, products):
         Whether the product is a scene or a tile.
         """
         prod = datacube.index.products.get_by_name(product)
-        return prod.definition['metadata_type']
+        kind = prod.definition['metadata_type']
+
+        # treat these two to be equivalent
+        if kind in ['landsat_l1_scene', 'landsat_scene']:
+            return 'scene'
+        else:
+            return kind
 
     kinds = {product_kind(product) for product in products}
 
@@ -179,7 +184,7 @@ def mismatches(datacube, product1, product2, grid_workflow, query):
 
     kind = common_product_kind(datacube, (product1, product2))
 
-    if kind == 'landsat_scene':
+    if kind == 'scene':
         uniqueness_function = unique_scenes
     else:
         uniqueness_function = unique_tiles
@@ -299,13 +304,14 @@ def time_query(start_date, end_date):
 @click.option('--output-file', '-o',
               type=click.File('wt'),
               default='-',
-              help="output .yaml file to write report to (default: stdout)")
+              help="Output .yaml file to write report to (default: stdout).")
 @click.option('--start-date', type=str,
-              help="start of date range (YYYY, YYYY-MM, or YYYY-MM-DD)")
+              help="Start of date range (YYYY-MM-DD, YYYY-MM, or YYYY).")
 @click.option('--end-date', type=str,
-              help="end of date range (YYYY, YYYY-MM, or YYYY-MM-DD)")
+              help="End of date range (YYYY-MM-DD, YYYY-MM, or YYYY).")
 @click.option('--time-divs', type=int,
-              help="divide the date range (computational)")
+              help="Split up the computation into number of segments"
+                   " of the date range.")
 def main(products, output_file, start_date, end_date, time_divs):
     """ Entry point. """
     datacube = Datacube(app='find-those-gaps')
