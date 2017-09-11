@@ -72,7 +72,9 @@ dependencies:
 - seaborn
 - shapely
 - singledispatch
+- spectral
 - sphinx
+- spyder
 - sqlalchemy
 - tqdm
 - xarray
@@ -87,8 +89,10 @@ dependencies:
   - hdmedians
   - ipython-sql
   - modernize
+  - mypy
   - perf
   - pudb
+  - pydash
   - pypeg2
   - skyfield
   - structlog[dev]

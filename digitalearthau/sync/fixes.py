@@ -22,7 +22,7 @@ def do_index_missing(mismatch: Mismatch, index: DatasetPathIndex):
 
 
 @do_index_missing.register(DatasetNotIndexed)
-def _(mismatch: DatasetNotIndexed, index: DatasetPathIndex):
+def _add_missing(mismatch: DatasetNotIndexed, index: DatasetPathIndex):
     _LOG.info("index_dataset", mismatch=mismatch)
     index.add_dataset(mismatch.dataset, mismatch.uri)
 
@@ -33,13 +33,13 @@ def do_update_locations(mismatch: Mismatch, index: DatasetPathIndex):
 
 
 @do_update_locations.register(LocationMissingOnDisk)
-def _(mismatch: LocationMissingOnDisk, index: DatasetPathIndex):
+def _remove_location(mismatch: LocationMissingOnDisk, index: DatasetPathIndex):
     _LOG.info("remove_location", mismatch=mismatch)
     index.remove_location(mismatch.dataset, mismatch.uri)
 
 
 @do_update_locations.register(LocationNotIndexed)
-def _(mismatch: LocationNotIndexed, index: DatasetPathIndex):
+def _add_location(mismatch: LocationNotIndexed, index: DatasetPathIndex):
     _LOG.info("add_location", mismatch=mismatch)
     index.add_location(mismatch.dataset, mismatch.uri)
 
@@ -57,7 +57,7 @@ def _as_utc(d):
 
 
 @do_trash_archived.register(ArchivedDatasetOnDisk)
-def _(mismatch: ArchivedDatasetOnDisk, index: DatasetPathIndex, min_age_hours: int):
+def _trash_archived_dataset(mismatch: ArchivedDatasetOnDisk, index: DatasetPathIndex, min_age_hours: int):
     latest_archived_time = datetime.utcnow().replace(tzinfo=tz.tzutc()) - timedelta(hours=min_age_hours)
 
     # all datasets at location must have been archived to trash.
@@ -82,7 +82,7 @@ def do_trash_missing(mismatch: Mismatch, index: DatasetPathIndex):
 @do_trash_missing.register(DatasetNotIndexed)
 # An unreadable dataset that passes the below sibling check should be considered missing from the index.
 @do_trash_missing.register(UnreadableDataset)
-def _(mismatch: DatasetNotIndexed, index: DatasetPathIndex):
+def _trash_missing_dataset(mismatch: DatasetNotIndexed, index: DatasetPathIndex):
     # If any (other) indexed datasets exist at the same location we can't trash it.
     datasets_at_location = list(index.get_datasets_for_uri(mismatch.uri))
     if datasets_at_location:
