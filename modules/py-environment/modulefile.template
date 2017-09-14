@@ -22,7 +22,7 @@ if {[info exists env(PYTHONPATH)] && ${esc}env(PYTHONPATH) != ""} {
 }
 
 # This disables loading modules and .pth files from ~/.local/lib/python2.7/...
-setenv PYTHONNOUSERSITE 1
+setenv PYTHONUSERBASE ~/.digitalearthau/${version}/local
 
 # Enable segfault tracebacks in py3. https://docs.python.org/3/library/faulthandler.html
 setenv PYTHONFAULTHANDLER 1
