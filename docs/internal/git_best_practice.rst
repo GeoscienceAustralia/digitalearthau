@@ -64,15 +64,18 @@ don't put full stop [.] at the end of the summary line.
 Many tools, GitHub including, expect this format and sticking to it makes
 inspecting history more accessible.
 
-.. note ::
+When writing the summary line prefer to use the *"imperative mood"* (i.e. "spoken or
+written as if giving a command or instruction"). So use ::
 
-    Could be helpful to prescribe how summary line is to be phrased. Which do we
-    prefer?
+   Fix spelling mistake in the help message
 
-    - Fixed spelling mistake in the help message
-    - Fix spelling mistake in the help message
+and not::
 
-For a more expanded exploration of the topic see `<https://chris.beams.io/posts/git-commit/>`_
+   Fixed spelling mistake in the help message
+
+Write it as if finishing this sentence: "When applied this commit will ...", but
+still start with a capital letter. For a more expanded exploration of the topic
+see `<https://chris.beams.io/posts/git-commit/>`_
 
 
 Clean Linear History
