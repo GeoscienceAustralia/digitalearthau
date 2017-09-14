@@ -144,7 +144,44 @@ Bug Fix Workflow
 New Feature Workflow
 -----------------------
 
-TODO
+As far as git mechanics go new feature development is similar to `Bug Fix
+Workflow`_. New features are developed in a feature branch. Since new feature
+development is likely to take longer than a bug fix it becomes important to keep
+your branch in sync with the main branch to minimize the pain of one massive
+merge at the end. So make sure to run ``git pull --rebase origin develop`` every
+so often in your feature branch.
+
+Again since it takes longer, it's best to push your branch to GitHub even if you
+are not ready to merge it back into the main. This gives visibility of the work
+to other team members and also serves as an offsite backup of your work. Note
+that it is still OK to "edit history" in your feature branch even if that
+history has been pushed to GitHub, but you will need to *force* push your
+changes when you do: ``git push --force``. We assume that feature branch is your
+"private branch", and so nobody will be impacted by history edits. If that's not
+the case, i.e. multiple people are working on the same branch, then you should
+not edit history you have shared with others. Don't worry you can still cleanup
+the history later on when feature development is complete just before creating a
+pull request.
+
+Creating pull request for a new feature is a little bit more involved than for a
+bug fix. Particularly for larger changes please take care to document the work
+you done in detail using GitHub comment interface, you can use markdown for
+formatting. Try to make the reviewers job easier by providing context of the
+change that might be difficult to extract from the code diff alone.
+
+
+
+Travis and Coveralls Integration
+-----------------------------------
+
+We use free service Travis CI `<https://travis-ci.org>`_ to automatically run
+unit tests when new code is pushed to GitHub. When running unit tests we extract
+"code coverage" statistics for given test run. We use Coveralls
+`<https://coveralls.zendesk.com/>`_ to keep track of how code coverage
+percentage changes over time. The expectation is that code coverage percentage
+increases over time or at least doesn't go backwards by a lot for too long. As
+new features are added so are the unit-tests that test new code.
+
 
 
 Pull Requests
