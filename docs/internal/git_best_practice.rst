@@ -15,6 +15,23 @@ please consider reading up on git online first.
 - `<https://help.github.com>`_ covers a lot of detail and github specifics
 
 
+Initial Setup
+----------------
+
+When setting up new dev machine make sure that your git identity is properly configured.
+
+.. code-block:: bash
+
+    git config --global user.name "YourFirstName YourLastName"
+    git config --global user.email "your_email@example.com"
+    # configure other useful options
+    git config --global pull.rebase true
+    # review
+    git config --list
+
+
+
+
 Main Principles
 ------------------
 
@@ -115,21 +132,6 @@ some of the tools listed below
 - `<https://www.gitkraken.com>`_
 - `<https://www.sourcetreeapp.com>`_
 - Docs for plain git `<https://help.github.com/articles/changing-a-commit-message/>`_
-
-
-Initial Setup
-----------------
-
-When setting up new dev machine make sure that your git identity is properly configured.
-
-.. code-block:: bash
-
-    git config --global user.name "YourFirstName YourLastName"
-    git config --global user.email "your_email@example.com"
-    # configure other useful options
-    git config --global pull.rebase true
-    # review
-    git config --list
 
 
 Bug Fix Workflow
