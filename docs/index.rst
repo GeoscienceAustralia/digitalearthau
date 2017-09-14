@@ -51,6 +51,7 @@ Publicly available data access and web services are currently in development.
    :caption: Developer Guide
 
    internal/new_product.rst
+   internal/git_best_practice.rst
 
 .. toctree::
    :maxdepth: 1
