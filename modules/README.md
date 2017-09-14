@@ -60,7 +60,8 @@ This will create a new environment module in `/g/data/v10/public/modules/agdc-py
 
 Loading the module might conflict with other python modules you have loaded.
 
-The module will disable locally installed python packages to prevent conflicts by setting `PYTHONNOUSERSITE`
+The module will prevent conflicts with locally installed python packages by changing `PYTHONUSERBASE` for each release;
+`pip install --user ...` will store packages under `~/.digitalearthau`.
 
 ## Data Cube Module
 

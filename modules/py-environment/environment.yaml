@@ -90,6 +90,7 @@ dependencies:
   - ipython-sql
   - modernize
   - mypy
+  - opencv-python
   - perf
   - pudb
   - pydash
