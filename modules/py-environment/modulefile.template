@@ -21,12 +21,13 @@ if {[info exists env(PYTHONPATH)] && ${esc}env(PYTHONPATH) != ""} {
         puts stderr "Try unloading all python modules if you experience any issues."
 }
 
-# This disables loading modules and .pth files from ~/.local/lib/python2.7/...
-setenv PYTHONUSERBASE ~/.digitalearthau/${version}/local
-
 # Enable segfault tracebacks in py3. https://docs.python.org/3/library/faulthandler.html
 setenv PYTHONFAULTHANDLER 1
 
 prepend-path PATH ${module_dir}/${package_name}/${version}/envs/agdc/bin
 setenv GDAL_DATA ${module_dir}/${package_name}/${version}/envs/agdc/share/gdal
+
+# This disables loading modules and .pth files from ~/.local/lib/python2.7/...
+setenv PYTHONUSERBASE ~/.digitalearthau/${version}/local
+prepend-path PATH ~/.digitalearthau/${version}/local/bin
 
