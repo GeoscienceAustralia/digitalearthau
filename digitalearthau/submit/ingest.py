@@ -59,9 +59,9 @@ def do_qsub(product_name, year, queue, project, nodes, walltime, name, allow_pro
     cmd = test % dict(taskfile=taskfile)
     if click.confirm('\n' + cmd + '\nRUN?', default=False):
         subprocess.check_call(cmd, shell=True)
-    
+
     product_changes_flag = '--allow-product-changes' if allow_product_changes else ''
-    
+
     name = name or taskfile.stem
     qsub = 'qsub -q %(queue)s -N %(name)s -P %(project)s ' \
            '-l ncpus=%(ncpus)d,mem=%(mem)dgb,walltime=%(walltime)d:00:00 ' \
