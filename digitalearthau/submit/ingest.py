@@ -37,9 +37,10 @@ def list_products():
               help='Number of hours to request',
               type=click.IntRange(1, 48))
 @click.option('--name', help='Job name to use')
+@click.option('--allow-product-changes', help='allow changes to product definition', is_flag=True)
 @click.argument('product_name')
 @click.argument('year')
-def do_qsub(product_name, year, queue, project, nodes, walltime, name):
+def do_qsub(product_name, year, queue, project, nodes, walltime, name, allow_product_changes):
     """Submits an ingest job to qsub."""
     config_path = INGEST_CONFIG_DIR / '{}.yaml'.format(product_name)
     taskfile = Path(product_name + '_' + year.replace('-', '_') + '.bin').absolute()
@@ -59,11 +60,14 @@ def do_qsub(product_name, year, queue, project, nodes, walltime, name):
     if click.confirm('\n' + cmd + '\nRUN?', default=False):
         subprocess.check_call(cmd, shell=True)
 
+    product_changes_flag = '--allow-product-changes' if allow_product_changes else ''
+
     name = name or taskfile.stem
     qsub = 'qsub -q %(queue)s -N %(name)s -P %(project)s ' \
            '-l ncpus=%(ncpus)d,mem=%(mem)dgb,walltime=%(walltime)d:00:00 ' \
            '-- /bin/bash "%(distr)s" "$(dea_module)s" --ppn 16 ' \
-           'datacube -v ingest --load-tasks "%(taskfile)s" --executor distributed DSCHEDULER'
+           'datacube -v ingest "%(product_changes_flag)s"  --load-tasks "%(taskfile)s" ' \
+           '--executor distributed DSCHEDULER'
     cmd = qsub % dict(taskfile=taskfile,
                       distr=DISTRIBUTED_SCRIPT,
                       dea_module=digitalearthau.MODULE_NAME,
@@ -72,7 +76,8 @@ def do_qsub(product_name, year, queue, project, nodes, walltime, name):
                       project=project,
                       ncpus=nodes * 16,
                       mem=nodes * 31,
-                      walltime=walltime)
+                      walltime=walltime,
+                      product_changes_flag=product_changes_flag)
     if click.confirm('\n' + cmd + '\nRUN?', default=True):
         subprocess.check_call(cmd, shell=True)
 
