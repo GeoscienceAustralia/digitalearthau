@@ -60,10 +60,8 @@ def do_qsub(product_name, year, queue, project, nodes, walltime, name, allow_pro
     if click.confirm('\n' + cmd + '\nRUN?', default=False):
         subprocess.check_call(cmd, shell=True)
     
-    product_changes_flag = ''
-    if allow_product_changes:
-	product_changes_flag = '--allow-product-changes'
-
+    product_changes_flag = '--allow-product-changes' if allow_product_changes else ''
+    
     name = name or taskfile.stem
     qsub = 'qsub -q %(queue)s -N %(name)s -P %(project)s ' \
            '-l ncpus=%(ncpus)d,mem=%(mem)dgb,walltime=%(walltime)d:00:00 ' \
@@ -78,7 +76,8 @@ def do_qsub(product_name, year, queue, project, nodes, walltime, name, allow_pro
                       project=project,
                       ncpus=nodes * 16,
                       mem=nodes * 31,
-                      walltime=walltime)
+                      walltime=walltime,
+                      product_changes_flag=product_changes_flag)
     if click.confirm('\n' + cmd + '\nRUN?', default=True):
         subprocess.check_call(cmd, shell=True)
 
