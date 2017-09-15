@@ -15,6 +15,23 @@ please consider reading up on git online first.
 - `<https://help.github.com>`_ covers a lot of detail and github specifics
 
 
+Initial Setup
+----------------
+
+When setting up new dev machine make sure that your git identity is properly configured.
+
+.. code-block:: bash
+
+    git config --global user.name "YourFirstName YourLastName"
+    git config --global user.email "your_email@example.com"
+    # configure other useful options
+    git config --global pull.rebase true
+    # review
+    git config --list
+
+
+
+
 Main Principles
 ------------------
 
@@ -64,15 +81,18 @@ don't put full stop [.] at the end of the summary line.
 Many tools, GitHub including, expect this format and sticking to it makes
 inspecting history more accessible.
 
-.. note ::
+When writing the summary line prefer to use the *"imperative mood"* (i.e. "spoken or
+written as if giving a command or instruction"). So use ::
 
-    Could be helpful to prescribe how summary line is to be phrased. Which do we
-    prefer?
+   Fix spelling mistake in the help message
 
-    - Fixed spelling mistake in the help message
-    - Fix spelling mistake in the help message
+and not::
 
-For a more expanded exploration of the topic see `<https://chris.beams.io/posts/git-commit/>`_
+   Fixed spelling mistake in the help message
+
+Write it as if finishing this sentence: "When applied this commit will ...", but
+still start with a capital letter. For a more expanded exploration of the topic
+see `<https://chris.beams.io/posts/git-commit/>`_
 
 
 Clean Linear History
@@ -112,21 +132,6 @@ some of the tools listed below
 - `<https://www.gitkraken.com>`_
 - `<https://www.sourcetreeapp.com>`_
 - Docs for plain git `<https://help.github.com/articles/changing-a-commit-message/>`_
-
-
-Initial Setup
-----------------
-
-When setting up new dev machine make sure that your git identity is properly configured.
-
-.. code-block:: bash
-
-    git config --global user.name "YourFirstName YourLastName"
-    git config --global user.email "your_email@example.com"
-    # configure other useful options
-    git config --global pull.rebase true
-    # review
-    git config --list
 
 
 Bug Fix Workflow
