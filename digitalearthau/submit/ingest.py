@@ -50,7 +50,7 @@ def do_qsub(product_name, year, queue, project, nodes, walltime, name, allow_pro
 
     subprocess.check_call('datacube -v system check', shell=True)
 
-    product_changes_flag = '--allow-product-changes' if allow_product_changes else '
+    product_changes_flag = '--allow-product-changes' if allow_product_changes else ''
 
     prep = 'datacube -v ingest -c "%(config)s" "%(product_changes_flag)s" --year %(year)s ' \ 
            '--save-tasks "%(taskfile)s"'
