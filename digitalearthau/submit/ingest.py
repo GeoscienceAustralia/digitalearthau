@@ -52,7 +52,7 @@ def do_qsub(product_name, year, queue, project, nodes, walltime, name, allow_pro
 
     product_changes_flag = '--allow-product-changes' if allow_product_changes else ''
 
-    prep = 'datacube -v ingest -c "%(config)s" "%(product_changes_flag)s" --year %(year)s ' \ 
+    prep = 'datacube -v ingest -c "%(config)s" "%(product_changes_flag)s" --year %(year)s ' \
            '--save-tasks "%(taskfile)s"'
     cmd = prep % dict(config=config_path, taskfile=taskfile, year=year,
                       product_changes_flag=product_changes_flag)
