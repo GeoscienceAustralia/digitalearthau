@@ -50,23 +50,25 @@ def do_qsub(product_name, year, queue, project, nodes, walltime, name, allow_pro
 
     subprocess.check_call('datacube -v system check', shell=True)
 
-    prep = 'datacube -v ingest -c "%(config)s" --year %(year)s --save-tasks "%(taskfile)s"'
-    cmd = prep % dict(config=config_path, taskfile=taskfile, year=year)
+    product_changes_flag = '--allow-product-changes' if allow_product_changes else ''
+
+    prep = 'datacube -v ingest -c "%(config)s" %(product_changes_flag)s --year %(year)s ' \
+           '--save-tasks "%(taskfile)s"'
+    cmd = prep % dict(config=config_path, taskfile=taskfile, year=year,
+                      product_changes_flag=product_changes_flag)
     if click.confirm('\n' + cmd + '\nRUN?', default=True):
         subprocess.check_call(cmd, shell=True)
 
-    test = 'datacube -v ingest --load-tasks "%(taskfile)s" --dry-run'
-    cmd = test % dict(taskfile=taskfile)
+    test = 'datacube -v ingest %(product_changes_flag)s --load-tasks "%(taskfile)s" --dry-run'
+    cmd = test % dict(taskfile=taskfile, product_changes_flag=product_changes_flag)
     if click.confirm('\n' + cmd + '\nRUN?', default=False):
         subprocess.check_call(cmd, shell=True)
-
-    product_changes_flag = '--allow-product-changes' if allow_product_changes else ''
 
     name = name or taskfile.stem
     qsub = 'qsub -q %(queue)s -N %(name)s -P %(project)s ' \
            '-l ncpus=%(ncpus)d,mem=%(mem)dgb,walltime=%(walltime)d:00:00 ' \
            '-- /bin/bash "%(distr)s" "$(dea_module)s" --ppn 16 ' \
-           'datacube -v ingest "%(product_changes_flag)s"  --load-tasks "%(taskfile)s" ' \
+           'datacube -v ingest %(product_changes_flag)s --load-tasks "%(taskfile)s" ' \
            '--executor distributed DSCHEDULER'
     cmd = qsub % dict(taskfile=taskfile,
                       distr=DISTRIBUTED_SCRIPT,
