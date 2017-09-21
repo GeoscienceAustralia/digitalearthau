@@ -4,6 +4,7 @@ import sys
 import re
 import logging
 import itertools
+import shlex
 from time import sleep
 
 from pydash import pick
@@ -304,7 +305,7 @@ def self_launch_args(*args):
 def generate_self_launch_script(*args):
     s = "#!/bin/bash\n\n"
     s += pbs.generate_env_header()
-    s += '\n\nexec ' + ' '.join("'{}'".format(s) for s in self_launch_args(*args))
+    s += '\n\nexec ' + ' '.join(shlex.quote(s) for s in self_launch_args(*args))
     return s
 
 
