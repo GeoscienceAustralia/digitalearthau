@@ -33,7 +33,7 @@ setup(
     install_requires=[
         'click>=5.0',
         'compliance-checker',
-        'datacube',
+        'datacube[celery]',
         'python-dateutil',
         'gdal',
         'eodatasets',
@@ -42,6 +42,7 @@ setup(
         'DAWG',
         'boltons',
         'lxml',
+        'pydash',
     ],
     tests_require=tests_require,
     extras_require=extras_require,
