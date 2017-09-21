@@ -36,6 +36,7 @@ def task_generator(num_tasks):
         yield Task(i)._asdict()
 
 
+# pylint thinks `op` is too short of a name
 # pylint: disable=invalid-name
 def run_task(task, op):
     """ Runs across multiple cpus/nodes

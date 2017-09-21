@@ -4,6 +4,7 @@ import subprocess
 import platform
 import re
 import functools
+import shlex
 from collections import namedtuple, OrderedDict
 
 Node = namedtuple('Node', ['name', 'num_cores', 'offset', 'is_main'])
@@ -82,7 +83,7 @@ def get_env(extras=None, **more_env):
 
 
 def mk_exports(env):
-    return '\n'.join('export {}="{}"'.format(k, v) for k, v in env.items())
+    return '\n'.join('export {}={}'.format(k, shlex.quote(v)) for k, v in env.items())
 
 
 def generate_env_header(extras=None, **more_env):
