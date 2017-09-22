@@ -1,10 +1,12 @@
-name: pq_count_albers
+name: pq_count_annual_summary
 description: Pixel Quality Statistics 25m
 
 metadata_type: eo
 
 metadata:
-  product_type: pixel_quality_statistical_summary
+  product_type: pq_count
+  stats:
+    period: '12m'
   format:
     name: NetCDF
 
@@ -25,11 +27,11 @@ storage:
 
 measurements:
   - name: clear_observation_count
-    dtype: uint16
-    nodata: 65535
+    dtype: int16
+    nodata: -1
     units: '1'
 
   - name: total_observation_count
-    dtype: uint16
-    nodata: 65535
+    dtype: int16
+    nodata: -1
     units: '1'

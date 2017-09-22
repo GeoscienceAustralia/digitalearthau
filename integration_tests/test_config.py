@@ -61,5 +61,6 @@ def test_dea_config(dea_index: Index):
         'ls8_pq_oli_scene',
         'ls8_pq_scene',
         'ls8_satellite_telemetry_data',
-        'pq_count_albers',
+        'pq_count_summary',
+        'pq_count_annual_summary',
     }
