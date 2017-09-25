@@ -331,12 +331,12 @@ def qsub_self_launch(qsub_opts, *args):
     return exit_code, out_txt
 
 
-def launch_redis_worker_pool(port=6379):
+def launch_redis_worker_pool(port=6379, **redis_params):
     redis_port = port
     redis_host = pbs.hostname()
     redis_password = cr.get_redis_password(generate_if_missing=True)
 
-    redis_shutdown = cr.launch_redis(redis_port, redis_password)
+    redis_shutdown = cr.launch_redis(redis_port, redis_password, **redis_params)
 
     _LOG.info('Launched Redis at %s:%d', redis_host, redis_port)
 
@@ -460,7 +460,9 @@ class TaskRunner(object):
 
         def mk_pbs_celery():
             qsize = pbs.preferred_queue_size()
-            executor, shutdown = launch_redis_worker_pool()
+            port = 6379  # TODO: randomise
+            maxmemory = "1024mb"  # TODO: compute maxmemory from qsize
+            executor, shutdown = launch_redis_worker_pool(port=port, maxmemory=maxmemory)
             return (executor, qsize, shutdown)
 
         def mk_dask():
