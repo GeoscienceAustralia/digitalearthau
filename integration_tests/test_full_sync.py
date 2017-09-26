@@ -13,7 +13,7 @@ from dateutil import tz
 from datacube.index.postgres import _api
 from datacube.utils import uri_to_local_path
 from digitalearthau import paths, collections
-from digitalearthau.archive import CleanConsoleRenderer
+from digitalearthau.uiutil import CleanConsoleRenderer
 from digitalearthau.collections import Collection
 from digitalearthau.index import DatasetLite, MemoryDatasetPathIndex, AgdcDatasetPathIndex
 from digitalearthau.paths import register_base_directory
