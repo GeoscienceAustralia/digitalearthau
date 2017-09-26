@@ -53,20 +53,26 @@ def duplicate_ls8_l1_scene(dea_index: Index, integration_test_data: Path) -> uui
 
 def test_no_duplicates(global_integration_cli_args,
                        indexed_ls8_l1_scenes: Tuple[uuid.UUID, uuid.UUID]):
-    res = _run_cmd(['-a'], global_integration_cli_args)
-    # Just the headers, no results
-    assert res.output == 'product,time_lower_day,platform,count,dataset_refs\n'
     res = _run_cmd(['ls8_level1_scene'], global_integration_cli_args)
     assert res.output == 'product,time_lower_day,sat_path_lower,sat_row_lower,count,dataset_refs\n'
+    assert res.exit_code == 0
+
+    res = _run_cmd(['ls8_nbar_albers'], global_integration_cli_args)
+    assert res.exit_code == 0
+    assert res.output == ''
+
+    # Error returned, fake product
+    res = _run_cmd(['ls8_fake_product'], global_integration_cli_args)
+    assert 'Usage:' in res.output
+    assert res.exit_code != 0
 
 
 def test_duplicates(global_integration_cli_args,
                     indexed_ls8_l1_scenes: Tuple[uuid.UUID, uuid.UUID], duplicate_ls8_l1_scene: uuid.UUID):
-    res = _run_cmd(['--all_'], global_integration_cli_args)
-    assert res.output == _EXPECTED_ALL_DUPLICATES
-
-    res = _run_cmd(['ls8_level1_scene'], global_integration_cli_args)
+    # It should only find dupes for ls8
+    res = _run_cmd(['ls8_level1_scene', 'ls7_level1_scene'], global_integration_cli_args)
     assert res.output == _EXPECTED_SPECIFIC_DUPS
+    assert res.exit_code == 0
 
 
 def _run_cmd(args, global_integration_cli_args) -> click.testing.Result:
