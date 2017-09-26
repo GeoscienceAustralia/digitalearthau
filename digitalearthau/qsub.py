@@ -53,7 +53,7 @@ class QSubLauncher(object):
         else:
             self._internal_args = self._internal_args + args
 
-    def __call__(self, auto=False, *args):
+    def __call__(self, *args, **kwargs):
         """ Submit self via qsub
 
         auto=True -- re-use arguments used during invocation, removing `--qsub` parameter
@@ -61,6 +61,7 @@ class QSubLauncher(object):
 
         args -- command line arguments to launch with under qsub, only used if auto=False
         """
+        auto = kwargs.get('auto', False)
         if auto:
             args = sys.argv[1:]
             args = remove_args('--qsub', args, n=1)
@@ -72,7 +73,7 @@ class QSubLauncher(object):
 
         r, output = qsub_self_launch(self._params, *args)
         click.echo(output)
-        return r
+        return r, output
 
 
 class QSubParamType(click.ParamType):
