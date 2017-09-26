@@ -49,7 +49,6 @@ setup(
 
     entry_points={
         'console_scripts': [
-            'dea-archive = digitalearthau.archive:main',
             'dea-clean = digitalearthau.cleanup:main',
             'dea-coherence = digitalearthau.coherence:main',
             'dea-duplicates = digitalearthau.duplicates:main',
