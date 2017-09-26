@@ -11,13 +11,14 @@ from functools import singledispatch
 from typing import Iterable
 from uuid import UUID
 
+import click
 from dateutil import tz
 from psycopg2._range import Range
 
-from datacube.index import index_connect
 from datacube.index._api import Index
 from datacube.index.fields import Field
 from datacube.model import DatasetType, MetadataType
+from datacube.ui.click import global_cli_options, pass_index
 from digitalearthau import collections
 
 
@@ -39,24 +40,24 @@ def parse_field_expression(md: MetadataType, expression: str):
     return field
 
 
-def write_duplicates_csv(collections_: Iterable[collections.Collection],
-                         out_stream):
-    with index_connect(application_name='find-duplicates') as c:
+def write_duplicates_csv(
+        index: Index,
+        collections_: Iterable[collections.Collection],
+        out_stream):
+    has_started = False
+    for collection in collections_:
+        matching_products = index.products.search(**collection.query)
+        for product in matching_products:
+            unique_fields = tuple(parse_field_expression(product.metadata_type, f)
+                                  for f in collection.unique)
 
-        has_started = False
-        for collection in collections_:
-            matching_products = c.products.search(**collection.query)
-            for product in matching_products:
-                unique_fields = tuple(parse_field_expression(product.metadata_type, f)
-                                      for f in collection.unique)
-
-                _write_csv(
-                    unique_fields,
-                    get_dupes(c, unique_fields, product),
-                    out_stream,
-                    append=has_started
-                )
-                has_started = True
+            _write_csv(
+                unique_fields,
+                get_dupes(index, unique_fields, product),
+                out_stream,
+                append=has_started
+            )
+            has_started = True
 
 
 def get_dupes(index, unique_fields, product):
@@ -140,26 +141,28 @@ def _write_csv(unique_fields, dicts, stream, append=False):
     )
 
 
-def main():
-    if len(sys.argv) > 1 and sys.argv[1] == '--help':
-        sys.stderr.write(
-            'Usage: {} [collections...]\n\n'
-            'Where collections are among: \n\t{}\n\n'
-            'Or specify --all to check all\n'.format(
-                sys.argv[0], '\n\t'.join(sorted(collections.registered_collection_names())))
-        )
-        sys.exit(1)
+collections.init_nci_collections(None)
 
-    if len(sys.argv) > 1 and sys.argv[1] == '--all':
+
+@click.command('duplicates')
+@global_cli_options
+@click.option('-a', '--all_', is_flag=True)
+@click.argument('collections_', type=click.Choice(collections.registered_collection_names()), nargs=-1)
+@pass_index(app_name="find-duplicates")
+def cli(index, all_, collections_):
+    collections.init_nci_collections(index)
+
+    if all_:
         collection_names = collections.registered_collection_names()
     else:
-        collection_names = sys.argv[1:]
+        collection_names = collections_
 
     write_duplicates_csv(
+        index,
         [collections.get_collection(name) for name in collection_names],
         sys.stdout
     )
 
 
 if __name__ == '__main__':
-    main()
+    cli()
