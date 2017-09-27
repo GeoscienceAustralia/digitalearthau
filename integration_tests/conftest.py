@@ -14,6 +14,7 @@ from datacube.index._api import Index
 from datacube.index.postgres import PostgresDb
 from datacube.index.postgres import _dynamic
 from datacube.index.postgres.tables import _core
+import digitalearthau.system
 
 try:
     from yaml import CSafeLoader as SafeLoader
@@ -47,13 +48,15 @@ def dea_index(index: Index):
     """
     An index initialised with DEA config (products)
     """
-    # Add DEA metadata types, products. They'll be validated etc.
-    for md_type_def in load_yaml_file(DEA_MD_TYPES):
-        index.metadata_types.add(index.metadata_types.from_doc(md_type_def))
+    # Add DEA metadata types, products. They'll be validated too.
+    digitalearthau.system.init_dea(
+        index,
+        with_permissions=False,
+        # No "product added" logging as it makes test runs too noisy
+        log_header=lambda *s: None,
+        log=lambda *s: None,
 
-    for product_file in DEA_PRODUCTS_DIR.glob('*.yaml'):
-        for product_def in load_yaml_file(product_file):
-            index.products.add_document(product_def)
+    )
 
     return index
 
