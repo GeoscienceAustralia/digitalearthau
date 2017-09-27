@@ -58,6 +58,7 @@ setup(
             'dea-submit-ncmler = digitalearthau.submit.ncmler:cli',
             'dea-submit-sync = digitalearthau.sync.submit_job:main',
             'dea-sync = digitalearthau.sync:cli',
+            'dea-system = digitalearthau.system:cli',
         ]
     },
 )

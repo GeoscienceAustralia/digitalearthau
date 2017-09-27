@@ -4,7 +4,6 @@ import click
 import digitalearthau
 from datacube.index._api import Index
 from datacube.scripts import ingest
-from datacube.scripts.system import database_init
 from datacube.ui.click import pass_index, global_cli_options
 from datacube.utils import read_documents
 
@@ -13,26 +12,51 @@ DEA_PRODUCTS_DIR = digitalearthau.CONFIG_DIR / 'products'
 DEA_INGESTION_DIR = digitalearthau.CONFIG_DIR / 'ingestion'
 
 
-@click.command()
-@global_cli_options
-@pass_index(expect_initialised=False)
-@click.pass_context
-def init_dea(ctx: click.Context, index: Index):
-    click.secho("ODC setup", bold=True)
-    init_result = ctx.invoke(database_init, default_types=False, lock_table=True)
+def print_header(msg):
+    click.secho(msg, bold=True)
 
-    click.secho('Checking DEA metadata types', bold=True)
+
+def print_(msg):
+    click.echo('    {}'.format(msg))
+
+
+def init_dea(
+        index: Index,
+        with_permissions: bool,
+        log_header=print_header,
+        log=print_
+):
+    """
+    Create or update a DEA configured ODC instance.
+    """
+    log_header(f"ODC init of {index.url}")
+    was_created = index.init_db(with_default_types=False,
+                                with_permissions=with_permissions)
+
+    if was_created:
+        log('Created.')
+    else:
+        log('Updated.')
+
+    log('Checking indexes/views.')
+    index.metadata_types.check_field_indexes(
+        allow_table_lock=True,
+        rebuild_indexes=False,
+        rebuild_views=True,
+    )
+
+    log_header('Checking DEA metadata types')
     # Add DEA metadata types, products.
     for _, md_type_def in read_documents(DEA_MD_TYPES):
         md = index.metadata_types.add(index.metadata_types.from_doc(md_type_def))
-        click.echo(f"    {md.name}")
+        log(f"{md.name}")
 
-    click.secho('Checking DEA products', bold=True)
+    log_header('Checking DEA products')
     for _, product_def in read_documents(*DEA_PRODUCTS_DIR.glob('*.yaml')):
         product = index.products.add_document(product_def)
-        click.echo(f"    {product.name}")
+        log(f"{product.name}")
 
-    click.secho('Checking DEA ingested definitions', bold=True)
+    log_header('Checking DEA ingested definitions')
 
     for path in DEA_INGESTION_DIR.glob('*.yaml'):
         ingest_config = ingest.load_config_from_file(index, path)
@@ -40,8 +64,24 @@ def init_dea(ctx: click.Context, index: Index):
         source_type, output_type = ingest.ensure_output_type(
             index, ingest_config, allow_product_changes=True
         )
-        click.echo(f"    {output_type.name:<20}\t\t← {source_type.name}")
+        log(f"{output_type.name:<20}\t\t← {source_type.name}")
+
+
+@click.group('system')
+@global_cli_options
+def cli():
+    pass
+
+
+@cli.command('init')
+@click.option(
+    '--init-users/--no-init-users', is_flag=True, default=True,
+    help="Include user roles and grants. (default: true)"
+)
+@pass_index(expect_initialised=False)
+def init_dea_cli(index: Index, init_users: bool):
+    init_dea(index, with_permissions=init_users)
 
 
 if __name__ == '__main__':
-    init_dea()
+    cli()
