@@ -13,12 +13,10 @@ See the modules [readme](modules/README.md)
 
 ### Creating a DEA-configured Data Cube
 
-DEA has its own metadata types, so you must initialise a new datacube without
-the default ones:
+DEA has its own metadata types, so you must initialise using the config in this
+repository rather that `datacube system init`. A command is available to do this:
 
-    datacube -v system init --no-default-types
+    dea-system init
 
-Then add metadata types and products from this repository:
 
-    datacube -v metadata_type add digitalearthau/config/metadata-types.yaml
-    datacube -v product add digitalearthau/config/products/ls*_scenes.yaml
+
