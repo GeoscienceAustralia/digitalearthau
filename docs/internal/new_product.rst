@@ -59,23 +59,10 @@ To check this worked run ``datacube system check`` at this point system check
 should fail as database is completely empty.
 
 
-.. note::
-
-   For now lets assume that exported list of products and metadata is maintained
-   in a well-known location and is always up-to-date with data contained in the
-   main database. Currently we will use data extracted by Damien (``dra547`` on
-   NCI.)
-
-
 .. code-block:: bash
 
-    METADATA_TYPES="/g/data/u46/users/dra547/all_prod_metadata_types.yaml"
-    PRODUCTS="/g/data/u46/users/dra547/all_prod_products.yaml"
-
-    # Create and populate database
-    datacube system init --no-default-types
-    datacube metadata_type add "${METADATA_TYPES}"
-    datacube product add "${PRODUCTS}"
+    # Create database with DEA configuration
+    dea-system init
 
 To verify run system check and product list
 

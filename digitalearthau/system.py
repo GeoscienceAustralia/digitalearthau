@@ -80,6 +80,18 @@ def cli():
 )
 @pass_index(expect_initialised=False)
 def init_dea_cli(index: Index, init_users: bool):
+    """
+    Initialise a DEA-configured datacube.
+
+    It does the equivalent of this:
+
+        datacube -v system init --no-default-types
+        datacube -v metadata_type add digitalearthau/config/metadata-types.yaml
+        datacube -v product add digitalearthau/config/products/ls*_scenes.yaml
+
+    ... and adds all ingest products too.
+
+    """
     init_dea(index, with_permissions=init_users)
 
 
