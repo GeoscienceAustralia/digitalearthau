@@ -59,7 +59,7 @@ def test_no_duplicates(global_integration_cli_args,
 
     res = _run_cmd(['ls8_nbar_albers'], global_integration_cli_args)
     assert res.exit_code == 0
-    assert res.output == ''
+    assert res.output == 'product,time_lower_day,lat,lon,count,dataset_refs\n'
 
     # Error returned, fake product
     res = _run_cmd(['ls8_fake_product'], global_integration_cli_args)
