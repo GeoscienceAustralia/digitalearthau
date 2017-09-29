@@ -30,6 +30,8 @@ def test_dea_config(dea_index: Index):
         'high_tide_comp_count',
         'low_tide_comp_20p',
         'low_tide_comp_count',
+        'item_v2',
+        'item_v2_conf',
         'ls5_level1_scene',
         'ls5_nbar_albers',
         'ls5_nbar_scene',
