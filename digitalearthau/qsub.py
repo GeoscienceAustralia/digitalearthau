@@ -497,6 +497,7 @@ class TaskRunner(object):
              default_queue_size,
              self._shutdown) = mk.get(self._kind, mk_serial)()
         except RuntimeError:
+            _LOG.exception("Error starting executor")
             return False
 
         if self._user_queue_size is not None:
