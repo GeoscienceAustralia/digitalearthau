@@ -11,7 +11,7 @@ metadata:
     name: NetCDF
 
 storage:
-  driver: NetCDFCF
+  driver: NetCDF CF
   crs: EPSG:3577
   tile_size:
     x: 100000.0
