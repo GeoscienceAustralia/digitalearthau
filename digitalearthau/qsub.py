@@ -1,6 +1,11 @@
+import json
+import multiprocessing
+import signal
+import uuid
+from typing import Optional
+
 import click
 import yaml
-import sys
 import re
 import logging
 import itertools
@@ -19,7 +24,6 @@ from datacube.executor import (SerialExecutor,
                                _get_distributed_executor)
 
 from datacube import _celery_runner as cr
-
 
 NUM_CPUS_PER_NODE = 16
 QSUB_L_FLAGS = 'mem ncpus walltime wd'.split(' ')
@@ -163,7 +167,6 @@ class HostPort(click.ParamType):
 
 
 def parse_comma_args(s, valid_keys=None):
-
     def parse_one(a):
         kv = tuple(s.strip() for s in re.split(' *[=:] *', a))
         if len(kv) == 1:
@@ -225,7 +228,6 @@ def normalise_mem(x):
 
 
 def norm_qsub_params(p):
-
     ncpus = int(p.get('ncpus', 0))
 
     if ncpus == 0:
@@ -311,7 +313,6 @@ def generate_self_launch_script(*args):
 
 
 def qsub_self_launch(qsub_opts, *args):
-
     script = generate_self_launch_script(*args)
     qsub_args = build_qsub_args(**qsub_opts)
 
@@ -332,17 +333,143 @@ def qsub_self_launch(qsub_opts, *args):
     return exit_code, out_txt
 
 
+import celery.events.state as celery_state
+import sys
+
+
+class JsonLinesWriter:
+    def __init__(self, file_obj) -> None:
+        self._file_obj = file_obj
+
+    def __enter__(self):
+        return self
+
+    def write_item(self, item):
+        self._file_obj.write(json.dumps(item) + '\n')
+        self._file_obj.flush()
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self._file_obj.close()
+
+
+_EXAMPLE_TASK_ARGS = """'(functools.partial(<function do_fc_task at 0x7f47e7aad598>, {\'source_type\': \'ls8_nbar_albers\', \'output_type\': \'ls8_fc_albers\', \'version\': \'${version}\', \'description\': \'Landsat 8 Fractional Cover 25 metre, 100km tile, Australian Albers Equal Area projection (EPSG:3577)\', \'product_type\': \'fractional_cover\', \'location\': \'/g/data/fk4/datacube/002/\', \'file_path_template\': \'LS8_OLI_FC/{tile_index[0]}_{tile_index[1]}/LS8_OLI_FC_3577_{tile_index[0]}_{tile_index[1]}_{start_time}_v{version}.nc\', \'partial_ncml_path_template\': \'LS8_OLI_FC/{tile_index[0]}_{tile_index[1]}/LS8_OLI_FC_3577_{tile_index[0]}_{tile_index[1]}_{start_time}.ncml\', \'ncml_path_template\': \'LS8_OLI_FC/LS8_OLI_FC_3577_{tile_index[0]}_{tile_index[1]}.ncml\', \'sensor_regression_coefficients\': {\'blue\': [0.00041, 0.9747], \'green\': [0.00289, 0.99779], \'red\': [0.00274, 1.00446], \'nir\': [4e-05, 0.98906], \'swir1\': [0.00256, 0.99467], \'swir2\': [-0.00327, 1.02551]}, \'global_attributes\': {\'title\': \'Fractional Cover 25 v2\', \'summary\': "The Fractional Cover (FC)...,)'"""
+_EXAMPLE_TASK_KWARGS = """{'task': {'nbar': Tile<sources=<xarray.DataArray (time: 1)>\narray([ (Dataset <id=d514c26a-d98f-47f1-b0de-15f7fe78c209 type=ls8_nbar_albers location=/g/data/rs0/datacube/002/LS8_OLI_NBAR/-11_-28/LS8_OLI_NBAR_3577_-11_-28_2015_v1496400956.nc>,)], dtype=object)\nCoordinates:\n  * time     (time) datetime64[ns] 2015-01-31T01:51:03,\n\tgeobox=GeoBox(4000, 4000, Affine(25.0, 0.0, -1100000.0,\n       0.0, -25.0, -2700000.0), EPSG:3577)>, 'tile_index': (-11, -28, numpy.datetime64('2015-01-31T01:51:03.000000000')), 'filename': '/g/data/fk4/datacube/002/LS8_OLI_FC/-11_-28/LS8_OLI_FC_3577_-11_-28_20150131015103000000_v1507076205.nc'}}"""
+
+TASK_ID_RE_EXTRACT = re.compile('Dataset <id=([a-z0-9-]{36}) ')
+
+
+def _extract_task_args_dataset_id(kwargs: str) -> Optional[uuid.UUID]:
+    """
+    >>> _extract_task_args_dataset_id(_EXAMPLE_TASK_KWARGS)
+    uuid.UUID('d514c26a-d98f-47f1-b0de-15f7fe78c209')
+    >>> _extract_task_args_dataset_id("no match")
+    """
+    m = TASK_ID_RE_EXTRACT.search(kwargs)
+    if not m:
+        return None
+
+    return uuid.UUID(m.group(1))
+
+
+def get_task_input_dataset_id(task: celery_state.Task):
+    return _extract_task_args_dataset_id(task.kwargs)
+
+
+def log_celery_tasks(app):
+    # Open log file.
+    # Connect to celery
+    # Stream events to file.
+    click.secho("Starting logger", bold=True)
+    state: celery_state.State = app.events.State()
+
+
+    # Two dump methods:
+    # Worker-* (online): hostname, pid, processed count,
+
+    # Task-* (successful, received):
+    #   args: string
+    args = """{'task': {'nbar': Tile<sources=<xarray.DataArray (time: 1)> array([ (Dataset <id=e940a7f7-2337-4267-813e-041a7506e6bb type=ls8_nbar_albers location=/g/data/rs0/datacube/002/LS8_OLI_NBAR/-11_-28/LS8_OLI_NBAR_3577_-11_-28_2015_v1496400956.nc>,)], dtype=object)
+    Coordinates:
+    *time(time)
+    datetime64[ns]
+    2015 - 03 - 29
+    T01: 44:47,
+    geobox = GeoBox(4000, 4000, Affine(25.0, 0.0, -1100000.0,
+                                       0.0, -25.0, -2700000.0), EPSG:3577) >, 'tile_index': (-11, -28, numpy.datetime64(
+        '2015-03-29T01:44:47.000000000')), 'filename': '/g/data/fk4/datacube/002/LS8_OLI_FC/-11_-28/LS8_OLI_FC_3577_-11_-28_20150329014447000000_v1507076205.nc'}}
+        """
+
+    # root_id uuid ?
+    # uuid    uuid
+    # hostname, pid
+    # retries ?
+    # timestamp ?
+    # state ("RECEIVED")
+
+    def handle_task(event):
+
+        state.event(event)
+
+        if not 'uuid' in event:
+            print(f"No task found {event['type']}")
+            return
+        # task name is sent only with -received event, and state
+        # will keep track of this for us.
+        task: celery_state.Task = state.tasks.get(event['uuid'])
+
+        if not task:
+            print(f"No task found {event['type']}")
+            return
+
+        print(f"Task {task.uuid}: {task.state} for dataset {get_task_input_dataset_id(task)}")
+        if 'kwargs' in event:
+            print(f"{repr(event['kwargs'])}")
+            #  Dataset <id=c41dd69b-d94e-4aef-be90-525f46e9c462>
+        if sys.stdout.isatty():
+            click.secho(f"{event['type']}", bold=True)
+
+        output.write_item(event)
+
+    def handle_worker(event):
+        state.event(event)
+        # task name is sent only with -received event, and state
+        # will keep track of this for us.
+        worker: celery_state.Task = state.tasks.get(event['uuid'])
+
+        if event['type'] == 'worker-heartbeat':
+            return
+
+        if sys.stdout.isatty():
+            click.secho(f"{event['type']}", color='red', bold=True)
+
+        output.write_item(event)
+
+    def sttoooopppp(*args):
+        # TODO: Make sure this processes the last events before stopping?
+        app.events.Dispatcher.should_stop = True
+
+    signal.signal(signal.SIGINT, sttoooopppp)
+    signal.signal(signal.SIGTERM, sttoooopppp)
+
+    with JsonLinesWriter(Path('app-events.jsonl').open('a')) as output:
+        with app.connection() as connection:
+            recv = app.events.Receiver(connection, handlers={
+                '*': handle_task,
+                # 'worker-*': handle_worker,
+            })
+            recv.capture(limit=None, timeout=None, wakeup=True)
+
+
 def launch_redis_worker_pool(port=6379, **redis_params):
     redis_port = port
     redis_host = pbs.hostname()
     redis_password = cr.get_redis_password(generate_if_missing=True)
 
     redis_shutdown = cr.launch_redis(redis_port, redis_password, **redis_params)
-
-    _LOG.info('Launched Redis at %s:%d', redis_host, redis_port)
-
     if not redis_shutdown:
         raise RuntimeError('Failed to launch Redis')
+
+    _LOG.info('Launched Redis at %s:%d', redis_host, redis_port)
 
     for i in range(5):
         if cr.check_redis(redis_host, redis_port, redis_password) is False:
@@ -351,22 +478,28 @@ def launch_redis_worker_pool(port=6379, **redis_params):
     executor = cr.CeleryExecutor(
         redis_host,
         redis_port,
-        password=redis_password)
+        password=redis_password,
+    )
+    log_proc = multiprocessing.Process(target=log_celery_tasks, args=(cr.app,))
+    log_proc.start()
 
     worker_env = pbs.get_env()
     worker_procs = []
 
     for node in pbs.nodes():
         nprocs = node.num_cores
+        print(f"Cores {nprocs}")
         if node.is_main:
             nprocs = max(1, nprocs - 2)
 
-        celery_worker_script = 'exec datacube-worker --executor celery {}:{} --nprocs {} >/dev/null 2>/dev/null'.format(
+        celery_worker_script = 'exec datacube-worker --executor celery {}:{} --nprocs {}'.format(
             redis_host, redis_port, nprocs)
         proc = pbs.pbsdsh(node.offset, celery_worker_script, env=worker_env)
+        _LOG.info(f"Started {proc.pid}")
         worker_procs.append(proc)
 
     def shutdown():
+
         cr.app.control.shutdown()
 
         _LOG.info('Waiting for workers to quit')
@@ -375,6 +508,9 @@ def launch_redis_worker_pool(port=6379, **redis_params):
         for p in worker_procs:
             p.wait()
 
+        _LOG.info('Stopping log process')
+        # log_proc.terminate()
+        log_proc.join()
         _LOG.info('Shutting down redis-server')
         redis_shutdown()
 
@@ -529,6 +665,13 @@ def get_current_obj(ctx=None):
     return ctx.obj
 
 
+class QsubRunState:
+    def __init__(self) -> None:
+        self.runner: TaskRunner = None
+        self.qsub: QSubLauncher = None
+        self.qsize: int = None
+
+
 def with_qsub_runner():
     """
     Will add the following options
@@ -547,16 +690,10 @@ def with_qsub_runner():
     arg_name = 'runner'
     o_key = '_qsub_state'
 
-    class State:
-        def __init__(self):
-            self.runner = None
-            self.qsub = None
-            self.qsize = None
-
-    def state(ctx=None):
+    def state(ctx=None) -> QsubRunState:
         obj = get_current_obj(ctx)
         if o_key not in obj:
-            obj[o_key] = State()
+            obj[o_key] = QsubRunState()
         return obj[o_key]
 
     def add_multiproc_executor(ctx, param, value):
@@ -596,14 +733,14 @@ def with_qsub_runner():
             click.option('--dask',
                          type=HostPort(),
                          help='Use dask.distributed backend for parallel computation. ' +
-                         'Supply address of dask scheduler.',
+                              'Supply address of dask scheduler.',
                          expose_value=False,
                          callback=add_dask_executor),
             click.option('--celery',
                          type=HostPort(),
                          help='Use celery backend for parallel computation. ' +
-                         'Supply redis server address, or "pbs-launch" to launch redis ' +
-                         'server and workers when running under pbs.',
+                              'Supply redis server address, or "pbs-launch" to launch redis ' +
+                              'server and workers when running under pbs.',
                          expose_value=False,
                          callback=add_celery_executor),
             click.option('--queue-size',
@@ -615,7 +752,7 @@ def with_qsub_runner():
                          type=QSubParamType(),
                          callback=capture_qsub,
                          help='Launch via qsub, supply comma or new-line separated list of parameters.' +
-                         ' Try --qsub=help.'),
+                              ' Try --qsub=help.'),
         ]
 
         for o in opts:
@@ -638,4 +775,5 @@ def with_qsub_runner():
             return f(*args, **kwargs)
 
         return update_wrapper(extract_runner, f)
+
     return decorate

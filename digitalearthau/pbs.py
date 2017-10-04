@@ -95,7 +95,7 @@ def wrap_script(script):
     return 'eval "$(echo {}|base64 --decode)"'.format(b64s)
 
 
-def pbsdsh(cpu_num, script, env=None, test_mode=False):
+def pbsdsh(cpu_num, script, env=None, test_mode=True):
 
     if env is None:
         env = get_env()
@@ -108,7 +108,4 @@ def pbsdsh(cpu_num, script, env=None, test_mode=False):
         args = "pbsdsh -n {} -- bash -c".format(cpu_num).split(' ')
 
     args.append(wrap_script(hdr + script))
-    return subprocess.Popen(
-        args,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE)
+    return subprocess.Popen(args)
