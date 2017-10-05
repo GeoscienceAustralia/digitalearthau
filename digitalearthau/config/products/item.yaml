@@ -6,7 +6,7 @@ metadata_type: eo
 managed: true
 metadata:
   format:
-    name: NetCDF
+    name: NetCDF CF
   product_type: ITEM
   statistic:
     name: decile
@@ -31,7 +31,7 @@ metadata_type: eo
 managed: true
 metadata:
   format:
-    name: NetCDF
+    name: NetCDF CF
   product_type: ITEM
   statistic:
     name: stddev
