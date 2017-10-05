@@ -6,7 +6,7 @@ metadata_type: eo
 managed: true
 metadata:
     format:
-        name: NetCDF CF
+        name: NetCDF
     product_type: tidal_composite
     statistic:
         name: precisegeomedian
@@ -56,7 +56,7 @@ managed: true
 
 metadata:
     format:
-        name: NetCDF CF
+        name: NetCDF
     product_type: tidal_composite
     statistic:
         name: clearcount
@@ -86,7 +86,7 @@ managed: true
 
 metadata:
     format:
-        name: NetCDF CF
+        name: NetCDF
     product_type: tidal_composite
     statistic:
         name: precisegeomedian
@@ -136,7 +136,7 @@ managed: true
 
 metadata:
     format:
-        name: NetCDF CF
+        name: NetCDF
     product_type: tidal_composite
     statistic:
         name: clearcount
