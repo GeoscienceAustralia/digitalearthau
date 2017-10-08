@@ -1,10 +1,14 @@
+import getpass
 import json
 import multiprocessing
 import signal
+import socket
 import uuid
-from typing import Optional
+from typing import Optional, Iterable
 
+import celery
 import click
+import datetime
 import yaml
 import re
 import logging
@@ -17,6 +21,7 @@ from pathlib import Path
 from functools import update_wrapper
 from subprocess import Popen, PIPE
 
+from digitalearthau.events import Status, TaskEvent, NodeMessage
 from . import pbs
 from datacube.executor import (SerialExecutor,
                                mk_celery_executor,
@@ -24,6 +29,10 @@ from datacube.executor import (SerialExecutor,
                                _get_distributed_executor)
 
 from datacube import _celery_runner as cr
+
+import celery.states
+
+from . import events
 
 NUM_CPUS_PER_NODE = 16
 QSUB_L_FLAGS = 'mem ncpus walltime wd'.split(' ')
@@ -352,8 +361,28 @@ class JsonLinesWriter:
         self._file_obj.close()
 
 
-_EXAMPLE_TASK_ARGS = """'(functools.partial(<function do_fc_task at 0x7f47e7aad598>, {\'source_type\': \'ls8_nbar_albers\', \'output_type\': \'ls8_fc_albers\', \'version\': \'${version}\', \'description\': \'Landsat 8 Fractional Cover 25 metre, 100km tile, Australian Albers Equal Area projection (EPSG:3577)\', \'product_type\': \'fractional_cover\', \'location\': \'/g/data/fk4/datacube/002/\', \'file_path_template\': \'LS8_OLI_FC/{tile_index[0]}_{tile_index[1]}/LS8_OLI_FC_3577_{tile_index[0]}_{tile_index[1]}_{start_time}_v{version}.nc\', \'partial_ncml_path_template\': \'LS8_OLI_FC/{tile_index[0]}_{tile_index[1]}/LS8_OLI_FC_3577_{tile_index[0]}_{tile_index[1]}_{start_time}.ncml\', \'ncml_path_template\': \'LS8_OLI_FC/LS8_OLI_FC_3577_{tile_index[0]}_{tile_index[1]}.ncml\', \'sensor_regression_coefficients\': {\'blue\': [0.00041, 0.9747], \'green\': [0.00289, 0.99779], \'red\': [0.00274, 1.00446], \'nir\': [4e-05, 0.98906], \'swir1\': [0.00256, 0.99467], \'swir2\': [-0.00327, 1.02551]}, \'global_attributes\': {\'title\': \'Fractional Cover 25 v2\', \'summary\': "The Fractional Cover (FC)...,)'"""
-_EXAMPLE_TASK_KWARGS = """{'task': {'nbar': Tile<sources=<xarray.DataArray (time: 1)>\narray([ (Dataset <id=d514c26a-d98f-47f1-b0de-15f7fe78c209 type=ls8_nbar_albers location=/g/data/rs0/datacube/002/LS8_OLI_NBAR/-11_-28/LS8_OLI_NBAR_3577_-11_-28_2015_v1496400956.nc>,)], dtype=object)\nCoordinates:\n  * time     (time) datetime64[ns] 2015-01-31T01:51:03,\n\tgeobox=GeoBox(4000, 4000, Affine(25.0, 0.0, -1100000.0,\n       0.0, -25.0, -2700000.0), EPSG:3577)>, 'tile_index': (-11, -28, numpy.datetime64('2015-01-31T01:51:03.000000000')), 'filename': '/g/data/fk4/datacube/002/LS8_OLI_FC/-11_-28/LS8_OLI_FC_3577_-11_-28_20150131015103000000_v1507076205.nc'}}"""
+# The strigified args that celery gives us back within task messages
+_EXAMPLE_TASK_ARGS = "'(functools.partial(<function do_fc_task at 0x7f47e7aad598>, {" \
+                     "\'source_type\': \'ls8_nbar_albers\', \'output_type\': \'ls8_fc_albers\', " \
+                     "\'version\': \'${version}\', \'description\': \'Landsat 8 Fractional Cover 25 metre, " \
+                     "100km tile, Australian Albers Equal Area projection (EPSG:3577)\', \'product_type\': " \
+                     "\'fractional_cover\', \'location\': \'/g/data/fk4/datacube/002/\', \'file_path_template\': " \
+                     "\'LS8_OLI_FC/{tile_index[0]}_{tile_index[1]}/LS8_OLI_FC_3577_{tile_index[0]}_{tile_index[1]}_" \
+                     "{start_time}_v{version}.nc\', \'partial_ncml_path_template\': \'LS8_OLI_FC/{tile_index[0]}_" \
+                     "{tile_index[1]}/LS8_OLI_FC_3577_{tile_index[0]}_{tile_index[1]}_{start_time}.ncml\', \'ncml_" \
+                     "path_template\': \'LS8_OLI_FC/LS8_OLI_FC_3577_{tile_index[0]}_{tile_index[1]}.ncml\', \'sensor" \
+                     "_regression_coefficients\': {\'blue\': [0.00041, 0.9747], \'green\': [0.00289, 0.99779], " \
+                     "\'red\': [0.00274, 1.00446], \'nir\': [4e-05, 0.98906], \'swir1\': [0.00256, 0.99467], " \
+                     "\'swir2\': [-0.00327, 1.02551]}, \'global_attributes\': {\'title\': \'Fractional Cover 25 " \
+                     "v2\', \'summary\': \"The Fractional Cover (FC)...,)'"
+_EXAMPLE_TASK_KWARGS = "{'task': {'nbar': Tile<sources=<xarray.DataArray (time: 1)>\narray([ (Dataset <id=" \
+                       "d514c26a-d98f-47f1-b0de-15f7fe78c209 type=ls8_nbar_albers location=/g/data/rs0/datacube/002/" \
+                       "LS8_OLI_NBAR/-11_-28/LS8_OLI_NBAR_3577_-11_-28_2015_v1496400956.nc>,)], dtype=object)\n" \
+                       "Coordinates:\n  * time     (time) datetime64[ns] 2015-01-31T01:51:03,\n\tgeobox=GeoBox(4000, " \
+                       "4000, Affine(25.0, 0.0, -1100000.0,\n       0.0, -25.0, -2700000.0), EPSG:3577)>, " \
+                       "'tile_index': (-11, -28, numpy.datetime64('2015-01-31T01:51:03.000000000')), " \
+                       "'filename': '/g/data/fk4/datacube/002/LS8_OLI_FC/-11_-28/LS8_OLI_FC_3577_-11_-28_" \
+                       "20150131015103000000_v1507076205.nc'}}"
 
 TASK_ID_RE_EXTRACT = re.compile('Dataset <id=([a-z0-9-]{36}) ')
 
@@ -375,13 +404,68 @@ def get_task_input_dataset_id(task: celery_state.Task):
     return _extract_task_args_dataset_id(task.kwargs)
 
 
-def log_celery_tasks(app):
+def celery_event_to_task(name, task: celery_state.Task, user=getpass.getuser()) -> Optional[TaskEvent]:
+    # root_id uuid ?
+    # uuid    uuid
+    # hostname, pid
+    # retries ?
+    # timestamp ?
+    # state ("RECEIVED")
+
+    celery_statemap = {
+        celery.states.PENDING: Status.PENDING,
+        # Task was received by a worker (only used in events).
+        celery.states.RECEIVED: Status.SCHEDULED,
+        celery.states.STARTED: Status.ACTIVE,
+        celery.states.SUCCESS: Status.COMPLETE,
+        celery.states.FAILURE: Status.FAILED,
+        celery.states.REVOKED: Status.CANCELLED,
+        # Task was rejected (by worker?)
+        celery.states.REJECTED: Status.CANCELLED,
+        # Waiting for retry
+        celery.states.RETRY: Status.PENDING,
+        celery.states.IGNORED: Status.PENDING,
+    }
+    if not task.state:
+        _LOG.warning("No state known for task %r" % task)
+        return None
+    status = celery_statemap.get(task.state)
+    if not status:
+        raise RuntimeError("Unknown celery state %r" % task.state)
+
+    message = None
+    if status.FAILED:
+        message = task.traceback
+
+    celery_worker: celery_state.Worker = task.worker
+    dataset_id = get_task_input_dataset_id(task)
+    return TaskEvent(
+        timestamp=task.timestamp or datetime.datetime.utcnow(),
+        event=f"task.{status.name.lower()}",
+        name=name,
+        user=user,
+        status=status,
+        id=task.id,
+        message=message,
+        input_datasets=(dataset_id,) if dataset_id else None,
+        output_datasets=None,
+        node=NodeMessage(
+            hostname=celery_worker.hostname,
+            pid=celery_worker.pid,
+            runtime_id=celery_worker.id
+        ),
+    )
+
+
+def log_celery_tasks(should_shutdown: multiprocessing.Value, app: celery.Celery):
     # Open log file.
     # Connect to celery
     # Stream events to file.
     click.secho("Starting logger", bold=True)
     state: celery_state.State = app.events.State()
 
+    # signal.signal(signal.SIGINT, signal.)
+    # signal.signal(signal.SIGTERM, exit_soon)
 
     # Two dump methods:
     # Worker-* (online): hostname, pid, processed count,
@@ -410,18 +494,22 @@ def log_celery_tasks(app):
 
         state.event(event)
 
-        if not 'uuid' in event:
-            print(f"No task found {event['type']}")
+        event_type = event['type']
+        if 'uuid' not in event:
+            # print(f"No task found {event_type}")
+            ws: Iterable[celery_state.Worker] = state.workers.values()
+            print(", ".join([f"{w.hostname}:{w.pid}:{'running' if w.active else 'done'}" for w in ws]))
             return
+
         # task name is sent only with -received event, and state
         # will keep track of this for us.
         task: celery_state.Task = state.tasks.get(event['uuid'])
 
         if not task:
-            print(f"No task found {event['type']}")
+            print(f"No task found {event_type}")
             return
 
-        print(f"Task {task.uuid}: {task.state} for dataset {get_task_input_dataset_id(task)}")
+        click.secho(f"Task {task.uuid}: {task.state} for dataset {get_task_input_dataset_id(task)}", color='green')
         if 'kwargs' in event:
             print(f"{repr(event['kwargs'])}")
             #  Dataset <id=c41dd69b-d94e-4aef-be90-525f46e9c462>
@@ -430,34 +518,21 @@ def log_celery_tasks(app):
 
         output.write_item(event)
 
-    def handle_worker(event):
-        state.event(event)
-        # task name is sent only with -received event, and state
-        # will keep track of this for us.
-        worker: celery_state.Task = state.tasks.get(event['uuid'])
-
-        if event['type'] == 'worker-heartbeat':
-            return
-
-        if sys.stdout.isatty():
-            click.secho(f"{event['type']}", color='red', bold=True)
-
-        output.write_item(event)
-
-    def sttoooopppp(*args):
-        # TODO: Make sure this processes the last events before stopping?
-        app.events.Dispatcher.should_stop = True
-
-    signal.signal(signal.SIGINT, sttoooopppp)
-    signal.signal(signal.SIGTERM, sttoooopppp)
-
     with JsonLinesWriter(Path('app-events.jsonl').open('a')) as output:
         with app.connection() as connection:
+
             recv = app.events.Receiver(connection, handlers={
                 '*': handle_task,
                 # 'worker-*': handle_worker,
             })
-            recv.capture(limit=None, timeout=None, wakeup=True)
+
+            while not should_shutdown.value:
+                try:
+                    for _ in recv.consume(limit=None, timeout=5, wakeup=True):
+                        pass
+                except socket.timeout:
+                    pass
+            _LOG.info("logger finished")
 
 
 def launch_redis_worker_pool(port=6379, **redis_params):
@@ -480,7 +555,8 @@ def launch_redis_worker_pool(port=6379, **redis_params):
         redis_port,
         password=redis_password,
     )
-    log_proc = multiprocessing.Process(target=log_celery_tasks, args=(cr.app,))
+    logger_shutdown = multiprocessing.Value('b', False, lock=False)
+    log_proc = multiprocessing.Process(target=log_celery_tasks, args=(logger_shutdown, cr.app,))
     log_proc.start()
 
     worker_env = pbs.get_env()
@@ -498,23 +574,26 @@ def launch_redis_worker_pool(port=6379, **redis_params):
         _LOG.info(f"Started {proc.pid}")
         worker_procs.append(proc)
 
-    def shutdown():
-
+    def start_shutdown():
         cr.app.control.shutdown()
 
+    def shutdown():
+        start_shutdown()
         _LOG.info('Waiting for workers to quit')
 
         # TODO: time limit followed by kill
         for p in worker_procs:
             p.wait()
 
+        # We deliberately don't want to stop the logger until all worker have stopped completely.
         _LOG.info('Stopping log process')
-        # log_proc.terminate()
+        logger_shutdown.value = True
         log_proc.join()
+
         _LOG.info('Shutting down redis-server')
         redis_shutdown()
 
-    return executor, shutdown
+    return executor, start_shutdown
 
 
 def describe_task(task):
