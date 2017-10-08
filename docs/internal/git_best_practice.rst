@@ -1,5 +1,5 @@
 .. highlight:: console
-.. internal_git_best_practice
+.. internal_git_best_practice:
 
 ================================================
 Git Best Practice

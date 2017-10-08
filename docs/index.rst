@@ -51,7 +51,11 @@ Publicly available data access and web services are currently in development.
    :caption: Developer Guide
 
    internal/new_product.rst
+   about/release_process
    internal/git_best_practice.rst
+   about/release.rst
+   about/orchestration.rst
+   about/requirements_met.ipynb
 
 .. toctree::
    :maxdepth: 1
