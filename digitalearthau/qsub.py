@@ -4,7 +4,7 @@ import multiprocessing
 import signal
 import socket
 import uuid
-from typing import Optional, Iterable
+from typing import Optional, List
 
 import celery
 import click
@@ -16,6 +16,7 @@ import itertools
 import shlex
 from time import sleep
 
+from celery.events import EventReceiver
 from dateutil import tz
 from pydash import pick
 from pathlib import Path
@@ -427,7 +428,7 @@ def celery_event_to_task(name, task: celery_state.Task, user=getpass.getuser()) 
         celery.states.IGNORED: Status.PENDING,
     }
     if not task.state:
-        _LOG.warning("No state known for task %r",  task)
+        _LOG.warning("No state known for task %r", task)
         return None
     status = celery_statemap.get(task.state)
     if not status:
@@ -503,11 +504,10 @@ def log_celery_tasks(should_shutdown: multiprocessing.Value, app: celery.Celery)
 
         state.event(event)
 
-        event_type = event['type']
-        if 'uuid' not in event:
-            # print(f"No task found {event_type}")
-            ws: Iterable[celery_state.Worker] = state.workers.values()
-            print(", ".join([f"{w.hostname}:{w.pid}:{'running' if w.active else 'done'}" for w in ws]))
+        event_type: str = event['type']
+
+        if not event_type.startswith('task.'):
+            _LOG.debug("Unhandled event type %r", event_type)
             return
 
         # task name is sent only with -received event, and state
@@ -515,25 +515,19 @@ def log_celery_tasks(should_shutdown: multiprocessing.Value, app: celery.Celery)
         task: celery_state.Task = state.tasks.get(event['uuid'])
 
         if not task:
-            print(f"No task found {event_type}")
+            _LOG.warning(f"No task found {event_type}")
             return
-
-        click.secho(f"Task {task.uuid}: {task.state} for dataset {get_task_input_dataset_id(task)}", color='green')
-        if 'kwargs' in event:
-            print(f"{repr(event['kwargs'])}")
-            #  Dataset <id=c41dd69b-d94e-4aef-be90-525f46e9c462>
-        if sys.stdout.isatty():
-            click.secho(f"{event['type']}", bold=True)
 
         output.write_item(event)
 
     with JsonLinesWriter(Path('app-events.jsonl').open('a')) as output:
         with app.connection() as connection:
 
-            recv = app.events.Receiver(connection, handlers={
+            recv: EventReceiver = app.events.Receiver(connection, handlers={
                 '*': handle_task,
             })
 
+            # If idle for 5 seconds, it will recheck whether to shutdown
             while not should_shutdown.value:
                 try:
                     for _ in recv.consume(limit=None, timeout=5, wakeup=True):
@@ -541,6 +535,16 @@ def log_celery_tasks(should_shutdown: multiprocessing.Value, app: celery.Celery)
                 except socket.timeout:
                     pass
             _LOG.info("logger finished")
+
+    # According to our recorded state we should have seen all workers stop.
+    workers: List[celery_state.Worker] = list(state.workers.values())
+    active_workers = [w.hostname for w in workers if w.active]
+    _LOG.info("%s/%s recorded workers are active", len(active_workers), len(workers))
+    if active_workers:
+        _LOG.warning(
+            "Some workers had not finished executing; their logs will be missed:n\n\t%s",
+            "\n\t".join(active_workers)
+        )
 
 
 def launch_redis_worker_pool(port=6379, **redis_params):
