@@ -348,21 +348,6 @@ def qsub_self_launch(qsub_opts, *args):
     return exit_code, out_txt
 
 
-class JsonLinesWriter:
-    def __init__(self, file_obj) -> None:
-        self._file_obj = file_obj
-
-    def __enter__(self):
-        return self
-
-    def write_item(self, item):
-        self._file_obj.write(json.dumps(item) + '\n')
-        self._file_obj.flush()
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        self._file_obj.close()
-
-
 # The strigified args that celery gives us back within task messages
 _EXAMPLE_TASK_ARGS = "'(functools.partial(<function do_fc_task at 0x7f47e7aad598>, {" \
                      "\'source_type\': \'ls8_nbar_albers\', \'output_type\': \'ls8_fc_albers\', " \
@@ -453,7 +438,7 @@ def celery_event_to_task(name, task: celery_state.Task, user=getpass.getuser()) 
         input_datasets=(dataset_id,) if dataset_id else None,
         output_datasets=None,
         node=NodeMessage(
-            hostname=_just_hostname(celery_worker),
+            hostname=_just_hostname(celery_worker.hostname),
             pid=celery_worker.pid
         ),
     )
@@ -497,9 +482,11 @@ def log_celery_tasks(should_shutdown: multiprocessing.Value, app: celery.Celery)
     state: celery_state.State = app.events.State()
 
     # TODO: handling immature shutdown cleanly? The celery runner itself might need better support for it...
-    # At NCI everything is ripped down by PBS
-    # signal.signal(signal.SIGINT, signal.SIG_DFL)
-    # signal.signal(signal.SIGTERM, signal.SIG_DFL)
+
+    # For now we ignore these "gentle" shutdown signals as we don't want to quit until all logs have been received.
+    # The main process will receive sigints/terms and will tell us ("should_shutdown" var) when it's safe...
+    signal.signal(signal.SIGINT, signal.SIG_IGN)
+    signal.signal(signal.SIGTERM, signal.SIG_IGN)
 
     def handle_task(event):
 
@@ -508,7 +495,7 @@ def log_celery_tasks(should_shutdown: multiprocessing.Value, app: celery.Celery)
         event_type: str = event['type']
 
         if not event_type.startswith('task-'):
-            _LOG.debug("Unhandled event type %r", event_type)
+            _LOG.debug("Skipping event %r", event_type)
             return
 
         # task name is sent only with -received event, and state
@@ -521,7 +508,7 @@ def log_celery_tasks(should_shutdown: multiprocessing.Value, app: celery.Celery)
         output.write_item(celery_event_to_task('fc.run', task))
         _log_task_states(state)
 
-    with JsonLinesWriter(Path('app-events.jsonl').open('a')) as output:
+    with events.JsonLinesWriter(Path('app-events.jsonl').open('a')) as output:
         with app.connection() as connection:
 
             recv: EventReceiver = app.events.Receiver(connection, handlers={

@@ -149,6 +149,21 @@ def test_serial():
     assert to_json(named_tuple_to_dict(m)) == {''}
 
 
+class JsonLinesWriter:
+    def __init__(self, file_obj) -> None:
+        self._file_obj = file_obj
+
+    def __enter__(self):
+        return self
+
+    def write_item(self, item):
+        self._file_obj.write(to_json(item) + '\n')
+        self._file_obj.flush()
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self._file_obj.close()
+
+
 def to_json(o, *args, **kwargs):
     """
     Support a few more common types for json serialisation
