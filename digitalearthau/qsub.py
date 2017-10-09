@@ -427,7 +427,7 @@ def celery_event_to_task(name, task: celery_state.Task, user=getpass.getuser()) 
         celery.states.IGNORED: Status.PENDING,
     }
     if not task.state:
-        _LOG.warning("No state known for task %r" % task)
+        _LOG.warning("No state known for task %r",  task)
         return None
     status = celery_statemap.get(task.state)
     if not status:
@@ -490,34 +490,14 @@ def log_celery_tasks(should_shutdown: multiprocessing.Value, app: celery.Celery)
     # Open log file.
     # Connect to celery
     # Stream events to file.
+
     click.secho("Starting logger", bold=True)
     state: celery_state.State = app.events.State()
 
+    # TODO: handling immature shutdown cleanly? The celery runner itself might need better support for it...
+    # At NCI everything is ripped down by PBS
     # signal.signal(signal.SIGINT, signal.)
     # signal.signal(signal.SIGTERM, exit_soon)
-
-    # Two dump methods:
-    # Worker-* (online): hostname, pid, processed count,
-
-    # Task-* (successful, received):
-    #   args: string
-    args = """{'task': {'nbar': Tile<sources=<xarray.DataArray (time: 1)> array([ (Dataset <id=e940a7f7-2337-4267-813e-041a7506e6bb type=ls8_nbar_albers location=/g/data/rs0/datacube/002/LS8_OLI_NBAR/-11_-28/LS8_OLI_NBAR_3577_-11_-28_2015_v1496400956.nc>,)], dtype=object)
-    Coordinates:
-    *time(time)
-    datetime64[ns]
-    2015 - 03 - 29
-    T01: 44:47,
-    geobox = GeoBox(4000, 4000, Affine(25.0, 0.0, -1100000.0,
-                                       0.0, -25.0, -2700000.0), EPSG:3577) >, 'tile_index': (-11, -28, numpy.datetime64(
-        '2015-03-29T01:44:47.000000000')), 'filename': '/g/data/fk4/datacube/002/LS8_OLI_FC/-11_-28/LS8_OLI_FC_3577_-11_-28_20150329014447000000_v1507076205.nc'}}
-        """
-
-    # root_id uuid ?
-    # uuid    uuid
-    # hostname, pid
-    # retries ?
-    # timestamp ?
-    # state ("RECEIVED")
 
     def handle_task(event):
 
@@ -552,7 +532,6 @@ def log_celery_tasks(should_shutdown: multiprocessing.Value, app: celery.Celery)
 
             recv = app.events.Receiver(connection, handlers={
                 '*': handle_task,
-                # 'worker-*': handle_worker,
             })
 
             while not should_shutdown.value:
