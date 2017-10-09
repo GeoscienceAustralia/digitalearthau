@@ -16,6 +16,7 @@ import itertools
 import shlex
 from time import sleep
 
+from dateutil import tz
 from pydash import pick
 from pathlib import Path
 from functools import update_wrapper
@@ -389,7 +390,7 @@ TASK_ID_RE_EXTRACT = re.compile('Dataset <id=([a-z0-9-]{36}) ')
 def _extract_task_args_dataset_id(kwargs: str) -> Optional[uuid.UUID]:
     """
     >>> _extract_task_args_dataset_id(_EXAMPLE_TASK_KWARGS)
-    uuid.UUID('d514c26a-d98f-47f1-b0de-15f7fe78c209')
+    UUID('d514c26a-d98f-47f1-b0de-15f7fe78c209')
     >>> _extract_task_args_dataset_id("no match")
     """
     m = TASK_ID_RE_EXTRACT.search(kwargs)
@@ -439,7 +440,7 @@ def celery_event_to_task(name, task: celery_state.Task, user=getpass.getuser()) 
     celery_worker: celery_state.Worker = task.worker
     dataset_id = get_task_input_dataset_id(task)
     return TaskEvent(
-        timestamp=task.timestamp or datetime.datetime.utcnow(),
+        timestamp=_utc_datetime(task.timestamp) if task.timestamp else datetime.datetime.utcnow(),
         event=f"task.{status.name.lower()}",
         name=name,
         user=user,
@@ -456,16 +457,25 @@ def celery_event_to_task(name, task: celery_state.Task, user=getpass.getuser()) 
     )
 
 
-def _just_hostname(celery_worker: celery_state.Worker):
+def _utc_datetime(timestamp: float):
+    """
+    >>> _utc_datetime(1507241505.7179525)
+    datetime.datetime(2017, 10, 5, 22, 11, 45, 717952, tzinfo=tzutc())
+    """
+    return datetime.datetime.utcfromtimestamp(timestamp).replace(tzinfo=tz.tzutc())
+
+
+def _just_hostname(hostname: str):
     """
     >>> _just_hostname("kveikur.local")
-    "kveikur.local"
+    'kveikur.local'
     >>> _just_hostname("someone@kveikur.local")
-    "kveikur.local"
+    'kveikur.local'
     >>> _just_hostname("someone@kveikur@local")
-    "kveikur.local"
+    Traceback (most recent call last):
+    ...
+    ValueError: ...
     """
-    hostname = celery_worker.hostname
     if '@' not in hostname:
         return hostname
 

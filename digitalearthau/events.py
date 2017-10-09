@@ -69,6 +69,7 @@ class TaskEvent(NamedTuple):
     ################
     # Base fields (common to all events)
 
+    # UTC timestamp
     timestamp: datetime.datetime
 
     # Name of event

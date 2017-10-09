@@ -6,6 +6,9 @@ import os
 
 import pytest
 from boltons.jsonutils import JSONLIterator
+from datetime import datetime
+
+from dateutil import tz
 from mock import mock
 from typing import List
 
@@ -70,7 +73,7 @@ _SUCCESS_CELERY_EVENTS = r"""
 # Three events produced: pending, active, success
 _EXPECTED_SUCCESS = [
     TaskEvent(
-        timestamp=1507241402.9484067,
+        timestamp=datetime(2017, 10, 5, 22, 10, 2, 948407, tzinfo=tz.tzutc()),
         event='task.pending',
         user='testuser',
         node=NodeMessage(
@@ -85,9 +88,10 @@ _EXPECTED_SUCCESS = [
         input_datasets=(UUID('60bc52f1-7a70-43f2-bc8d-2bd138eb2aba'),),
         output_datasets=None,
         job_parameters={},
+        # All parent_ids are calculated from the below "@mock.patch.dict(os.environ, {'PBS_JOBID': '87654321.r-man2'})"
         parent_id=UUID('9f682e52-6c9e-5ed1-a32f-1cb32f35e476')),
     TaskEvent(
-        timestamp=1507241505.7179525,
+        timestamp=datetime(2017, 10, 5, 22, 11, 45, 717952, tzinfo=tz.tzutc()),
         event='task.active',
         user='testuser',
         node=NodeMessage(
@@ -105,7 +109,7 @@ _EXPECTED_SUCCESS = [
         parent_id=UUID('9f682e52-6c9e-5ed1-a32f-1cb32f35e476')
     ),
     TaskEvent(
-        timestamp=1507241575.8904157,
+        timestamp=datetime(2017, 10, 5, 22, 12, 55, 890416, tzinfo=tz.tzutc()),
         event='task.complete',
         user='testuser',
         node=NodeMessage(
@@ -132,7 +136,7 @@ _FAIL_CELERY_EVENTS = r"""
 # Three events produced: pending, active, success
 _EXPECTED_FAILURE = [
     TaskEvent(
-        timestamp=1507182775.3364704,
+        timestamp=datetime(2017, 10, 5, 5, 52, 55, 336470, tzinfo=tz.tzutc()),
         event='task.pending',
         user='testuser',
         node=NodeMessage(
@@ -150,7 +154,7 @@ _EXPECTED_FAILURE = [
         parent_id=UUID('9f682e52-6c9e-5ed1-a32f-1cb32f35e476')
     ),
     TaskEvent(
-        timestamp=1507182775.3381906,
+        timestamp=datetime(2017, 10, 5, 5, 52, 55, 338191, tzinfo=tz.tzutc()),
         event='task.active',
         user='testuser',
         node=NodeMessage(
@@ -168,7 +172,7 @@ _EXPECTED_FAILURE = [
         parent_id=UUID('9f682e52-6c9e-5ed1-a32f-1cb32f35e476')
     ),
     TaskEvent(
-        timestamp=1507182775.3487089,
+        timestamp=datetime(2017, 10, 5, 5, 52, 55, 348709, tzinfo=tz.tzutc()),
         event='task.failed',
         user='testuser',
         node=NodeMessage(
@@ -215,9 +219,10 @@ def test_celery_success_to_task(input_json: str, expected_events: List[TaskEvent
     for j in JSONLIterator(StringIO(input_json)):
         state.event(j)
 
+        celery_task : celery_state.Task = state.tasks[task_id]
         events.append(celery_event_to_task(
             'fc.create',
-            state.tasks[task_id],
+            celery_task,
             user='testuser'
         ))
 
