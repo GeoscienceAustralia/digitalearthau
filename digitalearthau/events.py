@@ -91,7 +91,10 @@ class TaskEvent(NamedTuple):
     # Task fields
 
     # ID of this task
+    # 'id' is already taken in python. TODO: can our serializer support stripping a trailing underscore?
+    # pylint: disable=invalid-name
     id: uuid.UUID
+
     status: Status
     # Name of this kind of task.
     # Eg. "galpgs.create".

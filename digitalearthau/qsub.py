@@ -4,7 +4,7 @@ import multiprocessing
 import signal
 import socket
 import uuid
-from typing import Optional, List
+from typing import Optional, List, Iterable
 
 import celery
 import click
@@ -555,11 +555,13 @@ def log_celery_tasks(should_shutdown: multiprocessing.Value, app: celery.Celery)
 
 def _log_task_states(state):
     # Print count of tasks in each state.
-    tasks: collections.Iterable[celery_state.Task] = state.tasks.values()
+    tasks: Iterable[celery_state.Task] = state.tasks.values()
     task_states = collections.Counter(t.state for t in tasks)
     _LOG.info("Task states: %s", ", ".join(f"{v} {k}" for (k, v) in task_states.items()))
 
 
+# TODO: Refactor before pull request (Hopefully this comment doesn't enter the pull request, that would be embarrassing)
+# pylint: disable=too-many-locals
 def launch_redis_worker_pool(port=6379, **redis_params):
     redis_port = port
     redis_host = pbs.hostname()
