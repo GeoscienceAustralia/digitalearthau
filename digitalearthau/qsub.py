@@ -15,7 +15,7 @@ import logging
 import itertools
 import collections
 import shlex
-from time import sleep
+from time import sleep, time
 
 from celery.events import EventReceiver
 from dateutil import tz
@@ -515,13 +515,31 @@ def log_celery_tasks(should_shutdown: multiprocessing.Value, app: celery.Celery)
                 '*': handle_task,
             })
 
-            # If idle for 5 seconds, it will recheck whether to shutdown
-            while not should_shutdown.value:
+            shutdown_received = None
+
+            while True:
+                # If idle for 5 seconds, it will recheck whether to shutdown
                 try:
                     for _ in recv.consume(limit=None, timeout=5, wakeup=True):
                         pass
                 except socket.timeout:
                     pass
+
+                # We get a signal from the main process when it has terminated all workers, but there may still be
+                # events to consume.
+                if should_shutdown.value:
+                    # If all workers have sent a shutdown event to us, we know we have recorded everything.
+                    if state.alive_workers() == 0:
+                        _LOG.info("All workers finished, exiting.")
+                        break
+
+                    # Otherwise we wait up to 60 seconds for the last events to filter through redis...
+                    shutdown_received = shutdown_received or time()
+                    ellapsed_shutdown_seconds = time() - shutdown_received
+                    if ellapsed_shutdown_seconds > 60:
+                        _LOG.warning("Some workers are marked as active but the time-limit was reached.")
+                        break
+
             _LOG.info("logger finished")
 
     _log_task_states(state)
