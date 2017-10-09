@@ -30,6 +30,9 @@ from datacube.executor import (SerialExecutor,
 
 from datacube import _celery_runner as cr
 
+import celery.events.state as celery_state
+import sys
+
 import celery.states
 
 from . import events
@@ -342,10 +345,6 @@ def qsub_self_launch(qsub_opts, *args):
     return exit_code, out_txt
 
 
-import celery.events.state as celery_state
-import sys
-
-
 class JsonLinesWriter:
     def __init__(self, file_obj) -> None:
         self._file_obj = file_obj
@@ -446,13 +445,13 @@ def celery_event_to_task(name, task: celery_state.Task, user=getpass.getuser()) 
         user=user,
         status=status,
         id=task.id,
+        parent_id=pbs.current_job_task_id(),
         message=message,
         input_datasets=(dataset_id,) if dataset_id else None,
         output_datasets=None,
         node=NodeMessage(
             hostname=celery_worker.hostname,
-            pid=celery_worker.pid,
-            runtime_id=celery_worker.id
+            pid=celery_worker.pid
         ),
     )
 

@@ -1,3 +1,4 @@
+import uuid
 from base64 import b64encode
 import os
 import subprocess
@@ -6,6 +7,7 @@ import re
 import functools
 import shlex
 from collections import namedtuple, OrderedDict
+from typing import Optional
 
 Node = namedtuple('Node', ['name', 'num_cores', 'offset', 'is_main'])
 
@@ -19,7 +21,6 @@ def is_under_pbs():
 
 
 def parse_nodes_file(fname=None):
-
     if fname is None:
         fname = os.environ.get('PBS_NODEFILE')
         if fname is None:
@@ -44,6 +45,40 @@ def parse_nodes_file(fname=None):
                 is_main=(main_hostname == l))
 
     return [Node(**x) for x in _nodes.values()]
+
+
+# This is defined in document "DEA Event structure", to produce stable & consistent task ids for pbs jobs.
+NCI_PBS_UUID_NAMESPACE = uuid.UUID('85d36430-538f-4ecd-85d0-d0ef9edfc266')
+
+
+def current_job_task_id() -> Optional[uuid.UUID]:
+    """
+    Get a stable UUID for the current PBS job, or nothing if we don't appear to be in one.
+
+    >>> current_job_task_id("8894425.r-man2")
+    """
+    pbs_job_id = os.environ.get('PBS_JOBID')
+    if pbs_job_id is None:
+        return None
+
+    task_id = task_id_for_pbs_job(pbs_job_id)
+
+    return task_id
+
+
+def task_id_for_pbs_job(pbs_job_id: str) -> uuid.UUID:
+    """
+    Get a stable UUID for the the given PBS job id. Expects the whole job name ("8894425.r-man2"), not just the number).
+
+    >>> task_id_for_pbs_job("8894425.r-man2")
+    """
+    # Sanity check
+    if ".r-man" not in pbs_job_id:
+        raise RuntimeError(
+            "%r doesn't look like an NCI pbs job name. Expecting the full name, eg '8894425.r-man2'" % pbs_job_id
+        )
+    task_id = uuid.uuid5(NCI_PBS_UUID_NAMESPACE, pbs_job_id.strip())
+    return task_id
 
 
 @functools.lru_cache(maxsize=None)
@@ -96,7 +131,6 @@ def wrap_script(script):
 
 
 def pbsdsh(cpu_num, script, env=None, test_mode=True):
-
     if env is None:
         env = get_env()
 

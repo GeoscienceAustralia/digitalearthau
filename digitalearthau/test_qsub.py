@@ -1,6 +1,19 @@
-from digitalearthau.events import TaskEvent
+import json
+from io import StringIO
+from uuid import UUID
+
+import os
+from boltons.jsonutils import JSONLIterator
+from mock import mock
+
+from digitalearthau.events import TaskEvent, NodeMessage, Status
 from digitalearthau.qsub import celery_event_to_task
 from . import qsub
+
+import celery.events.state as celery_state
+import sys
+
+from datacube import _celery_runner as cr
 
 
 def test_parse_args():
@@ -44,25 +57,49 @@ def test_remove_args():
     assert qsub.remove_args('--removed', args3, 0) == ['--foo', 'bar']
 
 
+@mock.patch.dict(os.environ, {'PBS_JOBID': '87654321.r-man2'})
 def test_celery_success_to_task():
+
+    state: celery_state.State = cr.app.events.State()
+
+    for j in JSONLIterator(StringIO(_SUCCESS_EVENTS)):
+        state.event(j)
 
     task_success_message = celery_event_to_task(
         'fc.create',
-        _SUCCESS_CELERY_TASK,
+        state.tasks['13d1e3c4-cecd-4306-903f-97ed1ec2d73d'],
         user='testuser'
     )
 
-    assert task_success_message == TaskEvent()
+    assert task_success_message == TaskEvent(
+        timestamp=1507241575.8904157,
+        event='task.complete',
+        user='testuser',
+        node=NodeMessage(
+            hostname='kveikur',
+            pid=None,
+            runtime_id=None
+        ),
+        message=None,
+        id='13d1e3c4-cecd-4306-903f-97ed1ec2d73d',
+        status=Status.COMPLETE,
+        name='fc.create',
+        input_datasets=(UUID('60bc52f1-7a70-43f2-bc8d-2bd138eb2aba'),),
+        output_datasets=None,
+        job_parameters={},
+        parent_id=UUID('9f682e52-6c9e-5ed1-a32f-1cb32f35e476')
+    )
 
 
-_FAILED_CELERY_TASK = """
-{"hostname": "celery@kveikur", "utcoffset": -11, "pid": 27204, "clock": 158, "uuid": "410e05e3-4058-4bfa-bbc2-5fc085464841", "exception": "FileExistsError(17, 'Output file already exists')", "traceback": "Traceback (most recent call last):\n  File \"/g/data/v10/public/modules/agdc-py3-env/20170728/envs/agdc/lib/python3.6/site-packages/celery/app/trace.py\", line 374, in trace_task\n    R = retval = fun(*args, **kwargs)\n  File \"/g/data/v10/public/modules/agdc-py3-env/20170728/envs/agdc/lib/python3.6/site-packages/celery/app/trace.py\", line 629, in __protected_call__\n    return self.run(*args, **kwargs)\n  File \"/home/jez/prog/datacube/datacube/_celery_runner.py\", line 57, in run_cloud_pickled_function\n    return func(*args, **kwargs)\n  File \"/g/data/v10/public/modules/agdc-py3-env/20170728/envs/agdc/lib/python3.6/site-packages/fc/fc_app.py\", line 144, in do_fc_task\n    raise OSError(errno.EEXIST, 'Output file already exists', str(file_path))\nFileExistsError: [Errno 17] Output file already exists: '/g/data/fk4/datacube/002/LS8_OLI_FC/-11_-28/LS8_OLI_FC_3577_-11_-28_20151007014520000000_v1507076205.nc'\n", "timestamp": 1507182775.3487089, "type": "task-failed", "local_received": 1507182775.3507082, "state": "FAILURE"}
-"""
-
-_SUCCESS_CELERY_TASK = """
+# Three events: received, started, success
+_SUCCESS_EVENTS = r"""
+{"hostname": "celery@kveikur", "utcoffset": -11, "pid": 29517, "clock": 3, "uuid": "13d1e3c4-cecd-4306-903f-97ed1ec2d73d", "name": "datacube._celery_runner.run_cloud_pickled_function", "args": "(functools.partial(<function do_fc_task at 0x7fb79d1332f0>, {'source_type': 'ls8_nbar_albers', 'output_type': 'ls8_fc_albers', 'version': '${version}', 'description': 'Landsat 8 Fractional Cover 25 metre, 100km tile, Australian Albers Equal Area projection (EPSG:3577)', 'product_type': 'fractional_cover', 'location': '/g/data/fk4/datacube/002/', 'file_path_template': 'LS8_OLI_FC/{tile_index[0]}_{tile_index[1]}/LS8_OLI_FC_3577_{tile_index[0]}_{tile_index[1]}_{start_time}_v{version}.nc', 'partial_ncml_path_template': 'LS8_OLI_FC/{tile_index[0]}_{tile_index[1]}/LS8_OLI_FC_3577_{tile_index[0]}_{tile_index[1]}_{start_time}.ncml', 'ncml_path_template': 'LS8_OLI_FC/LS8_OLI_FC_3577_{tile_index[0]}_{tile_index[1]}.ncml', 'sensor_regression_coefficients': {'blue': [0.00041, 0.9747], 'green': [0.00289, 0.99779], 'red': [0.00274, 1.00446], 'nir': [4e-05, 0.98906], 'swir1': [0.00256, 0.99467], 'swir2': [-0.00327, 1.02551]}, 'global_attributes': {'title': 'Fractional Cover 25 v2', 'summary': \"The Fractional Cover (FC)...,)", "kwargs": "{'task': {'nbar': Tile<sources=<xarray.DataArray (time: 1)>\narray([ (Dataset <id=60bc52f1-7a70-43f2-bc8d-2bd138eb2aba type=ls8_nbar_albers location=/g/data/rs0/datacube/002/LS8_OLI_NBAR/-11_-28/LS8_OLI_NBAR_3577_-11_-28_2015_v1496400956.nc>,)], dtype=object)\nCoordinates:\n  * time     (time) datetime64[ns] 2015-03-04T01:51:14.500000,\n\tgeobox=GeoBox(4000, 4000, Affine(25.0, 0.0, -1100000.0,\n       0.0, -25.0, -2700000.0), EPSG:3577)>, 'tile_index': (-11, -28, numpy.datetime64('2015-03-04T01:51:14.500000000')), 'filename': '/g/data/fk4/datacube/002/LS8_OLI_FC/-11_-28/LS8_OLI_FC_3577_-11_-28_20150304015114500000_v1507241388.nc'}}", "root_id": "13d1e3c4-cecd-4306-903f-97ed1ec2d73d", "parent_id": null, "retries": 0, "eta": null, "expires": null, "timestamp": 1507241402.9484067, "type": "task-received", "local_received": 1507241402.9497962, "state": "RECEIVED"}
+{"hostname": "celery@kveikur", "utcoffset": -11, "pid": 29517, "clock": 99, "uuid": "13d1e3c4-cecd-4306-903f-97ed1ec2d73d", "timestamp": 1507241505.7179525, "type": "task-started", "local_received": 1507241505.7221746, "state": "STARTED"}
 {"hostname": "celery@kveikur", "utcoffset": -11, "pid": 29517, "clock": 171, "uuid": "13d1e3c4-cecd-4306-903f-97ed1ec2d73d", "result": "<xarray.DataArray (time: 1)>\narray([ Dataset <id=437d96cb-b65d-4186-8501-18b40658bac6 type=ls8_fc_albers location=/g/data/fk4/datacube/002/LS8_OLI_FC/-11_-28/LS8_OLI_FC_3577_-11_-28_20150304015114500000_v1507241388.nc>], dtype=object)\nCoordinates:\n  * time     (time) datetime64[ns] 2015-03-04T01:51:14.500000", "runtime": 70.13666241300234, "timestamp": 1507241575.8904157, "type": "task-succeeded", "local_received": 1507241575.891886, "state": "SUCCESS"}
 """
 
-_RECEIVED_CELERY_TASK = """
-{"hostname": "celery@kveikur", "utcoffset": -11, "pid": 29517, "clock": 313, "uuid": "788bdede-ac9c-4edb-bde5-f26013148cf4", "name": "datacube._celery_runner.run_cloud_pickled_function", "args": "(functools.partial(<function do_fc_task at 0x7fb79d1332f0>, {'source_type': 'ls8_nbar_albers', 'output_type': 'ls8_fc_albers', 'version': '${version}', 'description': 'Landsat 8 Fractional Cover 25 metre, 100km tile, Australian Albers Equal Area projection (EPSG:3577)', 'product_type': 'fractional_cover', 'location': '/g/data/fk4/datacube/002/', 'file_path_template': 'LS8_OLI_FC/{tile_index[0]}_{tile_index[1]}/LS8_OLI_FC_3577_{tile_index[0]}_{tile_index[1]}_{start_time}_v{version}.nc', 'partial_ncml_path_template': 'LS8_OLI_FC/{tile_index[0]}_{tile_index[1]}/LS8_OLI_FC_3577_{tile_index[0]}_{tile_index[1]}_{start_time}.ncml', 'ncml_path_template': 'LS8_OLI_FC/LS8_OLI_FC_3577_{tile_index[0]}_{tile_index[1]}.ncml', 'sensor_regression_coefficients': {'blue': [0.00041, 0.9747], 'green': [0.00289, 0.99779], 'red': [0.00274, 1.00446], 'nir': [4e-05, 0.98906], 'swir1': [0.00256, 0.99467], 'swir2': [-0.00327, 1.02551]}, 'global_attributes': {'title': 'Fractional Cover 25 v2', 'summary': \"The Fractional Cover (FC)...,)", "kwargs": "{'task': {'nbar': Tile<sources=<xarray.DataArray (time: 1)>\narray([ (Dataset <id=d4a9f344-7c5c-4c69-b70d-2e61c25a66a3 type=ls8_nbar_albers location=/g/data/rs0/datacube/002/LS8_OLI_NBAR/-11_-28/LS8_OLI_NBAR_3577_-11_-28_2015_v1496400956.nc>,)], dtype=object)\nCoordinates:\n  * time     (time) datetime64[ns] 2015-09-12T01:51:24,\n\tgeobox=GeoBox(4000, 4000, Affine(25.0, 0.0, -1100000.0,\n       0.0, -25.0, -2700000.0), EPSG:3577)>, 'tile_index': (-11, -28, numpy.datetime64('2015-09-12T01:51:24.000000000')), 'filename': '/g/data/fk4/datacube/002/LS8_OLI_FC/-11_-28/LS8_OLI_FC_3577_-11_-28_20150912015124000000_v1507241388.nc'}}", "root_id": "788bdede-ac9c-4edb-bde5-f26013148cf4", "parent_id": null, "retries": 0, "eta": null, "expires": null, "timestamp": 1507241710.5862098, "type": "task-received", "local_received": 1507241710.5875244, "state": "RECEIVED"}
+_FAIL_EVENTS = r"""
+{"hostname": "celery@kveikur", "utcoffset": -11, "pid": 27204, "clock": 156, "uuid": "410e05e3-4058-4bfa-bbc2-5fc085464841", "name": "datacube._celery_runner.run_cloud_pickled_function", "args": "(functools.partial(<function do_fc_task at 0x7f4dd49ff2f0>, {'source_type': 'ls8_nbar_albers', 'output_type': 'ls8_fc_albers', 'version': '${version}', 'description': 'Landsat 8 Fractional Cover 25 metre, 100km tile, Australian Albers Equal Area projection (EPSG:3577)', 'product_type': 'fractional_cover', 'location': '/g/data/fk4/datacube/002/', 'file_path_template': 'LS8_OLI_FC/{tile_index[0]}_{tile_index[1]}/LS8_OLI_FC_3577_{tile_index[0]}_{tile_index[1]}_{start_time}_v{version}.nc', 'partial_ncml_path_template': 'LS8_OLI_FC/{tile_index[0]}_{tile_index[1]}/LS8_OLI_FC_3577_{tile_index[0]}_{tile_index[1]}_{start_time}.ncml', 'ncml_path_template': 'LS8_OLI_FC/LS8_OLI_FC_3577_{tile_index[0]}_{tile_index[1]}.ncml', 'sensor_regression_coefficients': {'blue': [0.00041, 0.9747], 'green': [0.00289, 0.99779], 'red': [0.00274, 1.00446], 'nir': [4e-05, 0.98906], 'swir1': [0.00256, 0.99467], 'swir2': [-0.00327, 1.02551]}, 'global_attributes': {'title': 'Fractional Cover 25 v2', 'summary': \"The Fractional Cover (FC)...,)", "kwargs": "{'task': {'nbar': Tile<sources=<xarray.DataArray (time: 1)>\narray([ (Dataset <id=591fce1d-5268-44e8-a8b0-e38e6cfbb749 type=ls8_nbar_albers location=/g/data/rs0/datacube/002/LS8_OLI_NBAR/-11_-28/LS8_OLI_NBAR_3577_-11_-28_2015_v1496400956.nc>,)], dtype=object)\nCoordinates:\n  * time     (time) datetime64[ns] 2015-10-07T01:45:20,\n\tgeobox=GeoBox(4000, 4000, Affine(25.0, 0.0, -1100000.0,\n       0.0, -25.0, -2700000.0), EPSG:3577)>, 'tile_index': (-11, -28, numpy.datetime64('2015-10-07T01:45:20.000000000')), 'filename': '/g/data/fk4/datacube/002/LS8_OLI_FC/-11_-28/LS8_OLI_FC_3577_-11_-28_20151007014520000000_v1507076205.nc'}}", "root_id": "410e05e3-4058-4bfa-bbc2-5fc085464841", "parent_id": null, "retries": 0, "eta": null, "expires": null, "timestamp": 1507182775.3364704, "type": "task-received", "local_received": 1507182775.337901, "state": "RECEIVED"}
+{"hostname": "celery@kveikur", "utcoffset": -11, "pid": 27204, "clock": 157, "uuid": "410e05e3-4058-4bfa-bbc2-5fc085464841", "timestamp": 1507182775.3381906, "type": "task-started", "local_received": 1507182775.3400292, "state": "STARTED"}
+{"hostname": "celery@kveikur", "utcoffset": -11, "pid": 27204, "clock": 158, "uuid": "410e05e3-4058-4bfa-bbc2-5fc085464841", "exception": "FileExistsError(17, 'Output file already exists')", "traceback": "Traceback (most recent call last):\n  File \"/g/data/v10/public/modules/agdc-py3-env/20170728/envs/agdc/lib/python3.6/site-packages/celery/app/trace.py\", line 374, in trace_task\n    R = retval = fun(*args, **kwargs)\n  File \"/g/data/v10/public/modules/agdc-py3-env/20170728/envs/agdc/lib/python3.6/site-packages/celery/app/trace.py\", line 629, in __protected_call__\n    return self.run(*args, **kwargs)\n  File \"/home/jez/prog/datacube/datacube/_celery_runner.py\", line 57, in run_cloud_pickled_function\n    return func(*args, **kwargs)\n  File \"/g/data/v10/public/modules/agdc-py3-env/20170728/envs/agdc/lib/python3.6/site-packages/fc/fc_app.py\", line 144, in do_fc_task\n    raise OSError(errno.EEXIST, 'Output file already exists', str(file_path))\nFileExistsError: [Errno 17] Output file already exists: '/g/data/fk4/datacube/002/LS8_OLI_FC/-11_-28/LS8_OLI_FC_3577_-11_-28_20151007014520000000_v1507076205.nc'\n", "timestamp": 1507182775.3487089, "type": "task-failed", "local_received": 1507182775.3507082, "state": "FAILURE"}
 """

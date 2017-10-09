@@ -10,6 +10,8 @@ from enum import Enum, unique
 
 import pathlib
 
+from digitalearthau import pbs
+
 
 class NodeMessage(NamedTuple):
     hostname: str
@@ -58,27 +60,6 @@ class Status(Enum):
     CANCELLED = 7
 
 
-# This is defined in document "DEA Event structure", to produce stable & consistent task ids for pbs jobs.
-NCI_PBS_UUID_NAMESPACE = uuid.UUID('85d36430-538f-4ecd-85d0-d0ef9edfc266')
-
-
-def _get_pbs_task_id(pbs_job_id: str = os.environ.get('PBS_JOBID')) -> Optional[uuid.UUID]:
-    """
-    Get a stable UUID for the current PBS job, or nothing if we don't appear to be in one.
-
-    >>> _get_pbs_task_id("8894425.r-man2")
-    """
-    if pbs_job_id is None:
-        return None
-
-    if ".r-man" not in pbs_job_id:
-        raise RuntimeError(
-            "%r doesn't look like an NCI pbs job name. Expecting the full name, eg '8894425.r-man2'" % pbs_job_id
-        )
-
-    return uuid.uuid5(NCI_PBS_UUID_NAMESPACE, pbs_job_id.strip())
-
-
 class TaskEvent(NamedTuple):
     ################
     # Base fields (common to all events)
@@ -120,7 +101,7 @@ class TaskEvent(NamedTuple):
     job_parameters: dict = {}
 
     # Most tasks created here will be children of the PBS job (task) they run in.
-    parent_id: uuid.UUID = _get_pbs_task_id()
+    parent_id: uuid.UUID = pbs.current_job_task_id()
 
 
 class LogMessage(BaseMessage):
