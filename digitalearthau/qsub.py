@@ -413,13 +413,13 @@ def celery_event_to_task(name, task: celery_state.Task, user=getpass.getuser()) 
 
     celery_statemap = {
         celery.states.PENDING: Status.PENDING,
-        # Task was received by a worker (only used in events).
-        celery.states.RECEIVED: Status.SCHEDULED,
+        # Task was received by a worker.
+        celery.states.RECEIVED: Status.PENDING,
         celery.states.STARTED: Status.ACTIVE,
         celery.states.SUCCESS: Status.COMPLETE,
         celery.states.FAILURE: Status.FAILED,
         celery.states.REVOKED: Status.CANCELLED,
-        # Task was rejected (by worker?)
+        # Task was rejected (by a worker?)
         celery.states.REJECTED: Status.CANCELLED,
         # Waiting for retry
         celery.states.RETRY: Status.PENDING,
@@ -450,10 +450,30 @@ def celery_event_to_task(name, task: celery_state.Task, user=getpass.getuser()) 
         input_datasets=(dataset_id,) if dataset_id else None,
         output_datasets=None,
         node=NodeMessage(
-            hostname=celery_worker.hostname,
+            hostname=_just_hostname(celery_worker),
             pid=celery_worker.pid
         ),
     )
+
+
+def _just_hostname(celery_worker: celery_state.Worker):
+    """
+    >>> _just_hostname("kveikur.local")
+    "kveikur.local"
+    >>> _just_hostname("someone@kveikur.local")
+    "kveikur.local"
+    >>> _just_hostname("someone@kveikur@local")
+    "kveikur.local"
+    """
+    hostname = celery_worker.hostname
+    if '@' not in hostname:
+        return hostname
+
+    parts = hostname.split('@')
+    if len(parts) != 2:
+        raise ValueError("Strange-looking, unsupported hostname %r" % (hostname,))
+
+    return parts[-1]
 
 
 def log_celery_tasks(should_shutdown: multiprocessing.Value, app: celery.Celery):

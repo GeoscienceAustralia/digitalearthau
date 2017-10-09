@@ -51,9 +51,14 @@ class BaseMessage(NamedTuple):
 
 @unique
 class Status(Enum):
+    # Not yet received or queued: to-pre-announce an expected future task, such as on reception of a future satellite
+    # schedule.
     SCHEDULED = 1
+    # Received but can't be processed yet: such as waiting for Ancillary data.
     WAITING = 2
+    # Queued to run
     PENDING = 3
+    # .... the rest are self-expanatory
     ACTIVE = 4
     COMPLETE = 5
     FAILED = 6
