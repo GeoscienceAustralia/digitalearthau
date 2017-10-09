@@ -13,6 +13,7 @@ import yaml
 import re
 import logging
 import itertools
+import collections
 import shlex
 from time import sleep
 
@@ -506,7 +507,7 @@ def log_celery_tasks(should_shutdown: multiprocessing.Value, app: celery.Celery)
 
         event_type: str = event['type']
 
-        if not event_type.startswith('task.'):
+        if not event_type.startswith('task-'):
             _LOG.debug("Unhandled event type %r", event_type)
             return
 
@@ -528,7 +529,7 @@ def log_celery_tasks(should_shutdown: multiprocessing.Value, app: celery.Celery)
             })
 
             # If idle for 5 seconds, it will recheck whether to shutdown
-            while not should_shutdown.value:
+            while not should_shutdown.value and not recv.should_stop:
                 try:
                     for _ in recv.consume(limit=None, timeout=5, wakeup=True):
                         pass
@@ -536,10 +537,18 @@ def log_celery_tasks(should_shutdown: multiprocessing.Value, app: celery.Celery)
                     pass
             _LOG.info("logger finished")
 
+    # Print count of tasks in each state.
+    tasks: collections.Iterable[celery_state.Task] = state.tasks.values()
+    task_states = collections.Counter(t.state for t in tasks)
+    _LOG.info("Task states: %s", ", ".join(f"{v} {k}" for (k, v) in task_states.items()))
+
     # According to our recorded state we should have seen all workers stop.
     workers: List[celery_state.Worker] = list(state.workers.values())
     active_workers = [w.hostname for w in workers if w.active]
     _LOG.info("%s/%s recorded workers are active", len(active_workers), len(workers))
+    # Based on recency of heartbeat, not an offline event.
+    _LOG.info("%s/%s recorded workers seem to be alive", len(state.alive_workers()), len(workers))
+
     if active_workers:
         _LOG.warning(
             "Some workers had not finished executing; their logs will be missed:n\n\t%s",
