@@ -498,8 +498,8 @@ def log_celery_tasks(should_shutdown: multiprocessing.Value, app: celery.Celery)
 
     # TODO: handling immature shutdown cleanly? The celery runner itself might need better support for it...
     # At NCI everything is ripped down by PBS
-    # signal.signal(signal.SIGINT, signal.)
-    # signal.signal(signal.SIGTERM, exit_soon)
+    # signal.signal(signal.SIGINT, signal.SIG_DFL)
+    # signal.signal(signal.SIGTERM, signal.SIG_DFL)
 
     def handle_task(event):
 
@@ -518,8 +518,8 @@ def log_celery_tasks(should_shutdown: multiprocessing.Value, app: celery.Celery)
         if not task:
             _LOG.warning(f"No task found {event_type}")
             return
-
         output.write_item(event)
+        _log_task_states(state)
 
     with JsonLinesWriter(Path('app-events.jsonl').open('a')) as output:
         with app.connection() as connection:
@@ -529,7 +529,7 @@ def log_celery_tasks(should_shutdown: multiprocessing.Value, app: celery.Celery)
             })
 
             # If idle for 5 seconds, it will recheck whether to shutdown
-            while not should_shutdown.value and not recv.should_stop:
+            while not should_shutdown.value:
                 try:
                     for _ in recv.consume(limit=None, timeout=5, wakeup=True):
                         pass
@@ -537,23 +537,27 @@ def log_celery_tasks(should_shutdown: multiprocessing.Value, app: celery.Celery)
                     pass
             _LOG.info("logger finished")
 
-    # Print count of tasks in each state.
-    tasks: collections.Iterable[celery_state.Task] = state.tasks.values()
-    task_states = collections.Counter(t.state for t in tasks)
-    _LOG.info("Task states: %s", ", ".join(f"{v} {k}" for (k, v) in task_states.items()))
+    _log_task_states(state)
 
     # According to our recorded state we should have seen all workers stop.
     workers: List[celery_state.Worker] = list(state.workers.values())
     active_workers = [w.hostname for w in workers if w.active]
     _LOG.info("%s/%s recorded workers are active", len(active_workers), len(workers))
     # Based on recency of heartbeat, not an offline event.
-    _LOG.info("%s/%s recorded workers seem to be alive", len(state.alive_workers()), len(workers))
+    _LOG.info("%s/%s recorded workers seem to be alive", len(list(state.alive_workers())), len(workers))
 
     if active_workers:
         _LOG.warning(
             "Some workers had not finished executing; their logs will be missed:n\n\t%s",
             "\n\t".join(active_workers)
         )
+
+
+def _log_task_states(state):
+    # Print count of tasks in each state.
+    tasks: collections.Iterable[celery_state.Task] = state.tasks.values()
+    task_states = collections.Counter(t.state for t in tasks)
+    _LOG.info("Task states: %s", ", ".join(f"{v} {k}" for (k, v) in task_states.items()))
 
 
 def launch_redis_worker_pool(port=6379, **redis_params):
