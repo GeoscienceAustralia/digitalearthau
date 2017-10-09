@@ -518,7 +518,7 @@ def log_celery_tasks(should_shutdown: multiprocessing.Value, app: celery.Celery)
         if not task:
             _LOG.warning(f"No task found {event_type}")
             return
-        output.write_item(event)
+        output.write_item(celery_event_to_task('fc.run', task))
         _log_task_states(state)
 
     with JsonLinesWriter(Path('app-events.jsonl').open('a')) as output:
@@ -589,7 +589,6 @@ def launch_redis_worker_pool(port=6379, **redis_params):
 
     for node in pbs.nodes():
         nprocs = node.num_cores
-        print(f"Cores {nprocs}")
         if node.is_main:
             nprocs = max(1, nprocs - 2)
 
@@ -618,7 +617,7 @@ def launch_redis_worker_pool(port=6379, **redis_params):
         _LOG.info('Shutting down redis-server')
         redis_shutdown()
 
-    return executor, start_shutdown
+    return executor, shutdown
 
 
 def describe_task(task):
@@ -836,15 +835,19 @@ def with_qsub_runner():
                          callback=add_multiproc_executor),
             click.option('--dask',
                          type=HostPort(),
-                         help='Use dask.distributed backend for parallel computation. ' +
-                              'Supply address of dask scheduler.',
+                         help=(
+                             'Use dask.distributed backend for parallel computation. '
+                             'Supply address of dask scheduler.'
+                         ),
                          expose_value=False,
                          callback=add_dask_executor),
             click.option('--celery',
                          type=HostPort(),
-                         help='Use celery backend for parallel computation. ' +
-                              'Supply redis server address, or "pbs-launch" to launch redis ' +
-                              'server and workers when running under pbs.',
+                         help=(
+                             'Use celery backend for parallel computation. '
+                             'Supply redis server address, or "pbs-launch" to launch redis '
+                             'server and workers when running under pbs.'
+                         ),
                          expose_value=False,
                          callback=add_celery_executor),
             click.option('--queue-size',
@@ -855,8 +858,10 @@ def with_qsub_runner():
             click.option('--qsub',
                          type=QSubParamType(),
                          callback=capture_qsub,
-                         help='Launch via qsub, supply comma or new-line separated list of parameters.' +
-                              ' Try --qsub=help.'),
+                         help=(
+                             'Launch via qsub, supply comma or new-line separated list of parameters.'
+                             ' Try --qsub=help.'
+                         )),
         ]
 
         for o in opts:
