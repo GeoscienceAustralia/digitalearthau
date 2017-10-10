@@ -525,7 +525,7 @@ def log_celery_tasks(should_shutdown: multiprocessing.Value, app: celery.Celery,
                 # events to consume.
                 if should_shutdown.value:
                     # If all workers have sent a shutdown event to us, we know we have recorded everything.
-                    if state.alive_workers() == 0:
+                    if sum(1 for w in state.workers.values() if w.active) == 0:
                         _LOG.info("All workers finished, exiting.")
                         break
 
