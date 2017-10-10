@@ -1,7 +1,7 @@
 from pathlib import Path
 
 import datetime
-from typing import NamedTuple
+from typing import NamedTuple, List
 
 
 class TaskAppState(NamedTuple):
@@ -17,6 +17,9 @@ class TaskAppState(NamedTuple):
 class DefaultJobParameters(NamedTuple):
     # Datacube query args used to select datasets to process (eg time=(1994, 1995), product=ls5_nbar_albers)
     query: dict
+
+    source_types: List[str]
+    output_types: List[str]
 
 
 class TaskDescription(NamedTuple):
