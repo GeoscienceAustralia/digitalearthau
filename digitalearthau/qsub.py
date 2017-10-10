@@ -255,7 +255,28 @@ def norm_qsub_params(p):
     return pp
 
 
-def build_qsub_args(**p):
+def _build_qsub_args(**p):
+    """
+    Turn the output of norm_qsub_params into arguments for qsub.
+
+    >>> _build_qsub_args(
+    ...     ncpus=1,
+    ...     mem='4096MB',
+    ...     walltime='1:00:00',
+    ...     name='test',
+    ...     project='u46',
+    ...     queue='normal',
+    ...     wd=True,
+    ...     noask=True
+    ... )
+    ['-lmem=4096MB', '-lncpus=1', '-lwalltime=1:00:00', '-lwd', '-P', 'u46', '-q', 'normal', '-N', 'test']
+    >>> # It should complain on unknown fields
+    >>> _build_qsub_args(project='v10', wrong_arg='lumberjack')
+    Traceback (most recent call last):
+    ...
+    ValueError: Unknown qsub arguments: {'wrong_arg': 'lumberjack'}
+    """
+
     args = []
 
     flags = dict(project='-P',
@@ -263,7 +284,7 @@ def build_qsub_args(**p):
                  name='-N')
 
     def add_l_arg(n):
-        v = p.get(n)
+        v = p.pop(n, None)
         if v is not None:
             if isinstance(v, bool):
                 if v:
@@ -272,7 +293,7 @@ def build_qsub_args(**p):
                 args.append('-l{}={}'.format(n, v))
 
     def add_arg(n):
-        v = p.get(n)
+        v = p.pop(n, None)
         if v is not None:
             flag = flags[n]
             args.extend([flag, v])
@@ -283,7 +304,14 @@ def build_qsub_args(**p):
     for n in flags:
         add_arg(n)
 
-    args.extend(p.get('extra_qsub_args', []))
+    args.extend(p.pop('extra_qsub_args', []))
+
+    # Used in UI that calls this method, not qsub.
+    p.pop('noask', None)
+
+    # We should have popped all input arguments, otherwise they passed something unknown
+    if p:
+        raise ValueError(f"Unknown qsub arguments: {repr(p)}")
 
     # TODO: deal with env_vars!
 
@@ -308,7 +336,7 @@ def generate_self_launch_script(*args):
 
 def qsub_self_launch(qsub_opts, *args):
     script = generate_self_launch_script(*args)
-    qsub_args = build_qsub_args(**qsub_opts)
+    qsub_args = _build_qsub_args(**qsub_opts)
 
     noask = qsub_opts.get('noask', False)
 
