@@ -25,18 +25,18 @@ class JsonLinesWriter:
         return self
 
     def write_item(self, item):
-        self._file_obj.write(to_json(item) + '\n')
+        self._file_obj.write(to_json(item, compact=True) + '\n')
         self._file_obj.flush()
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self._file_obj.close()
 
 
-def to_json(o, *args, **kwargs):
+def to_json(o, compact=False, *args, **kwargs):
     """
     Support a few more common types for json serialisation
 
-    Let's make the output slightly more useful for common types.
+    Readable by default. Use compact=True for single-line output like jsonl
 
     >>> to_json([1, 2])
     '[1, 2]'
@@ -49,13 +49,20 @@ def to_json(o, *args, **kwargs):
     return json.dumps(
         o,
         default=simplify_obj,
-        separators=(', ', ':'),
+        separators=(', ', ':') if compact else None,
         sort_keys=True,
+        indent=None if compact else 4
     )
 
 
-def _json_fallback(obj):
-    """Fallback for non-serialisable json types."""
+def _lenient_json_fallback(obj):
+    """Fallback that should always succeed.
+
+    The default fallback will throw exceptions for unsupported types, this one will always
+    at least repr() an object rather than throw a NotSerialisableException
+
+    (intended for use in places such as json-based logs where you always want the message recorded)
+    """
     if isinstance(obj, (datetime.datetime, datetime.date)):
         return obj.isoformat()
 
@@ -87,22 +94,24 @@ def dump_document(path: pathlib.Path, object, allow_unsafe=False):
         )
     elif suffix == '.json':
         path.write_text(
-            to_json(object)
+            to_json(object) + '\n'
         )
+    else:
+        raise NotImplementedError(f"Unknown suffix {suffix}. Expected json/yaml.")
 
 
 def dump_structure(path: pathlib.Path, object):
     """
     Dump NamedTuples to a yaml/json document
     """
-    return dump_document(path, named_tuple_to_dict(object))
+    return dump_document(path, type_to_dict(object))
 
 
 def load_structure(path: pathlib.Path, expected_type):
     """
     Load the expected NamedTuple (with type hints) from a yaml/json
     """
-    return deserial(paths.read_document(path), expected_type)
+    return dict_to_type(paths.read_document(path), expected_type)
 
 
 def simplify_obj(obj):
@@ -123,22 +132,28 @@ def simplify_obj(obj):
         return obj
 
 
-def named_tuple_to_dict(o):
+def type_to_dict(o):
     """
     Convert a named tuple and all of its directly-embedded named tuples to serialisable dicts
+
+
+    TODO: Doesn't handle indirectly embedded NamedTuples, such as within a list.
+    (It's currently only used for simple cases, not complex hierarchies)
     """
-    # TODO: Doesn't handle indirectly embedded NamedTuples, such as within a list.
 
     # We can't isinstance() for NamedTuple, the noraml way is to see if attributes like _fields exist.
     try:
-        return dict(zip(o._fields, (named_tuple_to_dict(value) for value in o)))
+        return dict(zip(o._fields, (type_to_dict(value) for value in o)))
     except AttributeError:
         return simplify_obj(o)
 
 
-def deserial(o, expected_type):
+def dict_to_type(o, expected_type):
     """
-    Try to parse the given dict into an object tree.
+    Try to parse the given dict into the given NamedTuple type.
+
+    TODO: Doesn't handle indirectly embedded NamedTuples, such as within a list, or Optionals/Unions/etc
+    (It's currently only used for simple cases, not complex hierarchies)
     """
     if expected_type in (pathlib.Path, uuid.UUID):
         return expected_type(o)
@@ -151,38 +166,8 @@ def deserial(o, expected_type):
         field_types: Dict = expected_type._field_types
         assert isinstance(o, dict)
         return expected_type(
-            **{k: deserial(v, field_types[k]) for (k, v) in o.items()}
+            **{k: dict_to_type(v, field_types[k]) for (k, v) in o.items()}
         )
     except AttributeError:
         pass
     return o
-
-
-def test_serial():
-    # Convert to dict and back again, checking that it's identical.
-
-    class EmbeddedObj(NamedTuple):
-        a: str
-        my_dt: datetime.datetime
-
-    class ObjA(NamedTuple):
-        v1: str
-        v2: List[int]
-        mynamedtuple: EmbeddedObj
-        my_path: pathlib.Path
-
-    m = ObjA(
-        "a string",
-        [1, 2, 3],
-        EmbeddedObj(
-            "b string",
-            datetime.datetime.utcnow()
-        ),
-        pathlib.Path("/tmp/test")
-    )
-
-    d = named_tuple_to_dict(m)
-    print(repr(d))
-    new_m = deserial(d, ObjA)
-    print(repr(new_m))
-    assert m == new_m

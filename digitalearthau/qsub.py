@@ -585,8 +585,8 @@ class TaskDescription(NamedTuple):
     query: dict
 
     # Parameters specific to the task type.
-    # (A union because other app types might be added in the future...)
-    parameters: Union[type(None), TaskAppParameters]
+    # (Expect this type to be a union eventually: other app types might be added in the future...)
+    parameters: TaskAppParameters
 
 
 # TODO: Refactor before pull request (Hopefully this comment doesn't enter the pull request, that would be embarrassing)
