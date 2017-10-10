@@ -7,6 +7,7 @@ import uuid
 from pathlib import Path
 from typing import List, Iterable, Union, Tuple
 
+import pathlib
 import structlog
 
 from datacube.utils import is_supported_document_type, read_documents, InvalidDocException, uri_to_local_path
@@ -28,6 +29,10 @@ BASE_DIRECTORIES = [
 
 # Use a static variable so that trashed items in the same run will be in the same trash bin.
 _TRASH_DAY = datetime.datetime.utcnow().strftime('%Y-%m-%d')
+
+# TODO: configurable?
+NCI_WORK_ROOT = Path(os.environ.get('DEA_WORK_ROOT') or '/g/data/v10/work')
+JOB_WORK_OFFSET = 'product/{output_product}/{work_time:%Y-%m}/{work_time:dT%H%M}'
 
 
 def register_base_directory(d: Union[str, Path]):
@@ -233,6 +238,18 @@ def get_dataset_paths(metadata_path: Path) -> Tuple[Path, List[Path]]:
     raise ValueError("Unsupported path type: " + str(metadata_path))
 
 
+def read_document(path: Path) -> dict:
+    """
+    Read and parse exactly one document.
+    """
+    ds = list(read_documents(path))
+    if len(ds) != 1:
+        raise NotImplementedError("Expected one document to be in path %s" % path)
+
+    _, doc = ds[0]
+    return doc
+
+
 def get_metadata_path(dataset_path):
     """
     Find a metadata path for a given input/dataset path.
@@ -299,3 +316,13 @@ def trash_uri(uri: str, dry_run=False, log=_LOG):
         if not trash_path.parent.exists():
             os.makedirs(str(trash_path.parent))
         os.rename(str(base_path), str(trash_path))
+
+
+def get_product_work_directory(output_product, submission_time):
+    if not NCI_WORK_ROOT.exists():
+        raise ValueError("Work folder doesn't exist: %s" % NCI_WORK_ROOT)
+    job_offset = JOB_WORK_OFFSET.format(
+        work_time=submission_time,
+        output_product=output_product,
+    )
+    return NCI_WORK_ROOT.joinpath(job_offset)

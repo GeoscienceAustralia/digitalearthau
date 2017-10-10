@@ -1,44 +1,38 @@
+import collections
+import datetime
 import getpass
-import json
+import itertools
+import logging
 import multiprocessing
+import re
+import shlex
 import signal
 import socket
+import sys
 import uuid
-from typing import Optional, List, Iterable
+from functools import update_wrapper
+from pathlib import Path
+from subprocess import Popen, PIPE
+from time import sleep, time
+from typing import Optional, List, Iterable, NamedTuple, Union
 
 import celery
+import celery.events.state as celery_state
+import celery.states
 import click
-import datetime
 import yaml
-import re
-import logging
-import itertools
-import collections
-import shlex
-from time import sleep, time
-
 from celery.events import EventReceiver
 from dateutil import tz
 from pydash import pick
-from pathlib import Path
-from functools import update_wrapper
-from subprocess import Popen, PIPE
 
-from digitalearthau.events import Status, TaskEvent, NodeMessage
-from . import pbs
+from datacube import _celery_runner as cr
 from datacube.executor import (SerialExecutor,
                                mk_celery_executor,
                                _get_concurrent_executor,
                                _get_distributed_executor)
-
-from datacube import _celery_runner as cr
-
-import celery.events.state as celery_state
-import sys
-
-import celery.states
-
-from . import events
+from digitalearthau import serialise
+from .events import Status, TaskEvent, NodeMessage
+from . import pbs
 
 NUM_CPUS_PER_NODE = 16
 QSUB_L_FLAGS = 'mem ncpus walltime wd'.split(' ')
@@ -473,7 +467,7 @@ def _just_hostname(hostname: str):
     return parts[-1]
 
 
-def log_celery_tasks(should_shutdown: multiprocessing.Value, app: celery.Celery):
+def log_celery_tasks(should_shutdown: multiprocessing.Value, app: celery.Celery, task_description: 'TaskDescription'):
     # Open log file.
     # Connect to celery
     # Stream events to file.
@@ -508,7 +502,9 @@ def log_celery_tasks(should_shutdown: multiprocessing.Value, app: celery.Celery)
         output.write_item(celery_event_to_task('fc.run', task))
         _log_task_states(state)
 
-    with events.JsonLinesWriter(Path('app-events.jsonl').open('a')) as output:
+    events_path = task_description.events_path.joinpath('root.jsonl')
+
+    with serialise.JsonLinesWriter(events_path.open('a')) as output:
         with app.connection() as connection:
 
             recv: EventReceiver = app.events.Receiver(connection, handlers={
@@ -565,14 +561,42 @@ def _log_task_states(state):
     _LOG.info("Task states: %s", ", ".join(f"{v} {k}" for (k, v) in task_states.items()))
 
 
+class TaskAppParameters(NamedTuple):
+    """
+    Parameters for apps using the task_app framework.
+    """
+    # Input app config path
+    config_path: Path
+    # Path where tasks are stored, once calculated
+    task_serialisation_path: Path
+
+
+class TaskDescription(NamedTuple):
+    # task type (eg. "fc")
+    type_: str
+    # The submission timestamp used for all files/directories produced in the job.
+    task_dt: datetime
+
+    # Directory of event log outputs
+    events_path: Path
+    # Directory of plain-text log outputs
+    logs_path: Path
+    # Datacube query args used to select datasets to process (eg time=(1994, 1995), product=ls5_nbar_albers)
+    query: dict
+
+    # Parameters specific to the task type.
+    # (A union because other app types might be added in the future...)
+    parameters: Union[type(None), TaskAppParameters]
+
+
 # TODO: Refactor before pull request (Hopefully this comment doesn't enter the pull request, that would be embarrassing)
 # pylint: disable=too-many-locals
-def launch_redis_worker_pool(port=6379, **redis_params):
-    redis_port = port
+def launch_celery_worker_environment(task_description: TaskDescription, redis_params: dict):
+    redis_port = redis_params['port']
     redis_host = pbs.hostname()
     redis_password = cr.get_redis_password(generate_if_missing=True)
 
-    redis_shutdown = cr.launch_redis(redis_port, redis_password, **redis_params)
+    redis_shutdown = cr.launch_redis(password=redis_password, **redis_params)
     if not redis_shutdown:
         raise RuntimeError('Failed to launch Redis')
 
@@ -588,7 +612,8 @@ def launch_redis_worker_pool(port=6379, **redis_params):
         password=redis_password,
     )
     logger_shutdown = multiprocessing.Value('b', False, lock=False)
-    log_proc = multiprocessing.Process(target=log_celery_tasks, args=(logger_shutdown, cr.app,))
+
+    log_proc = multiprocessing.Process(target=log_celery_tasks, args=(logger_shutdown, cr.app, task_description))
     log_proc.start()
 
     worker_env = pbs.get_env()
@@ -701,33 +726,36 @@ class TaskRunner(object):
     def set_qsize(self, qsize):
         self._user_queue_size = qsize
 
-    def start(self):
+    def start(self, task_description: TaskDescription = None):
         def noop():
             pass
 
-        def mk_pbs_celery():
+        def mk_pbs_celery(environment: TaskDescription):
             qsize = pbs.preferred_queue_size()
             port = 6379  # TODO: randomise
             maxmemory = "1024mb"  # TODO: compute maxmemory from qsize
-            executor, shutdown = launch_redis_worker_pool(port=port, maxmemory=maxmemory)
+            executor, shutdown = launch_celery_worker_environment(
+                task_description=environment,
+                redis_params=dict(port=port, maxmemory=maxmemory)
+            )
             return (executor, qsize, shutdown)
 
-        def mk_dask():
+        def mk_dask(environment: TaskDescription):
             qsize = 100
             executor = _get_distributed_executor(self._opts)
             return (executor, qsize, noop)
 
-        def mk_celery():
+        def mk_celery(environment: TaskDescription):
             qsize = 100
             executor = mk_celery_executor(*self._opts)
             return (executor, qsize, noop)
 
-        def mk_multiproc():
+        def mk_multiproc(environment: TaskDescription):
             qsize = 100
             executor = _get_concurrent_executor(self._opts)
             return (executor, qsize, noop)
 
-        def mk_serial():
+        def mk_serial(environment: TaskDescription):
             qsize = 10
             executor = SerialExecutor()
             return (executor, qsize, noop)
@@ -741,7 +769,7 @@ class TaskRunner(object):
         try:
             (self._executor,
              default_queue_size,
-             self._shutdown) = mk.get(self._kind, mk_serial)()
+             self._shutdown) = mk.get(self._kind, mk_serial)(task_description)
         except RuntimeError:
             _LOG.exception("Error starting executor")
             return False
@@ -758,9 +786,9 @@ class TaskRunner(object):
             self._queue_size = None
             self._shutdown = None
 
-    def __call__(self, tasks, run_task, on_task_complete=None):
+    def __call__(self, task_description: TaskDescription, tasks, run_task, on_task_complete=None):
         if self._executor is None:
-            if self.start() is False:
+            if self.start(task_description) is False:
                 raise RuntimeError('Failed to launch worker pool')
 
         return run_tasks(tasks, self._executor, run_task, on_task_complete, self._queue_size)
