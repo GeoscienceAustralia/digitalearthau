@@ -112,33 +112,3 @@ class TaskEvent(NamedTuple):
     # Most tasks created here will be children of the PBS job (task) they run in.
     parent_id: uuid.UUID = pbs.current_job_task_id()
 
-
-class LogMessage(BaseMessage):
-    logger: str
-    task_id: uuid.UUID
-
-    # @classmethod
-    # def now(cls, level: str, message: str, user=getpass.getuser()) -> 'LogMessage':
-    #     return LogMessage(
-    #         timestamp=datetime.datetime.utcnow(),
-    #         event=f"log.{level.lower()}",
-    #         user=user,
-    #         logger='',
-    #         task_id=uuid.uuid4(),
-    #         message=message,
-    #         node=NodeMessage(
-    #             hostname=_CURRENT_HOST,
-    #             # "Computed" every time in case of forking.
-    #             pid=os.getpid()
-    #         )
-    #     )
-
-
-def named_tuple_to_dict(o):
-    """
-    Convert a named tuple and all of it's embedded named tuples to dicts
-    """
-    # Convert any child NamedTuples to DICTS
-    values = (named_tuple_to_dict(value) if isinstance(value, NamedTuple) else value for value in o)
-    return dict(zip(o._fields, values))
-
