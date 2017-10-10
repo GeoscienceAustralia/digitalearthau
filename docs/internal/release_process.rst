@@ -1,4 +1,4 @@
-.. about_release_process:
+.. internal_release_process:
 
 Build a version
 ===============

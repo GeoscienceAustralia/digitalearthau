@@ -1,6 +1,6 @@
 .. highlight:: console
 
-.. about_release:
+.. internal_release:
 
 Building a Release
 ===================

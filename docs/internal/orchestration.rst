@@ -1,6 +1,6 @@
 .. highlight:: console
 
-.. about_orchestration:
+.. internal_orchestration:
 
 DEA Orchestration
 =================
