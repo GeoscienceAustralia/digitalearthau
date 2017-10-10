@@ -1,0 +1,50 @@
+---
+name: item_v2
+description: Intertidal Extents Model
+metadata_type: eo
+
+managed: true
+metadata:
+  format:
+    name: NetCDF
+  product_type: ITEM
+  statistic:
+    name: decile
+
+measurements:
+- name: relative
+  dtype: int16
+  nodata: 0
+  units: '0.1'
+
+storage:
+  crs: EPSG:3577
+  resolution:
+    x: 25
+    y: -25
+
+---
+name: item_v2_conf
+description: Average ndwi Standard Deviation
+metadata_type: eo
+
+managed: true
+metadata:
+  format:
+    name: NetCDF
+  product_type: ITEM
+  statistic:
+    name: stddev
+    source: ndwi
+
+measurements:
+- name: stddev
+  dtype: float32
+  nodata: -6666
+  units: '1'
+
+storage:
+  crs: EPSG:3577
+  resolution:
+    x: 25
+    y: -25

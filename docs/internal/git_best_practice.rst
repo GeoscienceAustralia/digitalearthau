@@ -196,7 +196,7 @@ When accepting pull requests GitHub gives you three different options. The
 default behavior is to create a merge commit *"Merge pull request"*. Use this
 option for larger requests.
 
-.. image:: ../resources/github-merge-pull-request.png 
+.. image:: /_static/github-merge-pull-request.png
    :alt: GitHub merge pull request screenshot
 
 For smaller changes, a bug fix or a small feature, couple of small commits in
