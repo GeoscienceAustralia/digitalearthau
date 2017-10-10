@@ -575,7 +575,7 @@ class TaskDescription(NamedTuple):
     # task type (eg. "fc")
     type_: str
     # The submission timestamp used for all files/directories produced in the job.
-    task_dt: datetime
+    task_dt: datetime.datetime
 
     # Directory of event log outputs
     events_path: Path
