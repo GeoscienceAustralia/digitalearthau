@@ -1,3 +1,4 @@
+import enum
 import json
 import pathlib
 import uuid
@@ -8,6 +9,7 @@ import yaml
 from typing import Dict
 
 from digitalearthau import paths
+from digitalearthau.events import Status
 
 
 class JsonLinesWriter:
@@ -120,6 +122,10 @@ def simplify_obj(obj):
     if isinstance(obj, set):
         return list(obj)
 
+    if isinstance(obj, enum.Enum):
+        # Our enums are serialised for json to lowercase representation, as with most of our identifiers
+        return obj.name.lower()
+
     try:
         # Allow class to define their own.
         return obj.to_dict()
@@ -129,11 +135,15 @@ def simplify_obj(obj):
 
 def type_to_dict(o):
     """
-    Convert a named tuple and all of its directly-embedded named tuples to serialisable dicts
+    Convert a named tuple and all of its directly-embedded named tuples to dicts/etc suitable for json/yaml
 
 
     TODO: Doesn't handle indirectly embedded NamedTuples, such as within a list.
     (It's currently only used for simple cases, not complex hierarchies)
+
+    >>> type_to_dict(Status.ACTIVE)
+    'active'
+    >>> # More tests in test_serialise.py
     """
 
     # We can't isinstance() for NamedTuple, the noraml way is to see if attributes like _fields exist.
@@ -145,10 +155,19 @@ def type_to_dict(o):
 
 def dict_to_type(o, expected_type):
     """
-    Try to parse the given dict into the given NamedTuple type.
+    Try to parse the given dict (from json/etc) into the given NamedTuple.
 
     TODO: Doesn't handle indirectly embedded NamedTuples, such as within a list, or Optionals/Unions/etc
     (It's currently only used for simple cases, not complex hierarchies)
+
+    >>>
+    >>> Status.ACTIVE == dict_to_type('active', expected_type=Status)
+    True
+    >>> dict_to_type('eating', expected_type=Status)
+    Traceback (most recent call last):
+    ...
+    digitalearthau.serialise.SerialisationError: Unknown field EATING for Status. Expected one of ...
+    >>> # More tests in test_serialise.py
     """
     if expected_type in (pathlib.Path, uuid.UUID):
         return expected_type(o)
@@ -156,6 +175,13 @@ def dict_to_type(o, expected_type):
     if expected_type == datetime.datetime:
         return dateutil.parser.parse(o)
 
+    if issubclass(expected_type, enum.Enum):
+        name = str(o).upper()
+        v = expected_type.__members__.get(name)
+        if not v:
+            raise SerialisationError(f"Unknown field {name} for {expected_type.__name__}. "
+                                     f"Expected one of {', '.join(expected_type.__members__)}")
+        return v
     try:
         # We can't isinstance() for NamedTuple, the noraml way is to see if attributes like _fields exist.
         # pylint: disable=protected-access
@@ -167,3 +193,7 @@ def dict_to_type(o, expected_type):
     except AttributeError:
         pass
     return o
+
+
+class SerialisationError(Exception):
+    pass

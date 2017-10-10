@@ -1,30 +1,33 @@
 import pathlib
 
 import datetime
+import pytest
 from typing import NamedTuple, List
 
 from digitalearthau import serialise
 from digitalearthau.events import Status
+from digitalearthau.runners.model import TaskDescription, DefaultJobParameters, TaskAppState
+from pathlib import Path
 
 
 def test_roundtrip():
     # Convert to dict and back again, checking that it's identical.
 
-    class EmbeddedObj(NamedTuple):
+    class MyEmbeddedNamedTuple(NamedTuple):
         arg1: str
         my_dt: datetime.datetime
 
-    class ObjA(NamedTuple):
+    class MyNamedTuple(NamedTuple):
         var1: str
         var2: List[int]
-        mynamedtuple: EmbeddedObj
+        inner_tuple: MyEmbeddedNamedTuple
         my_path: pathlib.Path
-        status: Status
+        my_enum: Status
 
-    m = ObjA(
+    m = MyNamedTuple(
         "a string",
         [1, 2, 3],
-        EmbeddedObj(
+        MyEmbeddedNamedTuple(
             "b string",
             datetime.datetime.utcnow()
         ),
@@ -34,8 +37,38 @@ def test_roundtrip():
 
     d = serialise.type_to_dict(m)
     print(repr(d))
-    new_m = serialise.dict_to_type(d, ObjA)
+    new_m = serialise.dict_to_type(d, MyNamedTuple)
     print(repr(new_m))
     assert m == new_m
 
+
 # TODO Add test serialising the actual objects we have (TaskDescription etc..)
+
+
+def test_dump_load_task_structure(tmpdir):
+    # Dump to json and reload, check equality.
+
+    d = Path(str(tmpdir))
+    task_description = TaskDescription(
+        type_="reproject",
+        task_dt=datetime.datetime.utcnow(),
+        events_path=d.joinpath('events'),
+        logs_path=d.joinpath('logs'),
+        parameters=DefaultJobParameters(
+            query={'time': [2013, 2015]},
+            source_types=['ls5_nbar_albers'],
+            output_types=['ls5_nbar_waterman_butterfly'],
+        ),
+        # Task-app framework
+        runtime_state=TaskAppState(
+            config_path=Path('config.test.yaml'),
+            task_serialisation_path=d.joinpath('generated-tasks.pickle'),
+        )
+    )
+
+    serialised_file = d.joinpath('task_description.json')
+    serialise.dump_structure(serialised_file, task_description)
+
+    result = serialise.load_structure(serialised_file, expected_type=TaskDescription)
+
+    assert result == task_description
