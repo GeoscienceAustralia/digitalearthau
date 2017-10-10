@@ -18,7 +18,7 @@ class JsonLinesWriter:
         return self
 
     def write_item(self, item):
-        self._file_obj.write(to_json(type_to_dict(item), compact=False) + '\n')
+        self._file_obj.write(to_json(type_to_dict(item), compact=True) + '\n')
         self._file_obj.flush()
 
     def __exit__(self, exc_type, exc_val, exc_tb):
@@ -73,13 +73,13 @@ def _lenient_json_fallback(obj):
         return repr(obj)
 
 
-def dump_document(path: pathlib.Path, object, allow_unsafe=False):
+def dump_document(path: pathlib.Path, obj, allow_unsafe=False):
     suffix = path.suffix.lower()
     if suffix == '.yaml':
         path.write_text(
             # Allow unsafe dump, for where it's used as a more readable pickle.
             yaml.dump(
-                object,
+                obj,
                 Dumper=yaml.Dumper if allow_unsafe else yaml.SafeDumper,
                 default_flow_style=False,
                 indent=4,
@@ -87,17 +87,17 @@ def dump_document(path: pathlib.Path, object, allow_unsafe=False):
         )
     elif suffix == '.json':
         path.write_text(
-            to_json(object) + '\n'
+            to_json(obj) + '\n'
         )
     else:
         raise NotImplementedError(f"Unknown suffix {suffix}. Expected json/yaml.")
 
 
-def dump_structure(path: pathlib.Path, object):
+def dump_structure(path: pathlib.Path, obj):
     """
     Dump NamedTuples to a yaml/json document
     """
-    return dump_document(path, type_to_dict(object))
+    return dump_document(path, type_to_dict(obj))
 
 
 def load_structure(path: pathlib.Path, expected_type):
@@ -154,8 +154,9 @@ def dict_to_type(o, expected_type):
     if expected_type == datetime.datetime:
         return dateutil.parser.parse(o)
 
-    # We can't isinstance() for NamedTuple, the noraml way is to see if attributes like _fields exist.
     try:
+        # We can't isinstance() for NamedTuple, the noraml way is to see if attributes like _fields exist.
+        # pylint: disable=protected-access
         field_types: Dict = expected_type._field_types
         assert isinstance(o, dict)
         return expected_type(

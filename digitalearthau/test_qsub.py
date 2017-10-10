@@ -221,7 +221,7 @@ def test_celery_success_to_task(input_json: str, expected_events: List[TaskEvent
     for j in JSONLIterator(StringIO(input_json)):
         state.event(j)
 
-        celery_task : celery_state.Task = state.tasks[task_id]
+        celery_task: celery_state.Task = state.tasks[task_id]
         events.append(celery_event_to_task(
             'fc.create',
             celery_task,

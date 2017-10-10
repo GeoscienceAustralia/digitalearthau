@@ -1,14 +1,10 @@
-import getpass
-import json
 import os
 import socket
 import uuid
-import datetime
-from typing import NamedTuple, Optional, List
-
 from enum import Enum, unique
 
-import pathlib
+import datetime
+from typing import NamedTuple, Optional, List
 
 from digitalearthau import pbs
 
@@ -111,4 +107,3 @@ class TaskEvent(NamedTuple):
 
     # Most tasks created here will be children of the PBS job (task) they run in.
     parent_id: uuid.UUID = pbs.current_job_task_id()
-
