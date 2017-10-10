@@ -33,6 +33,7 @@ _TRASH_DAY = datetime.datetime.utcnow().strftime('%Y-%m-%d')
 # TODO: configurable?
 NCI_WORK_ROOT = Path(os.environ.get('DEA_WORK_ROOT') or '/g/data/v10/work')
 # Structure for work directories within the work root.
+# Eg. '/g/data/v10/work/ls8_nbar_albers/create/2017-10/09-2102'
 _JOB_WORK_OFFSET = '{output_product}/{task_type}/{work_time:%Y-%m}/{work_time:%d-%H%M}'
 
 
@@ -332,7 +333,9 @@ def get_product_work_directory(
     if not NCI_WORK_ROOT.exists():
         raise ValueError("Work folder doesn't exist: %s" % NCI_WORK_ROOT)
 
-    return _make_work_directory(output_product, time, task_type)
+    d = _make_work_directory(output_product, time, task_type)
+    d.mkdir(parents=True, exist_ok=False)
+    return d
 
 
 def _make_work_directory(output_product, work_time, task_type):
