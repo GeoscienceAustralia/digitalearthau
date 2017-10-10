@@ -4,20 +4,22 @@ import datetime
 from typing import NamedTuple, List
 
 from digitalearthau import serialise
+from digitalearthau.events import Status
 
 
 def test_roundtrip():
     # Convert to dict and back again, checking that it's identical.
 
     class EmbeddedObj(NamedTuple):
-        a: str
+        arg1: str
         my_dt: datetime.datetime
 
     class ObjA(NamedTuple):
-        v1: str
-        v2: List[int]
+        var1: str
+        var2: List[int]
         mynamedtuple: EmbeddedObj
         my_path: pathlib.Path
+        status: Status
 
     m = ObjA(
         "a string",
@@ -26,7 +28,8 @@ def test_roundtrip():
             "b string",
             datetime.datetime.utcnow()
         ),
-        pathlib.Path("/tmp/test")
+        pathlib.Path("/tmp/test"),
+        Status.ACTIVE
     )
 
     d = serialise.type_to_dict(m)

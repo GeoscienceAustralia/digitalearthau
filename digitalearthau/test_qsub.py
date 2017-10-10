@@ -13,7 +13,8 @@ from mock import mock
 from typing import List
 
 from digitalearthau.events import TaskEvent, NodeMessage, Status
-from digitalearthau.qsub import celery_event_to_task
+from digitalearthau.runners import model
+from digitalearthau.runners.celery_environment import celery_event_to_task
 from . import qsub
 
 import celery.events.state as celery_state
@@ -84,7 +85,7 @@ _EXPECTED_SUCCESS = [
         message=None,
         id='13d1e3c4-cecd-4306-903f-97ed1ec2d73d',
         status=Status.PENDING,
-        name='fc.create',
+        name='fc.test',
         input_datasets=(UUID('60bc52f1-7a70-43f2-bc8d-2bd138eb2aba'),),
         output_datasets=None,
         job_parameters={},
@@ -102,7 +103,7 @@ _EXPECTED_SUCCESS = [
         message=None,
         id='13d1e3c4-cecd-4306-903f-97ed1ec2d73d',
         status=Status.ACTIVE,
-        name='fc.create',
+        name='fc.test',
         input_datasets=(UUID('60bc52f1-7a70-43f2-bc8d-2bd138eb2aba'),),
         output_datasets=None,
         job_parameters={},
@@ -120,7 +121,7 @@ _EXPECTED_SUCCESS = [
         message=None,
         id='13d1e3c4-cecd-4306-903f-97ed1ec2d73d',
         status=Status.COMPLETE,
-        name='fc.create',
+        name='fc.test',
         input_datasets=(UUID('60bc52f1-7a70-43f2-bc8d-2bd138eb2aba'),),
         output_datasets=None,
         job_parameters={},
@@ -149,7 +150,7 @@ _EXPECTED_FAILURE = [
         message=None,
         id='410e05e3-4058-4bfa-bbc2-5fc085464841',
         status=Status.PENDING,
-        name='fc.create',
+        name='fc.test',
         input_datasets=(UUID('591fce1d-5268-44e8-a8b0-e38e6cfbb749'),),
         output_datasets=None,
         job_parameters={},
@@ -167,7 +168,7 @@ _EXPECTED_FAILURE = [
         message=None,
         id='410e05e3-4058-4bfa-bbc2-5fc085464841',
         status=Status.ACTIVE,
-        name='fc.create',
+        name='fc.test',
         input_datasets=(UUID('591fce1d-5268-44e8-a8b0-e38e6cfbb749'),),
         output_datasets=None,
         job_parameters={},
@@ -198,7 +199,7 @@ _EXPECTED_FAILURE = [
                 '20151007014520000000_v1507076205.nc\'\n',
         id='410e05e3-4058-4bfa-bbc2-5fc085464841',
         status=Status.FAILED,
-        name='fc.create',
+        name='fc.test',
         input_datasets=(UUID('591fce1d-5268-44e8-a8b0-e38e6cfbb749'),),
         output_datasets=None,
         job_parameters={},
@@ -217,13 +218,26 @@ def test_celery_success_to_task(input_json: str, expected_events: List[TaskEvent
 
     task_id = expected_events[0].id
 
+    task_description = model.TaskDescription(
+        type_="fc.test",
+        task_dt=None,
+        events_path=None,
+        logs_path=None,
+        parameters={},
+        # Task-app framework
+        runtime_state=model.TaskAppState(
+            config_path=None,
+            task_serialisation_path=None,
+        )
+    )
+
     events = []
     for j in JSONLIterator(StringIO(input_json)):
         state.event(j)
 
         celery_task: celery_state.Task = state.tasks[task_id]
         events.append(celery_event_to_task(
-            'fc.create',
+            task_description,
             celery_task,
             user='testuser'
         ))

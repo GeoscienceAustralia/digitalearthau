@@ -31,10 +31,12 @@ def to_json(o, compact=False, *args, **kwargs):
 
     Readable by default. Use compact=True for single-line output like jsonl
 
-    >>> to_json([1, 2])
+    >>> to_json([1, 2], compact=True)
     '[1, 2]'
+    >>> to_json({'a': 1})
+    '{\\n    "a": 1\\n}'
     >>> # Sets and paths
-    >>> to_json({pathlib.Path('/tmp')})
+    >>> to_json({pathlib.Path('/tmp')}, compact=True)
     '["/tmp"]'
     >>> to_json(uuid.UUID('b6bf8ff5-99e6-4562-87b4-cbe6549335e9'))
     '"b6bf8ff5-99e6-4562-87b4-cbe6549335e9"'
