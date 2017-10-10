@@ -32,7 +32,8 @@ _TRASH_DAY = datetime.datetime.utcnow().strftime('%Y-%m-%d')
 
 # TODO: configurable?
 NCI_WORK_ROOT = Path(os.environ.get('DEA_WORK_ROOT') or '/g/data/v10/work')
-JOB_WORK_OFFSET = 'product/{output_product}/{work_time:%Y-%m}/{work_time:dT%H%M}'
+# Structure for work directories within the work root.
+_JOB_WORK_OFFSET = '{output_product}/{task_type}/{work_time:%Y-%m}/{work_time:%d-%H%M}'
 
 
 def register_base_directory(d: Union[str, Path]):
@@ -318,11 +319,33 @@ def trash_uri(uri: str, dry_run=False, log=_LOG):
         os.rename(str(base_path), str(trash_path))
 
 
-def get_product_work_directory(output_product, submission_time):
+def get_product_work_directory(
+        output_product: str,
+        time=datetime.datetime.utcnow(),
+        task_type='create',
+):
+    """Get an NCI work directory for processing the given product.
+
+    :param time: A timestamp for roughly when your job happened (or was submitted)
+    :param task_type: Informally the kind of work you're doing on the product: create, sync, archive, ...
+    """
     if not NCI_WORK_ROOT.exists():
         raise ValueError("Work folder doesn't exist: %s" % NCI_WORK_ROOT)
-    job_offset = JOB_WORK_OFFSET.format(
-        work_time=submission_time,
+
+    return _make_work_directory(output_product, time, task_type)
+
+
+def _make_work_directory(output_product, work_time, task_type):
+    """
+    >>> t = datetime.datetime.fromtimestamp(1507582964.90336)
+    >>> _make_work_directory('ls8_nbar_albers', t, 'create')
+    PosixPath('/g/data/v10/work/ls8_nbar_albers/create/2017-10/10-0802')
+    >>> _make_work_directory('ls8_level1_scene', t, 'sync')
+    PosixPath('/g/data/v10/work/ls8_level1_scene/sync/2017-10/10-0802')
+    """
+    job_offset = _JOB_WORK_OFFSET.format(
+        work_time=work_time,
+        task_type=task_type,
         output_product=output_product,
     )
     return NCI_WORK_ROOT.joinpath(job_offset)
