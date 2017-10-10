@@ -6,7 +6,7 @@ import sys
 from functools import update_wrapper
 from pathlib import Path
 from subprocess import Popen, PIPE
-
+from pprint import pprint
 import click
 import yaml
 from pydash import pick
@@ -22,7 +22,9 @@ from .runners.model import TaskDescription
 NUM_CPUS_PER_NODE = 16
 QSUB_L_FLAGS = 'mem ncpus walltime wd'.split(' ')
 
-PASS_THRU_KEYS = 'name project queue env_vars wd noask _internal'.split(' ')
+# Keys that can be sent as-is to the qsub builder without normalisation (I think?)
+PASS_THRU_KEYS = 'name project queue env_vars wd noask _internal umask stdout stderr'.split(' ')
+# All keys/arguments supported by QsubLauncher functions
 VALID_KEYS = PASS_THRU_KEYS + 'walltime ncpus nodes mem extra_qsub_args'.split(' ')
 
 _LOG = logging.getLogger(__name__)
@@ -180,6 +182,12 @@ def parse_comma_args(s, valid_keys=None):
 
 
 def normalise_walltime(x):
+    """
+    >>> normalise_walltime('4h')
+    '4:00:00'
+    >>> # TODO Nothing returned or errored?
+    >>> normalise_walltime('4h5m')
+    """
     if x is None or x.find(':') >= 0:
         return x
 
@@ -208,6 +216,12 @@ def normalise_walltime(x):
 
 
 def normalise_mem(x):
+    """
+    >>> normalise_mem('2gb')
+    2
+    >>> normalise_mem('medium')
+    4
+    """
     named = dict(small=2,
                  medium=4,
                  large=7.875)
@@ -222,7 +236,40 @@ def normalise_mem(x):
 
 
 def norm_qsub_params(p):
-    ncpus = int(p.get('ncpus', 0))
+    """
+    >>> pprint(norm_qsub_params({
+    ...    'mem': 'small',
+    ...    'wd': True,
+    ...    'noask': True,
+    ...    'nodes': 4,
+    ...    'walltime': '4h',
+    ...    'project': 'v10',
+    ...    'queue': 'normal',
+    ...    'stdout': 'test.out.txt',
+    ...    'stderr': 'test.err.txt',
+    ...    'umask': 33,
+    ...    'name': 'staggering-fc-run',
+    ... }))
+    {'extra_qsub_args': [],
+     'mem': '129024MB',
+     'name': 'staggering-fc-run',
+     'ncpus': 64,
+     'noask': True,
+     'project': 'v10',
+     'queue': 'normal',
+     'stderr': 'test.err.txt',
+     'stdout': 'test.out.txt',
+     'umask': 33,
+     'walltime': '4:00:00',
+     'wd': True}
+    >>> # Default params
+    >>> norm_qsub_params({})
+    {'ncpus': 16, 'mem': '32256MB', 'walltime': None, 'extra_qsub_args': []}
+    >>> # TODO error on unknown args? It seems to explicitly pass through (PASS_THRU_KEYS) some, but not all valid keys?
+    >>> # No error currently:
+    >>> # norm_qsub_params({'ubermensch': 'understood'})
+    """
+    ncpus = int(p.pop('ncpus', 0))
 
     if ncpus == 0:
         nodes = int(p.get('nodes', 1))
@@ -275,13 +322,17 @@ def _build_qsub_args(**p):
     Traceback (most recent call last):
     ...
     ValueError: Unknown qsub arguments: {'wrong_arg': 'lumberjack'}
+    >>> _build_qsub_args(stdout='/tmp/testout.txt', stderr=Path('/tmp/testerr.txt'), umask=33)
+    ['-o', '/tmp/testout.txt', '-e', '/tmp/testerr.txt', '-W', 'umask=33']
     """
 
     args = []
 
     flags = dict(project='-P',
                  queue='-q',
-                 name='-N')
+                 name='-N',
+                 stdout='-o',
+                 stderr='-e')
 
     def add_l_arg(n):
         v = p.pop(n, None)
@@ -296,13 +347,18 @@ def _build_qsub_args(**p):
         v = p.pop(n, None)
         if v is not None:
             flag = flags[n]
-            args.extend([flag, v])
+            args.extend([flag, str(v)])
 
     for n in QSUB_L_FLAGS:
         add_l_arg(n)
 
     for n in flags:
         add_arg(n)
+
+    # Umask is in a an extended attributes group ("-W")
+    umask = p.pop('umask', None)
+    if umask:
+        args.extend(['-W', f'umask={umask}'])
 
     args.extend(p.pop('extra_qsub_args', []))
 
