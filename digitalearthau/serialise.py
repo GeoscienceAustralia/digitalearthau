@@ -48,7 +48,7 @@ def to_json(o, compact=False, *args, **kwargs):
     """
     return json.dumps(
         o,
-        default=simplify_obj,
+        default=_lenient_json_fallback,
         separators=(', ', ':') if compact else None,
         sort_keys=True,
         indent=None if compact else 4
