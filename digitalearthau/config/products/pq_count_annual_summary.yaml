@@ -5,7 +5,7 @@ metadata_type: eo
 
 metadata:
   product_type: pq_count
-  stats:
+  statistics:
     period: '12m'
   format:
     name: NetCDF
