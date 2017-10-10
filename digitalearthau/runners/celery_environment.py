@@ -8,7 +8,6 @@ import socket
 import uuid
 from time import sleep, time
 
-import celery
 import celery.events.state as celery_state
 import celery.states
 import click
@@ -68,34 +67,29 @@ def get_task_input_dataset_id(task: celery_state.Task):
     return _extract_task_args_dataset_id(task.kwargs)
 
 
-def celery_event_to_task(name: TaskDescription,
+CELERY_EVENT_MAP = {
+    celery.states.PENDING: Status.PENDING,
+    # Task was received by a worker.
+    celery.states.RECEIVED: Status.PENDING,
+    celery.states.STARTED: Status.ACTIVE,
+    celery.states.SUCCESS: Status.COMPLETE,
+    celery.states.FAILURE: Status.FAILED,
+    celery.states.REVOKED: Status.CANCELLED,
+    # Task was rejected (by a worker?)
+    celery.states.REJECTED: Status.CANCELLED,
+    # Waiting for retry
+    celery.states.RETRY: Status.PENDING,
+    celery.states.IGNORED: Status.PENDING,
+}
+
+
+def celery_event_to_task(task_description: TaskDescription,
                          task: celery_state.Task,
                          user=getpass.getuser()) -> Optional[TaskEvent]:
-    # root_id uuid ?
-    # uuid    uuid
-    # hostname, pid
-    # retries ?
-    # timestamp ?
-    # state ("RECEIVED")
-
-    celery_statemap = {
-        celery.states.PENDING: Status.PENDING,
-        # Task was received by a worker.
-        celery.states.RECEIVED: Status.PENDING,
-        celery.states.STARTED: Status.ACTIVE,
-        celery.states.SUCCESS: Status.COMPLETE,
-        celery.states.FAILURE: Status.FAILED,
-        celery.states.REVOKED: Status.CANCELLED,
-        # Task was rejected (by a worker?)
-        celery.states.REJECTED: Status.CANCELLED,
-        # Waiting for retry
-        celery.states.RETRY: Status.PENDING,
-        celery.states.IGNORED: Status.PENDING,
-    }
     if not task.state:
         _LOG.warning("No state known for task %r", task)
         return None
-    status = celery_statemap.get(task.state)
+    status = CELERY_EVENT_MAP.get(task.state)
     if not status:
         raise RuntimeError("Unknown celery state %r" % task.state)
 
@@ -108,11 +102,12 @@ def celery_event_to_task(name: TaskDescription,
     return TaskEvent(
         timestamp=_utc_datetime(task.timestamp) if task.timestamp else datetime.datetime.utcnow(),
         event=f"task.{status.name.lower()}",
-        name=name,
+        name=task_description.type_,
         user=user,
         status=status,
         id=task.id,
         parent_id=pbs.current_job_task_id(),
+        job_parameters=task_description.parameters,
         message=message,
         input_datasets=(dataset_id,) if dataset_id else None,
         output_datasets=None,

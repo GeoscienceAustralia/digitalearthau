@@ -1,18 +1,11 @@
-import getpass
 import json
-import os
-import socket
-import uuid
-import datetime
-
-from typing import NamedTuple, Optional, List, Dict, Union
-
-from enum import Enum, unique
-
 import pathlib
-import dateutil.parser
+import uuid
 
+import datetime
+import dateutil.parser
 import yaml
+from typing import Dict
 
 from digitalearthau import paths
 
@@ -25,7 +18,7 @@ class JsonLinesWriter:
         return self
 
     def write_item(self, item):
-        self._file_obj.write(to_json(item, compact=True) + '\n')
+        self._file_obj.write(to_json(type_to_dict(item), compact=False) + '\n')
         self._file_obj.flush()
 
     def __exit__(self, exc_type, exc_val, exc_tb):
