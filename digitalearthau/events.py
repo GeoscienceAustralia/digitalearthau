@@ -32,6 +32,8 @@ class BaseMessage(NamedTuple):
 
     # Name of event
     # By convention, lowercase alphanumeric separated by dots
+    # Convention:
+    #      <thing>.<status_change>
     # Eg. 'dataset.created'
     #     'task.failed'
     event: str
@@ -47,10 +49,10 @@ class BaseMessage(NamedTuple):
 
 @unique
 class Status(Enum):
-    # Not yet received or queued: to-pre-announce an expected future task, such as on reception of a future satellite
-    # schedule.
+    # Not yet received or queued: sent to pre-announce an expected future task,
+    # such as on reception of satellite schedule.
     SCHEDULED = 1
-    # Received but can't be processed yet: such as waiting for Ancillary data.
+    # Received but can't be queued yet: such as waiting for Ancillary data.
     WAITING = 2
     # Queued to run
     PENDING = 3
@@ -70,6 +72,8 @@ class TaskEvent(NamedTuple):
 
     # Name of event
     # By convention, lowercase alphanumeric separated by dots
+    # Convention:
+    #      <thing>.<status_change>
     # Eg. 'dataset.created'
     #     'task.failed'
     event: str
@@ -91,13 +95,15 @@ class TaskEvent(NamedTuple):
     # pylint: disable=invalid-name
     id: uuid.UUID
 
+    # Current task status (as mentioned in event type)
     status: Status
+
     # Name of this kind of task.
     # Eg. "galpgs.create".
     # (properties like time range go in the job_parameters field below, not in this name)
     name: str
 
-    # Input/ouytput datasets if known
+    # Input/output datasets if known
     input_datasets: Optional[List[uuid.UUID]] = None
     output_datasets: Optional[List[uuid.UUID]] = None
 
@@ -105,5 +111,6 @@ class TaskEvent(NamedTuple):
     # Note that this default value is mutable: TODO it may be initialised with values at the start of the job?
     job_parameters: dict = {}
 
-    # Most tasks created here will be children of the PBS job (task) they run in.
+    # The parent of this task
+    # If we're running in a pbs job, the default will set the pbs job as the parent.
     parent_id: uuid.UUID = pbs.current_job_task_id()
