@@ -47,7 +47,5 @@ project ``README`` file when viewed via the ``Github`` website.
 
 The ``DEA Goalkeeper`` will manage the release process when a new release is required
 
-Refer to the following documentation:
-
-- [digitalearthau build instructions](https://github.com/GeoscienceAustralia/digitalearthau/blob/develop/modules/README.md)
-- others?
+* The DEA build docs are here: http://datacube-core.readthedocs.io/en/stable/about/release_process.html
+* The ODC build docs are here: http://geoscienceaustralia.github.io/digitalearthau/internal/release.html
