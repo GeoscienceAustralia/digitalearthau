@@ -20,27 +20,30 @@ class JsonLinesWriter:
         return self
 
     def write_item(self, item):
-        self._file_obj.write(to_json(type_to_dict(item), compact=True) + '\n')
+        self._file_obj.write(to_lenient_json(type_to_dict(item), compact=True) + '\n')
         self._file_obj.flush()
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self._file_obj.close()
 
 
-def to_json(o, compact=False, *args, **kwargs):
+def to_lenient_json(o, compact=False, *args, **kwargs):
     """
-    Support a few more common types for json serialisation
+    Convert to json, supporting a few more common data types (Paths, UUID).
 
-    Readable by default. Use compact=True for single-line output like jsonl
+    Will always return a value (falling back to repr() rather than throw an unsupported object exception). This
+    is intended for cases such as logs where you always want output (need reliability).
 
-    >>> to_json([1, 2], compact=True)
+    Readable, indented, by default. Use compact=True for single-line output like jsonl
+
+    >>> to_lenient_json([1, 2], compact=True)
     '[1, 2]'
-    >>> to_json({'a': 1})
+    >>> to_lenient_json({'a': 1})
     '{\\n    "a": 1\\n}'
     >>> # Sets and paths
-    >>> to_json({pathlib.Path('/tmp')}, compact=True)
+    >>> to_lenient_json({pathlib.Path('/tmp')}, compact=True)
     '["/tmp"]'
-    >>> to_json(uuid.UUID('b6bf8ff5-99e6-4562-87b4-cbe6549335e9'))
+    >>> to_lenient_json(uuid.UUID('b6bf8ff5-99e6-4562-87b4-cbe6549335e9'))
     '"b6bf8ff5-99e6-4562-87b4-cbe6549335e9"'
     """
     return json.dumps(
@@ -78,6 +81,11 @@ def _lenient_json_fallback(obj):
 
 
 def dump_document(path: pathlib.Path, obj, allow_unsafe=False):
+    """
+    Write the given object to a file (json/yaml), in readable/indented format
+
+    The format is chosen based on the file suffix.
+    """
     suffix = path.suffix.lower()
     if suffix == '.yaml':
         path.write_text(
@@ -91,7 +99,7 @@ def dump_document(path: pathlib.Path, obj, allow_unsafe=False):
         )
     elif suffix == '.json':
         path.write_text(
-            to_json(obj) + '\n'
+            to_lenient_json(obj) + '\n'
         )
     else:
         raise NotImplementedError(f"Unknown suffix {suffix}. Expected json/yaml.")
@@ -99,7 +107,7 @@ def dump_document(path: pathlib.Path, obj, allow_unsafe=False):
 
 def dump_structure(path: pathlib.Path, obj):
     """
-    Dump NamedTuples to a yaml/json document
+    Dump NamedTuples and other simple objects to a yaml/json document
     """
     return dump_document(path, type_to_dict(obj))
 
@@ -107,6 +115,8 @@ def dump_structure(path: pathlib.Path, obj):
 def load_structure(path: pathlib.Path, expected_type):
     """
     Load the expected NamedTuple (with type hints) from a yaml/json
+
+    :param expected_type: the class/type you expect to get back.
     """
     return dict_to_type(paths.read_document(path), expected_type)
 

@@ -97,14 +97,5 @@ def init_dea_cli(index: Index, init_users: bool):
     init_dea(index, with_permissions=init_users)
 
 
-_LOG = logging.getLogger(__name__)
-
-
-class MyThing():
-    @staticmethod
-    def try_logging(num):
-        _LOG.warning("TASK TASK TASK %s", num)
-
-
 if __name__ == '__main__':
     cli()

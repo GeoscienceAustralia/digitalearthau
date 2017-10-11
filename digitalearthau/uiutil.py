@@ -7,7 +7,7 @@ from pathlib import Path
 import structlog
 import sys
 
-from digitalearthau import events
+from digitalearthau import serialise
 
 
 class CleanConsoleRenderer(structlog.dev.ConsoleRenderer):
@@ -27,7 +27,7 @@ def init_logging():
             structlog.processors.format_exc_info,
             # Coloured output if to terminal.
             CleanConsoleRenderer() if sys.stdout.isatty()
-            else structlog.processors.JSONRenderer(serializer=events.to_json),
+            else structlog.processors.JSONRenderer(serializer=serialise.to_lenient_json),
         ],
         context_class=dict,
         cache_logger_on_first_use=True,

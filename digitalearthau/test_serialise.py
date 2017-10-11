@@ -42,9 +42,6 @@ def test_roundtrip():
     assert m == new_m
 
 
-# TODO Add test serialising the actual objects we have (TaskDescription etc..)
-
-
 def test_dump_load_task_structure(tmpdir):
     # Dump to json and reload, check equality.
 
