@@ -34,7 +34,7 @@ def init_task_app(
         output_product=output_types[0],
         time=task_datetime
     )
-    task_description = TaskDescription(
+    task_desc = TaskDescription(
         type_=job_type,
         task_dt=task_datetime,
         events_path=work_path.joinpath('events'),
@@ -54,24 +54,24 @@ def init_task_app(
             )
         ),
     )
-    task_description.logs_path.mkdir(parents=True, exist_ok=False)
-    task_description.events_path.mkdir(parents=True, exist_ok=False)
-    task_description_path = work_path.joinpath('task-description.json')
-    serialise.dump_structure(task_description_path, task_description)
-    return task_description, task_description_path
+    task_desc.logs_path.mkdir(parents=True, exist_ok=False)
+    task_desc.events_path.mkdir(parents=True, exist_ok=False)
+    task_desc_path = work_path.joinpath('task-description.json')
+    serialise.dump_structure(task_desc_path, task_desc)
+    return task_desc, task_desc_path
 
 
 def submit_subjob(
         name: str,
-        task_description: TaskDescription,
+        task_desc: TaskDescription,
         command: List[str],
         qsub_params) -> str:
     """
-    Convenience method for submitting a sub job under the given task
+    Convenience method for submitting a sub job under the given task_desc
 
     It will set up output locations and pbs parameters for you.
 
-    Sub-job name should be unique for the task.
+    Sub-job name should be unique for the task_desc.
     """
     if not name.isidentifier():
         raise ValueError("sub-job name must be alphanumeric, eg 'generate', 'run_2013")
@@ -79,12 +79,12 @@ def submit_subjob(
     qsub = QSubLauncher(
         norm_qsub_params(
             dict(
-                **task_description.runtime_state.pbs_parameters._asdict(),
+                **task_desc.runtime_state.pbs_parameters._asdict(),
                 **qsub_params,
                 noask=True,
                 # 'head' is convention for the head node. Other nodes within the job will use different names...
-                stdout=task_description.logs_path.joinpath(f'{name.lower()}-head.out.log'),
-                stderr=task_description.logs_path.joinpath(f'{name.lower()}-head.err.log'),
+                stdout=task_desc.logs_path.joinpath(f'{name.lower()}-head.out.log'),
+                stderr=task_desc.logs_path.joinpath(f'{name.lower()}-head.err.log'),
             )
         )
     )
@@ -97,6 +97,6 @@ def submit_subjob(
         raise RuntimeError("qsub failure. See previous error?")
 
     job_id = qsub_stdout.strip(' \n')
-    _LOG.info('Submitted %r task: %r', name, job_id)
+    _LOG.info('Submitted %r job: %r', name, job_id)
 
     return job_id

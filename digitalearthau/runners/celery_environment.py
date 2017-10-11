@@ -92,35 +92,35 @@ CELERY_EVENT_MAP = {
 }
 
 
-def _celery_event_to_task(task_description: TaskDescription,
-                          task: celery_state.Task,
+def _celery_event_to_task(task_desc: TaskDescription,
+                          celery_task: celery_state.Task,
                           user=getpass.getuser()) -> Optional[TaskEvent]:
     """
-    Convert the given celery task into a dea task event if there's a state change.
+    Convert the given celery task into a dea task_desc event if there's a state change.
     """
-    if not task.state:
-        _LOG.warning("No state known for task %r", task)
+    if not celery_task.state:
+        _LOG.warning("No state known for task_desc %r", celery_task)
         return None
-    status = CELERY_EVENT_MAP.get(task.state)
+    status = CELERY_EVENT_MAP.get(celery_task.state)
     if not status:
-        raise RuntimeError("Unknown celery state %r" % task.state)
+        raise RuntimeError("Unknown celery state %r" % celery_task.state)
 
     message = None
     if status.FAILED:
         # TODO: Perhaps our events need a separate error message, rather than putting this in human-readable message.
-        message = task.traceback
+        message = celery_task.traceback
 
-    celery_worker: celery_state.Worker = task.worker
-    dataset_id = _get_task_input_dataset_id(task)
+    celery_worker: celery_state.Worker = celery_task.worker
+    dataset_id = _get_task_input_dataset_id(celery_task)
     return TaskEvent(
-        timestamp=_utc_datetime(task.timestamp) if task.timestamp else datetime.datetime.utcnow(),
+        timestamp=_utc_datetime(celery_task.timestamp) if celery_task.timestamp else datetime.datetime.utcnow(),
         event=f"task.{status.name.lower()}",
-        name=task_description.type_,
+        name=task_desc.type_,
         user=user,
         status=status,
-        id=task.id,
+        id=celery_task.id,
         parent_id=pbs.current_job_task_id(),
-        job_parameters=task_description.parameters,
+        job_parameters=task_desc.parameters,
         message=message,
         input_datasets=(dataset_id,) if dataset_id else None,
         output_datasets=None,
@@ -134,7 +134,7 @@ def _celery_event_to_task(task_description: TaskDescription,
 def _run_celery_task_logging(
         should_shutdown: multiprocessing.Value,
         app: celery.Celery,
-        task_description: 'TaskDescription',
+        task_desc: 'TaskDescription',
 ):
     """
     Stream events from celery, logging state changes to the events directory.
@@ -167,10 +167,10 @@ def _run_celery_task_logging(
         if not task:
             _LOG.warning(f"No task found {event_type}")
             return
-        output.write_item(_celery_event_to_task(task_description, task))
+        output.write_item(_celery_event_to_task(task_desc, task))
         _log_task_states(state)
 
-    events_path = task_description.events_path.joinpath(f'{socket.gethostname()}-collected-events.jsonl')
+    events_path = task_desc.events_path.joinpath(f'{socket.gethostname()}-collected-events.jsonl')
 
     with serialise.JsonLinesWriter(events_path.open('a')) as output:
         with app.connection() as connection:
@@ -258,7 +258,7 @@ def _just_the_hostname(hostname: str):
     return parts[-1]
 
 
-def launch_celery_worker_environment(task_description: TaskDescription, redis_params: dict):
+def launch_celery_worker_environment(task_desc: TaskDescription, redis_params: dict):
     redis_port = redis_params['port']
     redis_host = pbs.hostname()
     redis_password = cr.get_redis_password(generate_if_missing=True)
@@ -282,7 +282,7 @@ def launch_celery_worker_environment(task_description: TaskDescription, redis_pa
     logger_shutdown = multiprocessing.Value('b', False, lock=False)
     log_proc = multiprocessing.Process(
         target=_run_celery_task_logging,
-        args=(logger_shutdown, cr.app, task_description)
+        args=(logger_shutdown, cr.app, task_desc)
     )
     log_proc.start()
 

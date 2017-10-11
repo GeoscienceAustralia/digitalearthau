@@ -488,36 +488,36 @@ class TaskRunner(object):
     def set_qsize(self, qsize):
         self._user_queue_size = qsize
 
-    def start(self, task_description: TaskDescription = None):
+    def start(self, task_desc: TaskDescription = None):
         def noop():
             pass
 
-        def mk_pbs_celery(environment: TaskDescription):
+        def mk_pbs_celery(task_desc: TaskDescription):
             qsize = pbs.preferred_queue_size()
             port = 6379  # TODO: randomise
             maxmemory = "1024mb"  # TODO: compute maxmemory from qsize
             executor, shutdown = celery_environment.launch_celery_worker_environment(
-                task_description=environment,
+                task_desc=task_desc,
                 redis_params=dict(port=port, maxmemory=maxmemory)
             )
             return (executor, qsize, shutdown)
 
-        def mk_dask(environment: TaskDescription):
+        def mk_dask(task_desc: TaskDescription):
             qsize = 100
             executor = _get_distributed_executor(self._opts)
             return (executor, qsize, noop)
 
-        def mk_celery(environment: TaskDescription):
+        def mk_celery(task_desc: TaskDescription):
             qsize = 100
             executor = mk_celery_executor(*self._opts)
             return (executor, qsize, noop)
 
-        def mk_multiproc(environment: TaskDescription):
+        def mk_multiproc(task_desc: TaskDescription):
             qsize = 100
             executor = _get_concurrent_executor(self._opts)
             return (executor, qsize, noop)
 
-        def mk_serial(environment: TaskDescription):
+        def mk_serial(task_desc: TaskDescription):
             qsize = 10
             executor = SerialExecutor()
             return (executor, qsize, noop)
@@ -531,7 +531,7 @@ class TaskRunner(object):
         try:
             (self._executor,
              default_queue_size,
-             self._shutdown) = mk.get(self._kind, mk_serial)(task_description)
+             self._shutdown) = mk.get(self._kind, mk_serial)(task_desc)
         except RuntimeError:
             _LOG.exception("Error starting executor")
             return False
@@ -548,9 +548,9 @@ class TaskRunner(object):
             self._queue_size = None
             self._shutdown = None
 
-    def __call__(self, task_description: TaskDescription, tasks, run_task, on_task_complete=None):
+    def __call__(self, task_desc: TaskDescription, tasks, run_task, on_task_complete=None):
         if self._executor is None:
-            if self.start(task_description) is False:
+            if self.start(task_desc) is False:
                 raise RuntimeError('Failed to launch worker pool')
 
         return run_tasks(tasks, self._executor, run_task, on_task_complete, self._queue_size)
