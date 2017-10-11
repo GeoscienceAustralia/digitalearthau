@@ -34,7 +34,7 @@ _TRASH_DAY = datetime.datetime.utcnow().strftime('%Y-%m-%d')
 NCI_WORK_ROOT = Path(os.environ.get('DEA_WORK_ROOT') or '/g/data/v10/work')
 # Structure for work directories within the work root.
 # Eg. '/g/data/v10/work/ls8_nbar_albers/create/2017-10/09-2102'
-_JOB_WORK_OFFSET = '{output_product}/{task_type}/{work_time:%Y-%m}/{work_time:%d-%H%M}'
+_JOB_WORK_OFFSET = '{output_product}/{task_type}/{work_time:%Y-%m}/{work_time:%d-%H%M%S}'
 
 
 def register_base_directory(d: Union[str, Path]):
