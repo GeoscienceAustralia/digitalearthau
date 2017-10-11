@@ -134,7 +134,7 @@ def wrap_script(script):
     return 'eval "$(echo {}|base64 --decode)"'.format(b64s)
 
 
-def pbsdsh(cpu_num, script, env=None, test_mode=False):
+def pbsdsh(cpu_num, script, env=None, test_mode=False) -> subprocess.Popen:
 
     if env is None:
         env = get_env()

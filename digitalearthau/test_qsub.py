@@ -14,7 +14,7 @@ from typing import List
 
 from digitalearthau.events import TaskEvent, NodeMessage, Status
 from digitalearthau.runners import model
-from digitalearthau.runners.celery_environment import celery_event_to_task
+from digitalearthau.runners.celery_environment import _celery_event_to_task
 from . import qsub
 
 import celery.events.state as celery_state
@@ -236,7 +236,7 @@ def test_celery_success_to_task(input_json: str, expected_events: List[TaskEvent
         state.event(j)
 
         celery_task: celery_state.Task = state.tasks[task_id]
-        events.append(celery_event_to_task(
+        events.append(_celery_event_to_task(
             task_description,
             celery_task,
             user='testuser'

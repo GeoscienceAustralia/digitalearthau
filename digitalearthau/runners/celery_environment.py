@@ -12,8 +12,10 @@ import celery.events.state as celery_state
 import celery.states
 import click
 import datetime
+import subprocess
 from celery.events import EventReceiver
 from dateutil import tz
+from multiprocessing import Process
 from typing import Optional, List, Iterable
 
 from datacube import _celery_runner as cr
@@ -52,6 +54,9 @@ TASK_ID_RE_EXTRACT = re.compile('Dataset <id=([a-z0-9-]{36}) ')
 
 def _extract_task_args_dataset_id(kwargs: str) -> Optional[uuid.UUID]:
     """
+    Celery gives us the repr() output of function arguments, not the originals, in state messages, extract the
+    input dataset id if there is one...
+
     >>> _extract_task_args_dataset_id(_EXAMPLE_TASK_KWARGS)
     UUID('d514c26a-d98f-47f1-b0de-15f7fe78c209')
     >>> _extract_task_args_dataset_id("no match")
@@ -63,10 +68,14 @@ def _extract_task_args_dataset_id(kwargs: str) -> Optional[uuid.UUID]:
     return uuid.UUID(m.group(1))
 
 
-def get_task_input_dataset_id(task: celery_state.Task):
+def _get_task_input_dataset_id(task: celery_state.Task) -> Optional[uuid.UUID]:
+    """
+    Get the input dataset id, if known, for the given celery task
+    """
     return _extract_task_args_dataset_id(task.kwargs)
 
 
+# Map celery states to our states
 CELERY_EVENT_MAP = {
     celery.states.PENDING: Status.PENDING,
     # Task was received by a worker.
@@ -83,9 +92,12 @@ CELERY_EVENT_MAP = {
 }
 
 
-def celery_event_to_task(task_description: TaskDescription,
-                         task: celery_state.Task,
-                         user=getpass.getuser()) -> Optional[TaskEvent]:
+def _celery_event_to_task(task_description: TaskDescription,
+                          task: celery_state.Task,
+                          user=getpass.getuser()) -> Optional[TaskEvent]:
+    """
+    Convert the given celery task into a dea task event if there's a state change.
+    """
     if not task.state:
         _LOG.warning("No state known for task %r", task)
         return None
@@ -95,10 +107,11 @@ def celery_event_to_task(task_description: TaskDescription,
 
     message = None
     if status.FAILED:
+        # TODO: Perhaps our events need a separate error message, rather than putting this in human-readable message.
         message = task.traceback
 
     celery_worker: celery_state.Worker = task.worker
-    dataset_id = get_task_input_dataset_id(task)
+    dataset_id = _get_task_input_dataset_id(task)
     return TaskEvent(
         timestamp=_utc_datetime(task.timestamp) if task.timestamp else datetime.datetime.utcnow(),
         event=f"task.{status.name.lower()}",
@@ -112,16 +125,20 @@ def celery_event_to_task(task_description: TaskDescription,
         input_datasets=(dataset_id,) if dataset_id else None,
         output_datasets=None,
         node=NodeMessage(
-            hostname=_just_hostname(celery_worker.hostname),
+            hostname=_just_the_hostname(celery_worker.hostname),
             pid=celery_worker.pid
         ),
     )
 
 
-def log_celery_tasks(should_shutdown: multiprocessing.Value, app: celery.Celery, task_description: 'TaskDescription'):
-    # Open log file.
-    # Connect to celery
-    # Stream events to file.
+def _run_celery_task_logging(
+        should_shutdown: multiprocessing.Value,
+        app: celery.Celery,
+        task_description: 'TaskDescription',
+):
+    """
+    Stream events from celery, logging state changes to the events directory.
+    """
 
     click.secho("Starting logger", bold=True)
     state: celery_state.State = app.events.State()
@@ -150,7 +167,7 @@ def log_celery_tasks(should_shutdown: multiprocessing.Value, app: celery.Celery,
         if not task:
             _LOG.warning(f"No task found {event_type}")
             return
-        output.write_item(celery_event_to_task(task_description, task))
+        output.write_item(_celery_event_to_task(task_description, task))
         _log_task_states(state)
 
     events_path = task_description.events_path.joinpath(f'{socket.gethostname()}-collected-events.jsonl')
@@ -220,13 +237,13 @@ def _utc_datetime(timestamp: float):
     return datetime.datetime.utcfromtimestamp(timestamp).replace(tzinfo=tz.tzutc())
 
 
-def _just_hostname(hostname: str):
+def _just_the_hostname(hostname: str):
     """
-    >>> _just_hostname("kveikur.local")
+    >>> _just_the_hostname("kveikur.local")
     'kveikur.local'
-    >>> _just_hostname("someone@kveikur.local")
+    >>> _just_the_hostname("someone@kveikur.local")
     'kveikur.local'
-    >>> _just_hostname("someone@kveikur@local")
+    >>> _just_the_hostname("someone@kveikur@local")
     Traceback (most recent call last):
     ...
     ValueError: ...
@@ -241,8 +258,6 @@ def _just_hostname(hostname: str):
     return parts[-1]
 
 
-# TODO: Refactor before pull request (Hopefully this comment doesn't enter the pull request, that would be embarrassing)
-# pylint: disable=too-many-locals
 def launch_celery_worker_environment(task_description: TaskDescription, redis_params: dict):
     redis_port = redis_params['port']
     redis_host = pbs.hostname()
@@ -263,24 +278,15 @@ def launch_celery_worker_environment(task_description: TaskDescription, redis_pa
         redis_port,
         password=redis_password,
     )
-    logger_shutdown = multiprocessing.Value('b', False, lock=False)
 
-    log_proc = multiprocessing.Process(target=log_celery_tasks, args=(logger_shutdown, cr.app, task_description))
+    logger_shutdown = multiprocessing.Value('b', False, lock=False)
+    log_proc = multiprocessing.Process(
+        target=_run_celery_task_logging,
+        args=(logger_shutdown, cr.app, task_description)
+    )
     log_proc.start()
 
-    worker_env = pbs.get_env()
-    worker_procs = []
-
-    for node in pbs.nodes():
-        nprocs = node.num_cores
-        if node.is_main:
-            nprocs = max(1, nprocs - 2)
-
-        celery_worker_script = 'exec datacube-worker --executor celery {}:{} --nprocs {}'.format(
-            redis_host, redis_port, nprocs)
-        proc = pbs.pbsdsh(node.offset, celery_worker_script, env=worker_env)
-        _LOG.info(f"Started {proc.pid}")
-        worker_procs.append(proc)
+    worker_procs = list(_spawn_pbs_workers(redis_host, redis_port))
 
     def start_shutdown():
         cr.app.control.shutdown()
@@ -290,10 +296,12 @@ def launch_celery_worker_environment(task_description: TaskDescription, redis_pa
         _LOG.info('Waiting for workers to quit')
 
         # TODO: time limit followed by kill
-        for p in worker_procs:
-            p.wait()
+        for i, proc in enumerate(worker_procs):
+            _LOG.debug("Waiting on node %s", i)
+            proc.wait()
 
-        # We deliberately don't want to stop the logger until all worker have stopped completely.
+        # We deliberately don't want to stop the logger until all worker have stopped completely,
+        # to capture all of their logs.
         _LOG.info('Stopping log process')
         logger_shutdown.value = True
         log_proc.join()
@@ -302,3 +310,20 @@ def launch_celery_worker_environment(task_description: TaskDescription, redis_pa
         redis_shutdown()
 
     return executor, shutdown
+
+
+def _spawn_pbs_workers(redis_host: str, redis_port: str) -> Iterable[subprocess.Popen]:
+    worker_env = pbs.get_env()
+
+    for node in pbs.nodes():
+        nprocs = node.num_cores
+        if node.is_main:
+            nprocs = max(1, nprocs - 2)
+
+        proc = pbs.pbsdsh(
+            node.offset,
+            f'exec datacube-worker --executor celery {redis_host}:{redis_port} --nprocs {nprocs}',
+            env=worker_env
+        )
+        _LOG.info(f"Started node {node.offset} (pbsdsh pid {proc.pid})")
+        yield proc
