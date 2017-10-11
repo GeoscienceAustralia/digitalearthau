@@ -179,6 +179,9 @@ def dict_to_type(o, expected_type):
     digitalearthau.serialise.SerialisationError: Unknown field EATING for Status. Expected one of ...
     >>> # More tests in test_serialise.py
     """
+    if o is None:
+        return None
+
     if expected_type in (pathlib.Path, uuid.UUID):
         return expected_type(o)
 
