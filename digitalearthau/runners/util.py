@@ -98,6 +98,6 @@ def submit_subjob(
         raise RuntimeError("qsub failure. See previous error?")
 
     job_id = qsub_stdout.strip(' \n')
-    _LOG.info('Submitted %r job: %r', name, job_id)
+    _LOG.info('Submitted %s job: %s', name, job_id)
 
     return job_id

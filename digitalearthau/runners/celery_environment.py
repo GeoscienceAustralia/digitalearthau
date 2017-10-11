@@ -140,7 +140,7 @@ def _run_celery_task_logging(
     Stream events from celery, logging state changes to the events directory.
     """
 
-    click.secho("Starting logger", bold=True)
+    _LOG.info("Logger process started", bold=True)
     state: celery_state.State = app.events.State()
 
     # TODO: handling immature shutdown cleanly? The celery runner itself might need better support for it...
@@ -205,7 +205,7 @@ def _run_celery_task_logging(
                         _LOG.warning("Some workers are marked as active but the time-limit was reached.")
                         break
 
-            _LOG.info("logger finished")
+            _LOG.info("Celery event subscription finished")
 
     _log_task_states(state)
 
@@ -221,6 +221,8 @@ def _run_celery_task_logging(
             "Some workers had not finished executing; their logs will be missed:n\n\t%s",
             "\n\t".join(active_workers)
         )
+
+    _LOG.info("Logger process exiting")
 
 
 def _log_task_states(state):

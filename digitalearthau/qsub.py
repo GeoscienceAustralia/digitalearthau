@@ -72,7 +72,6 @@ class QSubLauncher(object):
             args = tuple(self._internal_args) + args
 
         r, output = qsub_self_launch(self._params, *args)
-        click.echo(output)
         return r, output
 
 
@@ -398,7 +397,6 @@ def qsub_self_launch(qsub_opts, *args):
     qsub_args = _build_qsub_args(**qsub_opts)
 
     noask = qsub_opts.get('noask', False)
-
     if not noask:
         click.echo('Args: ' + ' '.join(map(str, args)))
         confirmed = click.confirm('Submit to pbs?')
