@@ -342,9 +342,9 @@ def _make_work_directory(output_product, work_time, task_type):
     """
     >>> t = datetime.datetime.utcfromtimestamp(1507582964.90336)
     >>> _make_work_directory('ls8_nbar_albers', t, 'create')
-    PosixPath('/g/data/v10/work/ls8_nbar_albers/create/2017-10/09-2102')
+    PosixPath('/g/data/v10/work/ls8_nbar_albers/create/2017-10/09-210244')
     >>> _make_work_directory('ls8_level1_scene', t, 'sync')
-    PosixPath('/g/data/v10/work/ls8_level1_scene/sync/2017-10/09-2102')
+    PosixPath('/g/data/v10/work/ls8_level1_scene/sync/2017-10/09-210244')
     """
     job_offset = _JOB_WORK_OFFSET.format(
         work_time=work_time,
