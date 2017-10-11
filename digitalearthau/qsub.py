@@ -23,7 +23,7 @@ NUM_CPUS_PER_NODE = 16
 QSUB_L_FLAGS = 'mem ncpus walltime wd'.split(' ')
 
 # Keys that can be sent as-is to the qsub builder without normalisation (I think?)
-PASS_THRU_KEYS = 'name project queue env_vars wd noask _internal umask stdout stderr'.split(' ')
+PASS_THRU_KEYS = 'name project queue env_vars wd noask umask stdout stderr'.split(' ')
 # All keys/arguments supported by QsubLauncher functions
 VALID_KEYS = PASS_THRU_KEYS + 'walltime ncpus nodes mem extra_qsub_args'.split(' ')
 
@@ -365,11 +365,14 @@ def _build_qsub_args(**p):
     # Used in UI that calls this method, not qsub.
     p.pop('noask', None)
 
+    # TODO: deal with env_vars!
+    # For now, throw error if someone tries to set one (empty is ok)
+    if p.pop('env_vars', None):
+        raise NotImplementedError("env_vars is not yet implemented")
+
     # We should have popped all input arguments, otherwise they passed something unknown
     if p:
         raise ValueError(f"Unknown qsub arguments: {repr(p)}")
-
-    # TODO: deal with env_vars!
 
     return args
 
