@@ -44,5 +44,10 @@ project ``README`` file when viewed via the ``Github`` website.
 
 
 ## Release manager
-- Manage the release process, if a new release is required
-- _Refer to documentation_
+
+The ``DEA Goalkeeper`` will manage the release process when a new release is required
+
+Refer to the following documentation:
+
+- [digitalearthau build instructions](https://github.com/GeoscienceAustralia/digitalearthau/blob/develop/modules/README.md)
+- others?
