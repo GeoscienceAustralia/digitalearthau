@@ -17,6 +17,7 @@ ENCRYPTION_LABEL="c4bf5207aec3"
 
 function doCompile {
   pip install Sphinx sphinx_rtd_theme nbsphinx
+  pip install recommonmark
   make html
 }
 
