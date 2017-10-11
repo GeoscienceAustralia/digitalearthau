@@ -76,6 +76,7 @@ def submit_subjob(
     if not name.isidentifier():
         raise ValueError("sub-job name must be alphanumeric, eg 'generate', 'run_2013")
 
+    timestamp = datetime.utcnow().timestamp()
     qsub = QSubLauncher(
         norm_qsub_params(
             dict(
@@ -83,8 +84,8 @@ def submit_subjob(
                 **qsub_params,
                 noask=True,
                 # 'head' is convention for the head node. Other nodes within the job will use different names...
-                stdout=task_desc.logs_path.joinpath(f'{name.lower()}-head.out.log'),
-                stderr=task_desc.logs_path.joinpath(f'{name.lower()}-head.err.log'),
+                stdout=task_desc.logs_path.joinpath(f'{int(timestamp)}-{name.lower()}-head.out.log'),
+                stderr=task_desc.logs_path.joinpath(f'{int(timestamp)}-{name.lower()}-head.err.log'),
             )
         )
     )

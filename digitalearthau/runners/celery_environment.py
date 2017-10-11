@@ -170,7 +170,8 @@ def _run_celery_task_logging(
         output.write_item(_celery_event_to_task(task_desc, task))
         _log_task_states(state)
 
-    events_path = task_desc.events_path.joinpath(f'{socket.gethostname()}-collected-events.jsonl')
+    timestamp = datetime.datetime.utcnow().timestamp()
+    events_path = task_desc.events_path.joinpath(f'{int(timestamp)}-{socket.gethostname()}-collected-events.jsonl')
 
     with serialise.JsonLinesWriter(events_path.open('a')) as output:
         with app.connection() as connection:
