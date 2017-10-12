@@ -134,7 +134,7 @@ def submit_subjob(
                 ),
                 logs=dict(
                     stdout_path=stdout_path,
-                    stderr_patth=stderr_path,
+                    stderr_path=stderr_path,
                 ),
                 submitter=submitter_info
             ),
