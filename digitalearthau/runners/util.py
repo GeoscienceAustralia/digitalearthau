@@ -39,6 +39,8 @@ def init_task_app(
         output_product=output_types[0],
         time=task_datetime
     )
+    _LOG.info("Created work directory %s", work_path)
+
     task_desc = TaskDescription(
         type_=job_type,
         task_dt=task_datetime,
@@ -105,7 +107,7 @@ def submit_subjob(
     args, script = qsub.build_submission(*command)
 
     job_id = qsub.submit(*command)
-    _LOG.info('Submitted %s job: %s', name, job_id)
+    _LOG.info('Submitted %r: %s', name, job_id)
 
     # Record the job information in the jobs directory.
     submitter_info = dict(
