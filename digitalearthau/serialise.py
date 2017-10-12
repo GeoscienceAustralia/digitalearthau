@@ -210,3 +210,29 @@ def dict_to_type(o, expected_type):
 
 class SerialisationError(Exception):
     pass
+
+
+class MultilineString(str):
+    """
+    A string that will be represented preserved in multi-line format in yaml.
+    """
+    pass
+
+
+def literal_presenter(dumper, data):
+    return dumper.represent_scalar('tag:yaml.org,2002:str', data, style='|')
+
+
+yaml.add_representer(MultilineString, literal_presenter)
+
+
+def as_string_representer(dumper, data):
+    """
+    :type dumper: yaml.representer.BaseRepresenter
+    :type data: uuid.UUID
+    :rtype: yaml.nodes.Node
+    """
+    return dumper.represent_scalar(u'tag:yaml.org,2002:str', '%s' % data)
+
+
+yaml.add_multi_representer(pathlib.Path, as_string_representer)

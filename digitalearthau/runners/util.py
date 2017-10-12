@@ -1,11 +1,16 @@
+import getpass
 import logging
+import shlex
+import socket
 
 from datetime import datetime
 from pathlib import Path
 
 from typing import List, Tuple
 
+import yaml
 from dateutil import tz
+from digitalearthau import pbs
 
 from ..qsub import QSubLauncher, with_qsub_runner, norm_qsub_params, TaskRunner
 from .model import TaskDescription, DefaultJobParameters, TaskAppState, PbsParameters
@@ -39,6 +44,7 @@ def init_task_app(
         task_dt=task_datetime,
         events_path=work_path.joinpath('events'),
         logs_path=work_path.joinpath('logs'),
+        jobs_path=work_path.joinpath('jobs'),
         parameters=DefaultJobParameters(
             query=datacube_query_args,
             source_types=source_types,
@@ -56,6 +62,8 @@ def init_task_app(
     )
     task_desc.logs_path.mkdir(parents=True, exist_ok=False)
     task_desc.events_path.mkdir(parents=True, exist_ok=False)
+    task_desc.jobs_path.mkdir(parents=True, exist_ok=False)
+
     task_desc_path = work_path.joinpath('task-description.json')
     serialise.dump_structure(task_desc_path, task_desc)
     return task_desc, task_desc_path
@@ -76,28 +84,66 @@ def submit_subjob(
     if not name.isidentifier():
         raise ValueError("sub-job name must be alphanumeric, eg 'generate', 'run_2013")
 
-    timestamp = datetime.utcnow().timestamp()
+    submit_time = datetime.utcnow()
+    timestamp = submit_time.timestamp()
+
+    # 'head' is convention for the head node. Other nodes within the job will use different names...
+    stdout_path = task_desc.logs_path.joinpath(f'{int(timestamp)}-{name.lower()}-head.out.log')
+    stderr_path = task_desc.logs_path.joinpath(f'{int(timestamp)}-{name.lower()}-head.err.log')
     qsub = QSubLauncher(
         norm_qsub_params(
             dict(
                 **task_desc.runtime_state.pbs_parameters._asdict(),
                 **qsub_params,
                 noask=True,
-                # 'head' is convention for the head node. Other nodes within the job will use different names...
-                stdout=task_desc.logs_path.joinpath(f'{int(timestamp)}-{name.lower()}-head.out.log'),
-                stderr=task_desc.logs_path.joinpath(f'{int(timestamp)}-{name.lower()}-head.err.log'),
+                stdout=stdout_path,
+                stderr=stderr_path,
             )
         )
     )
 
-    ret_code, qsub_stdout = qsub(*command)
+    args, script = qsub.build_submission(*command)
 
-    if not ret_code == 0:
-        print(qsub_stdout)
-        # The error probably went to stderr, which is not captured?
-        raise RuntimeError("qsub failure. See previous error?")
-
-    job_id = qsub_stdout.strip(' \n')
+    job_id = qsub.submit(*command)
     _LOG.info('Submitted %s job: %s', name, job_id)
 
+    # Record the job information in the jobs directory.
+    submitter_info = dict(
+        user=getpass.getuser(),
+        hostname=socket.gethostname(),
+    )
+    if pbs.is_under_pbs():
+        submitter_info['job_id'] = pbs.current_pbs_job_id()
+
+    # This is yaml because the multiline text fields are far easier to read.
+    submission_info_path = task_desc.jobs_path.joinpath(f'{int(timestamp)}-{name.lower()}-{job_id}.yaml')
+    submission_info_path.write_text(
+        yaml.dump(
+            dict(
+                name=name,
+                submit_dt=submit_time,
+                command=_str_command_args(command),
+                pbs=dict(
+                    qsub=dict(
+                        arguments=_str_command_args(args),
+                        script=serialise.MultilineString(script),
+                    ),
+                    job_id=job_id,
+                ),
+                logs=dict(
+                    stdout_path=stdout_path,
+                    stderr_patth=stderr_path,
+                ),
+                submitter=submitter_info
+            ),
+            default_flow_style=False,
+            indent=4,
+        )
+    )
+    _LOG.info("Submission info: %s", submission_info_path)
+
     return job_id
+
+
+def _str_command_args(args):
+    return ' '.join(shlex.quote(arg) for arg in args)

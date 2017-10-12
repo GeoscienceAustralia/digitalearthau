@@ -66,3 +66,6 @@ class TaskDescription(NamedTuple):
     # Parameters specific to the task runtime (eg. datacube task_app).
     # (Expect this type to be a union eventually: other runtime types might be added in the future...)
     runtime_state: TaskAppState = None
+
+    # Folder containing records of submitted jobs.
+    jobs_path: Path = None

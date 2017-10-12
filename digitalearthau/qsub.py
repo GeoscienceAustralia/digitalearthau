@@ -10,6 +10,7 @@ from pprint import pprint
 import click
 import yaml
 from pydash import pick
+from typing import List, Tuple
 
 from datacube.executor import (SerialExecutor,
                                mk_celery_executor,
@@ -42,10 +43,10 @@ class QSubLauncher(object):
                          that passes through sys.argv arguments
         """
         self._internal_args = internal_args
-        self._params = params
+        self._raw_qsub_params = params
 
     def __repr__(self):
-        return yaml.dump(dict(qsub=self._params))
+        return yaml.dump(dict(qsub=self._raw_qsub_params))
 
     def add_internal_args(self, *args):
         if self._internal_args is None:
@@ -68,11 +69,58 @@ class QSubLauncher(object):
             args = remove_args('--queue-size', args, n=1)
             args = tuple(args)
 
-        if self._internal_args is not None:
-            args = tuple(self._internal_args) + args
+        qsub_args, script = self.build_submission(*args)
 
-        r, output = qsub_self_launch(self._params, *args)
-        return r, output
+        if not self._raw_qsub_params.get('noask', False):
+            click.echo('Args: ' + ' '.join(map(str, args)))
+            confirmed = click.confirm('Submit to pbs?')
+            if not confirmed:
+                return 0, 'Aborted by user'
+
+        proc = Popen(['qsub'] + qsub_args, stdin=PIPE, stdout=PIPE)
+        proc.stdin.write(script.encode('utf-8'))
+        proc.stdin.close()
+        out_txt = proc.stdout.read().decode('utf-8')
+        exit_code = proc.wait()
+        return exit_code, out_txt
+
+    # A slighly higher-level alternative to the above, since we repeatedly want to get the job_id and
+    # die on errors. This one captures rather than prints stderr.
+    # PyCharm also doesn't like type definitions on __call__()s.
+    # (TODO Leaving the above api for now as other scripts may break and we're on a deadline...)
+    def submit(self, *commands: str) -> str:
+        """
+        Submit a job, returning the job_id.
+
+        Throws JobSubmissionError on failure.
+        """
+        qsub_args, script = self.build_submission(*commands)
+
+        proc = Popen(['qsub'] + qsub_args, stdin=PIPE, stdout=PIPE, stderr=PIPE)
+        proc.stdin.write(script.encode('utf-8'))
+        proc.stdin.close()
+        stdout = proc.stdout.read().decode('utf-8')
+        stderr = proc.stdout.read().decode('utf-8')
+        exit_code = proc.wait()
+
+        if exit_code != 0:
+            raise JobSubmissionError("Error submitting qsub job", stdout, stderr)
+
+        job_id = stdout.strip(' \n')
+        return job_id
+
+    def build_submission(self, *commands: str) -> Tuple[List[str], str]:
+        """Get the qsub arguments and script that would be submitted, but don't submit it."""
+        if self._internal_args is not None:
+            commands = tuple(self._internal_args) + commands
+
+        script = _generate_self_launch_script(*commands)
+        qsub_args = _build_qsub_args(**self._raw_qsub_params)
+        return qsub_args, script
+
+
+class JobSubmissionError(Exception):
+    pass
 
 
 class QSubParamType(click.ParamType):
@@ -385,31 +433,11 @@ def self_launch_args(*args):
     return (sys.executable, py_file) + args
 
 
-def generate_self_launch_script(*args):
+def _generate_self_launch_script(*args):
     s = "#!/bin/bash\n\n"
     s += pbs.generate_env_header()
     s += '\n\nexec ' + ' '.join(shlex.quote(s) for s in self_launch_args(*args))
     return s
-
-
-def qsub_self_launch(qsub_opts, *args):
-    script = generate_self_launch_script(*args)
-    qsub_args = _build_qsub_args(**qsub_opts)
-
-    noask = qsub_opts.get('noask', False)
-    if not noask:
-        click.echo('Args: ' + ' '.join(map(str, args)))
-        confirmed = click.confirm('Submit to pbs?')
-        if not confirmed:
-            return (0, 'Aborted by user')
-
-    proc = Popen(['qsub'] + qsub_args, stdin=PIPE, stdout=PIPE)
-    proc.stdin.write(script.encode('utf-8'))
-    proc.stdin.close()
-    out_txt = proc.stdout.read().decode('utf-8')
-    exit_code = proc.wait()
-
-    return exit_code, out_txt
 
 
 def describe_task(task):
