@@ -140,7 +140,7 @@ def _run_celery_task_logging(
     Stream events from celery, logging state changes to the events directory.
     """
 
-    _LOG.info("Logger process started", bold=True)
+    _LOG.info("Logger process started")
     state: celery_state.State = app.events.State()
 
     # TODO: handling immature shutdown cleanly? The celery runner itself might need better support for it...
@@ -325,7 +325,7 @@ def _spawn_pbs_workers(redis_host: str, redis_port: str) -> Iterable[subprocess.
 
         proc = pbs.pbsdsh(
             node.offset,
-            f'exec datacube-worker --executor celery {redis_host}:{redis_port} --nprocs {nprocs}',
+            f'exec python -m datacube_apps.worker --executor celery {redis_host}:{redis_port} --nprocs {nprocs}',
             env=worker_env
         )
         _LOG.info(f"Started node {node.offset} (pbsdsh pid {proc.pid})")
