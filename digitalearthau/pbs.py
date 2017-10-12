@@ -20,6 +20,10 @@ def is_under_pbs():
     return 'PBS_NODEFILE' in os.environ
 
 
+def current_pbs_job_id() -> Optional[str]:
+    return os.environ.get('PBS_JOBID')
+
+
 def parse_nodes_file(fname=None):
     if fname is None:
         fname = os.environ.get('PBS_NODEFILE')
@@ -60,7 +64,7 @@ def current_job_task_id() -> Optional[uuid.UUID]:
     ...     current_job_task_id()
     UUID('9f682e52-6c9e-5ed1-a32f-1cb32f35e476')
     """
-    pbs_job_id = os.environ.get('PBS_JOBID')
+    pbs_job_id = current_pbs_job_id()
     if pbs_job_id is None:
         return None
 
