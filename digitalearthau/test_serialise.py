@@ -53,8 +53,8 @@ def test_dump_load_task_structure(tmpdir):
         logs_path=d.joinpath('logs'),
         parameters=DefaultJobParameters(
             query={'time': [2013, 2015]},
-            source_types=['ls5_nbar_albers'],
-            output_types=['ls5_nbar_waterman_butterfly'],
+            source_products=['ls5_nbar_albers'],
+            output_products=['ls5_nbar_waterman_butterfly'],
         ),
         # Task-app framework
         runtime_state=TaskAppState(
