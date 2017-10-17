@@ -16,7 +16,8 @@ class NodeMessage(NamedTuple):
     # An optional id to identify a single instance within a host, such as a worker. (pid is not unique)
     runtime_id: Optional[uuid.UUID] = None
 
-    def current_node(self) -> 'NodeMessage':
+    @classmethod
+    def current_node(cls) -> 'NodeMessage':
         return NodeMessage(
             hostname=_CURRENT_HOST,
             # "Computed" every time in case of forking.
