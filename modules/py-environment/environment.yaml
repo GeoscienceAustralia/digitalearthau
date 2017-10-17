@@ -1,4 +1,9 @@
 name: agdc
+channels:
+- conda-forge/label/dev
+- conda-forge
+- defaults
+- nodefaults
 dependencies:
 - basemap
 - bottleneck
@@ -61,7 +66,7 @@ dependencies:
 - pytest-cov
 - python-dateutil
 - pyyaml
-- rasterio >=0.34
+- rasterio >=0.9 # required for zip reading, 0.9 gets around 1.0a ordering problems
 - redis
 - redis-py
 - rtree
