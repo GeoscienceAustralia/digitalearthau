@@ -1,30 +1,31 @@
+import itertools
+import logging
+import re
+import shlex
+import sys
+from functools import update_wrapper
+from pathlib import Path
+from subprocess import Popen, PIPE
+from pprint import pprint
 import click
 import yaml
-import sys
-import re
-import logging
-import itertools
-import shlex
-from time import sleep
-
 from pydash import pick
-from pathlib import Path
-from functools import update_wrapper
-from subprocess import Popen, PIPE
+from typing import List, Tuple
 
-from . import pbs
 from datacube.executor import (SerialExecutor,
                                mk_celery_executor,
                                _get_concurrent_executor,
                                _get_distributed_executor)
-
-from datacube import _celery_runner as cr
-
+from . import pbs
+from .runners import celery_environment
+from .runners.model import TaskDescription
 
 NUM_CPUS_PER_NODE = 16
 QSUB_L_FLAGS = 'mem ncpus walltime wd'.split(' ')
 
-PASS_THRU_KEYS = 'name project queue env_vars wd noask _internal'.split(' ')
+# Keys that can be sent as-is to the qsub builder without normalisation (I think?)
+PASS_THRU_KEYS = 'name project queue env_vars wd noask umask stdout stderr'.split(' ')
+# All keys/arguments supported by QsubLauncher functions
 VALID_KEYS = PASS_THRU_KEYS + 'walltime ncpus nodes mem extra_qsub_args'.split(' ')
 
 _LOG = logging.getLogger(__name__)
@@ -42,10 +43,10 @@ class QSubLauncher(object):
                          that passes through sys.argv arguments
         """
         self._internal_args = internal_args
-        self._params = params
+        self._raw_qsub_params = params
 
     def __repr__(self):
-        return yaml.dump(dict(qsub=self._params))
+        return yaml.dump(dict(qsub=self._raw_qsub_params))
 
     def add_internal_args(self, *args):
         if self._internal_args is None:
@@ -68,12 +69,58 @@ class QSubLauncher(object):
             args = remove_args('--queue-size', args, n=1)
             args = tuple(args)
 
-        if self._internal_args is not None:
-            args = tuple(self._internal_args) + args
+        qsub_args, script = self.build_submission(*args)
 
-        r, output = qsub_self_launch(self._params, *args)
-        click.echo(output)
-        return r, output
+        if not self._raw_qsub_params.get('noask', False):
+            click.echo('Args: ' + ' '.join(map(str, args)))
+            confirmed = click.confirm('Submit to pbs?')
+            if not confirmed:
+                return 0, 'Aborted by user'
+
+        proc = Popen(['qsub'] + qsub_args, stdin=PIPE, stdout=PIPE)
+        proc.stdin.write(script.encode('utf-8'))
+        proc.stdin.close()
+        out_txt = proc.stdout.read().decode('utf-8')
+        exit_code = proc.wait()
+        return exit_code, out_txt
+
+    # A slighly higher-level alternative to the above, since we repeatedly want to get the job_id and
+    # die on errors. This one captures rather than prints stderr.
+    # PyCharm also doesn't like type definitions on __call__()s.
+    # (TODO Leaving the above api for now as other scripts may break and we're on a deadline...)
+    def submit(self, *commands: str) -> str:
+        """
+        Submit a job, returning the job_id.
+
+        Throws JobSubmissionError on failure.
+        """
+        qsub_args, script = self.build_submission(*commands)
+
+        proc = Popen(['qsub'] + qsub_args, stdin=PIPE, stdout=PIPE, stderr=PIPE)
+        proc.stdin.write(script.encode('utf-8'))
+        proc.stdin.close()
+        stdout = proc.stdout.read().decode('utf-8')
+        stderr = proc.stdout.read().decode('utf-8')
+        exit_code = proc.wait()
+
+        if exit_code != 0:
+            raise JobSubmissionError("Error submitting qsub job", stdout, stderr)
+
+        job_id = stdout.strip(' \n')
+        return job_id
+
+    def build_submission(self, *commands: str) -> Tuple[List[str], str]:
+        """Get the qsub arguments and script that would be submitted, but don't submit it."""
+        if self._internal_args is not None:
+            commands = tuple(self._internal_args) + commands
+
+        script = _generate_self_launch_script(*commands)
+        qsub_args = _build_qsub_args(**self._raw_qsub_params)
+        return qsub_args, script
+
+
+class JobSubmissionError(Exception):
+    pass
 
 
 class QSubParamType(click.ParamType):
@@ -163,7 +210,6 @@ class HostPort(click.ParamType):
 
 
 def parse_comma_args(s, valid_keys=None):
-
     def parse_one(a):
         kv = tuple(s.strip() for s in re.split(' *[=:] *', a))
         if len(kv) == 1:
@@ -183,6 +229,12 @@ def parse_comma_args(s, valid_keys=None):
 
 
 def normalise_walltime(x):
+    """
+    >>> normalise_walltime('4h')
+    '4:00:00'
+    >>> # TODO Nothing returned or errored?
+    >>> normalise_walltime('4h5m')
+    """
     if x is None or x.find(':') >= 0:
         return x
 
@@ -211,6 +263,12 @@ def normalise_walltime(x):
 
 
 def normalise_mem(x):
+    """
+    >>> normalise_mem('2gb')
+    2
+    >>> normalise_mem('medium')
+    4
+    """
     named = dict(small=2,
                  medium=4,
                  large=7.875)
@@ -225,8 +283,40 @@ def normalise_mem(x):
 
 
 def norm_qsub_params(p):
-
-    ncpus = int(p.get('ncpus', 0))
+    """
+    >>> pprint(norm_qsub_params({
+    ...    'mem': 'small',
+    ...    'wd': True,
+    ...    'noask': True,
+    ...    'nodes': 4,
+    ...    'walltime': '4h',
+    ...    'project': 'v10',
+    ...    'queue': 'normal',
+    ...    'stdout': 'test.out.txt',
+    ...    'stderr': 'test.err.txt',
+    ...    'umask': 33,
+    ...    'name': 'staggering-fc-run',
+    ... }))
+    {'extra_qsub_args': [],
+     'mem': '129024MB',
+     'name': 'staggering-fc-run',
+     'ncpus': 64,
+     'noask': True,
+     'project': 'v10',
+     'queue': 'normal',
+     'stderr': 'test.err.txt',
+     'stdout': 'test.out.txt',
+     'umask': 33,
+     'walltime': '4:00:00',
+     'wd': True}
+    >>> # Default params
+    >>> norm_qsub_params({})
+    {'ncpus': 16, 'mem': '32256MB', 'walltime': None, 'extra_qsub_args': []}
+    >>> # TODO error on unknown args? It seems to explicitly pass through (PASS_THRU_KEYS) some, but not all valid keys?
+    >>> # No error currently:
+    >>> # norm_qsub_params({'ubermensch': 'understood'})
+    """
+    ncpus = int(p.pop('ncpus', 0))
 
     if ncpus == 0:
         nodes = int(p.get('nodes', 1))
@@ -259,15 +349,40 @@ def norm_qsub_params(p):
     return pp
 
 
-def build_qsub_args(**p):
+def _build_qsub_args(**p):
+    """
+    Turn the output of norm_qsub_params into arguments for qsub.
+
+    >>> _build_qsub_args(
+    ...     ncpus=1,
+    ...     mem='4096MB',
+    ...     walltime='1:00:00',
+    ...     name='test',
+    ...     project='u46',
+    ...     queue='normal',
+    ...     wd=True,
+    ...     noask=True
+    ... )
+    ['-lmem=4096MB', '-lncpus=1', '-lwalltime=1:00:00', '-lwd', '-P', 'u46', '-q', 'normal', '-N', 'test']
+    >>> # It should complain on unknown fields
+    >>> _build_qsub_args(project='v10', wrong_arg='lumberjack')
+    Traceback (most recent call last):
+    ...
+    ValueError: Unknown qsub arguments: {'wrong_arg': 'lumberjack'}
+    >>> _build_qsub_args(stdout='/tmp/testout.txt', stderr=Path('/tmp/testerr.txt'), umask=33)
+    ['-o', '/tmp/testout.txt', '-e', '/tmp/testerr.txt', '-W', 'umask=33']
+    """
+
     args = []
 
     flags = dict(project='-P',
                  queue='-q',
-                 name='-N')
+                 name='-N',
+                 stdout='-o',
+                 stderr='-e')
 
     def add_l_arg(n):
-        v = p.get(n)
+        v = p.pop(n, None)
         if v is not None:
             if isinstance(v, bool):
                 if v:
@@ -276,10 +391,10 @@ def build_qsub_args(**p):
                 args.append('-l{}={}'.format(n, v))
 
     def add_arg(n):
-        v = p.get(n)
+        v = p.pop(n, None)
         if v is not None:
             flag = flags[n]
-            args.extend([flag, v])
+            args.extend([flag, str(v)])
 
     for n in QSUB_L_FLAGS:
         add_l_arg(n)
@@ -287,9 +402,24 @@ def build_qsub_args(**p):
     for n in flags:
         add_arg(n)
 
-    args.extend(p.get('extra_qsub_args', []))
+    # Umask is in a an extended attributes group ("-W")
+    umask = p.pop('umask', None)
+    if umask:
+        args.extend(['-W', f'umask={umask}'])
+
+    args.extend(p.pop('extra_qsub_args', []))
+
+    # Used in UI that calls this method, not qsub.
+    p.pop('noask', None)
 
     # TODO: deal with env_vars!
+    # For now, throw error if someone tries to set one (empty is ok)
+    if p.pop('env_vars', None):
+        raise NotImplementedError("env_vars is not yet implemented")
+
+    # We should have popped all input arguments, otherwise they passed something unknown
+    if p:
+        raise ValueError(f"Unknown qsub arguments: {repr(p)}")
 
     return args
 
@@ -303,82 +433,11 @@ def self_launch_args(*args):
     return (sys.executable, py_file) + args
 
 
-def generate_self_launch_script(*args):
+def _generate_self_launch_script(*args):
     s = "#!/bin/bash\n\n"
     s += pbs.generate_env_header()
     s += '\n\nexec ' + ' '.join(shlex.quote(s) for s in self_launch_args(*args))
     return s
-
-
-def qsub_self_launch(qsub_opts, *args):
-
-    script = generate_self_launch_script(*args)
-    qsub_args = build_qsub_args(**qsub_opts)
-
-    noask = qsub_opts.get('noask', False)
-
-    if not noask:
-        click.echo('Args: ' + ' '.join(map(str, args)))
-        confirmed = click.confirm('Submit to pbs?')
-        if not confirmed:
-            return (0, 'Aborted by user')
-
-    proc = Popen(['qsub'] + qsub_args, stdin=PIPE, stdout=PIPE)
-    proc.stdin.write(script.encode('utf-8'))
-    proc.stdin.close()
-    out_txt = proc.stdout.read().decode('utf-8')
-    exit_code = proc.wait()
-
-    return exit_code, out_txt
-
-
-def launch_redis_worker_pool(port=6379, **redis_params):
-    redis_port = port
-    redis_host = pbs.hostname()
-    redis_password = cr.get_redis_password(generate_if_missing=True)
-
-    redis_shutdown = cr.launch_redis(redis_port, redis_password, **redis_params)
-
-    _LOG.info('Launched Redis at %s:%d', redis_host, redis_port)
-
-    if not redis_shutdown:
-        raise RuntimeError('Failed to launch Redis')
-
-    for i in range(5):
-        if cr.check_redis(redis_host, redis_port, redis_password) is False:
-            sleep(0.5)
-
-    executor = cr.CeleryExecutor(
-        redis_host,
-        redis_port,
-        password=redis_password)
-
-    worker_env = pbs.get_env()
-    worker_procs = []
-
-    for node in pbs.nodes():
-        nprocs = node.num_cores
-        if node.is_main:
-            nprocs = max(1, nprocs - 2)
-
-        celery_worker_script = 'exec datacube-worker --executor celery {}:{} --nprocs {} >/dev/null 2>/dev/null'.format(
-            redis_host, redis_port, nprocs)
-        proc = pbs.pbsdsh(node.offset, celery_worker_script, env=worker_env)
-        worker_procs.append(proc)
-
-    def shutdown():
-        cr.app.control.shutdown()
-
-        _LOG.info('Waiting for workers to quit')
-
-        # TODO: time limit followed by kill
-        for p in worker_procs:
-            p.wait()
-
-        _LOG.info('Shutting down redis-server')
-        redis_shutdown()
-
-    return executor, shutdown
 
 
 def describe_task(task):
@@ -455,33 +514,36 @@ class TaskRunner(object):
     def set_qsize(self, qsize):
         self._user_queue_size = qsize
 
-    def start(self):
+    def start(self, task_desc: TaskDescription = None):
         def noop():
             pass
 
-        def mk_pbs_celery():
+        def mk_pbs_celery(task_desc: TaskDescription):
             qsize = pbs.preferred_queue_size()
             port = 6379  # TODO: randomise
             maxmemory = "1024mb"  # TODO: compute maxmemory from qsize
-            executor, shutdown = launch_redis_worker_pool(port=port, maxmemory=maxmemory)
+            executor, shutdown = celery_environment.launch_celery_worker_environment(
+                task_desc=task_desc,
+                redis_params=dict(port=port, maxmemory=maxmemory)
+            )
             return (executor, qsize, shutdown)
 
-        def mk_dask():
+        def mk_dask(task_desc: TaskDescription):
             qsize = 100
             executor = _get_distributed_executor(self._opts)
             return (executor, qsize, noop)
 
-        def mk_celery():
+        def mk_celery(task_desc: TaskDescription):
             qsize = 100
             executor = mk_celery_executor(*self._opts)
             return (executor, qsize, noop)
 
-        def mk_multiproc():
+        def mk_multiproc(task_desc: TaskDescription):
             qsize = 100
             executor = _get_concurrent_executor(self._opts)
             return (executor, qsize, noop)
 
-        def mk_serial():
+        def mk_serial(task_desc: TaskDescription):
             qsize = 10
             executor = SerialExecutor()
             return (executor, qsize, noop)
@@ -495,8 +557,9 @@ class TaskRunner(object):
         try:
             (self._executor,
              default_queue_size,
-             self._shutdown) = mk.get(self._kind, mk_serial)()
+             self._shutdown) = mk.get(self._kind, mk_serial)(task_desc)
         except RuntimeError:
+            _LOG.exception("Error starting executor")
             return False
 
         if self._user_queue_size is not None:
@@ -511,9 +574,9 @@ class TaskRunner(object):
             self._queue_size = None
             self._shutdown = None
 
-    def __call__(self, tasks, run_task, on_task_complete=None):
+    def __call__(self, task_desc: TaskDescription, tasks, run_task, on_task_complete=None):
         if self._executor is None:
-            if self.start() is False:
+            if self.start(task_desc) is False:
                 raise RuntimeError('Failed to launch worker pool')
 
         return run_tasks(tasks, self._executor, run_task, on_task_complete, self._queue_size)
@@ -526,6 +589,13 @@ def get_current_obj(ctx=None):
     if ctx.obj is None:
         ctx.obj = {}
     return ctx.obj
+
+
+class QsubRunState:
+    def __init__(self) -> None:
+        self.runner: TaskRunner = None
+        self.qsub: QSubLauncher = None
+        self.qsize: int = None
 
 
 def with_qsub_runner():
@@ -546,16 +616,10 @@ def with_qsub_runner():
     arg_name = 'runner'
     o_key = '_qsub_state'
 
-    class State:
-        def __init__(self):
-            self.runner = None
-            self.qsub = None
-            self.qsize = None
-
-    def state(ctx=None):
+    def state(ctx=None) -> QsubRunState:
         obj = get_current_obj(ctx)
         if o_key not in obj:
-            obj[o_key] = State()
+            obj[o_key] = QsubRunState()
         return obj[o_key]
 
     def add_multiproc_executor(ctx, param, value):
@@ -594,15 +658,19 @@ def with_qsub_runner():
                          callback=add_multiproc_executor),
             click.option('--dask',
                          type=HostPort(),
-                         help='Use dask.distributed backend for parallel computation. ' +
-                         'Supply address of dask scheduler.',
+                         help=(
+                             'Use dask.distributed backend for parallel computation. '
+                             'Supply address of dask scheduler.'
+                         ),
                          expose_value=False,
                          callback=add_dask_executor),
             click.option('--celery',
                          type=HostPort(),
-                         help='Use celery backend for parallel computation. ' +
-                         'Supply redis server address, or "pbs-launch" to launch redis ' +
-                         'server and workers when running under pbs.',
+                         help=(
+                             'Use celery backend for parallel computation. '
+                             'Supply redis server address, or "pbs-launch" to launch redis '
+                             'server and workers when running under pbs.'
+                         ),
                          expose_value=False,
                          callback=add_celery_executor),
             click.option('--queue-size',
@@ -613,8 +681,10 @@ def with_qsub_runner():
             click.option('--qsub',
                          type=QSubParamType(),
                          callback=capture_qsub,
-                         help='Launch via qsub, supply comma or new-line separated list of parameters.' +
-                         ' Try --qsub=help.'),
+                         help=(
+                             'Launch via qsub, supply comma or new-line separated list of parameters.'
+                             ' Try --qsub=help.'
+                         )),
         ]
 
         for o in opts:
@@ -637,4 +707,5 @@ def with_qsub_runner():
             return f(*args, **kwargs)
 
         return update_wrapper(extract_runner, f)
+
     return decorate

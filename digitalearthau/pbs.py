@@ -1,3 +1,4 @@
+import uuid
 from base64 import b64encode
 import os
 import subprocess
@@ -6,6 +7,7 @@ import re
 import functools
 import shlex
 from collections import namedtuple, OrderedDict
+from typing import Optional
 
 Node = namedtuple('Node', ['name', 'num_cores', 'offset', 'is_main'])
 
@@ -18,8 +20,11 @@ def is_under_pbs():
     return 'PBS_NODEFILE' in os.environ
 
 
-def parse_nodes_file(fname=None):
+def current_pbs_job_id() -> Optional[str]:
+    return os.environ.get('PBS_JOBID')
 
+
+def parse_nodes_file(fname=None):
     if fname is None:
         fname = os.environ.get('PBS_NODEFILE')
         if fname is None:
@@ -44,6 +49,44 @@ def parse_nodes_file(fname=None):
                 is_main=(main_hostname == l))
 
     return [Node(**x) for x in _nodes.values()]
+
+
+# This is defined in document "DEA Event structure", to produce stable & consistent task ids for pbs jobs.
+NCI_PBS_UUID_NAMESPACE = uuid.UUID('85d36430-538f-4ecd-85d0-d0ef9edfc266')
+
+
+def current_job_task_id() -> Optional[uuid.UUID]:
+    """
+    Get a stable UUID for the current PBS job, or nothing if we don't appear to be in one.
+
+    >>> import mock
+    >>> with mock.patch.dict(os.environ, {'PBS_JOBID': '87654321.r-man2'}):
+    ...     current_job_task_id()
+    UUID('9f682e52-6c9e-5ed1-a32f-1cb32f35e476')
+    """
+    pbs_job_id = current_pbs_job_id()
+    if pbs_job_id is None:
+        return None
+
+    task_id = task_id_for_pbs_job(pbs_job_id)
+
+    return task_id
+
+
+def task_id_for_pbs_job(pbs_job_id: str) -> uuid.UUID:
+    """
+    Get a stable UUID for the the given PBS job id. Expects the whole job name ("8894425.r-man2"), not just the number).
+
+    >>> task_id_for_pbs_job('7818401.r-man2')
+    UUID('f3f5ab5c-ada9-5507-b00b-ad856743bb76')
+    """
+    # Sanity check
+    if ".r-man" not in pbs_job_id:
+        raise RuntimeError(
+            "%r doesn't look like an NCI pbs job name. Expecting the full name, eg '8894425.r-man2'" % pbs_job_id
+        )
+    task_id = uuid.uuid5(NCI_PBS_UUID_NAMESPACE, pbs_job_id.strip())
+    return task_id
 
 
 @functools.lru_cache(maxsize=None)
@@ -95,7 +138,7 @@ def wrap_script(script):
     return 'eval "$(echo {}|base64 --decode)"'.format(b64s)
 
 
-def pbsdsh(cpu_num, script, env=None, test_mode=False):
+def pbsdsh(cpu_num, script, env=None, test_mode=False) -> subprocess.Popen:
 
     if env is None:
         env = get_env()
@@ -111,4 +154,5 @@ def pbsdsh(cpu_num, script, env=None, test_mode=False):
     return subprocess.Popen(
         args,
         stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE)
+        stderr=subprocess.PIPE
+    )

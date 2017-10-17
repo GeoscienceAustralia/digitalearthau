@@ -40,6 +40,8 @@ FILES_PER_JOB_CUTOFF = 15000
 
 _LOG = logging.getLogger(__name__)
 
+
+# TODO: merge this logic into `paths.NCI_WORK_ROOT`
 DEFAULT_WORK_FOLDER = '/g/data/v10/work/sync/{collection.name}/{work_time:%Y-%m-%dT%H%M}'
 DEFAULT_CACHE_FOLDER = '/g/data/v10/work/sync/{collection.name}/cache'
 
