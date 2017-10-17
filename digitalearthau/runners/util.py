@@ -21,8 +21,8 @@ _LOG = logging.getLogger(__name__)
 
 def init_task_app(
         job_type: str,
-        source_types: List[str],
-        output_types: List[str],
+        source_products: List[str],
+        output_products: List[str],
         datacube_query_args: dict,
         app_config_path: Path,
         pbs_project: str,
@@ -35,8 +35,8 @@ def init_task_app(
     """
     task_datetime = datetime.utcnow().replace(tzinfo=tz.tzutc())
     work_path = paths.get_product_work_directory(
-        # First type is the primary...
-        output_product=output_types[0],
+        # First is the primary...
+        output_product=output_products[0],
         time=task_datetime
     )
     _LOG.info("Created work directory %s", work_path)
@@ -49,8 +49,8 @@ def init_task_app(
         jobs_path=work_path.joinpath('jobs'),
         parameters=DefaultJobParameters(
             query=datacube_query_args,
-            source_types=source_types,
-            output_types=output_types,
+            source_products=source_products,
+            output_products=output_products,
         ),
         # Task-app framework
         runtime_state=TaskAppState(

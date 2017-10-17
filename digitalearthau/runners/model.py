@@ -42,9 +42,9 @@ class DefaultJobParameters(NamedTuple):
     # Datacube query args used to select datasets to process (eg time=(1994, 1995), product=ls5_nbar_albers)
     query: dict
 
-    # Input and output products ("ls7_nbar_albers")
-    source_types: List[str]
-    output_types: List[str]
+    # Input and output product names ("ls7_nbar_albers")
+    source_products: List[str]
+    output_products: List[str]
 
 
 class TaskDescription(NamedTuple):
