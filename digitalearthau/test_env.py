@@ -179,8 +179,7 @@ def as_dict(local_config, env=None):
 @click.group()
 @click.option('-C', '--config-file',
               type=click.Path(exists=True, dir_okay=False),
-              help="Database configuration file."
-                   "  [default: config/datacube.conf]")
+              help="Database configuration file.")
 @click.option('-E', '--test-env',
               default='NCI-test', show_default=True,
               help="Test environment section in database configuration.")
