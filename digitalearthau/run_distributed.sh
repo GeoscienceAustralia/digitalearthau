@@ -8,6 +8,7 @@ shift
 
 ppn=1
 tpp=1
+mem=4e9
 umask=0027
 
 while [[ $# -gt 0 ]]
@@ -56,11 +57,11 @@ n0ppn=$(( n0ppn > 0 ? n0ppn : 1 ))
 pbsdsh -n 0 -- /bin/bash -c "${init_env}; dask-scheduler --port $SCHEDULER_PORT"&
 sleep 5s
 
-pbsdsh -n 0 -- /bin/bash -c "${init_env}; dask-worker $SCHEDULER_ADDR --nprocs ${n0ppn} --nthreads ${tpp}"&
+pbsdsh -n 0 -- /bin/bash -c "${init_env}; dask-worker $SCHEDULER_ADDR --nprocs ${n0ppn} --nthreads ${tpp} --memory-limit ${mem}"&
 sleep 0.5s
 
 for ((i=NCPUS; i<PBS_NCPUS; i+=NCPUS)); do
-  pbsdsh -n $i -- /bin/bash -c "${init_env}; dask-worker $SCHEDULER_ADDR --nprocs ${ppn} --nthreads ${tpp}"&
+  pbsdsh -n $i -- /bin/bash -c "${init_env}; dask-worker $SCHEDULER_ADDR --nprocs ${ppn} --nthreads ${tpp} --memory-limit ${mem}"&
   sleep 0.5s
 done
 sleep 5s
