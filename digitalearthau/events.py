@@ -1,3 +1,8 @@
+"""
+Event types for announcing task and dataset status changes.
+
+See the doc for an overview: https://docs.google.com/document/d/1VNpK3GL1r4kbjwAO-sJ6_BMk2FSHhNnoDg4VHeylyAE/edit?usp=sharing
+"""
 import os
 import socket
 import uuid

@@ -1,3 +1,13 @@
+"""
+Tools for conversion to/from json, jsonl, yaml.
+
+This especially revolves around conversion of NamedTuples, as they are used in many of our
+common types (events, runner model objects)
+
+(The use of named tuples were an attempt to be a compromise between dicts and full classes.
+A lot of the previous dict-based code grew unwieldy, especially as it neutered pycharm/pylint.
+Normal classes are an option too, but they'd need their own serialization code regardless.)
+"""
 import enum
 import json
 import pathlib
@@ -13,6 +23,10 @@ from digitalearthau.events import Status
 
 
 class JsonLinesWriter:
+    """
+    Stream events (or any Namedtuple) to a file in JSON-Lines format.
+    """
+
     def __init__(self, file_obj) -> None:
         self._file_obj = file_obj
 
@@ -29,7 +43,7 @@ class JsonLinesWriter:
 
 def to_lenient_json(o, compact=False, *args, **kwargs):
     """
-    Convert to json, supporting a few more common data types (Paths, UUID).
+    Convert an object to json, supporting a few more common data types (Paths, UUID).
 
     Will always return a value (falling back to repr() rather than throw an unsupported object exception). This
     is intended for cases such as logs where you always want output (need reliability).
@@ -146,7 +160,6 @@ def simplify_obj(obj):
 def type_to_dict(o):
     """
     Convert a named tuple and all of its directly-embedded named tuples to dicts/etc suitable for json/yaml
-
 
     TODO: Doesn't handle indirectly embedded NamedTuples, such as within a list.
     (It's currently only used for simple cases, not complex hierarchies)

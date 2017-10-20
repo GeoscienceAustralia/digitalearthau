@@ -10,7 +10,6 @@ from time import sleep, time
 
 import celery.events.state as celery_state
 import celery.states
-import click
 import datetime
 import subprocess
 from celery.events import EventReceiver
@@ -26,7 +25,7 @@ from digitalearthau.runners.model import TaskDescription
 
 _LOG = logging.getLogger(__name__)
 
-# The strigified args that celery gives us back within task messages
+# The stringified args that celery gives us back within task messages
 _EXAMPLE_TASK_ARGS = "'(functools.partial(<function do_fc_task at 0x7f47e7aad598>, {" \
                      "\'source_type\': \'ls8_nbar_albers\', \'output_type\': \'ls8_fc_albers\', " \
                      "\'version\': \'${version}\', \'description\': \'Landsat 8 Fractional Cover 25 metre, " \
