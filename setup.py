@@ -20,7 +20,10 @@ setup(
     author='Geoscience Australia',
     license='Apache License 2.0',
 
-    packages=find_packages(),
+    packages=find_packages(
+        exclude=('tests', 'tests.*',
+                 'integration_tests', 'integration_tests.*')
+    ),
     package_data={
         '': ['*.yaml', '*/*.yaml'],
     },
