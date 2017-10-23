@@ -8,44 +8,37 @@ that should contain the same set of datasets.
 """
 import fnmatch
 import glob
+from enum import Enum, auto
 from pathlib import Path
-from typing import Iterable, Optional, List, Dict
+from typing import Iterable, Optional, List, Dict, NamedTuple, Tuple
 
 from digitalearthau.index import DatasetPathIndex, MemoryDatasetPathIndex
-from digitalearthau.utils import simple_object_repr
 
 
-class Collection:
-    def __init__(self,
-                 name: str,
-                 query: dict,
-                 file_patterns: Iterable[str],
-                 unique: Iterable[str],
-                 index: DatasetPathIndex = None,
-                 delete_archived_after_days=None,
-                 expected_parents=None,
-                 trust: Optional[str] = None) -> None:
-        self.name = name
-        # The query args needed to get all of this collection from the datacube index
-        self.query = query
-        # The file glob patterns to iterate all files on disk (NCI collections are all file:// locations)
-        self.file_patterns = file_patterns
+class Trust(Enum):
+    """
+    Which side do we trust in a sync? The disk, or the index?
+    'None' means don't do anything when there's an unknown dataset (they'll have to be indexed elsewhere)
+    """
+    nothing = auto()
+    index = auto()
+    disk = auto()
 
-        self.unique = unique
-        self.delete_archived_after_days = delete_archived_after_days
-        self.expected_parents = expected_parents
 
-        self._index = index
+class Collection(NamedTuple):
+    name: str
+    # The query args needed to get all of this collection from the datacube index
+    query: dict
+    # The file glob patterns to iterate all files on disk (NCI collections are all file:// locations)
+    file_patterns: Tuple[str, ...]
+    unique: Tuple[str, ...]
 
-        # Which side do we trust in a sync? The disk, or the index?
-        # 'None' means don't do anything when there's an unknown dataset (they'll have to be indexed elsewhere)
-        trust_types = ('index', 'disk')
-        if trust and (trust not in trust_types):
-            raise ValueError('Unknown type of trust %r, expected one of %r or None' % (trust, trust_types))
-        self.trust = trust
+    index: DatasetPathIndex = None
 
-    def __repr__(self):
-        return simple_object_repr(self)
+    # If something is archived, how many days before we can delete it? None means never
+    delete_archived_after_days: float = None
+
+    trust: Trust = Trust.nothing
 
     def iter_fs_paths(self):
         return (
@@ -59,7 +52,7 @@ class Collection:
             yield path.as_uri()
 
     def iter_index_uris(self):
-        return map(str, self._index.iter_all_uris(self.query))
+        return map(str, self.index.iter_all_uris(self.query))
 
     def constrained_file_patterns(self, within_path: Path) -> List[str]:
         """
@@ -140,23 +133,6 @@ def _constrain_pattern(within_path: Path, pattern: str):
     return None
 
 
-class SceneCollection(Collection):
-    def __init__(self,
-                 name: str,
-                 query: dict,
-                 file_patterns: Iterable[str],
-                 index: Optional[DatasetPathIndex],
-                 delete_archived_after_days=None,
-                 expected_parents: Iterable[str] = None) -> None:
-        super().__init__(name, query, file_patterns=file_patterns, index=index,
-                         unique=('time.lower.day', 'sat_path.lower', 'sat_row.lower'),
-                         delete_archived_after_days=delete_archived_after_days,
-                         expected_parents=expected_parents,
-                         # Scenes default to trusting disk. They're atomically written to the destination,
-                         # and the jobs themselves wont index.
-                         trust='disk')
-
-
 _COLLECTIONS = {}  # type: Dict[str, Collection]
 
 
@@ -208,42 +184,53 @@ def init_nci_collections(index: DatasetPathIndex):
         Collection(
             name='telemetry',
             query={'metadata_type': 'telemetry'},
-            file_patterns=[
+            file_patterns=(
                 '/g/data/v10/repackaged/rawdata/0/[0-9][0-9][0-9][0-9]/[0-9][0-9]/*/ga-metadata.yaml',
-            ],
+            ),
             unique=('time.lower.day', 'platform'),
             index=index,
-            trust='disk'
+            trust=Trust.disk
         )
     )
+
+    def scene_collection(name, query, file_patterns, delete_archived_after_days=None):
+        """Make a collection with common defaults for scene collections"""
+        return Collection(
+            name,
+            query,
+            file_patterns=file_patterns,
+            index=index,
+            unique=('time.lower.day', 'sat_path.lower', 'sat_row.lower'),
+            delete_archived_after_days=delete_archived_after_days,
+            # Scenes default to trusting disk. They're atomically written to the destination,
+            # and the jobs themselves wont index.
+            trust=Trust.disk
+        )
 
     # Level 1
     # /g/data/v10/reprocess/ls7/level1/2016/06/
     #           LS7_ETM_SYS_P31_GALPGS01-002_103_074_20160617/ga-metadata.yaml
     _add(
-        SceneCollection(
+        scene_collection(
             name='ls8_level1_scene',
             query={'product': ['ls8_level1_scene', 'ls8_level1_oli_scene']},
             file_patterns=[
                 '/g/data/v10/reprocess/ls8/level1/[0-9][0-9][0-9][0-9]/[0-9][0-9]/LS*/ga-metadata.yaml',
             ],
-            index=index,
         ),
-        SceneCollection(
+        scene_collection(
             name='ls7_level1_scene',
             query={'product': 'ls7_level1_scene'},
             file_patterns=[
                 '/g/data/v10/reprocess/ls7/level1/[0.-9][0-9][0-9][0-9]/[0-9][0-9]/LS*/ga-metadata.yaml',
             ],
-            index=index,
         ),
-        SceneCollection(
+        scene_collection(
             name='ls5_level1_scene',
             query={'product': 'ls5_level1_scene'},
             file_patterns=[
                 '/g/data/v10/reprocess/ls5/level1/[0-9][0-9][0-9][0-9]/[0-9][0-9]/LS*/ga-metadata.yaml',
             ],
-            index=index,
         )
     )
 
@@ -254,32 +241,29 @@ def init_nci_collections(index: DatasetPathIndex):
     #           LS7_ETM_NBART_P54_GANBART01-002_114_078_20040731/ga-metadata.yaml
     nbar_scene_offset = '[0-9][0-9][0-9][0-9]/[0-9][0-9]/output/nbar*/LS*/ga-metadata.yaml'
     _add(
-        SceneCollection(
+        scene_collection(
             name='ls5_nbar_scene',
             query={'product': ['ls5_nbar_scene', 'ls5_nbart_scene']},
             file_patterns=[
                 '/g/data/rs0/scenes/nbar-scenes-tmp/ls5/' + nbar_scene_offset,
                 '/short/v10/scenes/nbar-scenes-tmp/ls5/' + nbar_scene_offset,
             ],
-            index=index,
         ),
-        SceneCollection(
+        scene_collection(
             name='ls7_nbar_scene',
             query={'product': ['ls7_nbar_scene', 'ls7_nbart_scene']},
             file_patterns=[
                 '/g/data/rs0/scenes/nbar-scenes-tmp/ls7/' + nbar_scene_offset,
                 '/short/v10/scenes/nbar-scenes-tmp/ls7/' + nbar_scene_offset,
             ],
-            index=index,
         ),
-        SceneCollection(
+        scene_collection(
             name='ls8_nbar_scene',
             query={'product': ['ls8_nbar_scene', 'ls8_nbart_scene']},
             file_patterns=[
                 '/g/data/rs0/scenes/nbar-scenes-tmp/ls8/' + nbar_scene_offset,
                 '/short/v10/scenes/nbar-scenes-tmp/ls8/' + nbar_scene_offset,
             ],
-            index=index,
         )
     )
 
@@ -287,29 +271,26 @@ def init_nci_collections(index: DatasetPathIndex):
     # /g/data/rs0/scenes/pq-scenes-tmp/ls7/2005/01/output/pqa/
     #           LS7_ETM_PQ_P55_GAPQ01-002_108_075_20050113/ga-metadata.yaml
     _add(
-        SceneCollection(
+        scene_collection(
             name='ls5_pq_scene',
             query={'product': 'ls5_pq_scene'},
             file_patterns=[
                 '/g/data/rs0/scenes/pq-scenes-tmp/ls5/[0-9][0-9][0-9][0-9]/[0-9][0-9]/output/pqa/LS*/ga-metadata.yaml',
             ],
-            index=index,
         ),
-        SceneCollection(
+        scene_collection(
             name='ls7_pq_scene',
             query={'product': 'ls7_pq_scene'},
             file_patterns=[
                 '/g/data/rs0/scenes/pq-scenes-tmp/ls7/[0-9][0-9][0-9][0-9]/[0-9][0-9]/output/pqa/LS*/ga-metadata.yaml',
             ],
-            index=index,
         ),
-        SceneCollection(
+        scene_collection(
             name='ls8_pq_scene',
             query={'product': 'ls8_pq_scene'},
             file_patterns=[
                 '/g/data/rs0/scenes/pq-scenes-tmp/ls8/[0-9][0-9][0-9][0-9]/[0-9][0-9]/output/pqa/LS*/ga-metadata.yaml',
             ],
-            index=index,
         )
     )
 
@@ -322,44 +303,44 @@ def init_nci_collections(index: DatasetPathIndex):
             Collection(
                 name='ls5_{}_albers'.format(name),
                 query={'product': 'ls5_{}_albers'.format(name)},
-                file_patterns=[
+                file_patterns=(
                     '/g/data/{project}/datacube/002/'
                     'LS5_TM_{name}/*_*/LS5*{name}*.nc'.format(project=project,
                                                               name=name.upper()),
-                ],
+                ),
                 unique=('time.lower.day', 'lat', 'lon'),
                 index=index,
                 # Tiles default to trusting index over the disk: they were indexed at the end of the job,
                 # so unfinished tiles could be left on disk.
-                trust='index'
+                trust=Trust.index
             ),
             Collection(
                 name='ls7_{}_albers'.format(name),
                 query={'product': 'ls7_{}_albers'.format(name)},
-                file_patterns=[
+                file_patterns=(
                     '/g/data/{project}/datacube/002/LS7_ETM_{name}/'
                     '*_*/LS7*{name}*.nc'.format(project=project,
                                                 name=name.upper()),
-                ],
+                ),
                 unique=('time.lower.day', 'lat', 'lon'),
                 index=index,
                 # Tiles default to trusting index over the disk: they were indexed at the end of the job,
                 # so unfinished tiles could be left on disk.
-                trust='index'
+                trust=Trust.index
             ),
             Collection(
                 name='ls8_{}_albers'.format(name),
                 query={'product': 'ls8_{}_albers'.format(name)},
-                file_patterns=[
+                file_patterns=(
                     '/g/data/{project}/datacube/002/LS8_OLI_{name}/'
                     '*_*/LS8*{name}*.nc'.format(project=project,
                                                 name=name.upper()),
-                ],
+                ),
                 unique=('time.lower.day', 'lat', 'lon'),
                 index=index,
                 # Tiles default to trusting index over the disk: they were indexed at the end of the job,
                 # so unfinished tiles could be left on disk.
-                trust='index'
+                trust=Trust.index
             )
         )
 
@@ -368,5 +349,9 @@ def init_nci_collections(index: DatasetPathIndex):
     add_albers_collections('nbart')
     add_albers_collections('fc', project='fk4')
 
-    assert get_collection('ls5_fc_albers').file_patterns == ['/g/data/fk4/datacube/002/LS5_TM_FC/*_*/LS5*FC*.nc']
-    assert get_collection('ls8_nbar_albers').file_patterns == ['/g/data/rs0/datacube/002/LS8_OLI_NBAR/*_*/LS8*NBAR*.nc']
+    assert get_collection('ls5_fc_albers').file_patterns == (
+        '/g/data/fk4/datacube/002/LS5_TM_FC/*_*/LS5*FC*.nc',
+    )
+    assert get_collection('ls8_nbar_albers').file_patterns == (
+        '/g/data/rs0/datacube/002/LS8_OLI_NBAR/*_*/LS8*NBAR*.nc',
+    )
