@@ -19,7 +19,7 @@ from digitalearthau.index import DatasetLite, MemoryDatasetPathIndex, AgdcDatase
 from digitalearthau.paths import register_base_directory
 from digitalearthau.sync import differences as mm, fixes, scan, Mismatch
 
-from integration_tests.conftest import TestDataset
+from integration_tests.conftest import DatasetOnDisk
 
 
 # These are ok in tests.
@@ -42,9 +42,9 @@ def configure_log_output(request):
     )
 
 
-def test_new_and_old_on_disk(test_dataset: TestDataset,
+def test_new_and_old_on_disk(test_dataset: DatasetOnDisk,
                              integration_test_data: Path,
-                             other_dataset: TestDataset):
+                             other_dataset: DatasetOnDisk):
     # type: (Tuple[Collection, DatasetLite, str, Path]) -> None
     # ls8_collection, on_disk, on_disk_uri, root = syncable_environment
 
@@ -79,9 +79,9 @@ def test_new_and_old_on_disk(test_dataset: TestDataset,
     )
 
 
-def test_replace_on_disk(test_dataset: TestDataset,
+def test_replace_on_disk(test_dataset: DatasetOnDisk,
                          integration_test_data: Path,
-                         other_dataset: TestDataset):
+                         other_dataset: DatasetOnDisk):
     # type: (Tuple[Collection, DatasetLite, str, Path]) -> None
     """
     File on disk has a different id to the one in the index (ie. it was quietly reprocessed)
@@ -111,9 +111,9 @@ def test_replace_on_disk(test_dataset: TestDataset,
     )
 
 
-def test_move_on_disk(test_dataset: TestDataset,
+def test_move_on_disk(test_dataset: DatasetOnDisk,
                       integration_test_data: Path,
-                      other_dataset: TestDataset):
+                      other_dataset: DatasetOnDisk):
     # type: (Tuple[Collection, DatasetLite, str, Path]) -> None
     """
     Indexed dataset was moved over the top of another indexed dataset
@@ -144,7 +144,7 @@ def test_move_on_disk(test_dataset: TestDataset,
     )
 
 
-def test_archived_on_disk(test_dataset: TestDataset,
+def test_archived_on_disk(test_dataset: DatasetOnDisk,
                           integration_test_data: Path):
     # type: (Tuple[Collection, DatasetLite, str, Path]) -> None
     """
@@ -176,7 +176,7 @@ def test_archived_on_disk(test_dataset: TestDataset,
     assert uri_to_local_path(test_dataset.uri).exists(), "On-disk location shouldn't be touched"
 
 
-def test_detect_corrupt_existing(test_dataset: TestDataset,
+def test_detect_corrupt_existing(test_dataset: DatasetOnDisk,
                                  integration_test_data: Path):
     # type: (Tuple[Collection, str, str, Path]) -> None
     """If a dataset exists but cannot be read, report as corrupt"""
@@ -209,7 +209,7 @@ def test_detect_corrupt_existing(test_dataset: TestDataset,
     assert path.exists(), "Corrupt dataset with sibling in index should not be trashed"
 
 
-def test_detect_corrupt_new(test_dataset: TestDataset,
+def test_detect_corrupt_new(test_dataset: DatasetOnDisk,
                             integration_test_data: Path):
     # type: (Tuple[Collection, str, str, Path]) -> None
     """If a dataset exists but cannot be read handle as corrupt"""
@@ -240,9 +240,9 @@ _TRASH_PREFIX = ('.trash', (datetime.utcnow().strftime('%Y-%m-%d')))
 
 
 # noinspection PyShadowingNames
-def test_remove_missing(test_dataset: TestDataset,
+def test_remove_missing(test_dataset: DatasetOnDisk,
                         integration_test_data: Path,
-                        other_dataset: TestDataset):
+                        other_dataset: DatasetOnDisk):
     """An on-disk dataset that's not indexed should be trashed when trash_missing=True"""
     register_base_directory(integration_test_data)
     trashed_path = test_dataset.base_path.joinpath(*_TRASH_PREFIX, *test_dataset.path_offset)
@@ -286,7 +286,7 @@ def now_utc():
     # One day in the future, not trashed.
     (now_utc() + timedelta(days=1), False),
 ])
-def test_is_trashed(test_dataset: TestDataset,
+def test_is_trashed(test_dataset: DatasetOnDisk,
                     integration_test_data: Path,
                     archived_dt,
                     expect_to_be_trashed):
