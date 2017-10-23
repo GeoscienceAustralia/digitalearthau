@@ -145,7 +145,7 @@ ON_DISK2_ID = DatasetLite(uuid.UUID('10c4a9fe-2890-11e6-8ec8-a0000100fe80'))
 ON_DISK2_OFFSET = ('LS8_OLITIRS_OTH_P51_GALPGS01-032_114_080_20150924', 'ga-metadata.yaml')
 
 
-class TestDataset(NamedTuple):
+class DatasetOnDisk(NamedTuple):
     """
     Information on a test dataset. The properties are recorded here separately so tests can verify them.
     """
@@ -190,7 +190,7 @@ class SimpleEnv(NamedTuple):
 
 
 @pytest.fixture
-def test_dataset(integration_test_data, dea_index) -> TestDataset:
+def test_dataset(integration_test_data, dea_index) -> DatasetOnDisk:
     """A dataset on disk, indexed in a collection"""
     test_data = integration_test_data
 
@@ -222,7 +222,7 @@ def test_dataset(integration_test_data, dea_index) -> TestDataset:
     cache_path = test_data.joinpath('cache')
     cache_path.mkdir()
 
-    return TestDataset(
+    return DatasetOnDisk(
         collection=ls8_collection,
         id_=uuid.UUID('86150afc-b7d5-4938-a75e-3445007256d3'),
         base_path=test_data,
@@ -232,7 +232,7 @@ def test_dataset(integration_test_data, dea_index) -> TestDataset:
 
 
 @pytest.fixture
-def other_dataset(integration_test_data: Path) -> TestDataset:
+def other_dataset(integration_test_data: Path) -> DatasetOnDisk:
     """
     A dataset matching the same collection as test_dataset, but not indexed.
     """
@@ -262,7 +262,7 @@ lineage:
         containing_dir=integration_test_data
     )
 
-    return TestDataset(
+    return DatasetOnDisk(
         collection=None,
         id_=ds_id,
         base_path=integration_test_data,
