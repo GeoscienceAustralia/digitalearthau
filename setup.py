@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 import versioneer
 
-tests_require = ['pytest', 'pytest-cov', 'mock', 'pep8', 'pylint==1.6.4', 'hypothesis', 'compliance-checker']
+tests_require = ['pytest', 'pytest-cov', 'mock', 'pep8', 'pylint', 'hypothesis', 'compliance-checker']
 
 extras_require = {
     'doc': ['Sphinx', 'setuptools', 'sphinx_rtd_theme'],

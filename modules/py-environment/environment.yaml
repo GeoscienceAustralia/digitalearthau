@@ -60,7 +60,7 @@ dependencies:
 - psutil
 - psycopg2
 - py6s
-- pylint = 1.6.4
+- pylint
 - pytables
 - pytest
 - pytest-cov
