@@ -37,7 +37,7 @@ _LOG = structlog.get_logger()
               type=int,
               default=4,
               help="Number of worker processes to use")
-@click.option('-f',
+@click.option('-f', '--format', 'format_',
               type=click.Path(exists=True, readable=True, dir_okay=False),
               help="Input from file instead of scanning collections")
 @click.option('--index-missing', is_flag=True, default=False,
@@ -53,7 +53,7 @@ _LOG = structlog.get_logger()
 # TODO
 # @click.option('--validate', is_flag=True, default=False,
 #               help="Run any available checksums or validation checks for the file type")
-@click.option('-o',
+@click.option('-o', '--output', 'output_file',
               type=click.Path(writable=True, dir_okay=False),
               help="Output to file instead of stdout")
 @click.argument('collections',
@@ -64,10 +64,8 @@ _LOG = structlog.get_logger()
 def cli(index: Index,
         collections: Iterable[str],
         cache_folder: str,
-        # format
-        f: str,
-        # output file
-        o: str,
+        format_: str,
+        output_file: str,
         min_trash_age_hours: bool,
         jobs: int,
         **fix_settings):
@@ -81,12 +79,12 @@ def cli(index: Index,
     with AgdcDatasetPathIndex(index) as path_index:
         cs.init_nci_collections(path_index)
 
-        mismatches = get_mismatches(cache_folder, collections, f, path_index, jobs)
+        mismatches = get_mismatches(cache_folder, collections, format_, path_index, jobs)
 
         out_f = sys.stdout
         try:
-            if o:
-                out_f = open(o, 'w')
+            if output_file:
+                out_f = open(output_file, 'w')
 
             fixes.fix_mismatches(
                 mismatches,
@@ -95,7 +93,7 @@ def cli(index: Index,
                 **fix_settings
             )
         finally:
-            if o:
+            if output_file:
                 out_f.close()
 
 

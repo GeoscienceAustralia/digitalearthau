@@ -18,6 +18,7 @@ from datacube.model import Dataset
 from datacube.ui import click as ui
 from digitalearthau import collections, uiutil
 from digitalearthau import paths as path_utils
+from digitalearthau.index import AgdcDatasetPathIndex
 
 _LOG = structlog.get_logger()
 
@@ -28,14 +29,21 @@ _LOG = structlog.get_logger()
 @click.option('--checksum/--no-checksum', is_flag=True, default=True)
 @click.option('--destination', '-d',
               required=True,
-              type=click.Path(exists=True, writable=True))
+              type=click.Path(exists=True, writable=True),
+              help="Base folder where datasets will be placed inside")
 @click.argument('paths',
                 type=click.Path(exists=True, readable=True),
                 nargs=-1)
 @ui.pass_index('move')
-def main(index, dry_run, paths, destination, checksum):
+def cli(index, dry_run, paths, destination, checksum):
+    """
+    Move the given folder of datasets into the given destination folder.
+
+    Both the source(s) and destination are expected to be paths containing existing DEA collections.
+    (See collections.py)
+    """
     uiutil.init_logging()
-    collections.init_nci_collections(None)
+    collections.init_nci_collections(AgdcDatasetPathIndex(index))
 
     if not path_utils.is_base_directory(destination):
         raise click.BadArgumentUsage(
@@ -263,4 +271,4 @@ def _expected_checksum_path(dataset_path):
 
 
 if __name__ == '__main__':
-    main()
+    cli()

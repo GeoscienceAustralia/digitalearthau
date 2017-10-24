@@ -56,7 +56,7 @@ setup(
             'dea-coherence = digitalearthau.coherence:main',
             'dea-duplicates = digitalearthau.duplicates:main',
             'dea-harvest = digitalearthau.harvest.iso19115:main',
-            'dea-move = digitalearthau.move:main',
+            'dea-move = digitalearthau.move:cli',
             'dea-submit-ingest = digitalearthau.submit.ingest:cli',
             'dea-submit-ncmler = digitalearthau.submit.ncmler:cli',
             'dea-submit-sync = digitalearthau.sync.submit_job:main',
