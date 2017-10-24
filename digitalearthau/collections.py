@@ -31,7 +31,9 @@ class Collection(NamedTuple):
     query: dict
     # The file glob patterns to iterate all files on disk (NCI collections are all file:// locations)
     file_patterns: Tuple[str, ...]
-    unique: Tuple[str, ...]
+
+    # The fields that together uniquely identify a dataset (for finding duplicates)
+    unique: Tuple[str, ...] = None
 
     index: DatasetPathIndex = None
 
