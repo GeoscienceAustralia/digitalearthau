@@ -10,12 +10,12 @@ import pytest
 import structlog
 from dateutil import tz
 
+from datacube.index._api import Index
 from datacube.index.postgres import _api
 from datacube.utils import uri_to_local_path
-from digitalearthau import paths, collections
-from digitalearthau.uiutil import CleanConsoleRenderer
+from digitalearthau import paths
 from digitalearthau.collections import Collection
-from digitalearthau.index import DatasetLite, MemoryDatasetPathIndex, AgdcDatasetPathIndex
+from digitalearthau.index import DatasetLite, add_dataset
 from digitalearthau.paths import register_base_directory
 from digitalearthau.sync import differences as mm, fixes, scan, Mismatch
 
@@ -24,6 +24,10 @@ from integration_tests.conftest import DatasetOnDisk
 
 # These are ok in tests.
 # pylint: disable=too-many-locals, protected-access, redefined-outer-name
+
+
+def index_dataset(ds: DatasetOnDisk):
+    add_dataset(ds.collection.index_, ds.id_, ds.uri)
 
 
 def test_new_and_old_on_disk(test_dataset: DatasetOnDisk,
@@ -38,7 +42,7 @@ def test_new_and_old_on_disk(test_dataset: DatasetOnDisk,
 
     missing_dataset = other_dataset
 
-    test_dataset.collection._index.add_dataset(missing_dataset.dataset, missing_dataset.uri)
+    index_dataset(missing_dataset)
 
     # Make it missing
     shutil.rmtree(str(missing_dataset.path.parent))
@@ -70,8 +74,7 @@ def test_replace_on_disk(test_dataset: DatasetOnDisk,
     """
     File on disk has a different id to the one in the index (ie. it was quietly reprocessed)
     """
-
-    test_dataset.collection._index.add_dataset(test_dataset.dataset, test_dataset.uri)
+    index_dataset(test_dataset)
 
     # move a new one over the top
     shutil.move(other_dataset.path, str(uri_to_local_path(test_dataset.uri)))
@@ -102,8 +105,8 @@ def test_move_on_disk(test_dataset: DatasetOnDisk,
     """
     Indexed dataset was moved over the top of another indexed dataset
     """
-    test_dataset.collection._index.add_dataset(test_dataset.dataset, test_dataset.uri)
-    test_dataset.collection._index.add_dataset(other_dataset.dataset, other_dataset.path.as_uri())
+    index_dataset(test_dataset)
+    index_dataset(other_dataset)
 
     shutil.move(other_dataset.path, str(uri_to_local_path(test_dataset.uri)))
 
@@ -135,9 +138,9 @@ def test_archived_on_disk(test_dataset: DatasetOnDisk,
     A an already-archived dataset on disk. Should report it, but not touch the file (trash_archived is false)
     """
     # archived_on_disk = DatasetLite(on_disk.id, archived_time=(datetime.utcnow() - timedelta(days=5)))
-    test_dataset.collection._index.add_dataset(test_dataset.dataset, test_dataset.uri)
-    test_dataset.collection._index._index.datasets.archive([test_dataset.dataset.id])
-    archived_time = test_dataset.collection._index._index.datasets.get(test_dataset.dataset.id).archived_time
+    index_dataset(test_dataset)
+    test_dataset.collection.index_.datasets.archive([test_dataset.dataset.id])
+    archived_time = test_dataset.collection.index_.datasets.get(test_dataset.dataset.id).archived_time
 
     assert uri_to_local_path(test_dataset.uri).exists(), "On-disk location should exist before test begins."
     _check_sync(
@@ -166,7 +169,7 @@ def test_detect_corrupt_existing(test_dataset: DatasetOnDisk,
     """If a dataset exists but cannot be read, report as corrupt"""
     path = uri_to_local_path(test_dataset.uri)
 
-    test_dataset.collection._index.add_dataset(test_dataset.dataset, test_dataset.uri)
+    index_dataset(test_dataset)
     assert path.exists()
 
     # Overwrite with corrupted file.
@@ -185,7 +188,7 @@ def test_detect_corrupt_existing(test_dataset: DatasetOnDisk,
             mm.UnreadableDataset(None, test_dataset.uri)
         ],
         # Unmodified index
-        expected_index_result=test_dataset.collection._index.as_map(),
+        expected_index_result=as_map(test_dataset.collection.index_),
         cache_path=integration_test_data,
         fix_settings=dict(trash_missing=True, trash_archived=True, update_locations=True)
     )
@@ -232,7 +235,7 @@ def test_remove_missing(test_dataset: DatasetOnDisk,
     trashed_path = test_dataset.base_path.joinpath(*_TRASH_PREFIX, *test_dataset.path_offset)
 
     # Add a second dataset that's indexed. Should not be touched!
-    test_dataset.collection._index.add_dataset(other_dataset.dataset, other_dataset.path.as_uri())
+    index_dataset(other_dataset)
 
     assert other_dataset.path.exists()
 
@@ -248,7 +251,7 @@ def test_remove_missing(test_dataset: DatasetOnDisk,
             mm.DatasetNotIndexed(test_dataset.dataset, test_dataset.uri)
         ],
         # Unmodified index
-        expected_index_result=test_dataset.collection._index.as_map(),
+        expected_index_result=as_map(test_dataset.collection.index_),
         cache_path=integration_test_data,
         fix_settings=dict(trash_missing=True, update_locations=True)
     )
@@ -278,8 +281,8 @@ def test_is_trashed(test_dataset: DatasetOnDisk,
 
     # Same test, but trash_archived=True, so it should be renamed to the.
     register_base_directory(root)
+    index_dataset(test_dataset)
     archived_on_disk = DatasetLite(test_dataset.dataset.id, archived_time=archived_dt)
-    test_dataset.collection._index.add_dataset(archived_on_disk, test_dataset.uri)
     archive_dataset(archived_dt, test_dataset.dataset.id, test_dataset.collection)
 
     trashed_path = test_dataset.base_path.joinpath(*_TRASH_PREFIX, *test_dataset.path_offset)
@@ -320,7 +323,7 @@ def test_is_trashed(test_dataset: DatasetOnDisk,
 
 def archive_dataset(archived_dt, dataset_id, collection):
     # Hack until ODC allows specifying the archive time.
-    with collection._index._index._db.begin() as transaction:
+    with collection.index_._db.begin() as transaction:
         # SQLAlchemy queries require "column == None", not "column is None" due to operator overloading:
         # pylint: disable=singleton-comparison
         transaction._connection.execute(
@@ -348,9 +351,9 @@ def _check_sync(expected_paths: Iterable[str],
 
     _check_pathset_loading(cache_path, expected_paths, log, collection)
 
-    mismatches = _check_mismatch_find(cache_path, expected_mismatches, collection._index, log, collection)
+    mismatches = _check_mismatch_find(cache_path, expected_mismatches, collection)
 
-    _check_mismatch_fix(collection._index, mismatches, expected_index_result, fix_settings=fix_settings)
+    _check_mismatch_fix(collection.index_, mismatches, expected_index_result, fix_settings=fix_settings)
 
 
 # noinspection PyProtectedMember
@@ -369,12 +372,12 @@ def _check_pathset_loading(cache_path: Path,
     assert dummy_dataset.absolute().as_uri() not in path_set
 
 
-def _check_mismatch_find(cache_path, expected_mismatches, index, log, collection: Collection):
+def _check_mismatch_find(cache_path, expected_mismatches, collection: Collection):
     """Check that the correct mismatches were found"""
 
     mismatches = []
 
-    for mismatch in scan.mismatches_for_collection(collection, cache_path, index):
+    for mismatch in scan.mismatches_for_collection(collection, cache_path):
         print(repr(mismatch))
         mismatches.append(mismatch)
 
@@ -403,19 +406,32 @@ def _check_mismatch_find(cache_path, expected_mismatches, index, log, collection
     return mismatches
 
 
-def _check_mismatch_fix(index: MemoryDatasetPathIndex,
+def _check_mismatch_fix(index: Index,
                         mismatches: Iterable[Mismatch],
                         expected_index_result: Mapping[DatasetLite, Iterable[str]],
                         fix_settings: dict):
     """Check that the index is correctly updated when fixing mismatches"""
 
     # First check that no change is made to the index if we have all fixes set to False.
-    starting_index = index.as_map()
+    starting_index = as_map(index)
     # Default settings are all false.
     fixes.fix_mismatches(mismatches, index)
-    assert starting_index == index.as_map(), "Changes made to index despite all fix settings being " \
-                                             "false (index_missing=False etc)"
+    assert starting_index == as_map(index), "Changes made to index despite all fix settings being " \
+                                            "false (index_missing=False etc)"
 
     # Now perform fixes, check that they match expected.
     fixes.fix_mismatches(mismatches, index, **fix_settings)
-    assert expected_index_result == index.as_map()
+    assert expected_index_result == as_map(index)
+
+
+def as_map(index: Index) -> Mapping[DatasetLite, Iterable[str]]:
+    """
+    All contained (dataset_id, [location]) values, to check test results.
+    """
+    return dict(
+        (
+            DatasetLite(dataset.id, archived_time=dataset.archived_time),
+            tuple(dataset.uris)
+        )
+        for dataset in index.datasets.search()
+    )

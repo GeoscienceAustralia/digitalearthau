@@ -18,7 +18,6 @@ from datacube.model import Dataset
 from datacube.ui import click as ui
 from digitalearthau import collections, uiutil
 from digitalearthau import paths as path_utils
-from digitalearthau.index import AgdcDatasetPathIndex
 
 _LOG = structlog.get_logger()
 
@@ -43,7 +42,7 @@ def cli(index, dry_run, paths, destination, checksum):
     (See collections.py)
     """
     uiutil.init_logging()
-    collections.init_nci_collections(AgdcDatasetPathIndex(index))
+    collections.init_nci_collections(index)
 
     if not path_utils.is_base_directory(destination):
         raise click.BadArgumentUsage(
