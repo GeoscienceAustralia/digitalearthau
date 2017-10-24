@@ -22,6 +22,11 @@ from digitalearthau.collections import Collection
 from digitalearthau.index import DatasetLite, AgdcDatasetPathIndex
 from digitalearthau.paths import register_base_directory
 
+import pytest
+import structlog
+
+from digitalearthau.uiutil import CleanConsoleRenderer
+
 try:
     from yaml import CSafeLoader as SafeLoader
 except ImportError:
@@ -35,6 +40,22 @@ PROJECT_ROOT = Path(__file__).parents[1]
 
 DEA_MD_TYPES = digitalearthau.CONFIG_DIR / 'metadata-types.yaml'
 DEA_PRODUCTS_DIR = digitalearthau.CONFIG_DIR / 'products'
+
+
+@pytest.fixture(scope="session", autouse=True)
+def configure_log_output(request):
+    structlog.configure(
+        processors=[
+            structlog.stdlib.add_log_level,
+            structlog.processors.TimeStamper(fmt="%Y-%m-%d %H:%M.%S"),
+            structlog.processors.StackInfoRenderer(),
+            structlog.processors.format_exc_info,
+            # Coloured output if to terminal.
+            CleanConsoleRenderer()
+        ],
+        context_class=dict,
+        cache_logger_on_first_use=True,
+    )
 
 
 def load_yaml_file(path):
@@ -191,7 +212,7 @@ class SimpleEnv(NamedTuple):
 
 @pytest.fixture
 def test_dataset(integration_test_data, dea_index) -> DatasetOnDisk:
-    """A dataset on disk, indexed in a collection"""
+    """A dataset on disk, with corresponding collection"""
     test_data = integration_test_data
 
     # Tests assume one dataset for the collection, so delete the second.
