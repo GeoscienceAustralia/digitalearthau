@@ -12,7 +12,7 @@ from enum import Enum, auto
 from pathlib import Path
 from typing import Iterable, Optional, List, Dict, NamedTuple, Tuple
 
-from digitalearthau.index import DatasetPathIndex, MemoryDatasetPathIndex
+from datacube.index._api import Index
 
 
 class Trust(Enum):
@@ -35,7 +35,7 @@ class Collection(NamedTuple):
     # The fields that together uniquely identify a dataset (for finding duplicates)
     unique: Tuple[str, ...] = None
 
-    index: DatasetPathIndex = None
+    index_: Index = None
 
     # If something is archived, how many days before we can delete it? None means never
     delete_archived_after_days: float = None
@@ -54,13 +54,19 @@ class Collection(NamedTuple):
             yield path.as_uri()
 
     def iter_index_uris(self):
-        return map(str, self.index.iter_all_uris(self.query))
+        """
+        Iter over all uris in the index of this collection.
+
+        Both active and archived uris are returned.
+        """
+        for uri, in self.index_.datasets.search_returning(['uri'], **self.query):
+            yield str(uri)
 
     def constrained_file_patterns(self, within_path: Path) -> List[str]:
         """
         Constrain the file glob pattern(s) to only match datasets within the given folder.
 
-        >>> init_nci_collections(MemoryDatasetPathIndex())
+        >>> init_nci_collections(None)
         >>> get_collection('telemetry').constrained_file_patterns(Path('/g/data/v10/repackaged'))
         ['/g/data/v10/repackaged/rawdata/0/[0-9][0-9][0-9][0-9]/[0-9][0-9]/*/ga-metadata.yaml']
         >>> get_collection('ls8_level1_scene').constrained_file_patterns(
@@ -159,7 +165,7 @@ def get_collections_in_path(p: Path) -> Iterable[Collection]:
     """
     Get any collections that may have datasets within the given path.
 
-    >>> init_nci_collections(MemoryDatasetPathIndex())
+    >>> init_nci_collections(None)
     >>> [c.name for c in get_collections_in_path(Path('/g/data/v10/repackaged'))]
     ['telemetry']
     >>> [c.name for c in get_collections_in_path(Path('/g/data/v10/reprocess/ls8/level1/2016/04'))]
@@ -179,7 +185,7 @@ def get_collections_in_path(p: Path) -> Iterable[Collection]:
                 break
 
 
-def init_nci_collections(index: DatasetPathIndex):
+def init_nci_collections(index: Index):
     # NCI collections. TODO: move these to config file?
 
     _add(
@@ -190,7 +196,7 @@ def init_nci_collections(index: DatasetPathIndex):
                 '/g/data/v10/repackaged/rawdata/0/[0-9][0-9][0-9][0-9]/[0-9][0-9]/*/ga-metadata.yaml',
             ),
             unique=('time.lower.day', 'platform'),
-            index=index,
+            index_=index,
             trust=Trust.disk
         )
     )
@@ -201,7 +207,7 @@ def init_nci_collections(index: DatasetPathIndex):
             name,
             query,
             file_patterns=file_patterns,
-            index=index,
+            index_=index,
             unique=('time.lower.day', 'sat_path.lower', 'sat_row.lower'),
             delete_archived_after_days=delete_archived_after_days,
             # Scenes default to trusting disk. They're atomically written to the destination,
@@ -311,7 +317,7 @@ def init_nci_collections(index: DatasetPathIndex):
                                                               name=name.upper()),
                 ),
                 unique=('time.lower.day', 'lat', 'lon'),
-                index=index,
+                index_=index,
                 # Tiles default to trusting index over the disk: they were indexed at the end of the job,
                 # so unfinished tiles could be left on disk.
                 trust=Trust.index
@@ -325,7 +331,7 @@ def init_nci_collections(index: DatasetPathIndex):
                                                 name=name.upper()),
                 ),
                 unique=('time.lower.day', 'lat', 'lon'),
-                index=index,
+                index_=index,
                 # Tiles default to trusting index over the disk: they were indexed at the end of the job,
                 # so unfinished tiles could be left on disk.
                 trust=Trust.index
@@ -339,7 +345,7 @@ def init_nci_collections(index: DatasetPathIndex):
                                                 name=name.upper()),
                 ),
                 unique=('time.lower.day', 'lat', 'lon'),
-                index=index,
+                index_=index,
                 # Tiles default to trusting index over the disk: they were indexed at the end of the job,
                 # so unfinished tiles could be left on disk.
                 trust=Trust.index

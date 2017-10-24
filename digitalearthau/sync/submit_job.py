@@ -30,7 +30,6 @@ from click import style
 
 from datacube.index import index_connect
 from digitalearthau import collections
-from digitalearthau.index import AgdcDatasetPathIndex
 from digitalearthau.paths import get_dataset_paths
 from digitalearthau.sync import scan
 
@@ -224,7 +223,7 @@ def main(folders: Iterable[str],
     input_paths = [Path(folder).absolute() for folder in folders]
 
     with index_connect(application_name='sync-submit') as index:
-        collections.init_nci_collections(AgdcDatasetPathIndex(index))
+        collections.init_nci_collections(index)
         submitter = SyncSubmission(cache_folder, project, queue, dry_run, verbose=True, workers=4)
         click.echo(
             "{} input path(s)".format(len(input_paths))

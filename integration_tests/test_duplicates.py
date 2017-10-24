@@ -6,7 +6,7 @@ from typing import Tuple
 
 from datacube.index._api import Index
 from digitalearthau import duplicates
-from digitalearthau.index import AgdcDatasetPathIndex, DatasetLite
+from digitalearthau.index import add_dataset
 
 import click.testing
 
@@ -35,8 +35,8 @@ def indexed_ls8_l1_scenes(dea_index: Index, integration_test_data: Path) -> Tupl
     ds1 = integration_test_data.joinpath(*ON_DISK1_OFFSET)
     ds2 = integration_test_data.joinpath(*ON_DISK2_OFFSET)
 
-    AgdcDatasetPathIndex(dea_index).add_dataset(DatasetLite(ON_DISK1_ID), ds1.as_uri())
-    AgdcDatasetPathIndex(dea_index).add_dataset(DatasetLite(ON_DISK2_ID), ds2.as_uri())
+    add_dataset(dea_index, ON_DISK1_ID, ds1.as_uri())
+    add_dataset(dea_index, ON_DISK2_ID, ds2.as_uri())
 
     return ON_DISK1_ID, ON_DISK2_ID
 
@@ -47,7 +47,7 @@ def duplicate_ls8_l1_scene(dea_index: Index, integration_test_data: Path) -> uui
         'dupe', 'LS8_OLITIRS_OTH_P51_GALPGS01-032_114_080_20160926_2', 'ga-metadata.yaml'
     )
 
-    AgdcDatasetPathIndex(dea_index).add_dataset(DatasetLite(ON_DISK1_DUP_ID), dd1.as_uri())
+    add_dataset(dea_index, ON_DISK1_DUP_ID, dd1.as_uri())
     return ON_DISK1_DUP_ID
 
 

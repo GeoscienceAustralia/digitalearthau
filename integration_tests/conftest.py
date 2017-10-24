@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Tuple, NamedTuple, Optional
 
 import pytest
+import structlog
 import yaml
 
 import digitalearthau
@@ -19,12 +20,8 @@ from datacube.index.postgres import _dynamic
 from datacube.index.postgres.tables import _core
 from digitalearthau import paths, collections
 from digitalearthau.collections import Collection
-from digitalearthau.index import DatasetLite, AgdcDatasetPathIndex
+from digitalearthau.index import DatasetLite
 from digitalearthau.paths import register_base_directory
-
-import pytest
-import structlog
-
 from digitalearthau.uiutil import CleanConsoleRenderer
 
 try:
@@ -170,7 +167,7 @@ class DatasetOnDisk(NamedTuple):
     """
     Information on a test dataset. The properties are recorded here separately so tests can verify them.
     """
-    collection: Optional[Collection]
+    collection: Collection
 
     id_: uuid.UUID
 
@@ -217,13 +214,12 @@ def test_dataset(integration_test_data, dea_index) -> DatasetOnDisk:
 
     # Tests assume one dataset for the collection, so delete the second.
     shutil.rmtree(str(test_data.joinpath('LS8_OLITIRS_OTH_P51_GALPGS01-032_114_080_20150924')))
-    index = AgdcDatasetPathIndex(dea_index)
     ls8_collection = Collection(
         name='ls8_scene_test',
         query={},
         file_patterns=[str(test_data.joinpath('LS8*/ga-metadata.yaml'))],
         unique=[],
-        index=index
+        index_=dea_index
     )
     collections._add(ls8_collection)
 
@@ -233,7 +229,7 @@ def test_dataset(integration_test_data, dea_index) -> DatasetOnDisk:
         query={},
         file_patterns=[str(test_data.joinpath('LS5*.nc'))],
         unique=[],
-        index=index
+        index_=dea_index
     )
     collections._add(ls8_collection)
 
@@ -253,7 +249,7 @@ def test_dataset(integration_test_data, dea_index) -> DatasetOnDisk:
 
 
 @pytest.fixture
-def other_dataset(integration_test_data: Path) -> DatasetOnDisk:
+def other_dataset(integration_test_data: Path, test_dataset: DatasetOnDisk) -> DatasetOnDisk:
     """
     A dataset matching the same collection as test_dataset, but not indexed.
     """
@@ -284,7 +280,7 @@ lineage:
     )
 
     return DatasetOnDisk(
-        collection=None,
+        collection=test_dataset.collection,
         id_=ds_id,
         base_path=integration_test_data,
         path_offset=('LS8_INDEXED_ALREADY', 'ga-metadata.yaml')
