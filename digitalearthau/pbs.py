@@ -52,6 +52,7 @@ def parse_nodes_file(fname=None):
 
 
 # This is defined in document "DEA Event structure", to produce stable & consistent task ids for pbs jobs.
+# https://docs.google.com/document/d/1VNpK3GL1r4kbjwAO-sJ6_BMk2FSHhNnoDg4VHeylyAE/edit?usp=sharing
 NCI_PBS_UUID_NAMESPACE = uuid.UUID('85d36430-538f-4ecd-85d0-d0ef9edfc266')
 
 
