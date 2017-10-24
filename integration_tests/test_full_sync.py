@@ -26,22 +26,6 @@ from integration_tests.conftest import DatasetOnDisk
 # pylint: disable=too-many-locals, protected-access, redefined-outer-name
 
 
-@pytest.fixture(scope="session", autouse=True)
-def configure_log_output(request):
-    structlog.configure(
-        processors=[
-            structlog.stdlib.add_log_level,
-            structlog.processors.TimeStamper(fmt="%Y-%m-%d %H:%M.%S"),
-            structlog.processors.StackInfoRenderer(),
-            structlog.processors.format_exc_info,
-            # Coloured output if to terminal.
-            CleanConsoleRenderer()
-        ],
-        context_class=dict,
-        cache_logger_on_first_use=True,
-    )
-
-
 def test_new_and_old_on_disk(test_dataset: DatasetOnDisk,
                              integration_test_data: Path,
                              other_dataset: DatasetOnDisk):
