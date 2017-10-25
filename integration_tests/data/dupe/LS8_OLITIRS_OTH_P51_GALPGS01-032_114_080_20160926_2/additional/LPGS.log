@@ -1,0 +1,936 @@
+Thu Oct 13 20:53:29 AEDT 2016
+ 
+DMS Setup Work Order (DSW)
+ 
+2016-10-13 20:53:29  setup_work_order    28174 setup_work_order.c        91  INFO Initiated
+2016-10-13 20:53:29  setup_work_order    28174 read_l0r_metadata.c       91  INFO Reading L0R metadata from l0r_symlink/LC81140802016270LGN00
+2016-10-13 20:53:29  setup_work_order    28174 setup_work_order.c       554  INFO Successful completion
+ 
+setup_work_order execution completed with status of 0
+ 
+Thu Oct 13 20:53:29 AEDT 2016
+Thu Oct 13 20:53:31 AEDT 2016
+ 
+DMS Retrieve Elevation (DRE)
+ 
+2016-10-13 20:53:31  retrieve_elevation    28288 make_gls_tile_name.c      41  INFO Gls tile name v2: s28_e112_3arc_v2
+2016-10-13 20:53:31  retrieve_elevation    28288 make_gls_tile_name.c      74  INFO Gls tile name v1: s28_e112_3arc_v1
+2016-10-13 20:53:31  retrieve_elevation    28288 make_gls_tile_name.c     107  INFO Gls tile name v0: s28e112
+2016-10-13 20:53:31  retrieve_elevation    28288 make_gls_tile_name.c      41  INFO Gls tile name v2: s28_e113_3arc_v2
+2016-10-13 20:53:31  retrieve_elevation    28288 make_gls_tile_name.c      74  INFO Gls tile name v1: s28_e113_3arc_v1
+2016-10-13 20:53:31  retrieve_elevation    28288 make_gls_tile_name.c     107  INFO Gls tile name v0: s28e113
+2016-10-13 20:53:31  retrieve_elevation    28288 make_gls_tile_name.c      41  INFO Gls tile name v2: s28_e114_3arc_v2
+2016-10-13 20:53:31  retrieve_elevation    28288 make_gls_tile_name.c      74  INFO Gls tile name v1: s28_e114_3arc_v1
+2016-10-13 20:53:31  retrieve_elevation    28288 make_gls_tile_name.c     107  INFO Gls tile name v0: s28e114
+2016-10-13 20:53:31  retrieve_elevation    28288 make_gls_tile_name.c      41  INFO Gls tile name v2: s28_e115_3arc_v2
+2016-10-13 20:53:31  retrieve_elevation    28288 make_gls_tile_name.c      74  INFO Gls tile name v1: s28_e115_3arc_v1
+2016-10-13 20:53:31  retrieve_elevation    28288 make_gls_tile_name.c     107  INFO Gls tile name v0: s28e115
+2016-10-13 20:53:31  retrieve_elevation    28288 make_gls_tile_name.c      41  INFO Gls tile name v2: s29_e112_3arc_v2
+2016-10-13 20:53:31  retrieve_elevation    28288 make_gls_tile_name.c      74  INFO Gls tile name v1: s29_e112_3arc_v1
+2016-10-13 20:53:31  retrieve_elevation    28288 make_gls_tile_name.c     107  INFO Gls tile name v0: s29e112
+2016-10-13 20:53:31  retrieve_elevation    28288 make_gls_tile_name.c      41  INFO Gls tile name v2: s29_e113_3arc_v2
+2016-10-13 20:53:31  retrieve_elevation    28288 make_gls_tile_name.c      74  INFO Gls tile name v1: s29_e113_3arc_v1
+2016-10-13 20:53:31  retrieve_elevation    28288 make_gls_tile_name.c     107  INFO Gls tile name v0: s29e113
+2016-10-13 20:53:31  retrieve_elevation    28288 make_gls_tile_name.c      41  INFO Gls tile name v2: s29_e114_3arc_v2
+2016-10-13 20:53:31  retrieve_elevation    28288 make_gls_tile_name.c      74  INFO Gls tile name v1: s29_e114_3arc_v1
+2016-10-13 20:53:31  retrieve_elevation    28288 make_gls_tile_name.c     107  INFO Gls tile name v0: s29e114
+2016-10-13 20:53:31  retrieve_elevation    28288 make_gls_tile_name.c      41  INFO Gls tile name v2: s29_e115_3arc_v2
+2016-10-13 20:53:31  retrieve_elevation    28288 make_gls_tile_name.c      74  INFO Gls tile name v1: s29_e115_3arc_v1
+2016-10-13 20:53:31  retrieve_elevation    28288 make_gls_tile_name.c     107  INFO Gls tile name v0: s29e115
+2016-10-13 20:53:31  retrieve_elevation    28288 make_gls_tile_name.c      41  INFO Gls tile name v2: s30_e112_3arc_v2
+2016-10-13 20:53:31  retrieve_elevation    28288 make_gls_tile_name.c      74  INFO Gls tile name v1: s30_e112_3arc_v1
+2016-10-13 20:53:31  retrieve_elevation    28288 make_gls_tile_name.c     107  INFO Gls tile name v0: s30e112
+2016-10-13 20:53:31  retrieve_elevation    28288 make_gls_tile_name.c      41  INFO Gls tile name v2: s30_e113_3arc_v2
+2016-10-13 20:53:31  retrieve_elevation    28288 make_gls_tile_name.c      74  INFO Gls tile name v1: s30_e113_3arc_v1
+2016-10-13 20:53:31  retrieve_elevation    28288 make_gls_tile_name.c     107  INFO Gls tile name v0: s30e113
+2016-10-13 20:53:31  retrieve_elevation    28288 make_gls_tile_name.c      41  INFO Gls tile name v2: s30_e114_3arc_v2
+2016-10-13 20:53:31  retrieve_elevation    28288 make_gls_tile_name.c      74  INFO Gls tile name v1: s30_e114_3arc_v1
+2016-10-13 20:53:31  retrieve_elevation    28288 make_gls_tile_name.c     107  INFO Gls tile name v0: s30e114
+2016-10-13 20:53:31  retrieve_elevation    28288 make_gls_tile_name.c      41  INFO Gls tile name v2: s30_e115_3arc_v2
+2016-10-13 20:53:31  retrieve_elevation    28288 make_gls_tile_name.c      74  INFO Gls tile name v1: s30_e115_3arc_v1
+2016-10-13 20:53:31  retrieve_elevation    28288 make_gls_tile_name.c     107  INFO Gls tile name v0: s30e115
+2016-10-13 20:53:31  retrieve_elevation    28288 make_gls_tile_name.c      41  INFO Gls tile name v2: s31_e112_3arc_v2
+2016-10-13 20:53:31  retrieve_elevation    28288 make_gls_tile_name.c      74  INFO Gls tile name v1: s31_e112_3arc_v1
+2016-10-13 20:53:31  retrieve_elevation    28288 make_gls_tile_name.c     107  INFO Gls tile name v0: s31e112
+2016-10-13 20:53:31  retrieve_elevation    28288 make_gls_tile_name.c      41  INFO Gls tile name v2: s31_e113_3arc_v2
+2016-10-13 20:53:31  retrieve_elevation    28288 make_gls_tile_name.c      74  INFO Gls tile name v1: s31_e113_3arc_v1
+2016-10-13 20:53:31  retrieve_elevation    28288 make_gls_tile_name.c     107  INFO Gls tile name v0: s31e113
+2016-10-13 20:53:31  retrieve_elevation    28288 make_gls_tile_name.c      41  INFO Gls tile name v2: s31_e114_3arc_v2
+2016-10-13 20:53:31  retrieve_elevation    28288 make_gls_tile_name.c      74  INFO Gls tile name v1: s31_e114_3arc_v1
+2016-10-13 20:53:31  retrieve_elevation    28288 make_gls_tile_name.c     107  INFO Gls tile name v0: s31e114
+2016-10-13 20:53:31  retrieve_elevation    28288 make_gls_tile_name.c      41  INFO Gls tile name v2: s31_e115_3arc_v2
+2016-10-13 20:53:31  retrieve_elevation    28288 make_gls_tile_name.c      74  INFO Gls tile name v1: s31_e115_3arc_v1
+2016-10-13 20:53:31  retrieve_elevation    28288 make_gls_tile_name.c     107  INFO Gls tile name v0: s31e115
+2016-10-13 20:53:31  retrieve_elevation    28288 get_gls_data.c           180  INFO Mosaicing GLS DEM tiles...
+2016-10-13 20:53:31  retrieve_elevation    28288 get_gls_data.c           206  INFO Falling back to v1 DEM tiles
+2016-10-13 20:53:31  retrieve_elevation    28288 get_gls_data.c           221  INFO Falling back to v0 DEM tiles
+2016-10-13 20:53:31  retrieve_elevation    28288 get_gls_data.c           206  INFO Falling back to v1 DEM tiles
+2016-10-13 20:53:31  retrieve_elevation    28288 get_gls_data.c           221  INFO Falling back to v0 DEM tiles
+2016-10-13 20:53:31  retrieve_elevation    28288 get_gls_data.c           206  INFO Falling back to v1 DEM tiles
+2016-10-13 20:53:31  retrieve_elevation    28288 get_gls_data.c           221  INFO Falling back to v0 DEM tiles
+2016-10-13 20:53:31  retrieve_elevation    28288 get_gls_data.c           206  INFO Falling back to v1 DEM tiles
+2016-10-13 20:53:31  retrieve_elevation    28288 get_gls_data.c           221  INFO Falling back to v0 DEM tiles
+2016-10-13 20:53:31  retrieve_elevation    28288 get_gls_data.c           206  INFO Falling back to v1 DEM tiles
+2016-10-13 20:53:31  retrieve_elevation    28288 get_gls_data.c           221  INFO Falling back to v0 DEM tiles
+2016-10-13 20:53:32  retrieve_elevation    28288 get_gls_data.c           206  INFO Falling back to v1 DEM tiles
+2016-10-13 20:53:32  retrieve_elevation    28288 get_gls_data.c           221  INFO Falling back to v0 DEM tiles
+2016-10-13 20:53:32  retrieve_elevation    28288 get_gls_data.c           206  INFO Falling back to v1 DEM tiles
+2016-10-13 20:53:32  retrieve_elevation    28288 get_gls_data.c           221  INFO Falling back to v0 DEM tiles
+2016-10-13 20:53:32  retrieve_elevation    28288 get_gls_data.c           206  INFO Falling back to v1 DEM tiles
+2016-10-13 20:53:32  retrieve_elevation    28288 get_gls_data.c           221  INFO Falling back to v0 DEM tiles
+2016-10-13 20:53:32  retrieve_elevation    28288 get_gls_data.c           206  INFO Falling back to v1 DEM tiles
+2016-10-13 20:53:32  retrieve_elevation    28288 get_gls_data.c           221  INFO Falling back to v0 DEM tiles
+2016-10-13 20:53:32  retrieve_elevation    28288 get_gls_data.c           206  INFO Falling back to v1 DEM tiles
+2016-10-13 20:53:32  retrieve_elevation    28288 get_gls_data.c           221  INFO Falling back to v0 DEM tiles
+2016-10-13 20:53:32  retrieve_elevation    28288 get_gls_data.c           206  INFO Falling back to v1 DEM tiles
+2016-10-13 20:53:32  retrieve_elevation    28288 get_gls_data.c           221  INFO Falling back to v0 DEM tiles
+2016-10-13 20:53:32  retrieve_elevation    28288 get_gls_data.c           206  INFO Falling back to v1 DEM tiles
+2016-10-13 20:53:32  retrieve_elevation    28288 get_gls_data.c           221  INFO Falling back to v0 DEM tiles
+2016-10-13 20:53:32  retrieve_elevation    28288 get_gls_data.c           206  INFO Falling back to v1 DEM tiles
+2016-10-13 20:53:32  retrieve_elevation    28288 get_gls_data.c           221  INFO Falling back to v0 DEM tiles
+2016-10-13 20:53:32  retrieve_elevation    28288 get_gls_data.c           206  INFO Falling back to v1 DEM tiles
+2016-10-13 20:53:32  retrieve_elevation    28288 get_gls_data.c           221  INFO Falling back to v0 DEM tiles
+2016-10-13 20:53:32  retrieve_elevation    28288 get_gls_data.c           206  INFO Falling back to v1 DEM tiles
+2016-10-13 20:53:32  retrieve_elevation    28288 get_gls_data.c           221  INFO Falling back to v0 DEM tiles
+2016-10-13 20:53:32  retrieve_elevation    28288 get_gls_data.c           206  INFO Falling back to v1 DEM tiles
+2016-10-13 20:53:32  retrieve_elevation    28288 get_gls_data.c           221  INFO Falling back to v0 DEM tiles
+2016-10-13 20:53:41  retrieve_elevation    28288 retrieve_elevation.c     416  INFO DEM data retrieval successfully completed.
+ 
+retrieve_elevation execution completed with status of 0
+ 
+Thu Oct 13 20:53:41 AEDT 2016
+Thu Oct 13 20:53:42 AEDT 2016
+ 
+DMS Ground Control (DGC)
+ 
+2016-10-13T09:53:43 LoadChips.cpp 766: INFO: Found chips at '/g/data/v10/eoancillarydata/GCP/Phase2_GCP/114/080/GCPLib'
+2016-10-13T09:53:50 SaveChips.cpp 385: INFO: Saving tile as version '2'
+ 
+lpgs-chip-loader execution completed with status of 0
+ 
+Thu Oct 13 20:53:50 AEDT 2016
+Thu Oct 13 20:53:51 AEDT 2016
+ 
+Ancillary Data Preprocessor (ADP)
+ 
+2016-10-13 20:53:51  ancillary_data_preprocessor    28499 ancillary_data_preprocessor.c     100  INFO Initiated
+2016-10-13 20:53:51  ancillary_data_preprocessor    28499 ias_ancillary_smooth_ephemeris.c     172  INFO L0R ephemeris record count = 226
+2016-10-13 20:53:51  ancillary_data_preprocessor    28499 ias_ancillary_identify_quaternion_outliers.c     268  INFO Number of attitude quaternion points 11300
+2016-10-13 20:53:51  ancillary_data_preprocessor    28499 ias_ancillary_convert_imu_to_acs.c     350  INFO Bounds on IMU time 528128129.895857, 528128355.875101
+2016-10-13 20:53:51  ancillary_data_preprocessor    28499 ias_ancillary_extract_valid_imu_data_window.c      60  INFO Ephemeris times --- start 528128130.900064, end 528128355.900064 -> center 528128243.400064
+2016-10-13 20:53:51  ancillary_data_preprocessor    28499 ancillary_data_preprocessor.c     232  INFO Successful completion
+ 
+ancillary_data_preprocessor execution completed with status of 0
+ 
+Thu Oct 13 20:53:51 AEDT 2016
+Thu Oct 13 20:53:53 AEDT 2016
+ 
+Create Line of Sight Model Initialization (L8INIT)
+ 
+2016-10-13 20:53:53  create_los_model    28549 read_parameters.c        302  INFO Overriding the estimated TIRS SSM position file with '/g/data/v10/eoancillarydata/sensor-specific/LANDSAT8/TIRS-SSM/20161013.l8_tirs_estimated_ssm_position.txt'
+2016-10-13 20:53:53  create_los_model    28549 create_los_model.c        76  INFO Create LOS Model started
+2016-10-13 20:53:54  create_los_model    28549 ias_sensor_set_ssm_from_l0r.c     180  WARN MCE mode 0 in use, not mode 4 as expected
+2016-10-13 20:53:54  create_los_model    28549 ias_sensor_set_ssm_from_l0r.c     193  WARN Operating in MCE mode 0 without valid SSM encoder data!
+2016-10-13 20:53:54  create_los_model    28549 ias_sensor_check_ssm_encoder_data.c     313  WARN No valid SSM angles found; using nominal value
+2016-10-13 20:53:54  create_los_model    28549 ias_sensor_set_ssm_from_l0r.c     778  INFO Using estimated SSM encoder data from /g/data/v10/eoancillarydata/sensor-specific/LANDSAT8/TIRS-SSM/20161013.l8_tirs_estimated_ssm_position.txt to replace missing mirror telemetry
+2016-10-13 20:53:54  create_los_model    28549 create_los_model.c       271  INFO Create LOS Model finished
+ 
+create_los_model execution completed with status of 0
+ 
+Thu Oct 13 20:53:54 AEDT 2016
+Thu Oct 13 20:53:56 AEDT 2016
+ 
+Create Level 1R (L8RPS)
+ 
+2016-10-13 20:53:56  create_l1r    28623 rps_main.c                71  INFO Initiated create_l1r
+2016-10-13 20:53:59  create_l1r    28623 process_scas.c            46  INFO Processing band 1
+2016-10-13 20:54:26  create_l1r    28623 process_scas.c            46  INFO Processing band 2
+2016-10-13 20:54:34  create_l1r    28623 process_scas.c            46  INFO Processing band 3
+2016-10-13 20:54:45  create_l1r    28623 process_scas.c            46  INFO Processing band 4
+2016-10-13 20:54:56  create_l1r    28623 process_scas.c            46  INFO Processing band 5
+2016-10-13 20:55:07  create_l1r    28623 process_scas.c            46  INFO Processing band 6
+2016-10-13 20:55:19  create_l1r    28623 process_scas.c            46  INFO Processing band 7
+2016-10-13 20:55:29  create_l1r    28623 process_scas.c            46  INFO Processing band 8
+2016-10-13 20:56:33  create_l1r    28623 process_scas.c            46  INFO Processing band 9
+2016-10-13 20:56:50  create_l1r    28623 process_scas.c            46  INFO Processing band 10
+2016-10-13 20:56:52  create_l1r    28623 process_scas.c            46  INFO Processing band 11
+2016-10-13 20:56:54  create_l1r    28623 api/api_striping_characterization.c     329  INFO Overall striping metric not calculated due to report and database storage flags being false
+2016-10-13 20:56:54  create_l1r    28623 rps_main.c               261  INFO Successful completion
+ 
+create_l1r execution completed with status of 0
+ 
+Thu Oct 13 20:56:54 AEDT 2016
+Thu Oct 13 20:56:56 AEDT 2016
+ 
+Create Systematic Grid (L8GRID_SYS)
+ 
+2016-10-13 20:56:56  create_grid    29141 get_parms_and_initialize_grid.c    1228  INFO Pixel origin will be 'UL'
+2016-10-13 20:56:56  create_grid    29141 create_grid.c            173  INFO Initiate Create Grid...
+2016-10-13 20:56:56  create_grid    29141 create_grid.c            284  INFO Elevation range   -40.00   419.00
+2016-10-13 20:56:56  create_grid    29141 pad_corners.c             58  INFO Scene padding size is 30.000000
+2016-10-13 20:56:56  create_grid    29141 build_grid.c             259  INFO Processing band number 6
+2016-10-13 20:56:59  create_grid    29141 build_grid.c              93  INFO Writing grid band number 6
+2016-10-13 20:56:59  create_grid    29141 create_grid.c            869  INFO Writing output grid file headers
+2016-10-13 20:56:59  create_grid    29141 create_grid.c            929  INFO Successful completion
+ 
+create_grid execution completed with status of 0
+ 
+Thu Oct 13 20:56:59 AEDT 2016
+Thu Oct 13 20:57:00 AEDT 2016
+ 
+Make the Geometric Terrain Grid (GRID_TERRAIN)
+ 
+2016-10-13 20:57:00  Makegeomgrid    29193 make_geom_grid.c         100  INFO Initiated
+2016-10-13 20:57:00  Makegeomgrid    29193 make_geom_grid.c         189  INFO Using band number 6 from the TARGET_FRAME_FILE
+2016-10-13 20:57:00  Makegeomgrid    29193 make_geom_grid.c         607  INFO Successful Completion
+ 
+makegeomgrid execution completed with status of 0
+ 
+Thu Oct 13 20:57:00 AEDT 2016
+Thu Oct 13 20:57:03 AEDT 2016
+ 
+Geometric Terrain Resample (RESAMPLE_TERRAIN)
+ 
+2016-10-13 20:57:03  Geomresample    29227 geomresample.c            93  INFO Geometric Resample Initiated
+2016-10-13 20:57:03  Geomresample    29227 geomresample.c           112  INFO Reading Grid
+2016-10-13 20:57:03  Geomresample    29227 geomresample.c           219  INFO Resampling band 1
+2016-10-13 20:57:03  Geomresample    29227 scanman.c                250  INFO resampling lines 0 through 800
+2016-10-13 20:57:03  Geomresample    29227 scanman.c                250  INFO resampling lines 650 through 1450
+2016-10-13 20:57:03  Geomresample    29227 scanman.c                250  INFO resampling lines 1300 through 2100
+2016-10-13 20:57:03  Geomresample    29227 scanman.c                250  INFO resampling lines 1950 through 2750
+2016-10-13 20:57:03  Geomresample    29227 scanman.c                250  INFO resampling lines 2600 through 3400
+2016-10-13 20:57:04  Geomresample    29227 scanman.c                250  INFO resampling lines 3250 through 4050
+2016-10-13 20:57:04  Geomresample    29227 scanman.c                250  INFO resampling lines 3900 through 4700
+2016-10-13 20:57:04  Geomresample    29227 scanman.c                250  INFO resampling lines 4550 through 5350
+2016-10-13 20:57:04  Geomresample    29227 scanman.c                250  INFO resampling lines 5200 through 6000
+2016-10-13 20:57:04  Geomresample    29227 scanman.c                250  INFO resampling lines 5850 through 6650
+2016-10-13 20:57:05  Geomresample    29227 scanman.c                250  INFO resampling lines 6500 through 7300
+2016-10-13 20:57:05  Geomresample    29227 scanman.c                250  INFO resampling lines 7150 through 7950
+2016-10-13 20:57:05  Geomresample    29227 scanman.c                250  INFO resampling lines 7800 through 8600
+2016-10-13 20:57:05  Geomresample    29227 scanman.c                250  INFO resampling lines 8450 through 9250
+2016-10-13 20:57:06  Geomresample    29227 scanman.c                250  INFO resampling lines 9100 through 9900
+2016-10-13 20:57:06  Geomresample    29227 scanman.c                250  INFO resampling lines 9750 through 10550
+2016-10-13 20:57:06  Geomresample    29227 scanman.c                250  INFO resampling lines 10400 through 11200
+2016-10-13 20:57:06  Geomresample    29227 scanman.c                250  INFO resampling lines 11050 through 11850
+2016-10-13 20:57:06  Geomresample    29227 scanman.c                250  INFO resampling lines 11700 through 12500
+2016-10-13 20:57:06  Geomresample    29227 scanman.c                250  INFO resampling lines 12350 through 13093
+2016-10-13 20:57:06  Geomresample    29227 geomresample.c           330  INFO Geometric Resample Successful Completion
+ 
+geomresample execution completed with status of 0
+ 
+Thu Oct 13 20:57:06 AEDT 2016
+Thu Oct 13 20:57:08 AEDT 2016
+ 
+Systematic L8 Resample (L8RESAMPLE_SYS)
+ 
+2016-10-13 20:57:08  Resample    29290 resample.c               115  INFO Initiated
+2016-10-13 20:57:10  Resample    29290 process_band.c            80  INFO Resampling band number 6
+2016-10-13 20:57:37  Resample    29290 resample.c               789  INFO Successful Completion
+ 
+resample execution completed with status of 0
+ 
+Thu Oct 13 20:57:37 AEDT 2016
+Thu Oct 13 20:57:39 AEDT 2016
+ 
+L8 GCP Correlation for Precision (L8PRECISION_GCP)
+ 
+2016-10-13 20:57:39  gcpcorrelate    29481 GCPcorrelate.c            84  INFO Initiated
+2016-10-13 20:57:39  gcpcorrelate    29481 GCPcorrelate.c            87  INFO Reading gcp_lib/GCPLib
+2016-10-13 20:57:39  gcpcorrelate    29481 ias_gcp_read_gcplib.c     292  INFO Reading gcp_lib/GCPLib
+2016-10-13 20:57:39  gcpcorrelate    29481 ias_gcp_read_gcplib.c     313  INFO Read 408 GCPs
+2016-10-13 20:57:39  gcpcorrelate    29481 ias_gcp_read_gcplib.c     135  INFO Pixel alignment will be 'UL', hemisphere is 'S', datum = 'GDA_94'
+2016-10-13 20:57:39  gcpcorrelate    29481 GCPcorrelate.c           116  INFO Read 408 GCPs
+2016-10-13 20:57:39  gcpcorrelate    29481 process_gcp.c            236  INFO Processing 1 SCA(s) in image sys_l1g.h5
+2016-10-13 20:57:39  gcpcorrelate    29481 process_gcp.c            375  INFO Using image chips from gcp_lib
+2016-10-13 20:57:39  gcpcorrelate    29481 process_gcp.c            430  INFO Correlating GCP # 0 to SCA 0
+2016-10-13 20:57:39  gcpcorrelate    29481 process_gcp.c            430  INFO Correlating GCP # 40 to SCA 0
+2016-10-13 20:57:39  gcpcorrelate    29481 process_gcp.c            430  INFO Correlating GCP # 80 to SCA 0
+2016-10-13 20:57:39  gcpcorrelate    29481 process_gcp.c            430  INFO Correlating GCP # 120 to SCA 0
+2016-10-13 20:57:39  gcpcorrelate    29481 process_gcp.c            430  INFO Correlating GCP # 160 to SCA 0
+2016-10-13 20:57:40  gcpcorrelate    29481 process_gcp.c            430  INFO Correlating GCP # 200 to SCA 0
+2016-10-13 20:57:40  gcpcorrelate    29481 process_gcp.c            430  INFO Correlating GCP # 240 to SCA 0
+2016-10-13 20:57:40  gcpcorrelate    29481 process_gcp.c            430  INFO Correlating GCP # 280 to SCA 0
+2016-10-13 20:57:40  gcpcorrelate    29481 process_gcp.c            430  INFO Correlating GCP # 320 to SCA 0
+2016-10-13 20:57:40  gcpcorrelate    29481 process_gcp.c            430  INFO Correlating GCP # 360 to SCA 0
+2016-10-13 20:57:41  gcpcorrelate    29481 process_gcp.c            430  INFO Correlating GCP # 400 to SCA 0
+2016-10-13 20:57:41  gcpcorrelate    29481 process_gcp.c            694  INFO Points inside image 408, Number used 408, Last used 0
+2016-10-13 20:57:41  gcpcorrelate    29481 process_gcp.c            759  INFO 318 of 408 points correlated
+2016-10-13 20:57:41  gcpcorrelate    29481 GCPcorrelate.c           151  INFO Successful completion
+ 
+gcpcorrelate execution completed with status of 0
+ 
+Thu Oct 13 20:57:41 AEDT 2016
+Thu Oct 13 20:57:42 AEDT 2016
+ 
+L8 Precision Correction (L8PRECISION_SOLVE)
+ 
+2016-10-13 20:57:42  correct_los_model    29494 correct_los_model.c      116  INFO Initiated correct_los_model
+2016-10-13 20:57:43  correct_los_model    29494 correct_los_model.c      298  INFO Finished getting satellite time and position
+2016-10-13 20:57:44  correct_los_model    29494 correct_los_model.c      369  INFO Finished calculating the precision corrections
+2016-10-13 20:57:44  correct_los_model    29494 correct_los_model.c      402  INFO Pre-fit RMS residuals:   X =  11.154 meters  Y =   8.346 meters
+2016-10-13 20:57:44  correct_los_model    29494 correct_los_model.c      405  INFO Post-fit RMS residuals:  X =   4.256 meters  Y =   4.797 meters
+2016-10-13 20:57:44  correct_los_model    29494 correct_los_model.c      409  INFO GCP Outlier Percentage:  11.01 percent
+2016-10-13 20:57:45  correct_los_model    29494 correct_los_model.c      544  INFO Successful completion
+ 
+correct_los_model exection completed with status of 0
+ 
+Thu Oct 13 20:57:45 AEDT 2016
+Thu Oct 13 20:57:47 AEDT 2016
+ 
+Geodetic Accuracy Characterization (GEODETIC)
+ 
+2016-10-13 20:57:47  geodetic    29518 geodetic_char.c           89  INFO Geodetic Accuracy Assessment initiated
+2016-10-13 20:57:47  geodetic    29518 geodetic_char.c          235  INFO Successful Completion
+ 
+geodetic execution completed with status of 0
+ 
+Thu Oct 13 20:57:47 AEDT 2016
+Thu Oct 13 20:57:49 AEDT 2016
+ 
+Create Grid for Precision (L8GRID_PREC)
+ 
+2016-10-13 20:57:49  create_grid    29543 get_parms_and_initialize_grid.c    1228  INFO Pixel origin will be 'UL'
+2016-10-13 20:57:49  create_grid    29543 create_grid.c            173  INFO Initiate Create Grid...
+2016-10-13 20:57:49  create_grid    29543 create_grid.c            284  INFO Elevation range   -40.00   419.00
+2016-10-13 20:57:49  create_grid    29543 pad_corners.c             58  INFO Scene padding size is 25.000000
+2016-10-13 20:57:49  create_grid    29543 get_frame_minbox.c       189  INFO 123825.000000 351750.000000 6687925.000000 6918600.000000
+
+2016-10-13 20:57:49  create_grid    29543 build_grid.c             259  INFO Processing band number 1
+2016-10-13 20:57:52  create_grid    29543 build_grid.c             259  INFO Processing band number 2
+2016-10-13 20:57:53  create_grid    29543 build_grid.c              93  INFO Writing grid band number 1
+2016-10-13 20:57:55  create_grid    29543 build_grid.c             259  INFO Processing band number 3
+2016-10-13 20:57:56  create_grid    29543 build_grid.c              93  INFO Writing grid band number 2
+2016-10-13 20:57:58  create_grid    29543 build_grid.c             259  INFO Processing band number 4
+2016-10-13 20:57:59  create_grid    29543 build_grid.c              93  INFO Writing grid band number 3
+2016-10-13 20:58:02  create_grid    29543 build_grid.c             259  INFO Processing band number 5
+2016-10-13 20:58:02  create_grid    29543 build_grid.c              93  INFO Writing grid band number 4
+2016-10-13 20:58:05  create_grid    29543 build_grid.c             259  INFO Processing band number 6
+2016-10-13 20:58:06  create_grid    29543 build_grid.c              93  INFO Writing grid band number 5
+2016-10-13 20:58:08  create_grid    29543 build_grid.c             259  INFO Processing band number 7
+2016-10-13 20:58:09  create_grid    29543 build_grid.c              93  INFO Writing grid band number 6
+2016-10-13 20:58:12  create_grid    29543 build_grid.c             259  INFO Processing band number 8
+2016-10-13 20:58:13  create_grid    29543 build_grid.c              93  INFO Writing grid band number 7
+2016-10-13 20:58:15  create_grid    29543 build_grid.c             259  INFO Processing band number 9
+2016-10-13 20:58:16  create_grid    29543 build_grid.c              93  INFO Writing grid band number 8
+2016-10-13 20:58:18  create_grid    29543 build_grid.c             259  INFO Processing band number 10
+2016-10-13 20:58:19  create_grid    29543 build_grid.c             259  INFO Processing band number 11
+2016-10-13 20:58:19  create_grid    29543 build_grid.c              93  INFO Writing grid band number 9
+2016-10-13 20:58:22  create_grid    29543 build_grid.c              93  INFO Writing grid band number 10
+2016-10-13 20:58:25  create_grid    29543 build_grid.c              93  INFO Writing grid band number 11
+2016-10-13 20:58:25  create_grid    29543 create_grid.c            869  INFO Writing output grid file headers
+2016-10-13 20:58:25  create_grid    29543 create_grid.c            929  INFO Successful completion
+ 
+create_grid execution completed with status of 0
+ 
+Thu Oct 13 20:58:25 AEDT 2016
+Thu Oct 13 20:58:27 AEDT 2016
+ 
+Grid Terrain Second Pass (GRID_TERRAIN_PASS2)
+ 
+2016-10-13 20:58:27  Makegeomgrid    29746 make_geom_grid.c         100  INFO Initiated
+2016-10-13 20:58:27  Makegeomgrid    29746 make_geom_grid.c         189  INFO Using band number 6 from the TARGET_FRAME_FILE
+2016-10-13 20:58:27  Makegeomgrid    29746 make_geom_grid.c         607  INFO Successful Completion
+ 
+makegeomgrid execution completed with status of 0
+ 
+Thu Oct 13 20:58:27 AEDT 2016
+Thu Oct 13 20:58:29 AEDT 2016
+ 
+Resample Terrain Second Pass (RESAMPLE_TERRAIN_PASS2)
+ 
+2016-10-13 20:58:29  Geomresample    29762 geomresample.c            93  INFO Geometric Resample Initiated
+2016-10-13 20:58:29  Geomresample    29762 geomresample.c           112  INFO Reading Grid
+2016-10-13 20:58:29  Geomresample    29762 geomresample.c           219  INFO Resampling band 1
+2016-10-13 20:58:29  Geomresample    29762 scanman.c                250  INFO resampling lines 0 through 800
+2016-10-13 20:58:30  Geomresample    29762 scanman.c                250  INFO resampling lines 650 through 1450
+2016-10-13 20:58:30  Geomresample    29762 scanman.c                250  INFO resampling lines 1300 through 2100
+2016-10-13 20:58:30  Geomresample    29762 scanman.c                250  INFO resampling lines 1950 through 2750
+2016-10-13 20:58:30  Geomresample    29762 scanman.c                250  INFO resampling lines 2600 through 3400
+2016-10-13 20:58:30  Geomresample    29762 scanman.c                250  INFO resampling lines 3250 through 4050
+2016-10-13 20:58:30  Geomresample    29762 scanman.c                250  INFO resampling lines 3900 through 4700
+2016-10-13 20:58:31  Geomresample    29762 scanman.c                250  INFO resampling lines 4550 through 5350
+2016-10-13 20:58:31  Geomresample    29762 scanman.c                250  INFO resampling lines 5200 through 6000
+2016-10-13 20:58:31  Geomresample    29762 scanman.c                250  INFO resampling lines 5850 through 6650
+2016-10-13 20:58:31  Geomresample    29762 scanman.c                250  INFO resampling lines 6500 through 7300
+2016-10-13 20:58:32  Geomresample    29762 scanman.c                250  INFO resampling lines 7150 through 7950
+2016-10-13 20:58:32  Geomresample    29762 scanman.c                250  INFO resampling lines 7800 through 8600
+2016-10-13 20:58:32  Geomresample    29762 scanman.c                250  INFO resampling lines 8450 through 9250
+2016-10-13 20:58:33  Geomresample    29762 scanman.c                250  INFO resampling lines 9100 through 9900
+2016-10-13 20:58:33  Geomresample    29762 scanman.c                250  INFO resampling lines 9750 through 10550
+2016-10-13 20:58:33  Geomresample    29762 scanman.c                250  INFO resampling lines 10400 through 11200
+2016-10-13 20:58:33  Geomresample    29762 scanman.c                250  INFO resampling lines 11050 through 11850
+2016-10-13 20:58:33  Geomresample    29762 scanman.c                250  INFO resampling lines 11700 through 12500
+2016-10-13 20:58:34  Geomresample    29762 scanman.c                250  INFO resampling lines 12350 through 13093
+2016-10-13 20:58:34  Geomresample    29762 geomresample.c           330  INFO Geometric Resample Successful Completion
+ 
+geomresample execution completed with status of 0
+ 
+Thu Oct 13 20:58:34 AEDT 2016
+Thu Oct 13 20:58:35 AEDT 2016
+ 
+L8 Resample Precision (L8RESAMPLE_PREC)
+ 
+2016-10-13 20:58:35  Resample    29793 resample.c               115  INFO Initiated
+2016-10-13 20:58:36  Resample    29793 process_band.c            80  INFO Resampling band number 1
+2016-10-13 20:59:14  Resample    29793 process_band.c            80  INFO Resampling band number 2
+2016-10-13 20:59:56  Resample    29793 process_band.c            80  INFO Resampling band number 3
+2016-10-13 21:00:33  Resample    29793 process_band.c            80  INFO Resampling band number 4
+2016-10-13 21:01:13  Resample    29793 process_band.c            80  INFO Resampling band number 5
+2016-10-13 21:01:52  Resample    29793 process_band.c            80  INFO Resampling band number 6
+2016-10-13 21:02:30  Resample    29793 process_band.c            80  INFO Resampling band number 7
+2016-10-13 21:03:03  Resample    29793 process_band.c            80  INFO Resampling band number 8
+2016-10-13 21:05:36  Resample    29793 process_band.c            80  INFO Resampling band number 9
+2016-10-13 21:06:07  Resample    29793 process_band.c            80  INFO Resampling band number 10
+2016-10-13 21:06:40  Resample    29793 process_band.c            80  INFO Resampling band number 11
+2016-10-13 21:07:10  Resample    29793 resample.c               789  INFO Successful Completion
+ 
+resample execution completed with status of 0
+ 
+Thu Oct 13 21:07:10 AEDT 2016
+Thu Oct 13 21:07:12 AEDT 2016
+ 
+L8 GCP Correlation for Precision Second Pass (L8PRECISION_GCP_PASS2)
+ 
+2016-10-13 21:07:12  gcpcorrelate    30362 GCPcorrelate.c            84  INFO Initiated
+2016-10-13 21:07:12  gcpcorrelate    30362 GCPcorrelate.c            87  INFO Reading gcp_lib/GCPLib
+2016-10-13 21:07:12  gcpcorrelate    30362 ias_gcp_read_gcplib.c     292  INFO Reading gcp_lib/GCPLib
+2016-10-13 21:07:12  gcpcorrelate    30362 ias_gcp_read_gcplib.c     313  INFO Read 408 GCPs
+2016-10-13 21:07:12  gcpcorrelate    30362 ias_gcp_read_gcplib.c     135  INFO Pixel alignment will be 'UL', hemisphere is 'S', datum = 'GDA_94'
+2016-10-13 21:07:12  gcpcorrelate    30362 GCPcorrelate.c           116  INFO Read 408 GCPs
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            236  INFO Processing 1 SCA(s) in image l1t.h5
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            375  INFO Using image chips from gcp_lib
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            430  INFO Correlating GCP # 0 to SCA 0
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800156 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800374 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800184 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800061 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800142 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800367 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800305 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800194 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800116 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800379 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800252 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800370 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800361 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800113 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800090 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800060 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800327 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800259 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800198 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800378 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800042 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800393 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800025 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800328 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800261 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800039 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800139 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800188 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800024 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800056 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800206 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800064 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800217 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800164 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800015 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800363 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800218 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800291 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800301 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800020 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            430  INFO Correlating GCP # 40 to SCA 0
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800284 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800197 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800294 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800234 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800272 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800009 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800154 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800346 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800058 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800038 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800109 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800005 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800223 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800114 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800099 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800022 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800317 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800120 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800176 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800250 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800322 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800130 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800246 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800028 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800092 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800210 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800170 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800135 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800107 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800225 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800310 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800131 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800079 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800260 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800040 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800181 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800100 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800345 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800076 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800125 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            430  INFO Correlating GCP # 80 to SCA 0
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800012 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800175 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800354 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800282 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800018 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800240 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800088 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800280 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800073 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800117 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800318 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800375 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800033 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800239 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800035 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800150 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800059 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800147 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800074 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800362 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800377 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800172 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800032 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800249 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800288 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800395 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800245 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800192 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800258 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800050 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800075 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800340 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800004 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800148 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800081 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800247 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800315 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800337 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800266 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800052 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            430  INFO Correlating GCP # 120 to SCA 0
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800201 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800065 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800224 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800145 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800338 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800086 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800205 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800163 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800271 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800091 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800066 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800041 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800263 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800143 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800069 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800037 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800297 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800119 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800264 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800230 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800231 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800151 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800110 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800391 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800278 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800190 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800355 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800002 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800057 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800146 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800168 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800098 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800084 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800102 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800221 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800166 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800289 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800352 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800237 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800296 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            430  INFO Correlating GCP # 160 to SCA 0
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800128 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800277 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800106 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800394 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800101 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800017 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800406 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800158 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800254 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800108 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800169 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800211 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800085 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800356 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800177 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800202 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800093 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800126 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800123 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800178 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800314 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800072 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800173 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800381 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800220 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800403 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800311 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800319 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800010 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800019 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800400 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800236 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800044 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800062 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800384 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800267 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800304 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800273 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800321 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800227 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            430  INFO Correlating GCP # 200 to SCA 0
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800121 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800144 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800115 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800386 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800342 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800171 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800083 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800161 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800251 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800281 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800071 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800390 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800193 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800335 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800348 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800136 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800360 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800174 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800298 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800213 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800129 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800183 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800134 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800215 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800388 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800330 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800292 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800248 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800182 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800396 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800089 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800299 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800212 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800034 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800257 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800207 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800047 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800255 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800339 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800419 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            430  INFO Correlating GCP # 240 to SCA 0
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800068 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800343 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800222 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800167 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800372 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800195 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800233 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800313 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800031 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800235 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800006 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800373 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800189 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800295 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800208 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800138 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800080 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800347 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800104 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800358 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800268 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800132 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800013 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800199 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800269 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800275 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800325 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800127 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800229 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800357 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800320 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800293 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800232 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800054 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800111 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800279 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800265 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800341 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800287 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800118 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            430  INFO Correlating GCP # 280 to SCA 0
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800124 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800141 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800187 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800368 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800228 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800001 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800140 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800155 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800014 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800308 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800196 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800369 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800326 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800112 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800048 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800276 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800316 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800046 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800380 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800094 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800003 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800398 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800149 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800331 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800152 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800336 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800133 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800055 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800097 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800021 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800185 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800385 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800165 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800027 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800290 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800137 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800366 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800179 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800191 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800051 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            430  INFO Correlating GCP # 320 to SCA 0
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800382 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800200 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800333 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800204 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800365 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800371 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800043 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800383 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800323 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800226 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800306 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800351 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800392 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800359 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800334 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800399 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800159 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800045 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800096 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800303 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800387 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800067 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800008 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800016 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800186 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800030 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800162 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800241 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800350 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800302 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800283 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800397 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800103 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800153 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800312 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800349 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800082 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800011 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800216 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800332 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            430  INFO Correlating GCP # 360 to SCA 0
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800244 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800242 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800344 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800087 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800353 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800389 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800270 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800324 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800238 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800243 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800023 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800364 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800274 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800105 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800077 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800253 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800286 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800285 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800122 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800029 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800307 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800063 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800219 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800095 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800007 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800157 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800300 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800070 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800214 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800078 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800180 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800053 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800036 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800376 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800407 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800026 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800049 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800405 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800309 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800160 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            430  INFO Correlating GCP # 400 to SCA 0
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800404 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800203 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800262 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800402 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800209 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800418 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800416 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            476  WARN Skipping GCP 1140800329 pixel size (30.000000, 30.000000) does not match image pixel size (25.000000, 25.000000)
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            694  INFO Points inside image 0, Number used 0, Last used 0
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            755  WARN No points correlated successfully
+2016-10-13 21:07:12  gcpcorrelate    30362 process_gcp.c            759  INFO 0 of 408 points correlated
+2016-10-13 21:07:12  gcpcorrelate    30362 GCPcorrelate.c           151  INFO Successful completion
+ 
+gcpcorrelate execution completed with status of 0
+ 
+Thu Oct 13 21:07:12 AEDT 2016
+Thu Oct 13 21:07:14 AEDT 2016
+ 
+Geometric Accuracy Characterization (GEOMETRIC)
+ 
+2016-10-13 21:07:14  geometric    30375 geometric_char.c         104  INFO Geometric Accuracy Assessment Characterization initiated
+2016-10-13 21:07:14  geometric    30375 geometric_char.c         143  WARN Number of correlated validation GCPs read 0 is below the minimum threshold 20, so geometric results should not be used
+ 
+geometric execution completed with status of 0
+ 
+Thu Oct 13 21:07:14 AEDT 2016
+Thu Oct 13 21:07:17 AEDT 2016
+ 
+Terrain Occlusion (TERRAIN_OCCLUSION)
+ 
+2016-10-13 21:07:17  terrain_occlusion    30387 terrain_occlusion.c       86  INFO Initiate ...
+2016-10-13 21:07:20  terrain_occlusion    30387 terrain_occlusion.c      269  INFO Elevation range on unresampled DEM: -40 to 419
+
+2016-10-13 21:07:20  terrain_occlusion    30387 occlusion_threading.c     348  INFO Starting terrain occlusion with 4 threads
+2016-10-13 21:07:20  terrain_occlusion    30387 occlusion_threading.c     144  INFO Starting SCA 0
+2016-10-13 21:07:22  terrain_occlusion    30387 occlusion_threading.c     144  INFO Starting SCA 1
+2016-10-13 21:07:23  terrain_occlusion    30387 occlusion_threading.c     144  INFO Starting SCA 2
+2016-10-13 21:07:25  terrain_occlusion    30387 occlusion_threading.c     144  INFO Starting SCA 3
+2016-10-13 21:07:26  terrain_occlusion    30387 occlusion_threading.c     144  INFO Starting SCA 4
+2016-10-13 21:07:27  terrain_occlusion    30387 occlusion_threading.c     144  INFO Starting SCA 5
+2016-10-13 21:07:29  terrain_occlusion    30387 occlusion_threading.c     144  INFO Starting SCA 6
+2016-10-13 21:07:30  terrain_occlusion    30387 occlusion_threading.c     144  INFO Starting SCA 7
+2016-10-13 21:07:31  terrain_occlusion    30387 occlusion_threading.c     144  INFO Starting SCA 8
+2016-10-13 21:07:32  terrain_occlusion    30387 occlusion_threading.c     144  INFO Starting SCA 9
+2016-10-13 21:07:33  terrain_occlusion    30387 occlusion_threading.c     144  INFO Starting SCA 10
+2016-10-13 21:07:34  terrain_occlusion    30387 occlusion_threading.c     144  INFO Starting SCA 11
+2016-10-13 21:07:35  terrain_occlusion    30387 occlusion_threading.c     144  INFO Starting SCA 12
+2016-10-13 21:07:36  terrain_occlusion    30387 occlusion_threading.c     144  INFO Starting SCA 13
+2016-10-13 21:07:38  terrain_occlusion    30387 occlusion_threading.c     377  INFO Occluded pixels in SCA 0: 0
+2016-10-13 21:07:38  terrain_occlusion    30387 occlusion_threading.c     377  INFO Occluded pixels in SCA 1: 0
+2016-10-13 21:07:38  terrain_occlusion    30387 occlusion_threading.c     377  INFO Occluded pixels in SCA 2: 0
+2016-10-13 21:07:38  terrain_occlusion    30387 occlusion_threading.c     377  INFO Occluded pixels in SCA 3: 0
+2016-10-13 21:07:38  terrain_occlusion    30387 occlusion_threading.c     377  INFO Occluded pixels in SCA 4: 0
+2016-10-13 21:07:38  terrain_occlusion    30387 occlusion_threading.c     377  INFO Occluded pixels in SCA 5: 0
+2016-10-13 21:07:38  terrain_occlusion    30387 occlusion_threading.c     377  INFO Occluded pixels in SCA 6: 0
+2016-10-13 21:07:38  terrain_occlusion    30387 occlusion_threading.c     377  INFO Occluded pixels in SCA 7: 0
+2016-10-13 21:07:38  terrain_occlusion    30387 occlusion_threading.c     377  INFO Occluded pixels in SCA 8: 0
+2016-10-13 21:07:38  terrain_occlusion    30387 occlusion_threading.c     377  INFO Occluded pixels in SCA 9: 0
+2016-10-13 21:07:38  terrain_occlusion    30387 occlusion_threading.c     377  INFO Occluded pixels in SCA 10: 0
+2016-10-13 21:07:38  terrain_occlusion    30387 occlusion_threading.c     377  INFO Occluded pixels in SCA 11: 0
+2016-10-13 21:07:38  terrain_occlusion    30387 occlusion_threading.c     377  INFO Occluded pixels in SCA 12: 0
+2016-10-13 21:07:38  terrain_occlusion    30387 occlusion_threading.c     377  INFO Occluded pixels in SCA 13: 0
+2016-10-13 21:07:38  terrain_occlusion    30387 occlusion_threading.c     381  INFO Total occluded pixels: 0
+2016-10-13 21:07:38  terrain_occlusion    30387 write_l1g.c               61  INFO Writing occlusion file occlusion_mask.h5
+2016-10-13 21:07:38  terrain_occlusion    30387 terrain_occlusion.c      330  INFO Successful completion.
+ 
+terrain_occlusion execution completed with a status of 0
+ 
+Thu Oct 13 21:07:39 AEDT 2016
+Thu Oct 13 21:07:40 AEDT 2016
+ 
+Assess Cloud Cover (ASSESS_CLOUD_COVER)
+ 
+2016-10-13 21:07:40  assess_cloud_cover    30473 assess_cloud_cover.c    2061  INFO assess_cloud_cover l1t.h5
+2016-10-13 21:07:40  assess_cloud_cover    30473 ias_cpf_parse_cloud_cover_assessment.c     122  WARN Only 1 parameter read in from the CPF for Cirrus Threshold
+2016-10-13 21:07:40  assess_cloud_cover    30473 algorithm.c              359  INFO Using ACCA algorithm
+2016-10-13 21:07:40  assess_cloud_cover    30473 algorithm.c              359  INFO Using Cirrus algorithm
+2016-10-13 21:07:40  assess_cloud_cover    30473 algorithm.c              359  INFO Using See5 algorithm
+2016-10-13 21:07:44  assess_cloud_cover    30473 assess_cloud_cover.c    1374  INFO Processing line    0/9228 (0%)
+2016-10-13 21:07:47  assess_cloud_cover    30473 assess_cloud_cover.c    1374  INFO Processing line  922/9228 (10%)
+2016-10-13 21:07:52  assess_cloud_cover    30473 assess_cloud_cover.c    1374  INFO Processing line 1844/9228 (20%)
+2016-10-13 21:07:57  assess_cloud_cover    30473 assess_cloud_cover.c    1374  INFO Processing line 2766/9228 (30%)
+2016-10-13 21:08:04  assess_cloud_cover    30473 assess_cloud_cover.c    1374  INFO Processing line 3688/9228 (40%)
+2016-10-13 21:08:08  assess_cloud_cover    30473 assess_cloud_cover.c    1374  INFO Processing line 4610/9228 (50%)
+2016-10-13 21:08:12  assess_cloud_cover    30473 assess_cloud_cover.c    1374  INFO Processing line 5532/9228 (60%)
+2016-10-13 21:08:17  assess_cloud_cover    30473 assess_cloud_cover.c    1374  INFO Processing line 6454/9228 (70%)
+2016-10-13 21:08:22  assess_cloud_cover    30473 assess_cloud_cover.c    1374  INFO Processing line 7376/9228 (80%)
+2016-10-13 21:08:26  assess_cloud_cover    30473 assess_cloud_cover.c    1374  INFO Processing line 8298/9228 (90%)
+2016-10-13 21:08:28  assess_cloud_cover    30473 assess_cloud_cover.c    1374  INFO Processing line 9220/9228 (100%)
+2016-10-13 21:08:28  assess_cloud_cover    30473 assess_cloud_cover.c    1633  INFO Processing line 9228/9228 (100%)
+2016-10-13 21:08:28  assess_cloud_cover    30473 assess_cloud_cover.c    1971  INFO Cloud Score l1t.h5: 5.48%
+2016-10-13 21:08:28  assess_cloud_cover    30473 assess_cloud_cover.c    1972  INFO Snow/Ice Score l1t.h5: 0.16%
+2016-10-13 21:08:28  assess_cloud_cover    30473 assess_cloud_cover.c    1974  INFO Land Cloud Cover Score l1t.h5: 0.09%
+2016-10-13 21:08:28  assess_cloud_cover    30473 assess_cloud_cover.c    1975  INFO Created quality band image: quality_band.h5
+2016-10-13 21:08:28  assess_cloud_cover    30473 assess_cloud_cover.c    1976  INFO assess_cloud_cover took 48 seconds
+ 
+assess_cloud_cover execution completed with a status of 0
+ 
+Thu Oct 13 21:08:28 AEDT 2016
+Thu Oct 13 21:08:30 AEDT 2016
+ 
+DMS Format and Package (DFP)
+ 
+2016-10-13 21:08:30  format_and_package    30607 format_and_package.c     244  INFO DMS Format & Package started
+2016-10-13 21:08:30  format_and_package    30607 format_and_package.c     245  INFO Pixel origin is UL
+2016-10-13 21:08:30  format_and_package    30607 convert_band.c            92  INFO Converting band 1
+2016-10-13 21:08:31  format_and_package    30607 convert_band.c            92  INFO Converting band 2
+2016-10-13 21:08:33  format_and_package    30607 convert_band.c            92  INFO Converting band 3
+2016-10-13 21:08:35  format_and_package    30607 convert_band.c            92  INFO Converting band 4
+2016-10-13 21:08:36  format_and_package    30607 convert_band.c            92  INFO Converting band 5
+2016-10-13 21:08:37  format_and_package    30607 convert_band.c            92  INFO Converting band 6
+2016-10-13 21:08:39  format_and_package    30607 convert_band.c            92  INFO Converting band 7
+2016-10-13 21:08:40  format_and_package    30607 convert_band.c            92  INFO Converting band 8
+2016-10-13 21:08:45  format_and_package    30607 convert_band.c            92  INFO Converting band 9
+2016-10-13 21:08:47  format_and_package    30607 convert_band.c            92  INFO Converting band 10
+2016-10-13 21:08:49  format_and_package    30607 convert_band.c            92  INFO Converting band 11
+2016-10-13 21:08:51  format_and_package    30607 convert_band.c            95  INFO Converting quality band
+2016-10-13 21:08:53  format_and_package    30607 format_and_package.c     532  INFO Creating the angle coefficients file
+2016-10-13 21:08:53  format_and_package    30607 write_metadata.c        1557  INFO Creating the L1G metadata file
+2016-10-13 21:08:53  format_and_package    30607 format_and_package.c     616  INFO Successful completion of DMS Format & Package
+ 
+format_and_package execution completed with status of 0
+ 
+Thu Oct 13 21:08:53 AEDT 2016

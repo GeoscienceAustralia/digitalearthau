@@ -1,0 +1,190 @@
+2016-12-20T10:19:30 main.cpp 34: INFO: Arguments
+gridSize = '26'
+resampleType  = 'BI'
+nullValue = '0.000000000000000'
+chipGenType = 'FIXED_LOCATION'
+fixedChipLocationFile = '/g/data/v10/eoancillarydata/GCP/Fix_QA_points/114/080/points.txt
+correlationThreshold = '0.750000000000000'
+referenceImage = 
+'	pathToImage = '/g/data/v10/eoancillarydata/GCP/GQA_v3/wrs2/114/080/LC81140802014216LGN00_B6.TIF'
+	proj4Str = '''
+inputImage = 
+'	pathToImage = '/g/data/v10/reprocess/ls8/level1/2015/09/LS8_OLITIRS_OTH_P51_GALPGS01-032_114_080_20150924/product/LC81140802015267LGN00_B6.TIF'
+	proj4Str = '''
+logPath = '/g/data/v10/reprocess/gqa/ls8/2015/09/output/LS8_OLITIRS_OTH_P51_GALPGS01-032_114_080_20150924.gqa-work'
+outputPath = '/g/data/v10/reprocess/gqa/ls8/2015/09/output/LS8_OLITIRS_OTH_P51_GALPGS01-032_114_080_20150924.gqa-work'
+threadCount = '4'
+usePhaseCorrelation = 'FALSE'
+workingDirectory = '/g/data/v10/reprocess/gqa/ls8/2015/09/output/LS8_OLITIRS_OTH_P51_GALPGS01-032_114_080_20150924.gqa-work'
+chipSize = '31'
+amountOfPyramids = '5'
+
+
+2016-12-20T10:19:35 ul_Reproject.cpp 133: INFO: Projecting 100%   
+2016-12-20T10:19:38 ul_Reproject.cpp 173: INFO: Generate translation map 100%   
+2016-12-20T10:19:38 ul_Resampler.h 476: INFO: Resample map is of type 'double'
+2016-12-20T10:19:39 ul_Resampler.h 97: INFO: Resampler is bilinear
+2016-12-20T10:19:43 ul_Resampler.h 326: INFO: Resampling 100%     
+2016-12-20T10:19:49 ul_ImageOverlap.cpp 356: INFO: Save new overlapped image to '/g/data/v10/reprocess/gqa/ls8/2015/09/output/LS8_OLITIRS_OTH_P51_GALPGS01-032_114_080_20150924.gqa-work/MinMaxBox/Input/warpedInput_LC81140802015267LGN00_B6.TIF'
+2016-12-20T10:19:55 ul_ImageOverlap.cpp 356: INFO: Save new overlapped image to '/g/data/v10/reprocess/gqa/ls8/2015/09/output/LS8_OLITIRS_OTH_P51_GALPGS01-032_114_080_20150924.gqa-work/MinMaxBox/Reference/LC81140802014216LGN00_B6.TIF'
+2016-12-20T10:20:01 ul_PaddImage.cpp 144: INFO: Processing 100%     
+2016-12-20T10:20:09 ul_PaddImage.cpp 144: INFO: Processing 100%     
+2016-12-20T10:20:18 ul_PaddImage.cpp 144: INFO: Processing 100%     
+2016-12-20T10:20:22 ul_PaddImage.cpp 144: INFO: Processing 100%     
+2016-12-20T10:20:28 ul_PaddImage.cpp 144: INFO: Processing 100%     
+2016-12-20T10:20:33 ul_PaddImage.cpp 144: INFO: Processing 100%     
+2016-12-20T10:20:35 ul_TiledGaussianPyramidTiePointGenerator.cpp 534: INFO: <<----------------------------------------------------------->>
+2016-12-20T10:20:35 ul_TiledGaussianPyramidTiePointGenerator.cpp 535: INFO:  <----TILE LOOP (1/2)----------------->
+2016-12-20T10:20:35 ul_TiledGaussianPyramidTiePointGenerator.cpp 536: INFO: <<----------------------------------------------------------->>
+2016-12-20T10:20:35 ul_GaussianPyramidTiePointGenerator.cpp 90: INFO: Generating pyramid level '2' of '5' for image 'Input_1_1'
+2016-12-20T10:20:37 ul_GaussianPyramidTiePointGenerator.cpp 90: INFO: Generating pyramid level '3' of '5' for image 'Input_1_1'
+2016-12-20T10:20:37 ul_GaussianPyramidTiePointGenerator.cpp 90: INFO: Generating pyramid level '4' of '5' for image 'Input_1_1'
+2016-12-20T10:20:37 ul_GaussianPyramidTiePointGenerator.cpp 90: INFO: Generating pyramid level '5' of '5' for image 'Input_1_1'
+2016-12-20T10:20:38 ul_GaussianPyramidTiePointGenerator.cpp 90: INFO: Generating pyramid level '2' of '5' for image 'Reference_1_1'
+2016-12-20T10:20:39 ul_GaussianPyramidTiePointGenerator.cpp 90: INFO: Generating pyramid level '3' of '5' for image 'Reference_1_1'
+2016-12-20T10:20:40 ul_GaussianPyramidTiePointGenerator.cpp 90: INFO: Generating pyramid level '4' of '5' for image 'Reference_1_1'
+2016-12-20T10:20:40 ul_GaussianPyramidTiePointGenerator.cpp 90: INFO: Generating pyramid level '5' of '5' for image 'Reference_1_1'
+2016-12-20T10:20:40 ul_GaussianPyramidTiePointGeneratorProcessingLoop.cpp 127: INFO: <<----PYRAMID LOOP (1/5)----------------->>
+2016-12-20T10:20:40 ul_FixedLocationChips.cpp 170: INFO: Processing 100%      
+2016-12-20T10:20:40 ul_FixedLocationChips.cpp 171: INFO: Generated '216' chips
+2016-12-20T10:20:40 ul_TiePointGenerator.cpp 166: INFO: Correlating '216' chips of size '31x31' on a search window of size '52x52' using a 'CCOEFF_NORM' correlator
+2016-12-20T10:20:40 ul_CorrelationHandler.cpp 174: INFO: Starting chip correlation
+2016-12-20T10:20:41 ul_TiePointGenerator.cpp 195: INFO: Removing duplicate GCPs
+2016-12-20T10:20:41 ul_TiePointGenerator.cpp 219: INFO: Removed '0' duplicate GCPs
+2016-12-20T10:20:41 ul_TiePointGenerator.cpp 285: INFO: Obtained '216' chips
+2016-12-20T10:20:41 ul_TiePointGeneratorHullReject.cpp 29: INFO: Not going to reject GCPs based on the image outer hulls
+2016-12-20T10:20:41 ul_GaussianPyramidTiePointGeneratorProcessingLoop.cpp 186: INFO: Average shift for pyramid scene '1/5' is 'x = 0.011282519514810 y = -0.003943295980524' pixels
+2016-12-20T10:20:41 ul_GaussianPyramidTiePointGeneratorProcessingLoop.cpp 127: INFO: <<----PYRAMID LOOP (2/5)----------------->>
+2016-12-20T10:20:41 ul_FixedLocationChips.cpp 170: INFO: Processing 100%      
+2016-12-20T10:20:41 ul_FixedLocationChips.cpp 171: INFO: Generated '291' chips
+2016-12-20T10:20:41 ul_TiePointGenerator.cpp 166: INFO: Correlating '291' chips of size '31x31' on a search window of size '46x46' using a 'CCOEFF_NORM' correlator
+2016-12-20T10:20:41 ul_CorrelationHandler.cpp 174: INFO: Starting chip correlation
+2016-12-20T10:20:42 ul_TiePointGenerator.cpp 195: INFO: Removing duplicate GCPs
+2016-12-20T10:20:42 ul_TiePointGenerator.cpp 219: INFO: Removed '0' duplicate GCPs
+2016-12-20T10:20:42 ul_TiePointGenerator.cpp 285: INFO: Obtained '291' chips
+2016-12-20T10:20:42 ul_TiePointGeneratorHullReject.cpp 29: INFO: Not going to reject GCPs based on the image outer hulls
+2016-12-20T10:20:42 ul_GaussianPyramidTiePointGeneratorProcessingLoop.cpp 186: INFO: Average shift for pyramid scene '2/5' is 'x = 0.001563976812921 y = -0.010439160552921' pixels
+2016-12-20T10:20:42 ul_GaussianPyramidTiePointGeneratorProcessingLoop.cpp 127: INFO: <<----PYRAMID LOOP (3/5)----------------->>
+2016-12-20T10:20:43 ul_FixedLocationChips.cpp 170: INFO: Processing 100%      
+2016-12-20T10:20:43 ul_FixedLocationChips.cpp 171: INFO: Generated '308' chips
+2016-12-20T10:20:43 ul_TiePointGenerator.cpp 166: INFO: Correlating '308' chips of size '31x31' on a search window of size '46x46' using a 'CCOEFF_NORM' correlator
+2016-12-20T10:20:43 ul_CorrelationHandler.cpp 174: INFO: Starting chip correlation
+2016-12-20T10:20:43 ul_TiePointGenerator.cpp 195: INFO: Removing duplicate GCPs
+2016-12-20T10:20:43 ul_TiePointGenerator.cpp 219: INFO: Removed '0' duplicate GCPs
+2016-12-20T10:20:43 ul_TiePointGenerator.cpp 285: INFO: Obtained '308' chips
+2016-12-20T10:20:43 ul_TiePointGeneratorHullReject.cpp 29: INFO: Not going to reject GCPs based on the image outer hulls
+2016-12-20T10:20:44 ul_GaussianPyramidTiePointGeneratorProcessingLoop.cpp 186: INFO: Average shift for pyramid scene '3/5' is 'x = 0.010714463061429 y = -0.007776243891401' pixels
+2016-12-20T10:20:44 ul_GaussianPyramidTiePointGeneratorProcessingLoop.cpp 127: INFO: <<----PYRAMID LOOP (4/5)----------------->>
+2016-12-20T10:20:44 ul_FixedLocationChips.cpp 170: INFO: Processing 100%      
+2016-12-20T10:20:44 ul_FixedLocationChips.cpp 171: INFO: Generated '320' chips
+2016-12-20T10:20:44 ul_TiePointGenerator.cpp 166: INFO: Correlating '320' chips of size '31x31' on a search window of size '46x46' using a 'CCOEFF_NORM' correlator
+2016-12-20T10:20:44 ul_CorrelationHandler.cpp 174: INFO: Starting chip correlation
+2016-12-20T10:20:45 ul_TiePointGenerator.cpp 195: INFO: Removing duplicate GCPs
+2016-12-20T10:20:45 ul_TiePointGenerator.cpp 219: INFO: Removed '0' duplicate GCPs
+2016-12-20T10:20:45 ul_TiePointGenerator.cpp 285: INFO: Obtained '320' chips
+2016-12-20T10:20:45 ul_TiePointGeneratorHullReject.cpp 29: INFO: Not going to reject GCPs based on the image outer hulls
+2016-12-20T10:20:45 ul_GaussianPyramidTiePointGeneratorProcessingLoop.cpp 186: INFO: Average shift for pyramid scene '4/5' is 'x = 0.019369012925536 y = 0.004951726112796' pixels
+2016-12-20T10:20:45 ul_GaussianPyramidTiePointGeneratorProcessingLoop.cpp 127: INFO: <<----PYRAMID LOOP (5/5)----------------->>
+2016-12-20T10:20:45 ul_FixedLocationChips.cpp 170: INFO: Processing 100%      
+2016-12-20T10:20:45 ul_FixedLocationChips.cpp 171: INFO: Generated '328' chips
+2016-12-20T10:20:45 ul_TiePointGenerator.cpp 166: INFO: Correlating '328' chips of size '31x31' on a search window of size '46x46' using a 'CCOEFF_NORM' correlator
+2016-12-20T10:20:46 ul_CorrelationHandler.cpp 174: INFO: Starting chip correlation
+2016-12-20T10:20:47 ul_TiePointGenerator.cpp 195: INFO: Removing duplicate GCPs
+2016-12-20T10:20:47 ul_TiePointGenerator.cpp 219: INFO: Removed '0' duplicate GCPs
+2016-12-20T10:20:47 ul_TiePointGenerator.cpp 285: INFO: Obtained '328' chips
+2016-12-20T10:20:48 ul_GcpHullRejection.cpp 264: INFO: Hull trim size is '31'
+2016-12-20T10:20:51 ul_ConvKernelToImage.h 178: INFO: 100%   
+2016-12-20T10:20:51 ul_ConvKernelToImage.h 178: INFO: 100%   
+2016-12-20T10:20:51 ul_ConvexHull.cpp 142: INFO: Sorting '474189' data points
+2016-12-20T10:20:52 ul_ConvexHull.cpp 119: INFO: CConvexHull 100%      
+2016-12-20T10:20:52 ul_ConvexHull.cpp 119: INFO: CConvexHull 100%      
+2016-12-20T10:20:52 ul_ConvexHull.cpp 142: INFO: Sorting '828172' data points
+2016-12-20T10:20:52 ul_ConvexHull.cpp 119: INFO: CConvexHull 100%      
+2016-12-20T10:20:52 ul_ConvexHull.cpp 119: INFO: CConvexHull 100%      
+2016-12-20T10:20:57 ul_GcpOutlierTestingHullGenThread.cpp 235: INFO: TrimHullArea 100%     
+2016-12-20T10:20:58 ul_GcpOutlierTestingHullGenThread.cpp 235: INFO: TrimHullArea 100%     
+2016-12-20T10:20:58 ul_GcpHullRejection.cpp 155: INFO: RejectGcps 100%     
+2016-12-20T10:20:58 ul_GcpHullRejection.cpp 275: INFO: Rejected a total of '1' GCP on the outer hull edges
+2016-12-20T10:20:58 ul_GaussianPyramidTiePointGeneratorProcessingLoop.cpp 205: INFO: Average shift in pixels are 'x = 0.005968880843412 y = 0.005709017122569'
+2016-12-20T10:20:58 ul_TiledGaussianPyramidTiePointGenerator.cpp 534: INFO: <<----------------------------------------------------------->>
+2016-12-20T10:20:58 ul_TiledGaussianPyramidTiePointGenerator.cpp 535: INFO:  <----TILE LOOP (2/2)----------------->
+2016-12-20T10:20:58 ul_TiledGaussianPyramidTiePointGenerator.cpp 536: INFO: <<----------------------------------------------------------->>
+2016-12-20T10:20:58 ul_GaussianPyramidTiePointGenerator.cpp 90: INFO: Generating pyramid level '2' of '5' for image 'Input_2_1'
+2016-12-20T10:21:00 ul_GaussianPyramidTiePointGenerator.cpp 90: INFO: Generating pyramid level '3' of '5' for image 'Input_2_1'
+2016-12-20T10:21:00 ul_GaussianPyramidTiePointGenerator.cpp 90: INFO: Generating pyramid level '4' of '5' for image 'Input_2_1'
+2016-12-20T10:21:01 ul_GaussianPyramidTiePointGenerator.cpp 90: INFO: Generating pyramid level '5' of '5' for image 'Input_2_1'
+2016-12-20T10:21:01 ul_GaussianPyramidTiePointGenerator.cpp 90: INFO: Generating pyramid level '2' of '5' for image 'Reference_2_1'
+2016-12-20T10:21:03 ul_GaussianPyramidTiePointGenerator.cpp 90: INFO: Generating pyramid level '3' of '5' for image 'Reference_2_1'
+2016-12-20T10:21:03 ul_GaussianPyramidTiePointGenerator.cpp 90: INFO: Generating pyramid level '4' of '5' for image 'Reference_2_1'
+2016-12-20T10:21:03 ul_GaussianPyramidTiePointGenerator.cpp 90: INFO: Generating pyramid level '5' of '5' for image 'Reference_2_1'
+2016-12-20T10:21:03 ul_GaussianPyramidTiePointGeneratorProcessingLoop.cpp 127: INFO: <<----PYRAMID LOOP (1/5)----------------->>
+2016-12-20T10:21:03 ul_FixedLocationChips.cpp 170: INFO: Processing 100%      
+2016-12-20T10:21:03 ul_FixedLocationChips.cpp 171: INFO: Generated '42' chips
+2016-12-20T10:21:03 ul_TiePointGenerator.cpp 166: INFO: Correlating '42' chips of size '31x31' on a search window of size '52x52' using a 'CCOEFF_NORM' correlator
+2016-12-20T10:21:03 ul_CorrelationHandler.cpp 174: INFO: Starting chip correlation
+2016-12-20T10:21:04 ul_TiePointGenerator.cpp 195: INFO: Removing duplicate GCPs
+2016-12-20T10:21:04 ul_TiePointGenerator.cpp 219: INFO: Removed '0' duplicate GCPs
+2016-12-20T10:21:04 ul_TiePointGenerator.cpp 285: INFO: Obtained '42' chips
+2016-12-20T10:21:04 ul_TiePointGeneratorHullReject.cpp 29: INFO: Not going to reject GCPs based on the image outer hulls
+2016-12-20T10:21:04 ul_GaussianPyramidTiePointGeneratorProcessingLoop.cpp 186: INFO: Average shift for pyramid scene '1/5' is 'x = 0.014691141027320 y = -0.033336012674554' pixels
+2016-12-20T10:21:04 ul_GaussianPyramidTiePointGeneratorProcessingLoop.cpp 127: INFO: <<----PYRAMID LOOP (2/5)----------------->>
+2016-12-20T10:21:04 ul_FixedLocationChips.cpp 170: INFO: Processing 100%      
+2016-12-20T10:21:04 ul_FixedLocationChips.cpp 171: INFO: Generated '63' chips
+2016-12-20T10:21:04 ul_TiePointGenerator.cpp 166: INFO: Correlating '63' chips of size '31x31' on a search window of size '46x46' using a 'CCOEFF_NORM' correlator
+2016-12-20T10:21:04 ul_CorrelationHandler.cpp 174: INFO: Starting chip correlation
+2016-12-20T10:21:04 ul_TiePointGenerator.cpp 195: INFO: Removing duplicate GCPs
+2016-12-20T10:21:04 ul_TiePointGenerator.cpp 219: INFO: Removed '0' duplicate GCPs
+2016-12-20T10:21:04 ul_TiePointGenerator.cpp 285: INFO: Obtained '63' chips
+2016-12-20T10:21:04 ul_TiePointGeneratorHullReject.cpp 29: INFO: Not going to reject GCPs based on the image outer hulls
+2016-12-20T10:21:04 ul_GaussianPyramidTiePointGeneratorProcessingLoop.cpp 186: INFO: Average shift for pyramid scene '2/5' is 'x = 0.041529518770903 y = -0.003110852063957' pixels
+2016-12-20T10:21:04 ul_GaussianPyramidTiePointGeneratorProcessingLoop.cpp 127: INFO: <<----PYRAMID LOOP (3/5)----------------->>
+2016-12-20T10:21:04 ul_FixedLocationChips.cpp 170: INFO: Processing 100%      
+2016-12-20T10:21:04 ul_FixedLocationChips.cpp 171: INFO: Generated '76' chips
+2016-12-20T10:21:04 ul_TiePointGenerator.cpp 166: INFO: Correlating '76' chips of size '31x31' on a search window of size '46x46' using a 'CCOEFF_NORM' correlator
+2016-12-20T10:21:04 ul_CorrelationHandler.cpp 174: INFO: Starting chip correlation
+2016-12-20T10:21:04 ul_TiePointGenerator.cpp 195: INFO: Removing duplicate GCPs
+2016-12-20T10:21:04 ul_TiePointGenerator.cpp 219: INFO: Removed '0' duplicate GCPs
+2016-12-20T10:21:04 ul_TiePointGenerator.cpp 285: INFO: Obtained '76' chips
+2016-12-20T10:21:04 ul_TiePointGeneratorHullReject.cpp 29: INFO: Not going to reject GCPs based on the image outer hulls
+2016-12-20T10:21:04 ul_GaussianPyramidTiePointGeneratorProcessingLoop.cpp 186: INFO: Average shift for pyramid scene '3/5' is 'x = 0.001010195332119 y = 0.013237053628080' pixels
+2016-12-20T10:21:04 ul_GaussianPyramidTiePointGeneratorProcessingLoop.cpp 127: INFO: <<----PYRAMID LOOP (4/5)----------------->>
+2016-12-20T10:21:05 ul_FixedLocationChips.cpp 170: INFO: Processing 100%      
+2016-12-20T10:21:05 ul_FixedLocationChips.cpp 171: INFO: Generated '88' chips
+2016-12-20T10:21:05 ul_TiePointGenerator.cpp 166: INFO: Correlating '88' chips of size '31x31' on a search window of size '46x46' using a 'CCOEFF_NORM' correlator
+2016-12-20T10:21:05 ul_CorrelationHandler.cpp 174: INFO: Starting chip correlation
+2016-12-20T10:21:05 ul_TiePointGenerator.cpp 195: INFO: Removing duplicate GCPs
+2016-12-20T10:21:05 ul_TiePointGenerator.cpp 219: INFO: Removed '0' duplicate GCPs
+2016-12-20T10:21:05 ul_TiePointGenerator.cpp 285: INFO: Obtained '88' chips
+2016-12-20T10:21:05 ul_TiePointGeneratorHullReject.cpp 29: INFO: Not going to reject GCPs based on the image outer hulls
+2016-12-20T10:21:05 ul_GaussianPyramidTiePointGeneratorProcessingLoop.cpp 186: INFO: Average shift for pyramid scene '4/5' is 'x = 0.028458433705919 y = 0.002585211800268' pixels
+2016-12-20T10:21:05 ul_GaussianPyramidTiePointGeneratorProcessingLoop.cpp 127: INFO: <<----PYRAMID LOOP (5/5)----------------->>
+2016-12-20T10:21:05 ul_FixedLocationChips.cpp 170: INFO: Processing 100%      
+2016-12-20T10:21:05 ul_FixedLocationChips.cpp 171: INFO: Generated '95' chips
+2016-12-20T10:21:05 ul_TiePointGenerator.cpp 166: INFO: Correlating '95' chips of size '31x31' on a search window of size '46x46' using a 'CCOEFF_NORM' correlator
+2016-12-20T10:21:07 ul_CorrelationHandler.cpp 174: INFO: Starting chip correlation
+2016-12-20T10:21:07 ul_TiePointGenerator.cpp 195: INFO: Removing duplicate GCPs
+2016-12-20T10:21:07 ul_TiePointGenerator.cpp 219: INFO: Removed '0' duplicate GCPs
+2016-12-20T10:21:07 ul_TiePointGenerator.cpp 285: INFO: Obtained '95' chips
+2016-12-20T10:21:08 ul_GcpHullRejection.cpp 264: INFO: Hull trim size is '31'
+2016-12-20T10:21:11 ul_ConvKernelToImage.h 178: INFO: 100%   
+2016-12-20T10:21:11 ul_ConvKernelToImage.h 178: INFO: 100%   
+2016-12-20T10:21:11 ul_ConvexHull.cpp 142: INFO: Sorting '441722' data points
+2016-12-20T10:21:11 ul_ConvexHull.cpp 142: INFO: Sorting '1083160' data points
+2016-12-20T10:21:11 ul_ConvexHull.cpp 119: INFO: CConvexHull 100%      
+2016-12-20T10:21:11 ul_ConvexHull.cpp 119: INFO: CConvexHull 100%      
+2016-12-20T10:21:12 ul_ConvexHull.cpp 119: INFO: CConvexHull 100%      
+2016-12-20T10:21:12 ul_ConvexHull.cpp 119: INFO: CConvexHull 100%      
+2016-12-20T10:21:16 ul_GcpOutlierTestingHullGenThread.cpp 235: INFO: TrimHullArea 100%     
+2016-12-20T10:21:18 ul_GcpOutlierTestingHullGenThread.cpp 235: INFO: TrimHullArea 100%     
+2016-12-20T10:21:18 ul_GcpHullRejection.cpp 155: INFO: RejectGcps 100%     
+2016-12-20T10:21:18 ul_GcpHullRejection.cpp 275: INFO: Rejected a total of '0' GCP on the outer hull edges
+2016-12-20T10:21:18 ul_GaussianPyramidTiePointGeneratorProcessingLoop.cpp 205: INFO: Average shift in pixels are 'x = 0.032365943609122 y = 0.011038294084636'
+2016-12-20T10:21:18 ul_TiledGaussianPyramidTiePointGenerator.cpp 457: INFO: Removing duplicate GCPs
+2016-12-20T10:21:18 ul_TiledGaussianPyramidTiePointGenerator.cpp 481: INFO: Removed '7' duplicate GCPs
+2016-12-20T10:21:30 GenerateResults.cpp 57: INFO: Residual X = 0.116857964454341 Y = 0.117312935325642
+2016-12-20T10:21:30 GenerateResults.cpp 81: INFO: Residual histogram
+	Green 167
+	Teal 3
+	Blue 2
+	Yellow 0
+	Red 0
