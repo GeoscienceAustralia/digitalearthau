@@ -1,11 +1,7 @@
-import datetime
-import json
-import pathlib
-import uuid
-from pathlib import Path
+import sys
+from functools import partial
 
 import structlog
-import sys
 
 from digitalearthau import serialise
 
@@ -27,7 +23,7 @@ def init_logging():
             structlog.processors.format_exc_info,
             # Coloured output if to terminal.
             CleanConsoleRenderer() if sys.stdout.isatty()
-            else structlog.processors.JSONRenderer(serializer=serialise.to_lenient_json),
+            else structlog.processors.JSONRenderer(serializer=partial(serialise.to_lenient_json, compact=True)),
         ],
         context_class=dict,
         cache_logger_on_first_use=True,
