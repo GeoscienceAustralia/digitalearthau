@@ -1,0 +1,5 @@
+CMD = '"/projects/v10/PinkMatter/LPGS4.1.4110/build/LAM/ot_subsetter" LC81140740812016270LGN00 "/jobfs/local/9456756.r-man2/lpgs-work8PT8e5/dee471ed-5aa5-46f5-96b5-1e1ea91ffee4/lpgs-work/pm/L0RA" "/jobfs/local/9456756.r-man2/lpgs-work8PT8e5/dee471ed-5aa5-46f5-96b5-1e1ea91ffee4/lpgs-work/pm/L0RP/114_080_080" --scene LC81140802016270LGN00'
+-------------------------------------------------------
+2016-10-13 20:52:15  Subsetter    27827 src/OTS/ot_subsetter.c     231  INFO scene_id LC81140802016270LGN00
+2016-10-13 20:52:15  Subsetter    27827 src/OTS/ot_subroutines.c    1730  INFO oli start: 34288
+2016-10-13 20:52:15  Subsetter    27827 src/OTS/ot_subroutines.c    1731  INFO oli stop: 41788
