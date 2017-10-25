@@ -11,7 +11,6 @@ import structlog
 from dateutil import tz
 
 from datacube.index._api import Index
-from datacube.index.postgres import _api
 from datacube.utils import uri_to_local_path
 from digitalearthau import paths
 from digitalearthau.collections import Collection
@@ -26,10 +25,6 @@ from integration_tests.conftest import DatasetOnDisk
 # pylint: disable=too-many-locals, protected-access, redefined-outer-name
 
 
-def index_dataset(ds: DatasetOnDisk):
-    add_dataset(ds.collection.index_, ds.id_, ds.uri)
-
-
 def test_new_and_old_on_disk(test_dataset: DatasetOnDisk,
                              integration_test_data: Path,
                              other_dataset: DatasetOnDisk):
@@ -42,7 +37,7 @@ def test_new_and_old_on_disk(test_dataset: DatasetOnDisk,
 
     missing_dataset = other_dataset
 
-    index_dataset(missing_dataset)
+    missing_dataset.add_to_index()
 
     # Make it missing
     shutil.rmtree(str(missing_dataset.path.parent))
@@ -74,7 +69,7 @@ def test_replace_on_disk(test_dataset: DatasetOnDisk,
     """
     File on disk has a different id to the one in the index (ie. it was quietly reprocessed)
     """
-    index_dataset(test_dataset)
+    test_dataset.add_to_index()
 
     # move a new one over the top
     shutil.move(other_dataset.path, str(uri_to_local_path(test_dataset.uri)))
@@ -105,8 +100,8 @@ def test_move_on_disk(test_dataset: DatasetOnDisk,
     """
     Indexed dataset was moved over the top of another indexed dataset
     """
-    index_dataset(test_dataset)
-    index_dataset(other_dataset)
+    test_dataset.add_to_index()
+    other_dataset.add_to_index()
 
     shutil.move(other_dataset.path, str(uri_to_local_path(test_dataset.uri)))
 
@@ -138,9 +133,9 @@ def test_archived_on_disk(test_dataset: DatasetOnDisk,
     A an already-archived dataset on disk. Should report it, but not touch the file (trash_archived is false)
     """
     # archived_on_disk = DatasetLite(on_disk.id, archived_time=(datetime.utcnow() - timedelta(days=5)))
-    index_dataset(test_dataset)
-    test_dataset.collection.index_.datasets.archive([test_dataset.dataset.id])
-    archived_time = test_dataset.collection.index_.datasets.get(test_dataset.dataset.id).archived_time
+    test_dataset.add_to_index()
+    test_dataset.archive_in_index()
+    archived_time = test_dataset.get_index_record().archived_time
 
     assert uri_to_local_path(test_dataset.uri).exists(), "On-disk location should exist before test begins."
     _check_sync(
@@ -169,7 +164,7 @@ def test_detect_corrupt_existing(test_dataset: DatasetOnDisk,
     """If a dataset exists but cannot be read, report as corrupt"""
     path = uri_to_local_path(test_dataset.uri)
 
-    index_dataset(test_dataset)
+    test_dataset.add_to_index()
     assert path.exists()
 
     # Overwrite with corrupted file.
@@ -235,7 +230,7 @@ def test_remove_missing(test_dataset: DatasetOnDisk,
     trashed_path = test_dataset.base_path.joinpath(*_TRASH_PREFIX, *test_dataset.path_offset)
 
     # Add a second dataset that's indexed. Should not be touched!
-    index_dataset(other_dataset)
+    other_dataset.add_to_index()
 
     assert other_dataset.path.exists()
 
@@ -281,9 +276,10 @@ def test_is_trashed(test_dataset: DatasetOnDisk,
 
     # Same test, but trash_archived=True, so it should be renamed to the.
     register_base_directory(root)
-    index_dataset(test_dataset)
+    test_dataset.add_to_index()
+    test_dataset.archive_in_index(archived_dt=archived_dt)
+
     archived_on_disk = DatasetLite(test_dataset.dataset.id, archived_time=archived_dt)
-    archive_dataset(archived_dt, test_dataset.dataset.id, test_dataset.collection)
 
     trashed_path = test_dataset.base_path.joinpath(*_TRASH_PREFIX, *test_dataset.path_offset)
 
@@ -319,22 +315,6 @@ def test_is_trashed(test_dataset: DatasetOnDisk,
     else:
         assert not trashed_path.exists(), "File shouldn't have been trashed."
         assert test_dataset.path.exists(), "On-disk location should still be in place."
-
-
-def archive_dataset(archived_dt, dataset_id, collection):
-    # Hack until ODC allows specifying the archive time.
-    with collection.index_._db.begin() as transaction:
-        # SQLAlchemy queries require "column == None", not "column is None" due to operator overloading:
-        # pylint: disable=singleton-comparison
-        transaction._connection.execute(
-            _api.DATASET.update().where(
-                _api.DATASET.c.id == dataset_id
-            ).where(
-                _api.DATASET.c.archived == None
-            ).values(
-                archived=archived_dt
-            )
-        )
 
 
 def _check_sync(expected_paths: Iterable[str],

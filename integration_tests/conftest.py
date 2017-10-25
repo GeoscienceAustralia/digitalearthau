@@ -18,11 +18,14 @@ from datacube.index._api import Index
 from datacube.index.postgres import PostgresDb
 from datacube.index.postgres import _dynamic
 from datacube.index.postgres.tables import _core
+from datacube.model import Dataset
 from digitalearthau import paths, collections
 from digitalearthau.collections import Collection
-from digitalearthau.index import DatasetLite
+from digitalearthau.index import DatasetLite, add_dataset
 from digitalearthau.paths import register_base_directory
 from digitalearthau.uiutil import CleanConsoleRenderer
+from datacube.index.postgres import _api
+from datetime import datetime
 
 try:
     from yaml import CSafeLoader as SafeLoader
@@ -165,7 +168,9 @@ ON_DISK2_OFFSET = ('LS8_OLITIRS_OTH_P51_GALPGS01-032_114_080_20150924', 'ga-meta
 
 class DatasetOnDisk(NamedTuple):
     """
-    Information on a test dataset. The properties are recorded here separately so tests can verify them.
+    Information on a test dataset, including the file location and collection it should belong to.
+
+    The properties are recorded here separately so tests can verify them.
     """
     collection: Collection
 
@@ -195,6 +200,17 @@ class DatasetOnDisk(NamedTuple):
     def parent(self) -> Optional[DatasetLite]:
         """Source datasets that will be indexed if on_disk1 is indexed"""
         return DatasetLite(self.parent_id) if self.parent_id else None
+
+    def add_to_index(self):
+        """Add to the current collection's index"""
+        add_dataset(self.collection.index_, self.id_, self.uri)
+
+    def archive_in_index(self, archived_dt: datetime = None):
+        archive_dataset(self.id_, self.collection, archived_dt=archived_dt)
+
+    def get_index_record(self) -> Optional[Dataset]:
+        """If this is indexed, return the full Dataset record"""
+        return self.collection.index_.datasets.get(self.id_)
 
 
 # We want one fixture to return all of this data. Returning a tuple was getting unwieldy.
@@ -285,3 +301,22 @@ lineage:
         base_path=integration_test_data,
         path_offset=('LS8_INDEXED_ALREADY', 'ga-metadata.yaml')
     )
+
+
+def archive_dataset(dataset_id, collection, archived_dt=None):
+    if archived_dt is None:
+        collection.index_.datasets.archive([dataset_id])
+    else:
+        # Hack until ODC allows specifying the archive time.
+        with collection.index_._db.begin() as transaction:
+            # SQLAlchemy queries require "column == None", not "column is None" due to operator overloading:
+            # pylint: disable=singleton-comparison
+            transaction._connection.execute(
+                _api.DATASET.update().where(
+                    _api.DATASET.c.id == dataset_id
+                ).where(
+                    _api.DATASET.c.archived == None
+                ).values(
+                    archived=archived_dt
+                )
+            )
