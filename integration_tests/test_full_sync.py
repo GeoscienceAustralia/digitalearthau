@@ -18,7 +18,7 @@ from digitalearthau.index import DatasetLite, add_dataset
 from digitalearthau.paths import register_base_directory
 from digitalearthau.sync import differences as mm, fixes, scan, Mismatch
 
-from integration_tests.conftest import DatasetForTests
+from integration_tests.conftest import DatasetForTests, as_map
 
 
 # These are ok in tests.
@@ -40,7 +40,7 @@ def test_new_and_old_on_disk(test_dataset: DatasetForTests,
     missing_dataset.add_to_index()
 
     # Make it missing
-    shutil.rmtree(str(missing_dataset.path.parent))
+    shutil.rmtree(str(missing_dataset.copyable_path))
 
     _check_sync(
         collection=test_dataset.collection,
@@ -402,16 +402,3 @@ def _check_mismatch_fix(index: Index,
     # Now perform fixes, check that they match expected.
     fixes.fix_mismatches(mismatches, index, **fix_settings)
     assert expected_index_result == as_map(index)
-
-
-def as_map(index: Index) -> Mapping[DatasetLite, Iterable[str]]:
-    """
-    All contained (dataset_id, [location]) values, to check test results.
-    """
-    return dict(
-        (
-            DatasetLite(dataset.id, archived_time=dataset.archived_time),
-            tuple(dataset.uris)
-        )
-        for dataset in index.datasets.search()
-    )
