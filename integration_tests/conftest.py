@@ -166,12 +166,15 @@ ON_DISK2_ID = DatasetLite(uuid.UUID('10c4a9fe-2890-11e6-8ec8-a0000100fe80'))
 ON_DISK2_OFFSET = ('LS8_OLITIRS_OTH_P51_GALPGS01-032_114_080_20150924', 'ga-metadata.yaml')
 
 
-class DatasetOnDisk(NamedTuple):
+class DatasetForTests(NamedTuple):
     """
-    Information on a test dataset, including the file location and collection it should belong to.
+    A test dataset, including the file location and collection it should belong to.
 
-    The properties are recorded here separately so tests can verify them.
+    When your test starts the dataset will be on disk but not yet indexed. Call add_to_index() and others as needed.
+
+    All properties are recorded here separately so tests can verify them independently.
     """
+    # The test collection this should belong to
     collection: Collection
 
     id_: uuid.UUID
@@ -224,7 +227,7 @@ class SimpleEnv(NamedTuple):
 
 
 @pytest.fixture
-def test_dataset(integration_test_data, dea_index) -> DatasetOnDisk:
+def test_dataset(integration_test_data, dea_index) -> DatasetForTests:
     """A dataset on disk, with corresponding collection"""
     test_data = integration_test_data
 
@@ -255,7 +258,7 @@ def test_dataset(integration_test_data, dea_index) -> DatasetOnDisk:
     cache_path = test_data.joinpath('cache')
     cache_path.mkdir()
 
-    return DatasetOnDisk(
+    return DatasetForTests(
         collection=ls8_collection,
         id_=uuid.UUID('86150afc-b7d5-4938-a75e-3445007256d3'),
         base_path=test_data,
@@ -265,7 +268,7 @@ def test_dataset(integration_test_data, dea_index) -> DatasetOnDisk:
 
 
 @pytest.fixture
-def other_dataset(integration_test_data: Path, test_dataset: DatasetOnDisk) -> DatasetOnDisk:
+def other_dataset(integration_test_data: Path, test_dataset: DatasetForTests) -> DatasetForTests:
     """
     A dataset matching the same collection as test_dataset, but not indexed.
     """
@@ -295,7 +298,7 @@ lineage:
         containing_dir=integration_test_data
     )
 
-    return DatasetOnDisk(
+    return DatasetForTests(
         collection=test_dataset.collection,
         id_=ds_id,
         base_path=integration_test_data,
