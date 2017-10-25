@@ -5,7 +5,7 @@ import shutil
 import uuid
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Tuple, NamedTuple, Optional
+from typing import Tuple, NamedTuple, Optional, Mapping, Iterable
 
 import pytest
 import structlog
@@ -192,6 +192,19 @@ class DatasetForTests(NamedTuple):
         return self.base_path.joinpath(*self.path_offset)
 
     @property
+    def copyable_path(self):
+        """Get the path containing the whole dataset that can be copied on disk.
+
+        The recorded self.path of datasets is the path to the metadata, but "packaged" datasets
+        such as scenes have a folder hierarchy, and to copy them we want to copy the whole scene
+        folder, not just the metadata file.
+
+        (This will return a folder for a scene, and will be identical to self.path for typical NetCDFs)
+        """
+        package_path, _ = paths.get_dataset_paths(self.path)
+        return package_path
+
+    @property
     def uri(self):
         return self.path.as_uri()
 
@@ -323,3 +336,16 @@ def archive_dataset(dataset_id, collection, archived_dt=None):
                     archived=archived_dt
                 )
             )
+
+
+def as_map(index: Index) -> Mapping[DatasetLite, Iterable[str]]:
+    """
+    All contained (dataset_id, [location]) values, to check test results.
+    """
+    return dict(
+        (
+            DatasetLite(dataset.id, archived_time=dataset.archived_time),
+            tuple(dataset.uris)
+        )
+        for dataset in index.datasets.search()
+    )
