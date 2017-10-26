@@ -68,7 +68,13 @@ def indexed(index: Index,
     for product, datasets in index.datasets.search_by_product(**expressions):
         expected_count = product_counts.get(product.name, 0)
         count, trash_count = _cleanup_datasets(
-            index, product, datasets, dry_run, latest_time_to_archive, only_redundant, expected_count
+            index, product, datasets, expected_count, dry_run, latest_time_to_archive, only_redundant,
+            arguments=dict(
+                query=expressions,
+                dry_run=dry_run,
+                only_redundant=only_redundant,
+                min_trash_age_hours=min_trash_age_hours
+            )
         )
         total_count += count
         total_trash_count += trash_count
@@ -79,10 +85,11 @@ def indexed(index: Index,
 def _cleanup_datasets(index: Index,
                       product: DatasetType,
                       datasets: Iterable[Dataset],
+                      expected_count: int,
                       dry_run: bool,
                       latest_time_to_archive: datetime,
                       only_redundant: bool,
-                      expected_count: int):
+                      arguments: dict):
     count = 0
     trash_count = 0
 
@@ -91,8 +98,9 @@ def _cleanup_datasets(index: Index,
     echo(f"Cleaning {style(product.name, bold=True)}", err=True)
     echo(f"  Expect {expected_count} datasets")
     echo(f"  Output {work_path}")
-    uiutil.init_logging(work_path.joinpath('execution.jsonl').open('a'))
+    uiutil.init_logging(work_path.joinpath('log.jsonl').open('a'))
     log = structlog.getLogger("cleanup-indexed").bind(product=product.name)
+    log.info('arguments', arguments=arguments)
     log.info("cleanup.product.start", expected_count=expected_count, product=product.name)
 
     with click.progressbar(datasets,
