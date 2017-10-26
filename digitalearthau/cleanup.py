@@ -6,8 +6,12 @@ from pathlib import Path
 
 import click
 import structlog
+import sys
+
+from click import echo
 from dateutil import tz
 
+from datacube.index._api import Index
 from datacube.ui import click as ui
 from digitalearthau import paths, uiutil
 
@@ -38,44 +42,70 @@ def main():
               help='Only trash locations with a second active location')
 @ui.pass_index()
 @ui.parsed_search_expressions
-def indexed(index, expressions, dry_run, only_redundant, min_trash_age_hours):
+def indexed(index: Index,
+            expressions: dict,
+            dry_run: bool,
+            only_redundant: bool,
+            min_trash_age_hours: int):
     uiutil.init_logging()
 
     _LOG.info('query', query=expressions)
-    datasets = index.datasets.search(**expressions)
+
+    product_counts = {product.name: count for product, count in index.datasets.count_by_product(**expressions)}
+
+    echo(f"{len(product_counts)} product(s) to scan; around {sum(product_counts.values())} datasets", err=True)
 
     latest_time_to_archive = _as_utc(datetime.utcnow()) - timedelta(hours=min_trash_age_hours)
 
-    count = 0
-    trash_count = 0
-    for dataset in datasets:
-        count += 1
+    total_count = 0
+    total_trash_count = 0
 
-        log = _LOG.bind(dataset_id=str(dataset.id))
+    for product, datasets in index.datasets.search_by_product(**expressions):
+        count = 0
+        trash_count = 0
+        expected_count = product_counts[product.name]
+        log = _LOG.bind(product=product.name)
+        _LOG.info("cleanup.product.start", expected_count=expected_count, product=product.name)
 
-        archived_uri_times = index.datasets.get_archived_location_times(dataset.id)
-        if not archived_uri_times:
-            log.debug('dataset.nothing_archived')
-            continue
+        with click.progressbar(datasets,
+                               label=f'{product.name} cleanup',
+                               length=expected_count,
+                               # stderr should be used for runtime information, not stdout
+                               file=sys.stderr) as dataset_iter:
+            for dataset in dataset_iter:
+                count += 1
 
-        if only_redundant:
-            if dataset.uris is not None and len(dataset.uris) == 0:
-                # This active dataset has no active locations to replace the one's we're archiving.
-                # Probably a mistake? Don't trash the archived ones yet.
-                log.warning("dataset.noactive", archived_paths=archived_uri_times)
-                continue
+                log = log.bind(dataset_id=str(dataset.id))
 
-        for uri, archived_time in archived_uri_times:
-            if _as_utc(archived_time) > latest_time_to_archive:
-                log.info('dataset.too_recent')
-                continue
+                archived_uri_times = index.datasets.get_archived_location_times(dataset.id)
+                if not archived_uri_times:
+                    log.debug('dataset.nothing_archived')
+                    continue
 
-            paths.trash_uri(uri, dry_run=dry_run, log=log)
-            if not dry_run:
-                index.datasets.remove_location(dataset.id, uri)
-            trash_count += 1
+                if only_redundant:
+                    if dataset.uris is not None and len(dataset.uris) == 0:
+                        # This active dataset has no active locations to replace the one's we're archiving.
+                        # Probably a mistake? Don't trash the archived ones yet.
+                        log.warning("dataset.noactive", archived_paths=archived_uri_times)
+                        continue
 
-    _LOG.info("cleanup.finish", count=count, trash_count=trash_count)
+                for uri, archived_time in archived_uri_times:
+                    if _as_utc(archived_time) > latest_time_to_archive:
+                        log.info('dataset.too_recent')
+                        continue
+
+                    paths.trash_uri(uri, dry_run=dry_run, log=log)
+                    if not dry_run:
+                        index.datasets.remove_location(dataset.id, uri)
+                    trash_count += 1
+
+                log = log.unbind('dataset_id')
+
+        log.info("cleanup.product.finish", count=count, trash_count=trash_count)
+        total_count += count
+        total_trash_count += trash_count
+
+    _LOG.info("cleanup.finish", count=total_count, trash_count=total_trash_count)
 
 
 @main.command('files', help="""Trash the given dataset paths directly.
