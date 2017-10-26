@@ -47,13 +47,29 @@ def indexed(index: Index,
             dry_run: bool,
             only_redundant: bool,
             min_trash_age_hours: int):
-    uiutil.init_logging()
-
-    _LOG.info('query', query=expressions)
+    echo(f"query: {expressions!r}", err=True)
 
     product_counts = {product.name: count for product, count in index.datasets.count_by_product(**expressions)}
-
     echo(f"{len(product_counts)} product(s) to scan; around {sum(product_counts.values())} datasets", err=True)
+
+    if not product_counts:
+        echo("No datasets for search. Finished.")
+        return
+
+    # We only support cleaning one product, due to this bug:
+    # https://github.com/opendatacube/datacube-core/pull/317
+    # (fixed in 1.5.4), and because we'll need to handle work directory output (below)
+    # separately per product.
+    if len(product_counts) > 1:
+        echo("\nRunning against multiple products is not yet supported.\n"
+             "Please limit your search arguments to one product.", err=True)
+        return 1
+
+    # Only supporting one product for now: output to a work directory under it.
+    [product_name] = product_counts.keys()
+    work_path = paths.get_product_work_directory(product_name, task_type='clean')
+    echo(f"Recording {product_name} to {work_path}", err=True)
+    uiutil.init_logging(work_path.joinpath('execution.jsonl').open('a'))
 
     latest_time_to_archive = _as_utc(datetime.utcnow()) - timedelta(hours=min_trash_age_hours)
 
@@ -63,13 +79,14 @@ def indexed(index: Index,
     for product, datasets in index.datasets.search_by_product(**expressions):
         count = 0
         trash_count = 0
-        expected_count = product_counts[product.name]
+        expected_count = product_counts.get(product.name, 0)
         log = _LOG.bind(product=product.name)
         _LOG.info("cleanup.product.start", expected_count=expected_count, product=product.name)
 
         with click.progressbar(datasets,
-                               label=f'{product.name} cleanup',
                                length=expected_count,
+                               label=f'cleaning {product.name}',
+                               bar_template='[%(bar)s] %(info)s %(label)s',
                                # stderr should be used for runtime information, not stdout
                                file=sys.stderr) as dataset_iter:
             for dataset in dataset_iter:
@@ -105,7 +122,7 @@ def indexed(index: Index,
         total_count += count
         total_trash_count += trash_count
 
-    _LOG.info("cleanup.finish", count=total_count, trash_count=total_trash_count)
+    echo(f"Finished {total_count} datasets; {total_trash_count} trashed.", err=True)
 
 
 @main.command('files', help="""Trash the given dataset paths directly.
