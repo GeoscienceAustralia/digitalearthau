@@ -8,14 +8,14 @@ import click
 import structlog
 import sys
 
-from click import echo
+from click import echo, style
 from dateutil import tz
+from typing import Iterable
 
 from datacube.index._api import Index
+from datacube.model import DatasetType, Dataset
 from datacube.ui import click as ui
 from digitalearthau import paths, uiutil
-
-_LOG = structlog.getLogger('cleanup-archived')
 
 TRASH_OPTIONS = ui.compose(
     click.option('--min-trash-age-hours',
@@ -52,24 +52,13 @@ def indexed(index: Index,
     product_counts = {product.name: count for product, count in index.datasets.count_by_product(**expressions)}
     echo(f"{len(product_counts)} product(s) to scan; around {sum(product_counts.values())} datasets", err=True)
 
-    if not product_counts:
-        echo("No datasets for search. Finished.")
-        return
-
-    # We only support cleaning one product, due to this bug:
+    # We only support cleaning one product on our pgbouncer, due to this bug:
     # https://github.com/opendatacube/datacube-core/pull/317
-    # (fixed in 1.5.4), and because we'll need to handle work directory output (below)
-    # separately per product.
-    if len(product_counts) > 1:
-        echo("\nRunning against multiple products is not yet supported.\n"
-             "Please limit your search arguments to one product.", err=True)
+    # pylint: disable=protected-access
+    if len(product_counts) > 1 and ('6543' in str(index.datasets._db.url)):
+        echo("\nRunning against multiple products will fail on port 6432 at NCI until AGDC 1.5.4 is released.\n"
+             "Change port to 5432 or limit your search arguments to one product.", err=True)
         return 1
-
-    # Only supporting one product for now: output to a work directory under it.
-    [product_name] = product_counts.keys()
-    work_path = paths.get_product_work_directory(product_name, task_type='clean')
-    echo(f"Recording {product_name} to {work_path}", err=True)
-    uiutil.init_logging(work_path.joinpath('execution.jsonl').open('a'))
 
     latest_time_to_archive = _as_utc(datetime.utcnow()) - timedelta(hours=min_trash_age_hours)
 
@@ -77,52 +66,70 @@ def indexed(index: Index,
     total_trash_count = 0
 
     for product, datasets in index.datasets.search_by_product(**expressions):
-        count = 0
-        trash_count = 0
         expected_count = product_counts.get(product.name, 0)
-        log = _LOG.bind(product=product.name)
-        _LOG.info("cleanup.product.start", expected_count=expected_count, product=product.name)
-
-        with click.progressbar(datasets,
-                               length=expected_count,
-                               label=f'cleaning {product.name}',
-                               bar_template='[%(bar)s] %(info)s %(label)s',
-                               # stderr should be used for runtime information, not stdout
-                               file=sys.stderr) as dataset_iter:
-            for dataset in dataset_iter:
-                count += 1
-
-                log = log.bind(dataset_id=str(dataset.id))
-
-                archived_uri_times = index.datasets.get_archived_location_times(dataset.id)
-                if not archived_uri_times:
-                    log.debug('dataset.nothing_archived')
-                    continue
-
-                if only_redundant:
-                    if dataset.uris is not None and len(dataset.uris) == 0:
-                        # This active dataset has no active locations to replace the one's we're archiving.
-                        # Probably a mistake? Don't trash the archived ones yet.
-                        log.warning("dataset.noactive", archived_paths=archived_uri_times)
-                        continue
-
-                for uri, archived_time in archived_uri_times:
-                    if _as_utc(archived_time) > latest_time_to_archive:
-                        log.info('dataset.too_recent')
-                        continue
-
-                    paths.trash_uri(uri, dry_run=dry_run, log=log)
-                    if not dry_run:
-                        index.datasets.remove_location(dataset.id, uri)
-                    trash_count += 1
-
-                log = log.unbind('dataset_id')
-
-        log.info("cleanup.product.finish", count=count, trash_count=trash_count)
+        count, trash_count = _cleanup_datasets(
+            index, product, datasets, dry_run, latest_time_to_archive, only_redundant, expected_count
+        )
         total_count += count
         total_trash_count += trash_count
 
     echo(f"Finished {total_count} datasets; {total_trash_count} trashed.", err=True)
+
+
+def _cleanup_datasets(index: Index,
+                      product: DatasetType,
+                      datasets: Iterable[Dataset],
+                      dry_run: bool,
+                      latest_time_to_archive: datetime,
+                      only_redundant: bool,
+                      expected_count: int):
+    count = 0
+    trash_count = 0
+
+    # Record results to the product's work folder.
+    work_path = paths.get_product_work_directory(product.name, task_type='clean')
+    echo(f"Cleaning {style(product.name, bold=True)}", err=True)
+    echo(f"  Expect {expected_count} datasets")
+    echo(f"  Output {work_path}")
+    uiutil.init_logging(work_path.joinpath('execution.jsonl').open('a'))
+    log = structlog.getLogger("cleanup-indexed").bind(product=product.name)
+    log.info("cleanup.product.start", expected_count=expected_count, product=product.name)
+
+    with click.progressbar(datasets,
+                           length=expected_count,
+                           # stderr should be used for runtime information, not stdout
+                           file=sys.stderr) as dataset_iter:
+        for dataset in dataset_iter:
+            count += 1
+
+            log = log.bind(dataset_id=str(dataset.id))
+
+            archived_uri_times = index.datasets.get_archived_location_times(dataset.id)
+            if not archived_uri_times:
+                log.debug('dataset.nothing_archived')
+                continue
+
+            if only_redundant:
+                if dataset.uris is not None and len(dataset.uris) == 0:
+                    # This active dataset has no active locations to replace the one's we're archiving.
+                    # Probably a mistake? Don't trash the archived ones yet.
+                    log.warning("dataset.noactive", archived_paths=archived_uri_times)
+                    continue
+
+            for uri, archived_time in archived_uri_times:
+                if _as_utc(archived_time) > latest_time_to_archive:
+                    log.info('dataset.too_recent')
+                    continue
+
+                paths.trash_uri(uri, dry_run=dry_run, log=log)
+                if not dry_run:
+                    index.datasets.remove_location(dataset.id, uri)
+                trash_count += 1
+
+            log = log.unbind('dataset_id')
+
+    log.info("cleanup.product.finish", count=count, trash_count=trash_count)
+    return count, trash_count
 
 
 @main.command('files', help="""Trash the given dataset paths directly.
@@ -135,7 +142,8 @@ But only if all indexed datasets are archived
                 nargs=-1)
 @TRASH_OPTIONS
 def trash_individual_files(index, dry_run, min_trash_age_hours, files):
-    _LOG.info('input_paths', input_paths=files)
+    glog = structlog.getLogger('cleanup-paths')
+    glog.info('input_paths', input_paths=files)
 
     latest_time_to_archive = _as_utc(datetime.utcnow()) - timedelta(hours=min_trash_age_hours)
 
@@ -143,17 +151,16 @@ def trash_individual_files(index, dry_run, min_trash_age_hours, files):
     trash_count = 0
     for file in files:
         count += 1
-        path = Path(file).absolute()
-        log = _LOG.bind(path=path)
+        log = glog.bind(path=(Path(file).absolute()))
 
-        uri = path.as_uri()
+        uri = Path(file).absolute().as_uri()
         datasets = list(index.datasets.get_datasets_for_location(uri))
 
         if datasets:
             # Can't trash file if any linked datasets are still active. They should be archived first.
             active_dataset_ids = [dataset.id for dataset in datasets if dataset.is_active]
             if active_dataset_ids:
-                _LOG.warning('dataset.is_active', dataset_ids=active_dataset_ids)
+                log.warning('dataset.is_active', dataset_ids=active_dataset_ids)
                 continue
 
             assert all(d.is_archived for d in datasets)
@@ -177,7 +184,7 @@ def trash_individual_files(index, dry_run, min_trash_age_hours, files):
         paths.trash_uri(uri, dry_run=dry_run, log=log)
         trash_count += 1
 
-    _LOG.info("cleanup.finish", count=count, trash_count=trash_count)
+    glog.info("cleanup.finish", count=count, trash_count=trash_count)
 
 
 def _as_utc(d):
