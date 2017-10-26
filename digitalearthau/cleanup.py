@@ -67,14 +67,24 @@ def indexed(index: Index,
 
     for product, datasets in index.datasets.search_by_product(**expressions):
         expected_count = product_counts.get(product.name, 0)
+
+        # Record results to the product's work folder.
+        work_path = paths.get_product_work_directory(product.name, task_type='clean')
+        uiutil.init_logging(work_path.joinpath('log.jsonl').open('a'))
+        log = structlog.getLogger("cleanup-indexed").bind(product=product.name)
+        echo(f"Cleaning {style(product.name, bold=True)}", err=True)
+        echo(f"  Expect {expected_count} datasets", err=True)
+        echo(f"  Output {work_path}", err=True)
+
+        log.info('arguments', arguments=dict(
+            query=expressions,
+            dry_run=dry_run,
+            only_redundant=only_redundant,
+            min_trash_age_hours=min_trash_age_hours
+        ))
         count, trash_count = _cleanup_datasets(
-            index, product, datasets, expected_count, dry_run, latest_time_to_archive, only_redundant,
-            arguments=dict(
-                query=expressions,
-                dry_run=dry_run,
-                only_redundant=only_redundant,
-                min_trash_age_hours=min_trash_age_hours
-            )
+            # Yuck. Too many arguments.
+            index, product, datasets, expected_count, dry_run, latest_time_to_archive, only_redundant, log
         )
         total_count += count
         total_trash_count += trash_count
@@ -89,18 +99,10 @@ def _cleanup_datasets(index: Index,
                       dry_run: bool,
                       latest_time_to_archive: datetime,
                       only_redundant: bool,
-                      arguments: dict):
+                      log):
     count = 0
     trash_count = 0
 
-    # Record results to the product's work folder.
-    work_path = paths.get_product_work_directory(product.name, task_type='clean')
-    echo(f"Cleaning {style(product.name, bold=True)}", err=True)
-    echo(f"  Expect {expected_count} datasets")
-    echo(f"  Output {work_path}")
-    uiutil.init_logging(work_path.joinpath('log.jsonl').open('a'))
-    log = structlog.getLogger("cleanup-indexed").bind(product=product.name)
-    log.info('arguments', arguments=arguments)
     log.info("cleanup.product.start", expected_count=expected_count, product=product.name)
 
     with click.progressbar(datasets,
@@ -119,7 +121,7 @@ def _cleanup_datasets(index: Index,
 
             if only_redundant:
                 if dataset.uris is not None and len(dataset.uris) == 0:
-                    # This active dataset has no active locations to replace the one's we're archiving.
+                    # This active dataset has no active locations to replace the ones we're archiving.
                     # Probably a mistake? Don't trash the archived ones yet.
                     log.warning("dataset.noactive", archived_paths=archived_uri_times)
                     continue
