@@ -9,26 +9,41 @@ from digitalearthau import uiutil
 _LOG = structlog.getLogger('archive-locationless')
 
 
-@click.command(help="Scan the index to archive duplicates and defunct/replaced datasets. "
-                    "Intended to be used after running sync: when filesystem and index is consistent")
+@click.command()
 @click.option('--debug',
               is_flag=True,
               help='Enable debug logging')
 @click.option('--check-locationless/--no-check-locationless',
               is_flag=True,
               default=True,
-              help='Check/archive any datasets without locations')
+              help='Check any datasets without locations')
+@click.option('--archive-locationless',
+              is_flag=True,
+              default=False,
+              help="Archive datasets with no active locations (forces --check-locationless)")
 @click.option('--check-ancestors',
               is_flag=True,
               help='Check if ancestor/source datasets are still active/valid')
 @click.option('--check-siblings',
               is_flag=True,
               help='Check if ancestor datasets have other children of the same type (they may be duplicates)')
-@click.option('--dry-run',
-              is_flag=True,
-              help="Don't make any changes (ie. don't archive anything)")
 @ui.parsed_search_expressions
-def main(expressions, dry_run, debug, check_locationless, check_ancestors, check_siblings):
+def main(expressions, archive_locationless, debug, check_locationless, check_ancestors, check_siblings):
+    """
+    Find problem datasets using the index.
+
+    - Datasets with no active locations (can be archived with --archive-locationless)
+
+    - Datasets whose ancestors have been archived. (perhaps they've been reprocessed?)
+
+    Intended to be used after running sync: when filesystem and index is consistent. Ideally
+    you've synced the ancestor collections too.
+
+    (the sync tool cannot do these checks "live", as we don't know how many locations there are of a dataset
+    until the entire folder has been synced, and ideally the ancestors synced too.
+    TODO: This could be merged into it as a post-processing step, although it's less safe than sync if
+    the index is being updated concurrently by another)
+    """
     uiutil.init_logging()
     with Datacube() as dc:
         _LOG.info('query', query=expressions)
@@ -39,12 +54,12 @@ def main(expressions, dry_run, debug, check_locationless, check_ancestors, check
             # Archive if it has no locations.
             # (the sync tool removes locations that don't exist anymore on disk,
             # but can't archive datasets as another path may be added later during the sync)
-            if check_locationless:
+            if check_locationless or archive_locationless:
                 if dataset.uris is not None and len(dataset.uris) == 0:
                     _LOG.info("dataset.locationless", dataset_id=str(dataset.id))
-                    if not dry_run:
+                    if archive_locationless:
                         dc.index.datasets.archive([dataset.id])
-                    archive_count += 1
+                        archive_count += 1
 
             # If an ancestor is archived, it may have been replaced. This one may need
             # to be reprocessed too.
