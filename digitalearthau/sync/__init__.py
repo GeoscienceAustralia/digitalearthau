@@ -67,6 +67,11 @@ def cli(index: Index,
         min_trash_age_hours: bool,
         jobs: int,
         **fix_settings):
+    """
+    Update a datacube index to the state of the filesystem.
+
+    This will update locations, trash or index new datasets, depending on the chosen options.
+    """
     uiutil.init_logging()
 
     if fix_settings['index_missing'] and fix_settings['trash_missing']:

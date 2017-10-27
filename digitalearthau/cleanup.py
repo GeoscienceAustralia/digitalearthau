@@ -1,6 +1,3 @@
-"""
-Find and trash archived locations of active datasets.
-"""
 from datetime import datetime, timedelta
 from pathlib import Path
 
@@ -34,7 +31,7 @@ def main():
     pass
 
 
-@main.command('indexed', help="Search the index for archived locations")
+@main.command('indexed')
 @TRASH_OPTIONS
 @click.option('--only-redundant/--all',
               is_flag=True,
@@ -47,6 +44,14 @@ def indexed(index: Index,
             dry_run: bool,
             only_redundant: bool,
             min_trash_age_hours: int):
+    """
+    Find and trash archived locations using an index search.
+
+    But only if they were archived more than  --min-trash-age-hours ago (default: 3 days)
+
+    By default it will also only trash a location if you've got another active location for it (as is
+    the case if the archived location was stacked or dea-move'd)
+    """
     echo(f"query: {expressions!r}", err=True)
 
     product_counts = {product.name: count for product, count in index.datasets.count_by_product(**expressions)}
@@ -142,16 +147,20 @@ def _cleanup_datasets(index: Index,
     return count, trash_count
 
 
-@main.command('files', help="""Trash the given dataset paths directly.
-
-But only if all indexed datasets are archived
-""")
+@main.command('files')
 @ui.pass_index()
 @click.argument('files',
                 type=click.Path(exists=True, readable=True),
                 nargs=-1)
 @TRASH_OPTIONS
 def trash_individual_files(index, dry_run, min_trash_age_hours, files):
+    """
+    Trash the given datasets if they're archived.
+
+    This expects exact dataset paths: *.nc files, or ga-metadata.yaml for scenes.
+
+    But only if they were archived more than  --min-trash-age-hours ago (default: 3 days)
+    """
     glog = structlog.getLogger('cleanup-paths')
     glog.info('input_paths', input_paths=files)
 
@@ -161,9 +170,9 @@ def trash_individual_files(index, dry_run, min_trash_age_hours, files):
     trash_count = 0
     for file in files:
         count += 1
-        log = glog.bind(path=(Path(file).absolute()))
+        log = glog.bind(path=(Path(file).resolve()))
 
-        uri = Path(file).absolute().as_uri()
+        uri = Path(file).resolve().as_uri()
         datasets = list(index.datasets.get_datasets_for_location(uri))
 
         if datasets:

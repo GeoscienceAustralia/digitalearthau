@@ -100,6 +100,9 @@ class Collection(NamedTuple):
         return out
 
     def iter_fs_paths_within(self, p: Path):
+        """
+        Iterate over all filesystem paths of this collection that are inside the given folder
+        """
         return (
             Path(path).absolute()
             for file_pattern in self.constrained_file_patterns(p)
