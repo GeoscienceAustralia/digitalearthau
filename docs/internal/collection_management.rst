@@ -7,16 +7,16 @@ Collection Management
 
 The DEA repository contains a set of tools for managing the collections on disk at NCI.
 
-See their help commands for information:
+See their help commands for specific information:
 
 .. code-block:: bash
 
-    # Update the index, find problems.
+    # Update the index, find problems with datasets.
     dea-sync --help
     dea-coherence --help
     dea-duplicates --help
 
-    # Move datasets between disks safely and incrementally (keeping the index updated).
+    # Move datasets between disks safely and incrementally (updating the index).
     dea-move --help
 
     # Trash archived datasets
@@ -25,30 +25,29 @@ See their help commands for information:
     # Submit a sync job to PBS
     dea-submit-sync --help
 
-Many of these expect you to operate on collections:
+Note that many of these operate on collections, not products. To perform a move or sync on a new product you
+may first need add it as a collection.
 
 ================================================
-Collections
+Defining Collections
 ================================================
 
-The Open Data Cube keeps track of where individual datasets are, but not where datasets as a whole should be.
+The Open Data Cube core keeps track of where individual datasets are in a product, but not where datasets as a
+whole should be (such as which filesystems).
 
-Knowing where they should be is currently done by this DEA repository, as it's specific to the NCI environment
-(filesystem paths etc).
+Knowing "where they should be" is currently handled in this DEA repository as the list of collections.
 
-A collection defines datacube query arguments and folder patterns that should contain the same set of datasets,
-as well as information on how to treat those datasets.
+A collection defines:
 
-- Tools like the sync tool can then scan the index and disk and fix problems in both directions.
+- datacube query arguments and folder patterns that should contain the same set of datasets. The sync tool, for
+ example, can then iterate the two to find mismatches in both directions.
+- how datasets in the collection should be treated: is an unindexed file found on disk corrupt, or newly arrived?
 
-- The move tool can use it to "safely" perform moves, ensuring they stay in correct structure and that unrelated
-files are not carried with them.
-
-The set of collections are defined in `collections.py`_ which is currently acting like a config file.
+The set of NCI DEA collections is currently in `collections.py`_.
 
 .. _collections.py: https://github.com/GeoscienceAustralia/digitalearthau/blob/develop/digitalearthau/collections.py
 
-Example collections:
+Examples:
 
 .. code-block:: python
 
