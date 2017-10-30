@@ -157,6 +157,9 @@ def mismatches_for_collection(collection: Collection,
         for r in result:
             yield from r
 
+        pool.close()
+        pool.join()
+
 
 def _find_uri_mismatches_eager(index: Index, uri: str) -> List[Mismatch]:
     return list(_find_uri_mismatches(index, uri))
