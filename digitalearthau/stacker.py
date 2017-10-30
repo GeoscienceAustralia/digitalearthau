@@ -131,25 +131,25 @@ def generate(index: Index,
              tag: str):
     _LOG.info('Tag: %s', tag)
 
-    config, task_desc = _make_config_and_description(index, Path(task_desc_file))
+    config, task_desc = _make_config_and_description(index, Path(task_desc_file), tag)
 
     num_tasks_saved = task_app.save_tasks(
         config,
         stacker.make_stacker_tasks(index, config, query=task_desc.parameters.query),
         task_desc.runtime_state.task_serialisation_path
     )
-    _LOG.info('Found %d tasks', num_tasks_saved)
+    _LOG.info('Found and saved %d tasks', num_tasks_saved)
 
     if not num_tasks_saved:
         _LOG.info("No tasks. Finishing.")
-        sys.exit(0)
+        return
 
     nodes, walltime = estimate_job_size(num_tasks_saved)
     _LOG.info('Will request %d nodes and %s time', nodes, walltime)
 
     if no_qsub:
         _LOG.info('Skipping submission due to --no-qsub')
-        return 0
+        return
 
     submit_subjob(
         name='run',
@@ -172,18 +172,18 @@ def generate(index: Index,
     )
 
 
-def _make_config_and_description(index: Index, task_desc_path: Path) -> Tuple[dict, TaskDescription]:
+def _make_config_and_description(index: Index, task_desc_path: Path, tag: str) -> Tuple[dict, TaskDescription]:
     task_desc = serialise.load_structure(task_desc_path, TaskDescription)
 
-    task_time: datetime = task_desc.task_dt
     app_config = task_desc.runtime_state.config_path
 
     config = paths.read_document(app_config)
 
-    # TODO: This carries over the old behaviour of each load. Should probably be replaced with *tag*
-    config['task_timestamp'] = int(task_time.timestamp())
     config['app_config_file'] = Path(app_config)
+    config['tag'] = tag
     config = stacker.make_stacker_config(index, config)
+    # 'taskfile_version' was previous set to the current datetime. Use 'tag' to make it easier to trace.
+    config['taskfile_version'] = tag
 
     return config, task_desc
 
