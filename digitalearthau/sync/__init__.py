@@ -55,7 +55,7 @@ _LOG = structlog.get_logger()
 @click.option('-o', '--output', 'output_file',
               type=click.Path(writable=True, dir_okay=False),
               help="Output to file instead of stdout")
-@click.argument('collections', 'collection_specifiers',
+@click.argument('collection_specifiers',
                 # help = "Either names of collections or subfolders of collections"
                 nargs=-1, )
 @ui.pass_index(expect_initialised=False)
