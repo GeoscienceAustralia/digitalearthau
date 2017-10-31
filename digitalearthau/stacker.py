@@ -41,13 +41,9 @@ from datacube_apps.stacker import stacker
 from digitalearthau import __version__
 from digitalearthau import paths, serialise
 # pylint: disable=invalid-name
-from digitalearthau.qsub import with_qsub_runner, QSubLauncher, TaskRunner
+from digitalearthau.qsub import with_qsub_runner, TaskRunner
 from digitalearthau.runners.model import TaskDescription
 from digitalearthau.runners.util import init_task_app, submit_subjob
-
-tag_option = click.option('--tag', type=str,
-                          default='notset',
-                          help='Unique id for the job')
 
 _LOG = logging.getLogger(__file__)
 APP_NAME = 'dea-stacker'
@@ -68,7 +64,6 @@ def cli():
               help='Limit the process to a particular year')
 @click.option('--no-qsub', is_flag=True, default=False,
               help="Skip submitting job")
-@tag_option
 @task_app.app_config_option
 @ui.config_option
 @ui.verbose_option
@@ -78,10 +73,7 @@ def submit(index: Index,
            project: str,
            queue: str,
            no_qsub: bool,
-           time_range: Tuple[datetime, datetime],
-           tag: str):
-    _LOG.info('Tag: %s', tag)
-
+           time_range: Tuple[datetime, datetime]):
     app_config_path = Path(app_config).resolve()
     app_config = paths.read_document(app_config_path)
 
@@ -107,16 +99,19 @@ def submit(index: Index,
         command=[
             'generate', '-v', '-v',
             '--task-desc', str(task_path),
-            '--tag', tag
         ],
         qsub_params=dict(
             mem='20G',
             wd=True,
             ncpus=1,
             walltime='1h',
-            name='stack-generate-{}'.format(tag)
+            name='stack-generate-{}'.format(make_tag(task_desc))
         )
     )
+
+
+def make_tag(task_desc: TaskDescription):
+    return "{:%Y%m%d%H%M%S}".format(task_desc.task_dt)
 
 
 @cli.command(help='Generate Tasks into file and Queue PBS job to process them')
@@ -126,16 +121,12 @@ def submit(index: Index,
     required=True,
     type=click.Path(exists=True, readable=True, writable=False, dir_okay=False)
 )
-@tag_option
 @ui.verbose_option
 @ui.log_queries_option
 @ui.pass_index(app_name=APP_NAME)
 def generate(index: Index,
              task_desc_file: str,
-             no_qsub: bool,
-             tag: str):
-    _LOG.info('Tag: %s', tag)
-
+             no_qsub: bool):
     config, task_desc = _make_config_and_description(index, Path(task_desc_file), tag)
 
     num_tasks_saved = task_app.save_tasks(
@@ -165,10 +156,9 @@ def generate(index: Index,
             '-vv',
             '--task-desc', str(task_desc_file),
             '--celery', 'pbs-launch',
-            '--tag', tag,
         ],
         qsub_params=dict(
-            name='stack-run-{}'.format(tag),
+            name='stack-run-{}'.format(make_tag(task_desc)),
             mem='small',
             wd=True,
             nodes=nodes,
@@ -177,7 +167,7 @@ def generate(index: Index,
     )
 
 
-def _make_config_and_description(index: Index, task_desc_path: Path, tag: str) -> Tuple[dict, TaskDescription]:
+def _make_config_and_description(index: Index, task_desc_path: Path) -> Tuple[dict, TaskDescription]:
     task_desc = serialise.load_structure(task_desc_path, TaskDescription)
 
     app_config = task_desc.runtime_state.config_path
@@ -186,10 +176,8 @@ def _make_config_and_description(index: Index, task_desc_path: Path, tag: str) -
 
     config['output_type'] = config['output_product']  # TODO: Temporary until ODC code is updated
     config['app_config_file'] = Path(app_config)
-    config['tag'] = tag
     config = stacker.make_stacker_config(index, config)
-    # 'taskfile_version' was previous set to the current datetime. Use 'tag' to make it easier to trace.
-    config['taskfile_version'] = tag  # TODO: Maybe fix, make ODC-stacker know about tags...
+    config['taskfile_version'] = make_tag(task_desc)
 
     return config, task_desc
 
@@ -225,19 +213,15 @@ def estimate_job_size(num_tasks):
 )
 @with_qsub_runner()
 @task_app.load_tasks_option
-@tag_option
 @ui.config_option
 @ui.verbose_option
 @ui.pass_index(app_name=APP_NAME)
 def run(index,
         dry_run: bool,
-        tag: str,
         task_desc_file: str,
-        qsub: QSubLauncher,
         runner: TaskRunner,
         *args, **kwargs):
     _LOG.info('Starting DEA Stacker processing...')
-    _LOG.info('Tag: %r', tag)
 
     task_desc = serialise.load_structure(Path(task_desc_file), TaskDescription)
     config, tasks = task_app.load_tasks(task_desc.runtime_state.task_serialisation_path)
