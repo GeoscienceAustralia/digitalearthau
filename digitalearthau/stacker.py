@@ -189,9 +189,6 @@ def estimate_job_size(num_tasks):
     cores_per_node = 16
     task_time_mins = 5
 
-    # TODO: Tune this code:
-    # "We have found for best throughput 25 nodes can produce about 11.5 tiles per minute per node,
-    # with a CPU efficiency of about 96%."
     if num_tasks < max_nodes * cores_per_node:
         nodes = ceil(num_tasks / cores_per_node / 4)  # If fewer tasks than max cores, try to get 4 tasks to a core
     else:
@@ -201,6 +198,7 @@ def estimate_job_size(num_tasks):
     wall_time_mins = '{mins}m'.format(mins=(task_time_mins * tasks_per_cpu))
 
     #    return nodes, wall_time_mins
+    # TODO: Replace with something specific to stacker
     return 1, '120m'
 
 
@@ -212,15 +210,13 @@ def estimate_job_size(num_tasks):
     type=click.Path(exists=True, readable=True, writable=False, dir_okay=False)
 )
 @with_qsub_runner()
-@task_app.load_tasks_option
 @ui.config_option
 @ui.verbose_option
 @ui.pass_index(app_name=APP_NAME)
 def run(index,
         dry_run: bool,
         task_desc_file: str,
-        runner: TaskRunner,
-        *args, **kwargs):
+        runner: TaskRunner):
     _LOG.info('Starting DEA Stacker processing...')
 
     task_desc = serialise.load_structure(Path(task_desc_file), TaskDescription)
