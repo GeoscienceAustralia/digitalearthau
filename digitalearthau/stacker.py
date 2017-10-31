@@ -33,6 +33,8 @@ from typing import Tuple
 
 import click
 
+import datacube
+import digitalearthau
 from datacube.api.query import Query
 from datacube.index._api import Index
 from datacube.ui import click as ui
@@ -178,6 +180,7 @@ def _make_config_and_description(index: Index, task_desc_path: Path) -> Tuple[di
     config['app_config_file'] = Path(app_config)
     config = stacker.make_stacker_config(index, config)
     config['taskfile_version'] = make_tag(task_desc)
+    config['version'] = digitalearthau.__version__ + ' ' + datacube.__version__
 
     return config, task_desc
 
