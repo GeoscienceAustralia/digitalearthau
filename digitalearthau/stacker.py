@@ -127,7 +127,7 @@ def make_tag(task_desc: TaskDescription):
 def generate(index: Index,
              task_desc_file: str,
              no_qsub: bool):
-    config, task_desc = _make_config_and_description(index, Path(task_desc_file), tag)
+    config, task_desc = _make_config_and_description(index, Path(task_desc_file))
 
     num_tasks_saved = task_app.save_tasks(
         config,
