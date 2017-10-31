@@ -216,7 +216,8 @@ def estimate_job_size(num_tasks):
 def run(index,
         dry_run: bool,
         task_desc_file: str,
-        runner: TaskRunner):
+        runner: TaskRunner,
+        qsub):
     _LOG.info('Starting DEA Stacker processing...')
 
     task_desc = serialise.load_structure(Path(task_desc_file), TaskDescription)
