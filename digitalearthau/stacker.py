@@ -140,7 +140,7 @@ def generate(index: Index,
 
     num_tasks_saved = task_app.save_tasks(
         config,
-        stacker.make_stacker_tasks(index, config, query=task_desc.parameters.query),
+        stacker.make_stacker_tasks(index, config, **task_desc.parameters.query),
         task_desc.runtime_state.task_serialisation_path
     )
     _LOG.info('Found and saved %d tasks', num_tasks_saved)
