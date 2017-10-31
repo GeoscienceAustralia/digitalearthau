@@ -3,22 +3,26 @@ A DEA version of `stacker` from ODC
 
 Uses the exact same implementation, but wraps it in QSUB Running/Event logging goodness.
 
-As such, it is a three step process:
+As such, it is a three step process, with the second two happening automatically after the first:
+
 1. Submit
-    Submit a single threaded PBS job to calculate how big the requested job is.
- - Executes very quickly
- - Creates the 'job' directory which groups logs and metadata about all the steps
- - Schedules a 'Generate' job to run through PBS
+
+ Submit a single threaded PBS job to calculate how big the requested job is.
+ This step executes very quickly, creates the 'job' directory which groups log files
+ and metadata for the full job, then finally schedules a 'generate' job to run using
+ PBS qsub.
 
 2. Generate
-    Run as a single threaded process inside PBS
-    calculate how much work is required,
-    write the tasks out to a task file,
-    Schedule another PBS job of an appropriate size to 'Run' the stacking
+
+ Run as a single threaded process inside PBS to:
+ calculate how much work is required,
+ write the tasks out to a task file and then
+ schedule another PBS job of an appropriate size to 'Run' the stacking
 
 3. Run
-  Do all of the stacking. Spin up a Redis queue and use celery to farm the tasks
-  out across a large PBS job.
+
+ Do all of the stacking. Spin up a Redis queue and use celery to farm the tasks
+ out across a large PBS job.
 """
 import logging
 from datetime import datetime
@@ -49,7 +53,7 @@ _LOG = logging.getLogger(__file__)
 APP_NAME = 'dea-stacker'
 
 
-@click.group(help='DEA Stacker')
+@click.group(help='DEA Stacker\n\n' + __doc__)
 @click.version_option(version=__version__)
 def cli():
     pass
@@ -82,7 +86,7 @@ def submit(index: Index,
     app_config = paths.read_document(app_config_path)
 
     task_desc, task_path = init_task_app(
-        job_type="stacking",
+        job_type="stack",
         source_products=[app_config['output_product']],  # With stacker, source=output
         output_products=[app_config['output_product']],  # With stacker, source=output
         # TODO: Use @datacube.ui.click.parsed_search_expressions to allow params other than time from the cli?
