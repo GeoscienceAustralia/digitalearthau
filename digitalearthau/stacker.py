@@ -83,7 +83,8 @@ def submit(index: Index,
 
     task_desc, task_path = init_task_app(
         job_type="stacking",
-        source_products=[app_config['source_product']],
+        source_products=[app_config['output_product']],  # With stacker, source=output
+        output_products=[app_config['output_product']],  # With stacker, source=output
         # TODO: Use @datacube.ui.click.parsed_search_expressions to allow params other than time from the cli?
         datacube_query_args=Query(index=index, time=time_range).search_terms,
         app_config_path=app_config_path,
@@ -179,11 +180,12 @@ def _make_config_and_description(index: Index, task_desc_path: Path, tag: str) -
 
     config = paths.read_document(app_config)
 
+    config['output_type'] = config['output_product']  # TODO: Temporary until ODC code is updated
     config['app_config_file'] = Path(app_config)
     config['tag'] = tag
     config = stacker.make_stacker_config(index, config)
     # 'taskfile_version' was previous set to the current datetime. Use 'tag' to make it easier to trace.
-    config['taskfile_version'] = tag
+    config['taskfile_version'] = tag  # TODO: Maybe fix, make ODC-stacker know about tags...
 
     return config, task_desc
 
@@ -210,7 +212,7 @@ def estimate_job_size(num_tasks):
     return 1, '120m'
 
 
-@cli.command(help='Actually process generated task file')
+@cli.command(help='Process all tasks in a task file')
 @click.option('--dry-run', is_flag=True, default=False, help='Check if output files already exist')
 @click.option(
     '--task-desc', 'task_desc_file', help='Task environment description file',
@@ -230,7 +232,7 @@ def run(index,
         qsub: QSubLauncher,
         runner: TaskRunner,
         *args, **kwargs):
-    _LOG.info('Starting Fractional Cover processing...')
+    _LOG.info('Starting DEA Stacker processing...')
     _LOG.info('Tag: %r', tag)
 
     task_desc = serialise.load_structure(Path(task_desc_file), TaskDescription)
