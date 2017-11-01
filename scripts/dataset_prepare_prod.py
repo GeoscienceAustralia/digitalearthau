@@ -71,7 +71,7 @@ def prepare_datasets_netcdf(nc_file, prod_val, prod_type_val):
             }
         }
         return dict(itertools.chain(gl_dict.items(), loc_dict.items()))
-    elif prod_val == "item_v2_conf":
+    if prod_val == "item_v2_conf":
         loc_dict = {
             'image': {
                 'bands': {
@@ -83,7 +83,7 @@ def prepare_datasets_netcdf(nc_file, prod_val, prod_type_val):
             }
         }
         return dict(itertools.chain(gl_dict.items(), loc_dict.items()))
-    elif "count" in prod_val:
+    if "count" in prod_val:
         loc_dict = {
             'image': {
                 'bands': {
@@ -95,39 +95,39 @@ def prepare_datasets_netcdf(nc_file, prod_val, prod_type_val):
             }
         }
         return dict(itertools.chain(gl_dict.items(), loc_dict.items()))
-    else:  # assuming product has six bands
-        loc_dict = {
-            'image': {
-                'bands': {
-                    'blue': {
-                        'path': str(Path(nc_file).absolute()),
-                        'layer': 'blue'
-                    },
-                    'green': {
-                        'path': str(Path(nc_file).absolute()),
-                        'layer': 'green'
-                    },
-                    'red': {
-                        'path': str(Path(nc_file).absolute()),
-                        'layer': 'red'
-                    },
-                    'nir': {
-                        'path': str(Path(nc_file).absolute()),
-                        'layer': 'nir'
-                    },
-                    'swir1': {
-                        'path': str(Path(nc_file).absolute()),
-                        'layer': 'swir1'
-                    },
-                    'swir2': {
-                        'path': str(Path(nc_file).absolute()),
-                        'layer': 'swir2'
-                    }
+    # assuming product has six bands
+    loc_dict = {
+        'image': {
+            'bands': {
+                'blue': {
+                    'path': str(Path(nc_file).absolute()),
+                    'layer': 'blue'
+                },
+                'green': {
+                    'path': str(Path(nc_file).absolute()),
+                    'layer': 'green'
+                },
+                'red': {
+                    'path': str(Path(nc_file).absolute()),
+                    'layer': 'red'
+                },
+                'nir': {
+                    'path': str(Path(nc_file).absolute()),
+                    'layer': 'nir'
+                },
+                'swir1': {
+                    'path': str(Path(nc_file).absolute()),
+                    'layer': 'swir1'
+                },
+                'swir2': {
+                    'path': str(Path(nc_file).absolute()),
+                    'layer': 'swir2'
                 }
-            },
-            'lineage': {'source_datasets': {}},
-        }
-        return dict(itertools.chain(gl_dict.items(), loc_dict.items()))
+            }
+        },
+        'lineage': {'source_datasets': {}},
+    }
+    return dict(itertools.chain(gl_dict.items(), loc_dict.items()))
 
 
 @click.command(help="Prepare datasets for indexation into the Data Cube.")
