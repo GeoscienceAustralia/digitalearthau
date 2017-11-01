@@ -16,8 +16,7 @@ disable=no-self-use,
     wrong-import-order,
     ungrouped-imports,
     bad-whitespace,
-    len-as-condition,
-    no-else-return
+    len-as-condition
 
 # Disabled len-as-condition: Sometimes this allows more readable code as it's more explicit.
 # Eg.
