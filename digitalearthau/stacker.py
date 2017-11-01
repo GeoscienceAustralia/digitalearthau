@@ -188,9 +188,9 @@ def _make_config_and_description(index: Index, task_desc_path: Path) -> Tuple[di
 def estimate_job_size(num_tasks):
     """ Translate num_tasks to number of nodes and walltime
     """
-    max_nodes = 20
+    max_nodes = 5
     cores_per_node = 16
-    task_time_mins = 5
+    task_time_mins = 10
 
     if num_tasks < max_nodes * cores_per_node:
         nodes = ceil(num_tasks / cores_per_node / 4)  # If fewer tasks than max cores, try to get 4 tasks to a core
@@ -200,9 +200,7 @@ def estimate_job_size(num_tasks):
     tasks_per_cpu = ceil(num_tasks / (nodes * cores_per_node))
     wall_time_mins = '{mins}m'.format(mins=(task_time_mins * tasks_per_cpu))
 
-    #    return nodes, wall_time_mins
-    # TODO: Replace with something specific to stacker
-    return 1, '120m'
+    return nodes, wall_time_mins
 
 
 @cli.command(help='Process all tasks in a task file')
