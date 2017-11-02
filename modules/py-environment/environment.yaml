@@ -52,8 +52,6 @@ dependencies:
 - openblas
 - openssl
 - pandas
-- pathlib
-- pathlib2
 - pep8
 - pip
 - plotly

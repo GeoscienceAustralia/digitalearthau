@@ -37,7 +37,8 @@ def init_task_app(
     work_path = paths.get_product_work_directory(
         # First is the primary...
         output_product=output_products[0],
-        time=task_datetime
+        time=task_datetime,
+        task_type=job_type
     )
     _LOG.info("Created work directory %s", work_path)
 

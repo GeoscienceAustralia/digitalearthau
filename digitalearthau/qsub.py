@@ -646,8 +646,9 @@ def with_qsub_runner():
         state(ctx).qsize = value
 
     def capture_qsub(ctx, param, value):
+        if value is None:
+            return
         state(ctx).qsub = value
-        return value
 
     def decorate(f):
         opts = [
