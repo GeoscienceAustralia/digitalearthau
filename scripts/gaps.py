@@ -92,8 +92,7 @@ def common_product_kind(datacube, products):
         # treat these two to be equivalent
         if kind in ['landsat_l1_scene', 'landsat_scene']:
             return 'scene'
-        else:
-            return kind
+        return kind
 
     kinds = {product_kind(product) for product in products}
 
