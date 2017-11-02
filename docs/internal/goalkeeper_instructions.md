@@ -7,9 +7,9 @@ The role of the ``DEA Goalkeeper`` is periodically rotated (usually weekly)
 amongst the group of DEA developers who work at Geoscience Australia. If you are new to the ``DEA Goalkeeper`` role, this 
 document should help.
 
-# Goal Keeper Responsibilities
+## Goal Keeper Responsibilities
 
-## Level 1 Support
+### Level 1 Support
 This is a key responsibility for the ``DEA Goalkeeper``:
 
 - Support requests on the `#general` and `#develop` channels on [opendatacube Slack](https://opendatacube.slack.com/messages)
@@ -26,13 +26,13 @@ Each request or issue coming through any of these channels should be triaged as 
 
 If the request or issue is still outstanding, summarise it's status in your handover to the next ``DEA Goalkeeper``
 
-## Build manager
+### Build manager
 
 Review the ``Continuous Integration Status`` of each of the following projects
 
-* [digitalearthau](https://github.com/GeoscienceAustralia/digitalearthau/)
-* [datacube-core](https://github.com/opendatacube/datacube-core)
-* [dea-orchestration](https://github.com/GeoscienceAustralia/dea-orchestration)
+* [digitalearthau](https://github.com/GeoscienceAustralia/digitalearthau/)  [![Build Status](https://travis-ci.org/GeoscienceAustralia/digitalearthau.svg?branch=Update_rst_docs)](https://travis-ci.org/GeoscienceAustralia/digitalearthau)
+* [datacube-core](https://github.com/opendatacube/datacube-core)  [![Build Status](https://travis-ci.org/opendatacube/datacube-core.svg?branch=develop)](https://travis-ci.org/opendatacube/datacube-core)
+* [dea-orchestration](https://github.com/GeoscienceAustralia/dea-orchestration)  [![Build Status](https://travis-ci.org/GeoscienceAustralia/dea-orchestration.svg?branch=develop)](https://travis-ci.org/GeoscienceAustralia/dea-orchestration)
 
 They all should be ``green``. If the ``CI Loop`` gets broken:
 
@@ -43,9 +43,10 @@ BTW: The ``Continuous Integration Status`` (or ``CI Loop``) is the status indica
 project ``README`` file when viewed via the ``Github`` website.
 
 
-## Release manager
+### Release manager
 
-The ``DEA Goalkeeper`` will manage the release process when a new release is required
+The ``DEA Goalkeeper`` will manage the release process when a new release is required.
 
-* The DEA build docs are here: http://datacube-core.readthedocs.io/en/stable/about/release_process.html
-* The ODC build docs are here: http://geoscienceaustralia.github.io/digitalearthau/internal/release.html
+
+* The [DEA build docs](http://datacube-core.readthedocs.io/en/stable/about/release_process.html)
+* The [ODC build docs](http://geoscienceaustralia.github.io/digitalearthau/internal/release.html)
