@@ -32,7 +32,7 @@ Review the ``Continuous Integration Status`` of each of the following projects
 
 * [digitalearthau](https://github.com/GeoscienceAustralia/digitalearthau/)  [![Build Status](https://travis-ci.org/GeoscienceAustralia/digitalearthau.svg?branch=Update_rst_docs)](https://travis-ci.org/GeoscienceAustralia/digitalearthau)
 * [datacube-core](https://github.com/opendatacube/datacube-core)  [![Build Status](https://travis-ci.org/opendatacube/datacube-core.svg?branch=develop)](https://travis-ci.org/opendatacube/datacube-core)
-* [dea-orchestration](https://github.com/GeoscienceAustralia/dea-orchestration)  [![Build Status](https://travis-ci.org/GeoscienceAustralia/dea-orchestration.svg?branch=develop)](https://travis-ci.org/GeoscienceAustralia/dea-orchestration)
+* [dea-orchestration](https://github.com/GeoscienceAustralia/dea-orchestration)  [![Build Status](https://travis-ci.org/GeoscienceAustralia/dea-orchestration.svg?branch=master)](https://travis-ci.org/GeoscienceAustralia/dea-orchestration)
 
 They all should be ``green``. If the ``CI Loop`` gets broken:
 
