@@ -1,9 +1,6 @@
-import itertools
-import logging
-import os
 import shutil
 import uuid
-from contextlib import contextmanager
+from datetime import datetime
 from pathlib import Path
 from typing import Tuple, NamedTuple, Optional, Mapping, Iterable
 
@@ -11,26 +8,22 @@ import pytest
 import structlog
 import yaml
 
-import digitalearthau
 import digitalearthau.system
-from datacube.config import LocalConfig
 from datacube.index._api import Index
-from datacube.index.postgres import PostgresDb
-from datacube.index.postgres import _dynamic
-from datacube.index.postgres.tables import _core
+from datacube.index.postgres import _api
 from datacube.model import Dataset
 from digitalearthau import paths, collections
 from digitalearthau.collections import Collection
 from digitalearthau.index import DatasetLite, add_dataset
 from digitalearthau.paths import register_base_directory
 from digitalearthau.uiutil import CleanConsoleRenderer
-from datacube.index.postgres import _api
-from datetime import datetime
 
 try:
     from yaml import CSafeLoader as SafeLoader
 except ImportError:
     from yaml import SafeLoader
+
+pytest_plugins = "digitalearthau.testing"
 
 INTEGRATION_DEFAULT_CONFIG_PATH = Path(__file__).parent.joinpath('deaintegration.conf')
 
@@ -68,97 +61,6 @@ def integration_test_data(tmpdir):
     d = tmpdir.join('integration_data')
     shutil.copytree(str(INTEGRATION_TEST_DATA), str(d))
     return Path(str(d))
-
-
-@pytest.fixture
-def dea_index(index: Index):
-    """
-    An index initialised with DEA config (products)
-    """
-    # Add DEA metadata types, products. They'll be validated too.
-    digitalearthau.system.init_dea(
-        index,
-        with_permissions=False,
-        # No "product added" logging as it makes test runs too noisy
-        log_header=lambda *s: None,
-        log=lambda *s: None,
-
-    )
-
-    return index
-
-
-@pytest.fixture
-def datasets(dea_index):
-    # Add test datasets, collection definitions.
-    pass
-
-
-@pytest.fixture
-def integration_config_paths():
-    return (
-        str(INTEGRATION_DEFAULT_CONFIG_PATH),
-        os.path.expanduser('~/.datacube_integration.conf')
-    )
-
-
-@pytest.fixture
-def global_integration_cli_args(integration_config_paths):
-    """
-    The first arguments to pass to a cli command for integration test configuration.
-    """
-    # List of a config files in order.
-    return list(itertools.chain(*(('--config_file', f) for f in integration_config_paths)))
-
-
-@pytest.fixture
-def local_config(integration_config_paths):
-    return LocalConfig.find(integration_config_paths)
-
-
-@pytest.fixture()
-def db(local_config):
-    db = PostgresDb.from_config(local_config, application_name='dea-test-run', validate_connection=False)
-
-    # Drop and recreate tables so our tests have a clean db.
-    with db.connect() as connection:
-        _core.drop_db(connection._connection)
-    remove_dynamic_indexes()
-
-    # Disable informational messages since we're doing this on every test run.
-    with _increase_logging(_core._LOG) as _:
-        _core.ensure_db(db._engine)
-
-    # We don't need informational create/drop messages for every config change.
-    _dynamic._LOG.setLevel(logging.WARN)
-
-    yield db
-    db.close()
-
-
-@contextmanager
-def _increase_logging(log, level=logging.WARN):
-    previous_level = log.getEffectiveLevel()
-    log.setLevel(level)
-    yield
-    log.setLevel(previous_level)
-
-
-def remove_dynamic_indexes():
-    """
-    Clear any dynamically created indexes from the schema.
-    """
-    # Our normal indexes start with "ix_", dynamic indexes with "dix_"
-    for table in _core.METADATA.tables.values():
-        table.indexes.intersection_update([i for i in table.indexes if not i.name.startswith('dix_')])
-
-
-@pytest.fixture
-def index(db):
-    """
-    :type db: datacube.index.postgres._api.PostgresDb
-    """
-    return Index(db)
 
 
 ON_DISK2_ID = DatasetLite(uuid.UUID('10c4a9fe-2890-11e6-8ec8-a0000100fe80'))
