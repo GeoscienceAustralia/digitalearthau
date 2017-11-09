@@ -10,6 +10,23 @@ Notes for adding new products to NCI datacube
 .. warning ::
     This is still work in progress
 
+Profile/Module Setup
+--------------------
+
+These instructions assume you have access to the `v10` project on the NCI.
+
+Ensure you have access to both public and private modules, and have loaded
+the `dea-prod` module. It makes sense to include the `module use` commands
+in your `~/.modulerc` or `~/.bashrc` or `~/.bash_profile`, but run the
+`module load` command when required. The `dea-*` module include `DEA`
+customised versions of some of the `ODC` management tools.
+
+.. code-block:: bash
+
+    module use /g/data/v10/private/modules/modulefiles/
+    module use /g/data/v10/private/modules/modulefiles/
+    module load dea-prod
+
 
 Test Database Access
 --------------------
