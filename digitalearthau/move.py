@@ -48,7 +48,7 @@ def cli(index, dry_run, paths, destination, checksum):
     * Source datasets with failing checksums will be left as-is, with a warning logged.
 
     * Both the source(s) and destination paths are expected to be paths containing existing DEA collections.
-    (See collections.py)
+    (See collections.py and paths.py)
     """
     uiutil.init_logging()
     collections.init_nci_collections(index)

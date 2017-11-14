@@ -19,12 +19,14 @@ _LOG = structlog.getLogger()
 
 # This may eventually go to a config file...
 # ".trash" directories will be created at this level for any datasets contained within.
+# TODO: Could these be inferred from the collections paths?
 BASE_DIRECTORIES = [
     '/g/data/fk4/datacube',
     '/g/data/rs0/datacube',
     '/g/data/v10/reprocess',
     '/g/data/rs0/scenes',
     '/short/v10/scenes',
+    '/g/data/v10/public/data',
 ]
 
 # Use a static variable so that trashed items in the same run will be in the same trash bin.
