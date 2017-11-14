@@ -217,18 +217,29 @@ class FileMoveTask:
                 tmp_package = tmp_dir.joinpath(dataset_path.name)
                 log.info("copy.put", src=dataset_path, tmp_dest=tmp_package)
                 if not dry_run:
-                    shutil.copytree(str(dataset_path), str(tmp_package))
+                    shutil.copytree(dataset_path, tmp_package)
                     log.debug("copy.put.done")
-                    os.rename(str(tmp_package), str(dest_path))
+                    os.rename(tmp_package, dest_path)
                     log.debug("copy.rename.done")
 
                     # It should have been contained within the dataset, see the check in the constructor.
                     assert self.dest_metadata_path.exists()
             finally:
                 log.debug("tmp_dir.rm", tmp_dir=tmp_dir)
-                shutil.rmtree(str(tmp_dir), ignore_errors=True)
+                shutil.rmtree(tmp_dir, ignore_errors=True)
+        elif self.dest_path == self.dest_metadata_path:  # Metadata is contained within the dataset file. eg. *.nc
+            log.debug("copy.mkdir", dest=dest_path.parent)
+            fileutils.mkdir_p(dest_path.parent)
+
+            # We don't want to risk partially-copied files left on disk, so we copy to a tmp name
+            # then atomically rename into place.
+            tmp_name = tempfile.mktemp(prefix='.dea-mv-', dir=dest_path.parent)
+            log.info("copy.put", src=dataset_path, tmp_dest=tmp_name)
+            shutil.copy(dataset_path, tmp_name)
+            log.debug("copy.put.done")
+            os.rename(tmp_name, dest_path)
         else:
-            # .nc files and sibling files
+            # Datasets that dataset file + sibling
             raise NotImplementedError("TODO: dataset files not yet supported")
 
         return self.dest_uri
