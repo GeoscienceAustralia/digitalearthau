@@ -357,7 +357,43 @@ def init_nci_collections(index: Index):
     add_albers_collections('pq')
     add_albers_collections('nbar')
     add_albers_collections('nbart')
-    add_albers_collections('fc', project='fk4')
+
+    # Old FC
+    for sat in ['ls5', 'ls7', 'ls8']:
+        name = 'fc'
+        glob_offset = f'{sat.upper()}_TM_{name}/*_*/{sat.upper()}*{name}*.nc'
+        _add(
+            Collection(
+                name=f'{sat}_{name}_albers',
+                query={'product': '{sat}_{name}_albers'},
+                file_patterns=(
+                    f'/g/data/fk4/datacube/002/' + glob_offset,
+                    f'/g/data/fk4/datacube/.trash/' + glob_offset,
+                ),
+                unique=('time.lower.day', 'lat', 'lon'),
+                # Tiles default to trusting index over the disk: they were indexed at the end of the job,
+                # so unfinished tiles could be left on disk.
+                trust=Trust.INDEX
+            )
+        )
+    # New FC
+    for sat in ['ls5', 'ls7', 'ls8']:
+        name = 'fc'
+        glob_offset = f'{sat.upper()}_TM_{name}/*_*/{sat.upper()}*{name}*.nc'
+        _add(
+            Collection(
+                name=f'{sat}_{name}_albers_staging',
+                query={'product': '{sat}_{name}_albers_staging'},
+                file_patterns=(
+                    f'/g/data/v10/public/data/fc/' + glob_offset,
+                    f'/g/data/fk4/datacube/002/' + glob_offset,
+                ),
+                unique=('time.lower.day', 'lat', 'lon'),
+                # Tiles default to trusting index over the disk: they were indexed at the end of the job,
+                # so unfinished tiles could be left on disk.
+                trust=Trust.INDEX
+            )
+        )
 
     assert get_collection('ls5_fc_albers').file_patterns == (
         '/g/data/fk4/datacube/002/LS5_TM_FC/*_*/LS5*FC*.nc',
