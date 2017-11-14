@@ -14,6 +14,9 @@ from datacube.index.postgres import PostgresDb
 from datacube.index.postgres import _dynamic
 from datacube.index.postgres.tables import _core
 
+# These are unavoidable in pytests due to fixtures
+# pylint: disable=redefined-outer-name,protected-access,invalid-name
+
 try:
     from yaml import CSafeLoader as SafeLoader
 except ImportError:
