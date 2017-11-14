@@ -3,6 +3,7 @@ import logging
 import os
 from contextlib import contextmanager
 from pathlib import Path
+from typing import Iterable
 
 import pytest
 
@@ -41,7 +42,7 @@ def integration_config_paths():
 
 
 @pytest.fixture
-def global_integration_cli_args(integration_config_paths):
+def global_integration_cli_args(integration_config_paths: Iterable[str]):
     """
     The first arguments to pass to a cli command for integration test configuration.
     """
@@ -71,8 +72,8 @@ def _increase_logging(log, level=logging.WARN):
     log.setLevel(previous_level)
 
 
-@pytest.fixture()
-def db(local_config):
+@pytest.fixture
+def db(local_config: LocalConfig):
     db = PostgresDb.from_config(local_config, application_name='dea-test-run', validate_connection=False)
 
     # Drop and recreate tables so our tests have a clean db.
@@ -92,7 +93,7 @@ def db(local_config):
 
 
 @pytest.fixture
-def index(db):
+def index(db: PostgresDb):
     """
     :type db: datacube.index.postgres._api.PostgresDb
     """
