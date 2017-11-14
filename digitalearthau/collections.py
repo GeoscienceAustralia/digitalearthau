@@ -10,7 +10,7 @@ import fnmatch
 import glob
 from enum import Enum, auto
 from pathlib import Path
-from typing import Iterable, Optional, List, Dict, NamedTuple, Tuple
+from typing import Iterable, Optional, List, Dict, NamedTuple, Sequence
 
 from datacube.index._api import Index
 
@@ -20,9 +20,9 @@ class Trust(Enum):
     Which side do we trust in a sync? The disk, or the index?
     'None' means don't do anything when there's an unknown dataset (they'll have to be indexed elsewhere)
     """
-    nothing = auto()
-    index = auto()
-    disk = auto()
+    NOTHING = auto()
+    INDEX = auto()
+    DISK = auto()
 
 
 class Collection(NamedTuple):
@@ -30,17 +30,17 @@ class Collection(NamedTuple):
     # The query args needed to get all of this collection from the datacube index
     query: dict
     # The file glob patterns to iterate all files on disk (NCI collections are all file:// locations)
-    file_patterns: Tuple[str, ...]
-
-    # The fields that together uniquely identify a dataset (for finding duplicates)
-    unique: Tuple[str, ...] = None
+    file_patterns: Sequence[str]
 
     index_: Index = None
+
+    # The fields that together uniquely identify a dataset (for finding duplicates)
+    unique: Sequence[str] = None
 
     # If something is archived, how many days before we can delete it? None means never
     delete_archived_after_days: float = None
 
-    trust: Trust = Trust.nothing
+    trust: Trust = Trust.NOTHING
 
     def iter_fs_paths(self):
         return (
@@ -198,9 +198,9 @@ def init_nci_collections(index: Index):
             file_patterns=(
                 '/g/data/v10/repackaged/rawdata/0/[0-9][0-9][0-9][0-9]/[0-9][0-9]/*/ga-metadata.yaml',
             ),
-            unique=('time.lower.day', 'platform'),
             index_=index,
-            trust=Trust.disk
+            unique=('time.lower.day', 'platform'),
+            trust=Trust.DISK
         )
     )
 
@@ -210,12 +210,11 @@ def init_nci_collections(index: Index):
             name,
             query,
             file_patterns=file_patterns,
-            index_=index,
             unique=('time.lower.day', 'sat_path.lower', 'sat_row.lower'),
             delete_archived_after_days=delete_archived_after_days,
             # Scenes default to trusting disk. They're atomically written to the destination,
             # and the jobs themselves wont index.
-            trust=Trust.disk
+            trust=Trust.DISK
         )
 
     # Level 1
@@ -319,11 +318,11 @@ def init_nci_collections(index: Index):
                     'LS5_TM_{name}/*_*/LS5*{name}*.nc'.format(project=project,
                                                               name=name.upper()),
                 ),
-                unique=('time.lower.day', 'lat', 'lon'),
                 index_=index,
+                unique=('time.lower.day', 'lat', 'lon'),
                 # Tiles default to trusting index over the disk: they were indexed at the end of the job,
                 # so unfinished tiles could be left on disk.
-                trust=Trust.index
+                trust=Trust.INDEX
             ),
             Collection(
                 name='ls7_{}_albers'.format(name),
@@ -333,11 +332,11 @@ def init_nci_collections(index: Index):
                     '*_*/LS7*{name}*.nc'.format(project=project,
                                                 name=name.upper()),
                 ),
-                unique=('time.lower.day', 'lat', 'lon'),
                 index_=index,
+                unique=('time.lower.day', 'lat', 'lon'),
                 # Tiles default to trusting index over the disk: they were indexed at the end of the job,
                 # so unfinished tiles could be left on disk.
-                trust=Trust.index
+                trust=Trust.INDEX
             ),
             Collection(
                 name='ls8_{}_albers'.format(name),
@@ -347,11 +346,11 @@ def init_nci_collections(index: Index):
                     '*_*/LS8*{name}*.nc'.format(project=project,
                                                 name=name.upper()),
                 ),
-                unique=('time.lower.day', 'lat', 'lon'),
                 index_=index,
+                unique=('time.lower.day', 'lat', 'lon'),
                 # Tiles default to trusting index over the disk: they were indexed at the end of the job,
                 # so unfinished tiles could be left on disk.
-                trust=Trust.index
+                trust=Trust.INDEX
             )
         )
 
