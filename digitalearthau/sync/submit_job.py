@@ -19,6 +19,7 @@ from click import style
 
 from datacube.index import index_connect
 from digitalearthau import collections
+from digitalearthau.collections import Trust
 from digitalearthau.paths import get_dataset_paths
 from digitalearthau.sync import scan
 
@@ -128,8 +129,8 @@ class SyncSubmission(object):
                 # Only complete scenes are written to fs, so '--index-missing' instead of trash.
 
                 trust_options = {
-                    'disk': ['--index-missing'],
-                    'index': ['--trash-missing'],
+                    Trust.DISK: ['--index-missing'],
+                    Trust.INDEX: ['--trash-missing'],
                 }
                 if task.collection.trust not in trust_options:
                     raise RuntimeError("Unknown trust type %r", task.collection.trust)
