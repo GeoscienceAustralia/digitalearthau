@@ -11,15 +11,15 @@ from integration_tests.conftest import DatasetForTests, freeze_index
 
 
 @pytest.fixture
-def target_directory(tmpdir) -> Path:
+def destination_path(tmpdir) -> Path:
     """A directory that datasets can be moved to or from.
 
     Provides a temp directory that is registered with the `digitalearthau.paths` module as a base directory.
     """
-    target = Path(tmpdir) / 'target_dir'
-    target.mkdir(parents=True)
-    paths.register_base_directory(target)
-    return Path(target)
+    destination = Path(tmpdir) / 'destination_collection'
+    destination.mkdir(exist_ok=False)
+    paths.register_base_directory(destination)
+    return destination
 
 
 @pytest.fixture
@@ -54,7 +54,7 @@ def example_nc_dataset(integration_test_data, dea_index):
 def test_move(global_integration_cli_args,
               test_dataset: DatasetForTests,
               other_dataset: DatasetForTests,
-              target_directory):
+              destination_path):
     """
     With two datasets in a collection, try to move one to a new disk location.
 
@@ -64,12 +64,12 @@ def test_move(global_integration_cli_args,
     other_dataset.add_to_index()
 
     # Expect a destination_path with the same offset (eg "year/LS8_SOMETHING_AROTHER") but in our new base folder.
-    expected_new_path = target_directory.joinpath(*test_dataset.path_offset)
+    expected_new_path = destination_path.joinpath(*test_dataset.path_offset)
 
     assert test_dataset.path != expected_new_path
 
     # Move one path to destination_path
-    res: Result = _call_move(['--destination', target_directory, test_dataset.path], global_integration_cli_args)
+    res: Result = _call_move(['--destination', destination_path, test_dataset.path], global_integration_cli_args)
 
     _check_successful_move(test_dataset, expected_new_path, other_dataset, res)
 
@@ -77,14 +77,17 @@ def test_move(global_integration_cli_args,
 def test_nc_move(global_integration_cli_args,
                  example_nc_dataset,
                  other_dataset: DatasetForTests,
-                 target_directory):
+                 destination_path):
+    """
+    Move a dataset comprising a single ODC style NetCDF file with embedded dataset info
+    """
     example_nc_dataset.add_to_index()
-    example_nc_dataset.collection.file_patterns.append(str(target_directory))
+    example_nc_dataset.collection.file_patterns.append(str(destination_path))
     other_dataset.add_to_index()
 
-    expected_destination = target_directory.joinpath(*example_nc_dataset.path_offset)
+    expected_destination = destination_path.joinpath(*example_nc_dataset.path_offset)
     assert example_nc_dataset.path != expected_destination
-    res: Result = _call_move(['--no-checksum', '--destination', target_directory, example_nc_dataset.path],
+    res: Result = _call_move(['--no-checksum', '--destination', destination_path, example_nc_dataset.path],
                              global_integration_cli_args)
 
     _check_successful_move(example_nc_dataset, expected_destination, other_dataset, res)
@@ -94,7 +97,7 @@ def test_nc_move(global_integration_cli_args,
 def test_move_when_already_exists_at_dest(global_integration_cli_args,
                                           test_dataset: DatasetForTests,
                                           other_dataset: DatasetForTests,
-                                          target_directory):
+                                          destination_path):
     """
     Move a dataset to a new location, but it already exists and is valid at the destination
 
@@ -105,13 +108,13 @@ def test_move_when_already_exists_at_dest(global_integration_cli_args,
     test_dataset.add_to_index()
     other_dataset.add_to_index()
 
-    expected_new_path = target_directory.joinpath(*test_dataset.path_offset)
+    expected_new_path = destination_path.joinpath(*test_dataset.path_offset)
 
     # Preemptively copy dataset to destination.
     shutil.copytree(str(test_dataset.copyable_path), str(expected_new_path.parent))
 
     # Move one path to destination_path
-    res = _call_move(['--destination', target_directory, test_dataset.path], global_integration_cli_args)
+    res = _call_move(['--destination', destination_path, test_dataset.path], global_integration_cli_args)
 
     _check_successful_move(test_dataset, expected_new_path, other_dataset, res)
 
@@ -119,7 +122,7 @@ def test_move_when_already_exists_at_dest(global_integration_cli_args,
 def test_move_when_corrupt_exists_at_dest(global_integration_cli_args,
                                           test_dataset: DatasetForTests,
                                           other_dataset: DatasetForTests,
-                                          target_directory):
+                                          destination_path):
     """
     Move a dataset to a location that already exists but is invalid.
 
@@ -128,7 +131,7 @@ def test_move_when_corrupt_exists_at_dest(global_integration_cli_args,
     test_dataset.add_to_index()
     other_dataset.add_to_index()
 
-    expected_new_path: Path = target_directory.joinpath(*test_dataset.path_offset)
+    expected_new_path: Path = destination_path.joinpath(*test_dataset.path_offset)
 
     # Create a corrupt dataset at destination
     expected_new_path.parent.mkdir(parents=True)
@@ -137,7 +140,7 @@ def test_move_when_corrupt_exists_at_dest(global_integration_cli_args,
     original_index = freeze_index(test_dataset.collection.index_)
 
     # Move one path to destination_path
-    res = _call_move(['--destination', target_directory, test_dataset.path], global_integration_cli_args)
+    res = _call_move(['--destination', destination_path, test_dataset.path], global_integration_cli_args)
 
     # Move script should have completed, but dataset should have been skipped.
     assert res.exit_code == 0, res.output

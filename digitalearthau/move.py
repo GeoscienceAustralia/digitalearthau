@@ -98,6 +98,11 @@ def move_all(index: Index, paths: Iterable[Path], destination_base_path: Path, d
 
 class FileMover:
     """
+    Move datasets around on the Filesystem, while keeping the DEA index up to date.
+
+    The move is in terms of the index. Files on disk are copied, and it's a second, later
+    step to remove them from their original location.
+
     There are several types of Datasets we may want to move around.
 
     1. A single file dataset. Eg. A *.nc file with an embedded `datasets` variable containing all metadata

@@ -135,8 +135,8 @@ def write_files(files_spec, containing_dir=None):
 
     write_files({'test.txt': 'contents of text file'})
 
-    :param containing_dir: Optionally specify the directory to add the files to, otherwise a temporary directory
-                           will be created.
+    :param containing_dir: Optionally specify the directory to add the files to,
+                           otherwise a temporary directory will be created.
     :type files_spec: dict
     :rtype: pathlib.Path
     :return: Created temporary directory path
