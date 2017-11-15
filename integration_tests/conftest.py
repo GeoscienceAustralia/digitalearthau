@@ -166,7 +166,7 @@ def test_dataset(integration_test_data, dea_index) -> DatasetForTests:
         unique=[],
         index_=dea_index
     )
-    collections._add(ls8_collection)
+    collections._add(ls5_nc_collection)
 
     # register this as a base directory so that datasets can be trashed within it.
     register_base_directory(str(test_data))
