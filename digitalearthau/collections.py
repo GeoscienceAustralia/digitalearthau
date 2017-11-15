@@ -361,7 +361,7 @@ def init_nci_collections(index: Index):
     # Old FC
     for sat in ['ls5', 'ls7', 'ls8']:
         name = 'fc'
-        glob_offset = f'{sat.upper()}_TM_{name}/*_*/{sat.upper()}*{name}*.nc'
+        glob_offset = f'{sat.upper()}_TM_{name.upper()}/*_*/{sat.upper()}*{name.upper()}*.nc'
         _add(
             Collection(
                 name=f'{sat}_{name}_albers',
@@ -379,7 +379,7 @@ def init_nci_collections(index: Index):
     # New FC
     for sat in ['ls5', 'ls7', 'ls8']:
         name = 'fc'
-        glob_offset = f'{sat.upper()}_TM_{name}/*_*/{sat.upper()}*{name}*.nc'
+        glob_offset = f'{sat.upper()}_TM_{name.upper()}/*_*/{sat.upper()}*{name.upper()}*.nc'
         _add(
             Collection(
                 name=f'{sat}_{name}_albers_staging',
@@ -395,9 +395,7 @@ def init_nci_collections(index: Index):
             )
         )
 
-    assert get_collection('ls5_fc_albers').file_patterns == (
-        '/g/data/fk4/datacube/002/LS5_TM_FC/*_*/LS5*FC*.nc',
-    )
+    assert '/g/data/fk4/datacube/002/LS5_TM_FC/*_*/LS5*FC*.nc' in get_collection('ls5_fc_albers').file_patterns
     assert get_collection('ls8_nbar_albers').file_patterns == (
         '/g/data/rs0/datacube/002/LS8_OLI_NBAR/*_*/LS8*NBAR*.nc',
     )
