@@ -2,6 +2,7 @@ import shutil
 import uuid
 from datetime import datetime
 from pathlib import Path
+from textwrap import dedent
 from typing import Tuple, NamedTuple, Optional, Mapping, Iterable
 
 import pytest
@@ -58,9 +59,9 @@ def load_yaml_file(path):
 
 @pytest.fixture
 def integration_test_data(tmpdir):
-    d = tmpdir.join('integration_data')
-    shutil.copytree(str(INTEGRATION_TEST_DATA), str(d))
-    return Path(str(d))
+    temp_data_dir = Path(tmpdir) / 'integration_data'
+    shutil.copytree(INTEGRATION_TEST_DATA, temp_data_dir)
+    return temp_data_dir
 
 
 ON_DISK2_ID = DatasetLite(uuid.UUID('10c4a9fe-2890-11e6-8ec8-a0000100fe80'))
@@ -192,21 +193,20 @@ def other_dataset(integration_test_data: Path, test_dataset: DatasetForTests) ->
     paths.write_files(
         {
             'LS8_INDEXED_ALREADY': {
-                'ga-metadata.yaml': ("""
-id: %s
-platform:
-    code: LANDSAT_8
-instrument:
-    name: OLI_TIRS
-format:
-    name: GeoTIFF
-product_type: level1
-product_level: L1T
-image:
-    bands: {}
-lineage:
-    source_datasets: {}
-    """ % str(ds_id)),
+                'ga-metadata.yaml': (dedent("""\
+                                     id: %s
+                                     platform:
+                                         code: LANDSAT_8
+                                     instrument:
+                                         name: OLI_TIRS
+                                     format:
+                                         name: GeoTIFF
+                                     product_type: level1
+                                     product_level: L1T
+                                     image:
+                                         bands: {}
+                                     lineage:
+                                         source_datasets: {}""" % str(ds_id))),
                 'dummy-file.txt': ''
             }
         },
