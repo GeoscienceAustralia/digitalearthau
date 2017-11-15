@@ -1,27 +1,60 @@
 import shutil
+import uuid
 from pathlib import Path
 
 import pytest
 from click.testing import CliRunner, Result
 
-from digitalearthau import move, paths
-from integration_tests.conftest import DatasetForTests, as_map
+from digitalearthau import move, paths, collections
+from digitalearthau.collections import Collection
+from integration_tests.conftest import DatasetForTests, freeze_index
 
 
 @pytest.fixture
-def destination_path(tmpdir) -> Path:
-    """A new "base folder" that a dataset could be moved to."""
+def target_directory(tmpdir) -> Path:
+    """A directory that datasets can be moved to or from.
 
-    destination = Path(tmpdir).joinpath('destination_collection')
-    destination.mkdir(exist_ok=False)
-    paths.register_base_directory(destination)
-    return destination
+    Provides a temp directory that is registered with the `digitalearthau.paths` module as a base directory.
+    """
+    target = Path(tmpdir) / 'target_dir'
+    target.mkdir(parents=True)
+    paths.register_base_directory(target)
+    return Path(target)
+
+
+@pytest.fixture
+def example_nc_dataset(integration_test_data, dea_index):
+    template = integration_test_data / 'example_nbar_dataset.yaml'
+    path_offset = ('LS8_OLI_NBAR', '17_-29', 'LS8_OLI_NBAR_3577_17_-29_20161018000035500000_v1508400361.nc')
+
+    dataset_file = integration_test_data.joinpath(*path_offset)
+    dataset_file.parent.mkdir(parents=True)
+    make_fake_netcdf_dataset(dataset_file, template)
+
+    assert dataset_file.exists()
+
+    ls8_nc_test = Collection(
+        name='ls8_nc_test',
+        query={},
+        file_patterns=[str(integration_test_data.joinpath('LS8_OLI_NBAR/*_*/LS8*.nc'))],
+        unique=[],
+        index_=dea_index
+    )
+    collections._add(ls8_nc_test)
+
+    return DatasetForTests(
+        collection=ls8_nc_test,
+        id_=uuid.UUID('6b8d2798-cbc2-4244-847f-807cd068e9ad'),
+        base_path=integration_test_data,
+        path_offset=path_offset,
+        parent_id=uuid.uuid4()
+    )
 
 
 def test_move(global_integration_cli_args,
               test_dataset: DatasetForTests,
               other_dataset: DatasetForTests,
-              destination_path):
+              target_directory):
     """
     With two datasets in a collection, try to move one to a new disk location.
 
@@ -31,23 +64,37 @@ def test_move(global_integration_cli_args,
     other_dataset.add_to_index()
 
     # Expect a destination_path with the same offset (eg "year/LS8_SOMETHING_AROTHER") but in our new base folder.
-    expected_new_path = destination_path.joinpath(*test_dataset.path_offset)
+    expected_new_path = target_directory.joinpath(*test_dataset.path_offset)
 
-    res: Result = _call_move(
-        # Move one path to destination_path
-        ['-d', str(destination_path), str(test_dataset.path)],
+    assert test_dataset.path != expected_new_path
 
-        global_integration_cli_args
-    )
+    # Move one path to destination_path
+    res: Result = _call_move(['--destination', target_directory, test_dataset.path], global_integration_cli_args)
 
     _check_successful_move(test_dataset, expected_new_path, other_dataset, res)
+
+
+def test_nc_move(global_integration_cli_args,
+                 example_nc_dataset,
+                 other_dataset: DatasetForTests,
+                 target_directory):
+    example_nc_dataset.add_to_index()
+    example_nc_dataset.collection.file_patterns.append(str(target_directory))
+    other_dataset.add_to_index()
+
+    expected_destination = target_directory.joinpath(*example_nc_dataset.path_offset)
+    assert example_nc_dataset.path != expected_destination
+    res: Result = _call_move(['--no-checksum', '--destination', target_directory, example_nc_dataset.path],
+                             global_integration_cli_args)
+
+    _check_successful_move(example_nc_dataset, expected_destination, other_dataset, res)
 
 
 @pytest.mark.xfail(reason="Not yet implemented", strict=True)
 def test_move_when_already_exists_at_dest(global_integration_cli_args,
                                           test_dataset: DatasetForTests,
                                           other_dataset: DatasetForTests,
-                                          destination_path):
+                                          base_directory):
     """
     Move a dataset to a new location, but it already exists and is valid at the destination
 
@@ -58,17 +105,13 @@ def test_move_when_already_exists_at_dest(global_integration_cli_args,
     test_dataset.add_to_index()
     other_dataset.add_to_index()
 
-    expected_new_path = destination_path.joinpath(*test_dataset.path_offset)
+    expected_new_path = base_directory.joinpath(*test_dataset.path_offset)
 
     # Preemptively copy dataset to destination.
     shutil.copytree(str(test_dataset.copyable_path), str(expected_new_path.parent))
 
-    res = _call_move(
-        # Move one path to destination_path
-        ['-d', str(destination_path), str(test_dataset.path)],
-
-        global_integration_cli_args
-    )
+    # Move one path to destination_path
+    res = _call_move(['--destination', base_directory, test_dataset.path], global_integration_cli_args)
 
     _check_successful_move(test_dataset, expected_new_path, other_dataset, res)
 
@@ -76,7 +119,7 @@ def test_move_when_already_exists_at_dest(global_integration_cli_args,
 def test_move_when_corrupt_exists_at_dest(global_integration_cli_args,
                                           test_dataset: DatasetForTests,
                                           other_dataset: DatasetForTests,
-                                          destination_path):
+                                          target_directory):
     """
     Move a dataset to a location that already exists but is invalid.
 
@@ -85,25 +128,22 @@ def test_move_when_corrupt_exists_at_dest(global_integration_cli_args,
     test_dataset.add_to_index()
     other_dataset.add_to_index()
 
-    expected_new_path: Path = destination_path.joinpath(*test_dataset.path_offset)
+    expected_new_path: Path = target_directory.joinpath(*test_dataset.path_offset)
 
     # Create a corrupt dataset at destination
     expected_new_path.parent.mkdir(parents=True)
     expected_new_path.write_text("invalid")
 
-    original_index = as_map(test_dataset.collection.index_)
-    res = _call_move(
-        # Move one path to destination_path
-        ['-d', str(destination_path), str(test_dataset.path)],
+    original_index = freeze_index(test_dataset.collection.index_)
 
-        global_integration_cli_args
-    )
+    # Move one path to destination_path
+    res = _call_move(['--destination', target_directory, test_dataset.path], global_integration_cli_args)
 
     # Move script should have completed, but dataset should have been skipped.
     assert res.exit_code == 0, res.output
     print(res.output)
 
-    now_index = as_map(test_dataset.collection.index_)
+    now_index = freeze_index(test_dataset.collection.index_)
 
     assert original_index == now_index
 
@@ -142,7 +182,24 @@ def _call_move(args, global_integration_cli_args) -> Result:
     # We'll call the cli interface itself, rather than the python api, to get wider coverage in our test.
     res: Result = CliRunner().invoke(
         move.cli,
-        [*global_integration_cli_args, *args],
+        global_integration_cli_args + [str(arg) for arg in args],
         catch_exceptions=False
     )
     return res
+
+
+def make_fake_netcdf_dataset(nc_name, yaml_doc):
+    from datacube.model import Variable
+    from datacube.storage.netcdf_writer import create_variable, netcdfy_data
+    from netCDF4 import Dataset
+    import numpy as np
+    content = yaml_doc.read_text()
+    npdata = np.array([content], dtype=bytes)
+
+    with Dataset(nc_name, 'w') as nco:
+        var = Variable(npdata.dtype, None, ('time',), None)
+        nco.createDimension('time', size=1)
+        create_variable(nco, 'dataset', var)
+        nco['dataset'][:] = netcdfy_data(npdata)
+
+    # from datacube.utils import read_documents
