@@ -240,7 +240,7 @@ def archive_dataset(dataset_id, collection, archived_dt=None):
             )
 
 
-def as_map(index: Index) -> Mapping[DatasetLite, Iterable[str]]:
+def freeze_index(index: Index) -> Mapping[DatasetLite, Iterable[str]]:
     """
     All contained (dataset_id, [location]) values, to check test results.
     """

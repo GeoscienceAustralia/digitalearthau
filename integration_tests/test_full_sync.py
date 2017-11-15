@@ -14,11 +14,10 @@ from datacube.index._api import Index
 from datacube.utils import uri_to_local_path
 from digitalearthau import paths
 from digitalearthau.collections import Collection
-from digitalearthau.index import DatasetLite, add_dataset
+from digitalearthau.index import DatasetLite
 from digitalearthau.paths import register_base_directory
 from digitalearthau.sync import differences as mm, fixes, scan, Mismatch
-
-from integration_tests.conftest import DatasetForTests, as_map
+from integration_tests.conftest import DatasetForTests, freeze_index
 
 
 # These are ok in tests.
@@ -183,7 +182,7 @@ def test_detect_corrupt_existing(test_dataset: DatasetForTests,
             mm.UnreadableDataset(None, test_dataset.uri)
         ],
         # Unmodified index
-        expected_index_result=as_map(test_dataset.collection.index_),
+        expected_index_result=freeze_index(test_dataset.collection.index_),
         cache_path=integration_test_data,
         fix_settings=dict(trash_missing=True, trash_archived=True, update_locations=True)
     )
@@ -246,7 +245,7 @@ def test_remove_missing(test_dataset: DatasetForTests,
             mm.DatasetNotIndexed(test_dataset.dataset, test_dataset.uri)
         ],
         # Unmodified index
-        expected_index_result=as_map(test_dataset.collection.index_),
+        expected_index_result=freeze_index(test_dataset.collection.index_),
         cache_path=integration_test_data,
         fix_settings=dict(trash_missing=True, update_locations=True)
     )
@@ -393,12 +392,12 @@ def _check_mismatch_fix(index: Index,
     """Check that the index is correctly updated when fixing mismatches"""
 
     # First check that no change is made to the index if we have all fixes set to False.
-    starting_index = as_map(index)
+    starting_index = freeze_index(index)
     # Default settings are all false.
     fixes.fix_mismatches(mismatches, index)
-    assert starting_index == as_map(index), "Changes made to index despite all fix settings being " \
-                                            "false (index_missing=False etc)"
+    assert starting_index == freeze_index(index), "Changes made to index despite all fix settings being " \
+                                                  "false (index_missing=False etc)"
 
     # Now perform fixes, check that they match expected.
     fixes.fix_mismatches(mismatches, index, **fix_settings)
-    assert expected_index_result == as_map(index)
+    assert expected_index_result == freeze_index(index)
