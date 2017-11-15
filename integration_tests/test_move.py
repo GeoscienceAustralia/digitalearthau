@@ -94,7 +94,7 @@ def test_nc_move(global_integration_cli_args,
 def test_move_when_already_exists_at_dest(global_integration_cli_args,
                                           test_dataset: DatasetForTests,
                                           other_dataset: DatasetForTests,
-                                          base_directory):
+                                          target_directory):
     """
     Move a dataset to a new location, but it already exists and is valid at the destination
 
@@ -105,13 +105,13 @@ def test_move_when_already_exists_at_dest(global_integration_cli_args,
     test_dataset.add_to_index()
     other_dataset.add_to_index()
 
-    expected_new_path = base_directory.joinpath(*test_dataset.path_offset)
+    expected_new_path = target_directory.joinpath(*test_dataset.path_offset)
 
     # Preemptively copy dataset to destination.
     shutil.copytree(str(test_dataset.copyable_path), str(expected_new_path.parent))
 
     # Move one path to destination_path
-    res = _call_move(['--destination', base_directory, test_dataset.path], global_integration_cli_args)
+    res = _call_move(['--destination', target_directory, test_dataset.path], global_integration_cli_args)
 
     _check_successful_move(test_dataset, expected_new_path, other_dataset, res)
 

@@ -30,13 +30,27 @@ grid_spatial:
 id: 6b8d2798-cbc2-4244-847f-807cd068e9ad
 image:
   bands:
-    blue: {layer: blue, path:}
-    coastal_aerosol: {layer: coastal_aerosol, path:}
-    green: {layer: green, path:}
-    nir: {layer: nir, path:}
-    red: {layer: red, path:}
-    swir1: {layer: swir1, path:}
-    swir2: {layer: swir2, path:}
+    blue:
+      layer: blue
+      path: ''
+    coastal_aerosol:
+      layer: coastal_aerosol
+      path: ''
+    green:
+      layer: green
+      path: ''
+    nir:
+      layer: nir
+      path: ''
+    red:
+      layer: red
+      path: ''
+    swir1:
+      layer: swir1
+      path: ''
+    swir2:
+      layer: swir2
+      path: ''
 instrument: {name: OLI_TIRS}
 lineage:
   algorithm:
