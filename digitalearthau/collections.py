@@ -198,8 +198,8 @@ def init_nci_collections(index: Index):
             file_patterns=(
                 '/g/data/v10/repackaged/rawdata/0/[0-9][0-9][0-9][0-9]/[0-9][0-9]/*/ga-metadata.yaml',
             ),
-            index_=index,
             unique=('time.lower.day', 'platform'),
+            index_=index,
             trust=Trust.DISK
         )
     )
@@ -210,6 +210,7 @@ def init_nci_collections(index: Index):
             name,
             query,
             file_patterns=file_patterns,
+            index_=index,
             unique=('time.lower.day', 'sat_path.lower', 'sat_row.lower'),
             delete_archived_after_days=delete_archived_after_days,
             # Scenes default to trusting disk. They're atomically written to the destination,
@@ -318,8 +319,8 @@ def init_nci_collections(index: Index):
                     'LS5_TM_{name}/*_*/LS5*{name}*.nc'.format(project=project,
                                                               name=name.upper()),
                 ),
-                index_=index,
                 unique=('time.lower.day', 'lat', 'lon'),
+                index_=index,
                 # Tiles default to trusting index over the disk: they were indexed at the end of the job,
                 # so unfinished tiles could be left on disk.
                 trust=Trust.INDEX
@@ -332,8 +333,8 @@ def init_nci_collections(index: Index):
                     '*_*/LS7*{name}*.nc'.format(project=project,
                                                 name=name.upper()),
                 ),
-                index_=index,
                 unique=('time.lower.day', 'lat', 'lon'),
+                index_=index,
                 # Tiles default to trusting index over the disk: they were indexed at the end of the job,
                 # so unfinished tiles could be left on disk.
                 trust=Trust.INDEX
@@ -346,8 +347,8 @@ def init_nci_collections(index: Index):
                     '*_*/LS8*{name}*.nc'.format(project=project,
                                                 name=name.upper()),
                 ),
-                index_=index,
                 unique=('time.lower.day', 'lat', 'lon'),
+                index_=index,
                 # Tiles default to trusting index over the disk: they were indexed at the end of the job,
                 # so unfinished tiles could be left on disk.
                 trust=Trust.INDEX
