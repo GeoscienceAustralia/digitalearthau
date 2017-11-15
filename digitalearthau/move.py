@@ -16,7 +16,9 @@ from eodatasets import verify
 from datacube.index._api import Index
 from datacube.model import Dataset
 from datacube.ui import click as ui
-from digitalearthau import collections, uiutil
+from digitalearthau.collections import init_nci_collections, get_collections_in_path
+from digitalearthau.paths import is_base_directory, BASE_DIRECTORIES, get_dataset_paths, split_path_from_base
+from digitalearthau.uiutil import init_logging
 from digitalearthau import paths as path_utils
 
 _LOG = structlog.get_logger()
@@ -50,14 +52,14 @@ def cli(index, dry_run, paths, destination, checksum):
     * Both the source(s) and destination paths are expected to be paths containing existing DEA collections.
     (See collections.py and paths.py)
     """
-    uiutil.init_logging()
-    collections.init_nci_collections(index)
+    init_logging()
+    init_nci_collections(index)
 
-    if not path_utils.is_base_directory(destination):
+    if not is_base_directory(destination):
         raise click.BadArgumentUsage(
             'Not a known DEA base directory; {}\nExpected one of:\n\t{}'.format(
                 destination,
-                '\n\t'.join(path_utils.BASE_DIRECTORIES))
+                '\n\t'.join(BASE_DIRECTORIES))
         )
 
     # We want to iterate all datasets in the given input folder, so we find collections that exist in
@@ -66,11 +68,11 @@ def cli(index, dry_run, paths, destination, checksum):
     # We do this aggressively to find errors in arguments immediately. (with the downside of `paths` memory usage)
     resulting_paths = []
     for input_path in map(Path, paths):
-        cs = list(collections.get_collections_in_path(input_path))
-        if not cs:
-            raise click.BadArgumentUsage("Directory doesn't match any known collections: {}".format(input_path))
+        collections = list(get_collections_in_path(input_path))
+        if not collections:
+            raise click.BadArgumentUsage(f"Directory doesn't match any known collections: {input_path}")
 
-        for collection in cs:
+        for collection in collections:
             resulting_paths.extend(list(collection.iter_fs_paths_within(input_path)))
 
     _LOG.info("dataset.count", input_count=len(paths), dataset_count=len(resulting_paths))
@@ -78,7 +80,7 @@ def cli(index, dry_run, paths, destination, checksum):
     # TODO: @ui.executor_cli_options
     move_all(
         index,
-        (path.absolute() for path in resulting_paths),
+        resulting_paths,
         Path(destination),
         dry_run=dry_run,
         checksum=checksum
@@ -87,44 +89,49 @@ def cli(index, dry_run, paths, destination, checksum):
 
 def move_all(index: Index, paths: Iterable[Path], destination_base_path: Path, dry_run=False, checksum=True):
     for path in paths:
-        task = FileMoveTask.evaluate_and_create(index, path, dest_base_path=destination_base_path)
-        if not task:
+        mover = FileMover.evaluate_and_create(index, path, dest_base_path=destination_base_path)
+        if not mover:
             continue
 
-        task.run(index, dry_run=dry_run, checksum=checksum)
+        mover.move(dry_run=dry_run, checksum=checksum)
 
 
-class FileMoveTask:
+class FileMover:
+    """
+    There are several types of Datasets we may want to move around.
+
+    1. A single file dataset. Eg. A *.nc file with an embedded `datasets` variable containing all metadata
+    2. A directory dataset. Eg. Landsat scenes. A dataset is a directory containing multiple data files,
+       a *-metadata.yaml file, and potentially other files as well.
+    3. A dataset is a metadata file which lives beside a data file.
+    4. A dataset is a metadata file which lives separately to a data file. (Probably not managed by DEA, unable to move)
+    """
     def __init__(self,
                  source_path: Path,
                  dest_path: Path,
                  source_metadata_path: Path,
                  dest_metadata_path: Path,
-                 dataset: Dataset) -> None:
+                 dataset: Dataset,
+                 index: Index) -> None:
         self.source_path = source_path
         self.dest_path = dest_path
-        self.source_metadata_path = source_metadata_path
+        self.from_metadata_path = source_metadata_path
         self.dest_metadata_path = dest_metadata_path
         self.dataset = dataset
 
-        if not str(self.source_metadata_path).startswith(str(self.source_path)):
+        self.index = index
+
+        self.source_uri = self.from_metadata_path.as_uri()
+        self.dest_uri = self.dest_metadata_path.as_uri()
+
+        self.log = _LOG.bind(source_path=self.source_path)
+
+        if not str(self.from_metadata_path).startswith(str(self.source_path)):
             # We only currently support copying when metadata is stored within the dataset.
             # Eg.
             # - an '.nc' file (same md path and dataset path)
             # - '*-metadata.yaml' file (inside the dataset path folder)
             raise NotImplementedError("Only metadata stored within a dataset is currently supported ")
-
-    @property
-    def source_uri(self):
-        return self.source_metadata_path.as_uri()
-
-    @property
-    def dest_uri(self):
-        return self.dest_metadata_path.as_uri()
-
-    @property
-    def log(self):
-        return _LOG.bind(source_path=self.source_path)
 
     @classmethod
     def evaluate_and_create(cls, index: Index, path: Path, dest_base_path: Path):
@@ -137,7 +144,7 @@ class FileMoveTask:
         metadata_path = path_utils.get_metadata_path(path)
         log.debug("found.metadata_path", metadata_path=metadata_path)
 
-        dataset_path, dest_path, dest_md_path = cls._source_dest_paths(log, metadata_path, dest_base_path)
+        dataset_path, dest_path, dest_md_path = cls._compute_paths(metadata_path, dest_base_path)
         if dest_path.exists() or dest_md_path.exists():
             log.info("skip.exists", dest_path=dest_path)
             return None
@@ -153,15 +160,16 @@ class FileMoveTask:
             log.warn("skip.not_indexed")
             return None
 
-        return FileMoveTask(
+        return FileMover(
             source_path=dataset_path,
             dest_path=dest_path,
             source_metadata_path=metadata_path,
             dest_metadata_path=dest_md_path,
-            dataset=dataset
+            dataset=dataset,
+            index=index
         )
 
-    def run(self, index: Index, dry_run=True, checksum=True):
+    def move(self, dry_run=True, checksum=True):
         dest_metadata_uri = self._do_copy(dry_run=dry_run, checksum=checksum)
         if not dest_metadata_uri:
             self.log.debug("index.skip")
@@ -169,21 +177,21 @@ class FileMoveTask:
 
         # Record destination location in index
         if not dry_run:
-            index.datasets.add_location(self.dataset.id, uri=dest_metadata_uri)
+            self.index.datasets.add_location(self.dataset.id, uri=dest_metadata_uri)
         self.log.info('index.dest.added', uri=dest_metadata_uri)
 
         # Archive source file in index (for deletion soon)
         if not dry_run:
-            index.datasets.archive_location(self.dataset.id, self.source_uri)
+            self.index.datasets.archive_location(self.dataset.id, self.source_uri)
 
         self.log.info('index.source.archived', uri=self.source_uri)
 
     @staticmethod
-    def _source_dest_paths(log, source_metadata_path, destination_base_path):
-        dataset_path, all_files = path_utils.get_dataset_paths(source_metadata_path)
-        _, dataset_offset = path_utils.split_path_from_base(dataset_path)
+    def _compute_paths(source_metadata_path, destination_base_path):
+        dataset_path, all_files = get_dataset_paths(source_metadata_path)
+        _, dataset_offset = split_path_from_base(dataset_path)
         new_dataset_location = destination_base_path.joinpath(dataset_offset)
-        _, metadata_offset = path_utils.split_path_from_base(source_metadata_path)
+        _, metadata_offset = split_path_from_base(source_metadata_path)
         new_metadata_location = destination_base_path.joinpath(metadata_offset)
 
         # We currently assume all files are contained in the dataset directory/path:
@@ -200,49 +208,54 @@ class FileMoveTask:
         dataset_path = self.source_path
 
         if checksum:
-            successful_checksum = _verify_checksum(self.log, self.source_metadata_path,
+            successful_checksum = _verify_checksum(self.log, self.from_metadata_path,
                                                    dry_run=dry_run)
             self.log.info("checksum.complete", passes_checksum=successful_checksum)
             if not successful_checksum:
-                raise RuntimeError("Checksum failure on " + str(self.source_metadata_path))
+                raise RuntimeError("Checksum failure on " + str(self.from_metadata_path))
 
         if dataset_path.is_dir():
-            log.debug("copy.mkdir", dest=dest_path.parent)
-            fileutils.mkdir_p(str(dest_path.parent))
-
-            # We don't want to risk partially-copied packaged left on disk, so we copy to a tmp dir in same
-            # folder and then atomically rename into place.
-            tmp_dir = Path(tempfile.mkdtemp(prefix='.dea-mv-', dir=str(dest_path.parent)))
-            try:
-                tmp_package = tmp_dir.joinpath(dataset_path.name)
-                log.info("copy.put", src=dataset_path, tmp_dest=tmp_package)
-                if not dry_run:
-                    shutil.copytree(dataset_path, tmp_package)
-                    log.debug("copy.put.done")
-                    os.rename(tmp_package, dest_path)
-                    log.debug("copy.rename.done")
-
-                    # It should have been contained within the dataset, see the check in the constructor.
-                    assert self.dest_metadata_path.exists()
-            finally:
-                log.debug("tmp_dir.rm", tmp_dir=tmp_dir)
-                shutil.rmtree(tmp_dir, ignore_errors=True)
+            self.copy_directory(dataset_path, dest_path, dry_run, log)
         elif self.dest_path == self.dest_metadata_path:  # Metadata is contained within the dataset file. eg. *.nc
-            log.debug("copy.mkdir", dest=dest_path.parent)
-            fileutils.mkdir_p(dest_path.parent)
-
-            # We don't want to risk partially-copied files left on disk, so we copy to a tmp name
-            # then atomically rename into place.
-            tmp_name = tempfile.mktemp(prefix='.dea-mv-', dir=dest_path.parent)
-            log.info("copy.put", src=dataset_path, tmp_dest=tmp_name)
-            shutil.copy(dataset_path, tmp_name)
-            log.debug("copy.put.done")
-            os.rename(tmp_name, dest_path)
+            self.copy_file(dataset_path, dest_path, log)
         else:
-            # Datasets that dataset file + sibling
+            # Datasets that are dataset file + sibling or metadata separate to data
             raise NotImplementedError("TODO: dataset files not yet supported")
 
         return self.dest_uri
+
+    def copy_file(self, from_, to, log):
+        to_directory = to.parent
+        log.debug("copy.mkdir", dest=to_directory)
+        fileutils.mkdir_p(to.parent)
+        # We don't want to risk partially-copied files left on disk, so we copy to a tmp name
+        # then atomically rename into place.
+        tmp_name = tempfile.mktemp(prefix='.dea-mv-', dir=to_directory)
+        log.info("copy.put", src=from_, tmp_dest=tmp_name)
+        shutil.copy(from_, tmp_name)
+        log.debug("copy.put.done")
+        os.rename(tmp_name, to)
+
+    def copy_directory(self, from_, dest_path, dry_run, log):
+        log.debug("copy.mkdir", dest=dest_path.parent)
+        fileutils.mkdir_p(str(dest_path.parent))
+        # We don't want to risk partially-copied packaged left on disk, so we copy to a tmp dir in same
+        # folder and then atomically rename into place.
+        tmp_dir = Path(tempfile.mkdtemp(prefix='.dea-mv-', dir=str(dest_path.parent)))
+        try:
+            tmp_package = tmp_dir.joinpath(from_.name)
+            log.info("copy.put", src=from_, tmp_dest=tmp_package)
+            if not dry_run:
+                shutil.copytree(from_, tmp_package)
+                log.debug("copy.put.done")
+                os.rename(tmp_package, dest_path)
+                log.debug("copy.rename.done")
+
+                # It should have been contained within the dataset, see the check in the constructor.
+                assert self.dest_metadata_path.exists()
+        finally:
+            log.debug("tmp_dir.rm", tmp_dir=tmp_dir)
+            shutil.rmtree(tmp_dir, ignore_errors=True)
 
 
 def _verify_checksum(log, metadata_path, dry_run=True):
@@ -273,7 +286,8 @@ def _expected_checksum_path(dataset_path):
     :rtype: pathlib.Path
 
     >>> import tempfile
-    >>> _expected_checksum_path(Path(tempfile.mkdtemp())).name == 'package.sha1'
+    >>> tempdir = Path(tempfile.mkdtemp())
+    >>> _expected_checksum_path(tempdir).name == 'package.sha1'
     True
     >>> file_ = Path(tempfile.mktemp(suffix='-dataset-file.tif'))
     >>> file_.open('a').close()
