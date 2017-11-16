@@ -5,6 +5,7 @@ from __future__ import print_function
 import os
 import shutil
 import tempfile
+from contextlib import suppress
 from pathlib import Path
 from typing import Iterable
 
@@ -236,10 +237,15 @@ class FileMover:
         # We don't want to risk partially-copied files left on disk, so we copy to a tmp name
         # then atomically rename into place.
         tmp_name = tempfile.mktemp(prefix='.dea-mv-', dir=to_directory)
-        log.info("copy.put", src=from_, tmp_dest=tmp_name)
-        shutil.copy(from_, tmp_name)
-        log.debug("copy.put.done")
-        os.rename(tmp_name, to)
+        try:
+            log.info("copy.put", src=from_, tmp_dest=tmp_name)
+            shutil.copy(from_, tmp_name)
+            log.debug("copy.put.done")
+            os.rename(tmp_name, to)
+        finally:
+            log.debug('tmp_file.rm', tmp_file=tmp_name)
+            with suppress(FileNotFoundError):
+                os.remove(tmp_name)
 
     def copy_directory(self, from_, dest_path, dry_run, log):
         log.debug("copy.mkdir", dest=dest_path.parent)
