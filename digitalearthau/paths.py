@@ -101,6 +101,8 @@ def split_path_from_base(file_path):
     """
     Split a dataset path into base directory and offset.
 
+    A base directory is one of the hardcoded paths in `BASE_DIRECTORIES`.
+
     :type file_path: pathlib.Path | str
     :rtype: (pathlib.Path, str)
 
@@ -125,9 +127,9 @@ def split_path_from_base(file_path):
 
 def write_files(files_spec, containing_dir=None):
     """
-    Convenience method for writing a tree of files to a temporary directory.
+    Write a tree of files to a temporary directory.
 
-    (primarily indended for use in tests)
+    (intended for use in tests)
 
     Dict format is "filename": "text content"
 
@@ -154,17 +156,9 @@ def write_files(files_spec, containing_dir=None):
     return containing_dir
 
 
-def _write_files_to_dir(directory_path, file_dict):
-    """
-    Convenience method for writing a tree of files to a given directory.
-
-    (primarily indended for use in tests)
-
-    :type directory_path: str
-    :type file_dict: dict
-    """
-    for filename, contents in file_dict.items():
-        path = os.path.join(directory_path, filename)
+def _write_files_to_dir(directory, files_dict):
+    for filename, contents in files_dict.items():
+        path = os.path.join(directory, filename)
         if isinstance(contents, dict):
             os.mkdir(path)
             _write_files_to_dir(path, contents)
@@ -227,6 +221,7 @@ def get_path_dataset_ids(path: Path) -> List[uuid.UUID]:
 def get_dataset_paths(metadata_path: Path) -> Tuple[Path, List[Path]]:
     """
     Get the base location and all files for a given dataset (specified by the metadata path)
+
     :param metadata_path:
     :return: (base_path, all_files)
     """
