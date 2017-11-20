@@ -57,8 +57,8 @@ def build_pathset(
         log.info("paths.trie.build")
         path_set = dawg.CompletionDAWG(
             chain(
-                collection.iter_index_uris(),
-                collection.iter_fs_uris()
+                collection.all_indexed_uris(),
+                collection.all_uris()
             )
         )
         log.info("paths.trie.done")

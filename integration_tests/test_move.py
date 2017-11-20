@@ -166,7 +166,7 @@ def _check_successful_move(test_dataset: DatasetForTests,
     expected_new_uri = expected_new_path.as_uri()
 
     # All three uris should be in the system still.
-    all_indexed_uris = set(test_dataset.collection.iter_index_uris())
+    all_indexed_uris = set(test_dataset.collection.all_indexed_uris())
     assert all_indexed_uris == {
         # The old uri one still indexed (but archived)
         test_dataset.uri,

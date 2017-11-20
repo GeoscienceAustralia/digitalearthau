@@ -275,7 +275,7 @@ def _paths_to_tasks(input_paths: List[Path]) -> List[Task]:
     parent_folder_counts = uniq_counts(dataset_folder_path(dataset_path)
                                        for input_path in normalised_input_paths
                                        for collection in collections.get_collections_in_path(input_path)
-                                       for dataset_path in collection.iter_fs_paths_within(input_path))
+                                       for dataset_path in collection.all_paths_within(input_path))
 
     # Sanity check: Each of these parent folders should still be within an input path
     for path, count in parent_folder_counts:

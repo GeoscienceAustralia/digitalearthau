@@ -75,8 +75,9 @@ def cli(index, dry_run, paths, destination, checksum):
         if not collections:
             raise click.BadArgumentUsage(f"Directory doesn't match any known collections: {input_path}")
 
+        # Is it an error for a dataset to be in more than one collection?
         for collection in collections:
-            resulting_paths.extend(list(collection.iter_fs_paths_within(input_path)))
+            resulting_paths.extend(list(collection.all_paths_within(input_path)))
 
     _LOG.info("dataset.count", input_count=len(paths), dataset_count=len(resulting_paths))
 

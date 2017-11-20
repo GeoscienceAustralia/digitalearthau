@@ -42,18 +42,21 @@ class Collection(NamedTuple):
 
     trust: Trust = Trust.NOTHING
 
-    def iter_fs_paths(self):
+    def all_paths(self):
+        """
+        Find the path to every dataset in this collection
+        """
         return (
             Path(path).absolute()
             for file_pattern in self.file_patterns
             for path in glob.iglob(file_pattern)
         )
 
-    def iter_fs_uris(self):
-        for path in self.iter_fs_paths():
+    def all_uris(self):
+        for path in self.all_paths():
             yield path.as_uri()
 
-    def iter_index_uris(self):
+    def all_indexed_uris(self):
         """
         Iter over all uris in the index of this collection.
 
@@ -99,9 +102,9 @@ class Collection(NamedTuple):
 
         return out
 
-    def iter_fs_paths_within(self, p: Path):
+    def all_paths_within(self, p: Path):
         """
-        Iterate over all filesystem paths of this collection that are inside the given folder
+        Find the path to every dataset in this collection, that is also within the given folder
         """
         return (
             Path(path).absolute()
