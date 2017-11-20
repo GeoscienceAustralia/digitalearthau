@@ -649,6 +649,7 @@ def with_qsub_runner():
         if value is None:
             return
         state(ctx).qsub = value
+        return value
 
     def decorate(f):
         opts = [
