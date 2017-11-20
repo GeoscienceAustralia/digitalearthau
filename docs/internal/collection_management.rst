@@ -28,9 +28,8 @@ See their help commands for specific information:
 Note that many of these operate on collections, not products. To perform a move or sync on a new product you
 may first need add it as a collection.
 
-================================================
 Defining Collections
-================================================
+------------------------------------------------
 
 The Open Data Cube core keeps track of where individual datasets are in a product, but not where datasets as a
 whole should be (such as which filesystems).
@@ -40,7 +39,8 @@ Knowing "where they should be" is currently handled in this DEA repository as th
 A collection defines:
 
 - datacube query arguments and folder patterns that should contain the same set of datasets. The sync tool, for
- example, can then iterate the two to find mismatches in both directions.
+  example, can then iterate the two to find mismatches in both directions.
+
 - how datasets in the collection should be treated: is an unindexed file found on disk corrupt, or newly arrived?
 
 The set of NCI DEA collections is currently in `collections.py`_.
@@ -71,4 +71,70 @@ Examples:
             # Who do we trust in a sync if there's a mismatch?
             trust=Trust.disk,
      )
+
+Command line tools
+------------------
+
+Update the index, find problems with datasets.
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. click:: digitalearthau.sync:cli
+   :prog: dea-sync
+   :show-nested:
+
+.. click:: digitalearthau.coherence:main
+  :prog: dea-coherence
+  :show-nested:
+
+.. click:: digitalearthau.duplicates:main
+  :prog: dea-duplicates
+  :show-nested:
+
+
+Move datasets
+^^^^^^^^^^^^^
+
+Move datasets between disks safely and incrementally (updating the index).
+
+.. click:: digitalearthau.move:cli
+   :prog: dea-move
+   :show-nested:
+
+Trash archived datasets
+^^^^^^^^^^^^^^^^^^^^^^^
+
+.. click:: digitalearthau.cleanup:main
+    :prog: dea-clean
+    :show-nested:
+
+Submit a sync job to PBS
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. click:: digitalearthau.sync.submit_job:main
+   :prog: dea-submit-sync
+   :show-nested:
+
+
+Initialise a database with DEA products
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. click:: digitalearthau.system:cli
+   :prog: dea-system
+   :show-nested:
+
+..
+    .. click:: digitalearthau.harvest.iso19115:main
+        :prog: dea-harvest
+        :show-nested:
+
+
+    .. click:: digitalearthau.submit.ingest:cli
+        :prog: dea-submit-ingest
+        :show-nested:
+
+    .. click:: digitalearthau.submit.ncmler:cli
+        :prog: dea-submit-ncmler
+        :show-nested:
+
+
 

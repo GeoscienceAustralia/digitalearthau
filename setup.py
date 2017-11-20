@@ -7,7 +7,7 @@ import versioneer
 tests_require = ['pytest', 'pytest-cov', 'mock', 'pep8', 'pylint', 'hypothesis', 'compliance-checker']
 
 extras_require = {
-    'doc': ['Sphinx', 'setuptools', 'sphinx_rtd_theme'],
+    'doc': ['Sphinx', 'setuptools', 'sphinx_rtd_theme', 'sphinx-click'],
     'test': tests_require,
 }
 
