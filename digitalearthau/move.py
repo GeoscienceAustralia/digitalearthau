@@ -43,6 +43,8 @@ def cli(index, dry_run, paths, destination, checksum):
 
     This will checksum the data, copy it to the destination, and mark the original as archived in the DEA index.
 
+    The <destination> MUST be a 'base folder', ie. defined in `paths.py`. Not even a sub-directory of a `base folder`
+    is acceptable.
 
     Notes:
 
@@ -90,11 +92,11 @@ def cli(index, dry_run, paths, destination, checksum):
 
 def move_all(index: Index, paths: Iterable[Path], destination_base_path: Path, dry_run=False, checksum=True):
     for path in paths:
-        mover = FileMover.evaluate_and_create(index, path, dest_base_path=destination_base_path)
+        mover = FileMover.evaluate_and_create(index, path, dest_base_path=destination_base_path, dry_run=dry_run)
         if not mover:
             continue
 
-        mover.move(dry_run=dry_run, checksum=checksum)
+        mover.move(checksum=checksum)
 
 
 class FileMover:
@@ -118,7 +120,8 @@ class FileMover:
                  source_metadata_path: Path,
                  dest_metadata_path: Path,
                  dataset: Dataset,
-                 index: Index) -> None:
+                 index: Index,
+                 dry_run=False) -> None:
         self.source_path = source_path
         self.dest_path = dest_path
         self.from_metadata_path = source_metadata_path
@@ -131,6 +134,7 @@ class FileMover:
         self.dest_uri = self.dest_metadata_path.as_uri()
 
         self.log = _LOG.bind(source_path=self.source_path)
+        self.dry_run = dry_run
 
         if not str(self.from_metadata_path).startswith(str(self.source_path)):
             # We only currently support copying when metadata is stored within the dataset.
@@ -140,7 +144,7 @@ class FileMover:
             raise NotImplementedError("Only metadata stored within a dataset is currently supported ")
 
     @classmethod
-    def evaluate_and_create(cls, index: Index, path: Path, dest_base_path: Path):
+    def evaluate_and_create(cls, index: Index, path: Path, dest_base_path: Path, dry_run=False):
         """
         Create a move task if this path is movable.
         """
@@ -172,22 +176,23 @@ class FileMover:
             source_metadata_path=metadata_path,
             dest_metadata_path=dest_md_path,
             dataset=dataset,
-            index=index
+            index=index,
+            dry_run=dry_run
         )
 
-    def move(self, dry_run=True, checksum=True):
-        dest_metadata_uri = self._do_copy(dry_run=dry_run, checksum=checksum)
+    def move(self, checksum=True):
+        dest_metadata_uri = self._do_copy(checksum=checksum)
         if not dest_metadata_uri:
             self.log.debug("index.skip")
             return
 
         # Record destination location in index
-        if not dry_run:
+        if not self.dry_run:
             self.index.datasets.add_location(self.dataset.id, uri=dest_metadata_uri)
         self.log.info('index.dest.added', uri=dest_metadata_uri)
 
         # Archive source file in index (for deletion soon)
-        if not dry_run:
+        if not self.dry_run:
             self.index.datasets.archive_location(self.dataset.id, self.source_uri)
 
         self.log.info('index.source.archived', uri=self.source_uri)
@@ -195,8 +200,10 @@ class FileMover:
     @staticmethod
     def _compute_paths(source_metadata_path, destination_base_path):
         dataset_path, all_files = get_dataset_paths(source_metadata_path)
-        _, dataset_offset = split_path_from_base(dataset_path)
-        new_dataset_location = destination_base_path.joinpath(dataset_offset)
+
+        _, relative = split_path_from_base(dataset_path)
+        new_dataset_location = destination_base_path.joinpath(relative)
+
         _, metadata_offset = split_path_from_base(source_metadata_path)
         new_metadata_location = destination_base_path.joinpath(metadata_offset)
 
@@ -208,20 +215,20 @@ class FileMover:
 
         return dataset_path, new_dataset_location, new_metadata_location
 
-    def _do_copy(self, dry_run=True, checksum=True):
+    def _do_copy(self, checksum=True):
         log = self.log
         dest_path = self.dest_path
         dataset_path = self.source_path
 
         if checksum:
             successful_checksum = _verify_checksum(self.log, self.from_metadata_path,
-                                                   dry_run=dry_run)
+                                                   dry_run=self.dry_run)
             self.log.info("checksum.complete", passes_checksum=successful_checksum)
             if not successful_checksum:
                 raise RuntimeError("Checksum failure on " + str(self.from_metadata_path))
 
         if dataset_path.is_dir():
-            self.copy_directory(dataset_path, dest_path, dry_run, log)
+            self.copy_directory(dataset_path, dest_path, log)
         elif self.dest_path == self.dest_metadata_path:  # Metadata is contained within the dataset file. eg. *.nc
             self.copy_file(dataset_path, dest_path, log)
         else:
@@ -233,30 +240,34 @@ class FileMover:
     def copy_file(self, from_, to, log):
         to_directory = to.parent
         log.debug("copy.mkdir", dest=to_directory)
-        fileutils.mkdir_p(to.parent)
+        if not self.dry_run:
+            fileutils.mkdir_p(str(to.parent))
         # We don't want to risk partially-copied files left on disk, so we copy to a tmp name
         # then atomically rename into place.
         tmp_name = tempfile.mktemp(prefix='.dea-mv-', dir=to_directory)
         try:
             log.info("copy.put", src=from_, tmp_dest=tmp_name)
-            shutil.copy(from_, tmp_name)
+            if not self.dry_run:
+                shutil.copy(from_, tmp_name)
             log.debug("copy.put.done")
             os.rename(tmp_name, to)
         finally:
             log.debug('tmp_file.rm', tmp_file=tmp_name)
-            with suppress(FileNotFoundError):
-                os.remove(tmp_name)
+            if not self.dry_run:
+                with suppress(FileNotFoundError):
+                    os.remove(tmp_name)
 
-    def copy_directory(self, from_, dest_path, dry_run, log):
+    def copy_directory(self, from_, dest_path, log):
         log.debug("copy.mkdir", dest=dest_path.parent)
-        fileutils.mkdir_p(str(dest_path.parent))
+        if not self.dry_run:
+            fileutils.mkdir_p(str(dest_path.parent))
         # We don't want to risk partially-copied packaged left on disk, so we copy to a tmp dir in same
         # folder and then atomically rename into place.
         tmp_dir = Path(tempfile.mkdtemp(prefix='.dea-mv-', dir=str(dest_path.parent)))
         try:
             tmp_package = tmp_dir.joinpath(from_.name)
             log.info("copy.put", src=from_, tmp_dest=tmp_package)
-            if not dry_run:
+            if not self.dry_run:
                 shutil.copytree(from_, tmp_package)
                 log.debug("copy.put.done")
                 os.rename(tmp_package, dest_path)
@@ -266,7 +277,8 @@ class FileMover:
                 assert self.dest_metadata_path.exists()
         finally:
             log.debug("tmp_dir.rm", tmp_dir=tmp_dir)
-            shutil.rmtree(tmp_dir, ignore_errors=True)
+            if not self.dry_run:
+                shutil.rmtree(tmp_dir, ignore_errors=True)
 
 
 def _verify_checksum(log, metadata_path, dry_run=True):
