@@ -1,3 +1,9 @@
+"""
+Test out the dea-move CLI command.
+
+Creates datasets on the filesystem, indexes them into a database, and then attempts to move them.
+
+"""
 import shutil
 import uuid
 from pathlib import Path
