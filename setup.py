@@ -54,7 +54,7 @@ setup(
         'console_scripts': [
             'dea-clean = digitalearthau.cleanup:main',
             'dea-coherence = digitalearthau.coherence:main',
-            'dea-duplicates = digitalearthau.duplicates:main',
+            'dea-duplicates = digitalearthau.duplicates:cli',
             'dea-harvest = digitalearthau.harvest.iso19115:main',
             'dea-move = digitalearthau.move:cli',
             'dea-submit-ingest = digitalearthau.submit.ingest:cli',
