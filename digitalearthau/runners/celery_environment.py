@@ -294,7 +294,7 @@ def launch_celery_worker_environment(task_desc: TaskDescription,
                                            redis_port,
                                            one_worker_per_node))
 
-    _LOG.info('{} workers launched.'.format(len(worker_procs)))
+    _LOG.info('%d workers launched.', len(worker_procs))
 
     def start_shutdown():
         cr.app.control.shutdown()
@@ -326,7 +326,7 @@ def _spawn_pbs_workers(redis_host: str,
     worker_env = pbs.get_env()
 
     _LOG.info('Launching PBS workers.')
-    _LOG.info('one worker per node: {}.'.format(one_worker_per_node))
+    _LOG.info('one worker per node: %s.', str(one_worker_per_node))
 
     for node in pbs.nodes():
         nprocs = node.num_cores
@@ -341,5 +341,5 @@ def _spawn_pbs_workers(redis_host: str,
             f'exec python -m datacube_apps.worker --executor celery {redis_host}:{redis_port} --nprocs {nprocs}',
             env=worker_env
         )
-        _LOG.info(f"Started node {node.offset} (pbsdsh pid {proc.pid})")
+        _LOG.info(f"Started node {node.offset} named {node.name} (pbsdsh pid {proc.pid})")
         yield proc
