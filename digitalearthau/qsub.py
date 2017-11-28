@@ -506,7 +506,7 @@ class TaskRunner(object):
         self._shutdown = None
         self._queue_size = None
         self._user_queue_size = None
-        self._one_worker_per_node = False
+        self._worker_per_node = None
 
     def __repr__(self):
         args = '' if self._opts is None else '-{}'.format(str(self._opts))
@@ -515,8 +515,8 @@ class TaskRunner(object):
     def set_qsize(self, qsize):
         self._user_queue_size = qsize
 
-    def set_one_worker_per_node(self, flag):
-        self._one_worker_per_node = flag
+    def set_worker_per_node(self, value):
+        self._worker_per_node = value
 
     def start(self, task_desc: TaskDescription = None):
         def noop():
@@ -529,7 +529,7 @@ class TaskRunner(object):
             executor, shutdown = celery_environment.launch_celery_worker_environment(
                 task_desc=task_desc,
                 redis_params=dict(port=port, maxmemory=maxmemory),
-                one_worker_per_node=self._one_worker_per_node
+                worker_per_node=self._worker_per_node
             )
             return (executor, qsize, shutdown)
 
@@ -601,6 +601,7 @@ class QsubRunState:
         self.runner: TaskRunner = None
         self.qsub: QSubLauncher = None
         self.qsize: int = None
+        self.worker_per_node: int = None
 
 
 def with_qsub_runner():
@@ -650,10 +651,10 @@ def with_qsub_runner():
             return
         state(ctx).qsize = value
 
-    def set_one_worker_per_node(ctx, param, value):
+    def set_worker_per_node(ctx, param, value):
         if value is None:
             return
-        state(ctx).one_worker_per_node = value
+        state(ctx).worker_per_node = value
 
     def capture_qsub(ctx, param, value):
         if value is None:
@@ -690,10 +691,10 @@ def with_qsub_runner():
                          help='Overwrite defaults for queue size',
                          expose_value=False,
                          callback=add_qsize),
-            click.option('--one-worker-per-node',
-                         is_flag=True, default=False,
+            click.option('--worker-per-node',
+                         type=int,
                          expose_value=False,
-                         callback=set_one_worker_per_node,
+                         callback=set_worker_per_node,
                          help='For code that parallelizes over cores'),
             click.option('--qsub',
                          type=QSubParamType(),
@@ -718,11 +719,12 @@ def with_qsub_runner():
             if s.qsub is not None and s.qsize is not None:
                 s.qsub.add_internal_args('--queue-size', s.qsize)
 
-            if s.qsub is not None and s.one_worker_per_node is not None:
-                s.qsub.add_internal_args('--one-worker-per-node')
+            if s.qsub is not None and s.worker_per_node is not None:
+                s.qsub.add_internal_args('--worker-per-node',
+                                         str(s.worker_per_node))
 
-            if s.runner is not None and s.one_worker_per_node is not None:
-                s.runner.set_one_worker_per_node(s.one_worker_per_node)
+            if s.runner is not None and s.worker_per_node is not None:
+                s.runner.set_worker_per_node(s.worker_per_node)
 
         def extract_runner(*args, **kwargs):
             finalise_state()

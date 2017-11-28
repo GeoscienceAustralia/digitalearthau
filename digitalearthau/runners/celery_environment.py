@@ -262,7 +262,7 @@ def _just_the_hostname(hostname: str):
 
 def launch_celery_worker_environment(task_desc: TaskDescription,
                                      redis_params: dict,
-                                     one_worker_per_node: bool):
+                                     worker_per_node: int):
     redis_port = redis_params['port']
     redis_host = pbs.hostname()
     redis_password = cr.get_redis_password(generate_if_missing=True)
@@ -292,7 +292,7 @@ def launch_celery_worker_environment(task_desc: TaskDescription,
 
     worker_procs = list(_spawn_pbs_workers(redis_host,
                                            redis_port,
-                                           one_worker_per_node))
+                                           worker_per_node))
 
     _LOG.info('%d workers launched.', len(worker_procs))
 
@@ -322,19 +322,21 @@ def launch_celery_worker_environment(task_desc: TaskDescription,
 
 def _spawn_pbs_workers(redis_host: str,
                        redis_port: str,
-                       one_worker_per_node: bool) -> Iterable[subprocess.Popen]:
+                       worker_per_node: int) -> Iterable[subprocess.Popen]:
     worker_env = pbs.get_env()
 
     _LOG.info('Launching PBS workers.')
-    _LOG.info('one worker per node: %s.', str(one_worker_per_node))
+    _LOG.info('worker per node: %d.', worker_per_node)
 
     for node in pbs.nodes():
         nprocs = node.num_cores
         if node.is_main:
             nprocs = max(1, nprocs - 2)
 
-        if one_worker_per_node:
-            nprocs = 1
+        if worker_per_node:
+            nprocs = min(worker_per_node, nprocs)
+
+        _LOG.info(f'datacube_apps.worker --executor celery {redis_host}:{redis_port} --nprocs {nprocs}')
 
         proc = pbs.pbsdsh(
             node.offset,
