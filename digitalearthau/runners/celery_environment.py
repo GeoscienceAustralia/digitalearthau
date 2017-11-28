@@ -260,7 +260,9 @@ def _just_the_hostname(hostname: str):
     return parts[-1]
 
 
-def launch_celery_worker_environment(task_desc: TaskDescription, redis_params: dict):
+def launch_celery_worker_environment(task_desc: TaskDescription,
+                                     redis_params: dict,
+                                     one_worker_per_node: bool):
     redis_port = redis_params['port']
     redis_host = pbs.hostname()
     redis_password = cr.get_redis_password(generate_if_missing=True)
@@ -288,7 +290,11 @@ def launch_celery_worker_environment(task_desc: TaskDescription, redis_params: d
     )
     log_proc.start()
 
-    worker_procs = list(_spawn_pbs_workers(redis_host, redis_port))
+    worker_procs = list(_spawn_pbs_workers(redis_host,
+                                           redis_port,
+                                           one_worker_per_node))
+
+    _LOG.info('{} workers launched.'.format(len(worker_procs)))
 
     def start_shutdown():
         cr.app.control.shutdown()
@@ -314,13 +320,21 @@ def launch_celery_worker_environment(task_desc: TaskDescription, redis_params: d
     return executor, shutdown
 
 
-def _spawn_pbs_workers(redis_host: str, redis_port: str) -> Iterable[subprocess.Popen]:
+def _spawn_pbs_workers(redis_host: str,
+                       redis_port: str,
+                       one_worker_per_node: bool) -> Iterable[subprocess.Popen]:
     worker_env = pbs.get_env()
+
+    _LOG.info('Launching PBS workers.')
+    _LOG.info('one worker per node: {}.'.format(one_worker_per_node))
 
     for node in pbs.nodes():
         nprocs = node.num_cores
         if node.is_main:
             nprocs = max(1, nprocs - 2)
+
+        if one_worker_per_node:
+            nprocs = 1
 
         proc = pbs.pbsdsh(
             node.offset,
