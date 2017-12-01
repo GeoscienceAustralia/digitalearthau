@@ -521,7 +521,7 @@ class TaskRunner(object):
         def mk_pbs_celery(task_desc: TaskDescription):
             qsize = pbs.preferred_queue_size()
             port = 6379  # TODO: randomise
-            maxmemory = "1024mb"  # TODO: compute maxmemory from qsize
+            maxmemory = "4096mb"  # TODO: compute maxmemory from qsize
             executor, shutdown = celery_environment.launch_celery_worker_environment(
                 task_desc=task_desc,
                 redis_params=dict(port=port, maxmemory=maxmemory)
