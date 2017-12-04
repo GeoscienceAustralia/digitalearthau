@@ -262,7 +262,7 @@ def _just_the_hostname(hostname: str):
 
 def launch_celery_worker_environment(task_desc: TaskDescription,
                                      redis_params: dict,
-                                     workers_per_node: int):
+                                     workers_per_node: int = None):
     redis_port = redis_params['port']
     redis_host = pbs.hostname()
     redis_password = cr.get_redis_password(generate_if_missing=True)
@@ -322,7 +322,7 @@ def launch_celery_worker_environment(task_desc: TaskDescription,
 
 def _spawn_pbs_workers(redis_host: str,
                        redis_port: str,
-                       workers_per_node: int) -> Iterable[subprocess.Popen]:
+                       workers_per_node: int = None) -> Iterable[subprocess.Popen]:
     worker_env = pbs.get_env()
 
     _LOG.info('Launching PBS workers.')
@@ -333,7 +333,7 @@ def _spawn_pbs_workers(redis_host: str,
         if node.is_main:
             nprocs = max(1, nprocs - 2)
 
-        if workers_per_node:
+        if workers_per_node is not None:
             nprocs = min(workers_per_node, nprocs)
 
         _LOG.info(f'datacube_apps.worker --executor celery {redis_host}:{redis_port} --nprocs {nprocs}')
