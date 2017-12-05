@@ -260,7 +260,9 @@ def _just_the_hostname(hostname: str):
     return parts[-1]
 
 
-def launch_celery_worker_environment(task_desc: TaskDescription, redis_params: dict):
+def launch_celery_worker_environment(task_desc: TaskDescription,
+                                     redis_params: dict,
+                                     workers_per_node: int = None):
     redis_port = redis_params['port']
     redis_host = pbs.hostname()
     redis_password = cr.get_redis_password(generate_if_missing=True)
@@ -288,7 +290,11 @@ def launch_celery_worker_environment(task_desc: TaskDescription, redis_params: d
     )
     log_proc.start()
 
-    worker_procs = list(_spawn_pbs_workers(redis_host, redis_port))
+    worker_procs = list(_spawn_pbs_workers(redis_host,
+                                           redis_port,
+                                           workers_per_node))
+
+    _LOG.info('%d workers launched.', len(worker_procs))
 
     def start_shutdown():
         cr.app.control.shutdown()
@@ -314,18 +320,28 @@ def launch_celery_worker_environment(task_desc: TaskDescription, redis_params: d
     return executor, shutdown
 
 
-def _spawn_pbs_workers(redis_host: str, redis_port: str) -> Iterable[subprocess.Popen]:
+def _spawn_pbs_workers(redis_host: str,
+                       redis_port: str,
+                       workers_per_node: int = None) -> Iterable[subprocess.Popen]:
     worker_env = pbs.get_env()
+
+    _LOG.info('Launching PBS workers.')
+    _LOG.info('Workers per node: %d.', workers_per_node)
 
     for node in pbs.nodes():
         nprocs = node.num_cores
         if node.is_main:
             nprocs = max(1, nprocs - 2)
 
+        if workers_per_node is not None:
+            nprocs = min(workers_per_node, nprocs)
+
+        _LOG.info(f'datacube_apps.worker --executor celery {redis_host}:{redis_port} --nprocs {nprocs}')
+
         proc = pbs.pbsdsh(
             node.offset,
             f'exec python -m datacube_apps.worker --executor celery {redis_host}:{redis_port} --nprocs {nprocs}',
             env=worker_env
         )
-        _LOG.info(f"Started node {node.offset} (pbsdsh pid {proc.pid})")
+        _LOG.info(f"Started node {node.offset} named {node.name} (pbsdsh pid {proc.pid})")
         yield proc
