@@ -17,8 +17,6 @@ from datacube.scripts.dataset import index_dataset_paths
 from datacube.ui.expression import parse_expressions
 from digitalearthau.system import init_dea
 
-DEFAULT_CONF_FILE = pathlib.Path(__file__).parent / "config" / "datacube.conf"
-
 CREATE_DATABASE_TEMPLATE = """
 CREATE DATABASE {db_database}
 WITH
@@ -180,7 +178,6 @@ def as_dict(local_config, env=None):
 
 @click.group()
 @click.option('-C', '--config-file',
-              default=DEFAULT_CONF_FILE,
               type=click.Path(exists=True, dir_okay=False),
               help="Database configuration file."
                    "  [default: config/datacube.conf]")
