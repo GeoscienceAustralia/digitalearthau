@@ -166,7 +166,7 @@ def psql_command(command, local_config, maintenance_db='postgres'):
 
 def load_config(config_file, env=None):
     """ Load configuration from file. """
-    paths = DEFAULT_CONF_PATHS + (str(config_file.absolute()),)
+    paths = DEFAULT_CONF_PATHS + (config_file,)
     return LocalConfig.find(paths=paths, env=env)
 
 
