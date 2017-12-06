@@ -46,7 +46,7 @@ class QSubLauncher(object):
         self._raw_qsub_params = params
 
     def __repr__(self):
-        return yaml.dump(dict(qsub=self._raw_qsub_params))
+        return yaml.dump(dict(qsub=self._raw_qsub_params, internal=self._internal_args))
 
     def add_internal_args(self, *args):
         if self._internal_args is None:
@@ -67,6 +67,7 @@ class QSubLauncher(object):
             args = sys.argv[1:]
             args = remove_args('--qsub', args, n=1)
             args = remove_args('--queue-size', args, n=1)
+            args = remove_args('--batch', args, n=1)
             args = tuple(args)
 
         qsub_args, script = self.build_submission(*args)
