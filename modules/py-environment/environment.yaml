@@ -17,7 +17,6 @@ dependencies:
 - distributed
 - ephem
 - fiona
-- flask
 - folium
 - future
 - gdal >=1.9
@@ -26,7 +25,6 @@ dependencies:
 - glueviz
 # This is only graphviz itself, not the python bindings. The latter are in the pip section.
 - graphviz
-- gunicorn
 - h5py
 - hdf5
 - hypothesis
@@ -87,9 +85,13 @@ dependencies:
   - ciso8601
   - compliance-checker
   - DAWG
+  - flask
+  - Flask-Caching
   - graphviz
+  - gunicorn
   - hdmedians
   - ipython-sql
+  - meinheld
   - modernize
   - mypy
   - opencv-python
