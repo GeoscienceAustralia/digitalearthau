@@ -35,18 +35,23 @@ class QSubLauncher(object):
     """ This class is for self-submitting as a PBS job.
     """
 
-    def __init__(self, params, internal_args=None):
+    def __init__(self, params, internal_args=None, auto_clean=None):
         """
         params -- normalised dictionary of qsub options, see `norm_qsub_params`
         internal_args -- optional extra command line arguments to add
                          when launching, particularly useful when using auto-mode
                          that passes through sys.argv arguments
+        auto_clean -- params to remove when self-submitting
         """
-        self._internal_args = internal_args
         self._raw_qsub_params = params
+        self._internal_args = internal_args
+        self._auto_clean = auto_clean
 
     def __repr__(self):
         return yaml.dump(dict(qsub=self._raw_qsub_params))
+
+    def clone(self):
+        return QSubLauncher(self._raw_qsub_params, self._internal_args, self._auto_clean)
 
     def add_internal_args(self, *args):
         if self._internal_args is None:
@@ -54,19 +59,31 @@ class QSubLauncher(object):
         else:
             self._internal_args = self._internal_args + args
 
-    def __call__(self, *args, **kwargs):
+    def reset_internal_args(self):
+        self._internal_args = None
+
+    def __call__(self, *args, auto=False, auto_clean=None, **kwargs):
         """ Submit self via qsub
 
         auto=True -- re-use arguments used during invocation, removing `--qsub` parameter
         auto=False -- ignore invocation arguments and just use suplied *args
 
         args -- command line arguments to launch with under qsub, only used if auto=False
+
+        auto_clean -- extra list of params to remove
         """
-        auto = kwargs.get('auto', False)
         if auto:
             args = sys.argv[1:]
-            args = remove_args('--qsub', args, n=1)
-            args = remove_args('--queue-size', args, n=1)
+
+            def to_pairs(ls):
+                if ls is None:
+                    return []
+
+                return [(x, 0) if isinstance(x, str) else x
+                        for x in ls]
+
+            for arg, nargs in to_pairs(self._auto_clean) + to_pairs(auto_clean):
+                args = remove_args(arg, args, n=nargs)
             args = tuple(args)
 
         qsub_args, script = self.build_submission(*args)
@@ -160,7 +177,8 @@ Examples:
                 p['wd'] = True
 
             p = norm_qsub_params(p)
-            return QSubLauncher(p, ('--celery', 'pbs-launch'))
+            return QSubLauncher(p, ('--celery', 'pbs-launch'),
+                                [('--qsub', 1), ('--queue-size', 1)])
         except ValueError:
             self.fail('Failed to parse: {}'.format(value), param, ctx)
 
