@@ -345,7 +345,7 @@ def norm_qsub_params(p):
     mem = normalise_mem(p.get('mem', 'small'))
 
     if nodes:
-        mem = int((mem * NUM_CPUS_PER_NODE * 1024 - 512) * nodes)
+        mem = int((mem * NUM_CPUS_PER_NODE * 1024 - 2048) * nodes)
     else:
         mem = int(mem * ncpus * 1024)
 
