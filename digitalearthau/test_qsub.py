@@ -44,7 +44,7 @@ def test_norm_qsub_params():
 
     assert p['ncpus'] == 16
     assert p['walltime'] == '0:10:00'
-    assert p['mem'] == '32256MB'
+    assert p['mem'] == '30720MB'
 
     p = qsub.parse_comma_args('ncpus=1, mem=medium, walltime=3h')
     p = qsub.norm_qsub_params(p)

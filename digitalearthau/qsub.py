@@ -21,6 +21,7 @@ from .runners import celery_environment
 from .runners.model import TaskDescription
 
 NUM_CPUS_PER_NODE = 16
+RESERVED_MEM_PER_NODE = 2048   # in MB
 QSUB_L_FLAGS = 'mem ncpus walltime wd'.split(' ')
 
 # Keys that can be sent as-is to the qsub builder without normalisation (I think?)
@@ -316,7 +317,7 @@ def norm_qsub_params(p):
     ...    'name': 'staggering-fc-run',
     ... }))
     {'extra_qsub_args': [],
-     'mem': '129024MB',
+     'mem': '122880MB',
      'name': 'staggering-fc-run',
      'ncpus': 64,
      'noask': True,
@@ -329,7 +330,7 @@ def norm_qsub_params(p):
      'wd': True}
     >>> # Default params
     >>> norm_qsub_params({})
-    {'ncpus': 16, 'mem': '32256MB', 'walltime': None, 'extra_qsub_args': []}
+    {'ncpus': 16, 'mem': '30720MB', 'walltime': None, 'extra_qsub_args': []}
     >>> # TODO error on unknown args? It seems to explicitly pass through (PASS_THRU_KEYS) some, but not all valid keys?
     >>> # No error currently:
     >>> # norm_qsub_params({'ubermensch': 'understood'})
@@ -345,7 +346,7 @@ def norm_qsub_params(p):
     mem = normalise_mem(p.get('mem', 'small'))
 
     if nodes:
-        mem = int((mem * NUM_CPUS_PER_NODE * 1024 - 2048) * nodes)
+        mem = int((mem * NUM_CPUS_PER_NODE * 1024 - RESERVED_MEM_PER_NODE) * nodes)
     else:
         mem = int(mem * ncpus * 1024)
 
