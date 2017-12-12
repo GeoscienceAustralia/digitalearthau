@@ -83,6 +83,7 @@ dependencies:
   - boltons
   - celery >= 4
   - ciso8601
+  - click-datetime
   - compliance-checker
   - DAWG
   - flask
