@@ -326,7 +326,8 @@ def _spawn_pbs_workers(redis_host: str,
     worker_env = pbs.get_env()
 
     _LOG.info('Launching PBS workers.')
-    _LOG.info('Workers per node: %d.', workers_per_node)
+    if workers_per_node is not None:
+        _LOG.info('Workers per node: %d.', workers_per_node)
 
     for node in pbs.nodes():
         nprocs = node.num_cores
