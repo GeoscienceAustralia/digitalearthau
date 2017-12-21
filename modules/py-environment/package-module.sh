@@ -89,6 +89,11 @@ then
     # create the env
     "${package_dest}/bin/conda" env create --file "${tmp_dir}/env.yaml"
 
+    # Ensure all file and folders are readable by all
+    find "${package_dest}" -type f -print0 | xargs -0 chmod a+r
+    find "${package_dest}" -type d -print0 | xargs -0 chmod a+rx
+
+    # Revoke my write access to minimise accidental changes.
     chmod -R a-w "${package_dest}"
 
     modulefile_dir="${module_dir}/modulefiles/${package_name}"
