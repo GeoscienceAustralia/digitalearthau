@@ -63,7 +63,7 @@ def indexed(index: Index,
     if len(product_counts) > 1 and ('6543' in str(index.datasets._db.url)):
         echo("\nRunning against multiple products will fail on port 6432 at NCI until AGDC 1.5.4 is released.\n"
              "Change port to 5432 or limit your search arguments to one product.", err=True)
-        return 1
+        sys.exit(1)
 
     latest_time_to_archive = _as_utc(datetime.utcnow()) - timedelta(hours=min_trash_age_hours)
 

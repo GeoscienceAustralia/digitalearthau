@@ -677,7 +677,7 @@ def with_qsub_runner():
 
     def capture_qsub(ctx, param, value):
         if value is None:
-            return
+            return None
         state(ctx).qsub = value
         return value
 

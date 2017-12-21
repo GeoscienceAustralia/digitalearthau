@@ -133,7 +133,7 @@ class SyncSubmission(object):
                     Trust.INDEX: ['--trash-missing'],
                 }
                 if task.collection.trust not in trust_options:
-                    raise RuntimeError("Unknown trust type %r", task.collection.trust)
+                    raise RuntimeError(f"Unknown trust type {task.collection.trust}")
                 sync_opts.extend(trust_options[task.collection.trust])
 
         sync_command = [
