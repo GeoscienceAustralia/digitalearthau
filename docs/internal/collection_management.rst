@@ -40,7 +40,8 @@ Knowing "where they should be" is currently handled in this DEA repository as th
 A collection defines:
 
 - datacube query arguments and folder patterns that should contain the same set of datasets. The sync tool, for
- example, can then iterate the two to find mismatches in both directions.
+  example, can then iterate the two to find mismatches in both directions.
+
 - how datasets in the collection should be treated: is an unindexed file found on disk corrupt, or newly arrived?
 
 The set of NCI DEA collections is currently in `collections.py`_.
