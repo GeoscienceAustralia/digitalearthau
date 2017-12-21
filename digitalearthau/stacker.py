@@ -93,7 +93,7 @@ def submit(index: Index,
 
     if no_qsub:
         _LOG.info('Skipping submission due to --no-qsub')
-        return 0
+        return
 
     submit_subjob(
         name='generate',
@@ -226,7 +226,7 @@ def run(index,
 
     if dry_run:
         task_app.check_existing_files((task['filename'] for task in tasks))
-        return 0
+        return
 
     task_func = partial(stacker.do_stack_task, config)
     process_func = partial(stacker.process_result, index)

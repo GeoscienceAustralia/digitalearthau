@@ -25,13 +25,13 @@ def parse_field_expression(md: MetadataType, expression: str):
     name = parts.pop(0)
     field = md.dataset_fields.get(name)
     if not field:
-        raise ValueError('No field named %r in %r', name, md.name)
+        raise ValueError(f'No field named {name} in {md.name}')
 
     while parts:
         name = parts.pop(0)
         field = getattr(field, name, None)
         if not field:
-            raise ValueError('No field %s for expression %s in %s', name, expression, md.name)
+            raise ValueError(f'No field {name} for expression {expression} in {md.name}')
 
     return field
 

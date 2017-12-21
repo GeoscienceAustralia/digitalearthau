@@ -41,6 +41,8 @@ class JsonLinesWriter:
         self._file_obj.close()
 
 
+# The "args" and "kwargs" are here to allow use as a json.dumps() replacement (ignoring other arguments).
+# pylint: disable=keyword-arg-before-vararg
 def to_lenient_json(o, compact=False, *args, **kwargs):
     """
     Convert an object to json, supporting a few more common data types (Paths, UUID).
