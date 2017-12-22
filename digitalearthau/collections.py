@@ -401,7 +401,7 @@ def init_nci_collections(index: Index):
         Collection(
             name='pq_count_summary',
             query={'product': 'pq_count_summary'},
-            file_patterns='/g/data/fk4/datacube/002/stats/pq_count/history/LS_PQ_COUNT/*_*/LS_PQ_COUNT_3577_*.nc',
+            file_patterns=['/g/data/fk4/datacube/002/stats/pq_count/history/LS_PQ_COUNT/*_*/LS_PQ_COUNT_3577_*.nc'],
             unique=('time.lower.day', 'lat', 'lon')
         )
     )
@@ -409,7 +409,7 @@ def init_nci_collections(index: Index):
         Collection(
             name='pq_count_annual_summary',
             query={'product': 'pq_count_annual_summary'},
-            file_patterns='/g/data/fk4/datacube/002/stats/pq_count/annual/LS_PQ_COUNT/*_*/LS_PQ_COUNT_3577_*.nc',
+            file_patterns=['/g/data/fk4/datacube/002/stats/pq_count/annual/LS_PQ_COUNT/*_*/LS_PQ_COUNT_3577_*.nc'],
             unique=('time.lower.day', 'lat', 'lon')
         )
     )
