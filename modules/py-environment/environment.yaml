@@ -17,6 +17,7 @@ dependencies:
 - distributed
 - ephem
 - fiona
+- ffmpeg
 - folium
 - future
 - gdal >=1.9
