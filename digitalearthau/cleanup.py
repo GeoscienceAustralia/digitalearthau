@@ -51,7 +51,7 @@ def archived(index: Index,
              files: List[str],
              min_trash_age_hours: int):
     """
-    Cleanup datasets and locations that have been archived.
+    Cleanup locations that have been archived.
     """
     for f in files:
         p = Path(f)
@@ -60,26 +60,42 @@ def archived(index: Index,
         assert p_uri.startswith('file:')
         p_uri_body = p_uri.split('file:')[1]
         with index.datasets._db.begin() as db:
-            ds = list(index.datasets._make_many(
+            locations = [
+                uri for (uri,) in
                 db._connection.execute(
                     select(
-                        pgapi._DATASET_SELECT_FIELDS
+                        [pgapi._dataset_uri_field(pgapi.DATASET_LOCATION)]
                     ).select_from(
                         pgapi.DATASET.join(pgapi.DATASET_LOCATION)
                     ).where(
                         and_(
-                            or_(pgapi.DATASET.c.archived != None, pgapi.DATASET_LOCATION.c.archived != None),
+                            pgapi.DATASET_LOCATION.c.archived != None,
                             pgapi.DATASET_LOCATION.c.uri_scheme == 'file',
                             pgapi.DATASET_LOCATION.c.uri_body.like(p_uri_body + '%')
                         )
                     )
                 )
-            ))
+            ]
 
-        # If archived location
-        print(len(ds))
-        for d in ds:
-            print(d)
+        # Multiple datasets can point to the same location (eg. a stacked file).
+        # Check that there's no other active locations for this dataset.
+
+        print(f"Matched {len(locations)} locations")
+        for uri in locations:
+            active_dataset = _get_active_dataset(index, uri)
+
+            if active_dataset:
+                print(f"\nSkipping {uri}: active exists: {active_dataset.id}\n")
+            else:
+                print(f"\nTrashing {uri}\n")
+
+
+def _get_active_dataset(index, uri):
+    datasets = list(index.datasets.get_datasets_for_location(uri))
+    for d in datasets:
+        if uri in d.uris:
+            return d
+    return None
 
 
 @main.command('indexed')
