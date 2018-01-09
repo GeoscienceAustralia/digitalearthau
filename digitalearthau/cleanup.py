@@ -37,22 +37,20 @@ def main():
 
 @main.command('archived')
 @TRASH_OPTIONS
-@click.option('--only-redundant/--all',
-              is_flag=True,
-              default=True,
-              help='Only trash locations with a second active location')
 @ui.pass_index()
 @click.argument('files',
                 type=click.Path(exists=True, readable=True),
                 nargs=-1)
 def archived(index: Index,
              dry_run: bool,
-             only_redundant: bool,
              files: List[str],
              min_trash_age_hours: int):
     """
     Cleanup locations that have been archived.
     """
+    latest_time_to_archive = _as_utc(datetime.utcnow()) - timedelta(hours=min_trash_age_hours)
+    trash_count = 0
+
     for f in files:
         p = Path(f)
 
@@ -71,27 +69,43 @@ def archived(index: Index,
                         and_(
                             pgapi.DATASET_LOCATION.c.archived != None,
                             pgapi.DATASET_LOCATION.c.uri_scheme == 'file',
-                            pgapi.DATASET_LOCATION.c.uri_body.like(p_uri_body + '%')
+                            pgapi.DATASET_LOCATION.c.uri_body.like(p_uri_body + '%'),
+                            pgapi.DATASET_LOCATION.c.archived < latest_time_to_archive
                         )
                     )
                 )
             ]
 
-        # Multiple datasets can point to the same location (eg. a stacked file).
-        # Check that there's no other active locations for this dataset.
+        # TODO: Get defined collections for path?
+        work_path = paths.get_product_work_directory('all', task_type='clean')
+        uiutil.init_logging(work_path.joinpath('log.jsonl').open('a'))
+        log = structlog.getLogger("cleanup-archived").bind(product='all')
 
-        print(f"Matched {len(locations)} locations")
-        for uri in locations:
-            active_dataset = _get_active_dataset(index, uri)
+        log.info(f"Matched {len(locations)} locations")
+        with click.progressbar(locations,
+                               # stderr should be used for runtime information, not stdout
+                               file=sys.stderr) as location_iter:
+            for uri in location_iter:
+                log = log.bind(uri=uri)
+                # Multiple datasets can point to the same location (eg. a stacked file).
+                datasets = list(index.datasets.get_datasets_for_location(uri))
 
-            if active_dataset:
-                print(f"\nSkipping {uri}: active exists: {active_dataset.id}\n")
-            else:
-                print(f"\nTrashing {uri}\n")
+                # Check that there's no other active locations for this dataset.
+                active_dataset = _get_dataset_where_active(uri, datasets)
+                if active_dataset:
+                    log.info(f"location.has_active", active_dataset_id=active_dataset.id)
+                    continue
+
+                paths.trash_uri(uri, dry_run=dry_run, log=log)
+                if not dry_run:
+                    for dataset in datasets:
+                        index.datasets.remove_location(dataset.id, uri)
+                trash_count += 1
+
+                log = log.unbind('uri')
 
 
-def _get_active_dataset(index, uri):
-    datasets = list(index.datasets.get_datasets_for_location(uri))
+def _get_dataset_where_active(uri, datasets):
     for d in datasets:
         if uri in d.uris:
             return d
