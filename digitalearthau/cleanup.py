@@ -49,7 +49,15 @@ def archived(index: Index,
     Cleanup locations that have been archived.
     """
     latest_time_to_archive = _as_utc(datetime.utcnow()) - timedelta(hours=min_trash_age_hours)
-    trash_count = 0
+    total_count = 0
+    total_trash_count = 0
+
+    # TODO: Get defined collections for path?
+    work_path = paths.get_product_work_directory('all', task_type='clean')
+    uiutil.init_logging(work_path.joinpath('log.jsonl').open('a'))
+    log = structlog.getLogger("cleanup-archived")
+
+    log.info("cleanup.start", dry_run=dry_run, input_paths=files, min_trash_age_hours=min_trash_age_hours)
 
     for f in files:
         p = Path(f)
@@ -57,6 +65,10 @@ def archived(index: Index,
         p_uri = p.absolute().as_uri()
         assert p_uri.startswith('file:')
         p_uri_body = p_uri.split('file:')[1]
+
+        echo(f"Cleaning {style(p_uri, bold=True)}", err=True)
+        echo(f"  Output {work_path}", err=True)
+
         with index.datasets._db.begin() as db:
             locations = [
                 uri for (uri,) in
@@ -76,16 +88,13 @@ def archived(index: Index,
                 )
             ]
 
-        # TODO: Get defined collections for path?
-        work_path = paths.get_product_work_directory('all', task_type='clean')
-        uiutil.init_logging(work_path.joinpath('log.jsonl').open('a'))
-        log = structlog.getLogger("cleanup-archived").bind(product='all')
+        echo(f"  {len(locations)} locations archived more than {min_trash_age_hours}hr ago", err=True)
 
-        log.info(f"Matched {len(locations)} locations")
         with click.progressbar(locations,
                                # stderr should be used for runtime information, not stdout
                                file=sys.stderr) as location_iter:
             for uri in location_iter:
+                total_count += 1
                 log = log.bind(uri=uri)
                 # Multiple datasets can point to the same location (eg. a stacked file).
                 datasets = list(index.datasets.get_datasets_for_location(uri))
@@ -100,9 +109,12 @@ def archived(index: Index,
                 if not dry_run:
                     for dataset in datasets:
                         index.datasets.remove_location(dataset.id, uri)
-                trash_count += 1
+                total_trash_count += 1
 
                 log = log.unbind('uri')
+
+    log.info("cleanup.finish", total_count=total_count, trash_count=total_trash_count)
+    echo(f"Finished; {total_trash_count} trashed.", err=True)
 
 
 def _get_dataset_where_active(uri, datasets):
