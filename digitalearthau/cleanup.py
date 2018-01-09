@@ -7,12 +7,16 @@ import sys
 
 from click import echo, style
 from dateutil import tz
-from typing import Iterable
+from typing import Iterable, List
+
+from sqlalchemy import select, or_, and_
 
 from datacube.index._api import Index
 from datacube.model import DatasetType, Dataset
 from datacube.ui import click as ui
 from digitalearthau import paths, uiutil
+
+from datacube.index.postgres import _api as pgapi
 
 TRASH_OPTIONS = ui.compose(
     click.option('--min-trash-age-hours',
@@ -29,6 +33,53 @@ TRASH_OPTIONS = ui.compose(
 @ui.global_cli_options
 def main():
     pass
+
+
+@main.command('archived')
+@TRASH_OPTIONS
+@click.option('--only-redundant/--all',
+              is_flag=True,
+              default=True,
+              help='Only trash locations with a second active location')
+@ui.pass_index()
+@click.argument('files',
+                type=click.Path(exists=True, readable=True),
+                nargs=-1)
+def archived(index: Index,
+             dry_run: bool,
+             only_redundant: bool,
+             files: List[str],
+             min_trash_age_hours: int):
+    """
+    Cleanup datasets and locations that have been archived.
+    """
+    for f in files:
+        p = Path(f)
+
+        p_uri = p.absolute().as_uri()
+        assert p_uri.startswith('file:')
+        p_uri_body = p_uri.split('file:')[1]
+        with index.datasets._db.begin() as db:
+            ds = list(index.datasets._make_many(
+                db._connection.execute(
+                    select(
+                        pgapi._DATASET_SELECT_FIELDS
+                    ).select_from(
+                        pgapi.DATASET.join(pgapi.DATASET_LOCATION)
+                    ).where(
+                        and_(
+                            or_(pgapi.DATASET.c.archived != None, pgapi.DATASET_LOCATION.c.archived != None),
+                            pgapi.DATASET_LOCATION.c.uri_scheme == 'file',
+                            pgapi.DATASET_LOCATION.c.uri_body.like(p_uri_body + '%')
+                        )
+                    )
+                )
+            ))
+
+        # If archived location
+        print(len(ds))
+        for d in ds:
+            print(d)
 
 
 @main.command('indexed')
