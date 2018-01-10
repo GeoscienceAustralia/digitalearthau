@@ -1,5 +1,8 @@
+import functools
+import shutil
 from datetime import datetime, timedelta
 
+import pytest
 from click.testing import CliRunner, Result
 
 from digitalearthau import cleanup
@@ -9,10 +12,9 @@ from integration_tests.conftest import DatasetForTests
 A_LONG_TIME_AGO = datetime.utcnow() - timedelta(days=4)
 
 
-def test_cleanup_archived(global_integration_cli_args,
+def test_cleanup_archived(run_cleanup,
                           test_dataset: DatasetForTests,
-                          other_dataset: DatasetForTests,
-                          integration_test_data):
+                          other_dataset: DatasetForTests):
     """
     Two archived datasets, one eligible for cleanup
     """
@@ -24,8 +26,7 @@ def test_cleanup_archived(global_integration_cli_args,
     other_dataset.add_to_index()
     other_dataset.archive_location_in_index(archived_dt=A_LONG_TIME_AGO)
 
-    # Archive folder
-    _call_cleanup(['archived', str(integration_test_data)], global_integration_cli_args)
+    run_cleanup()
 
     assert not other_dataset.path.exists(), "Dataset was not cleaned up"
 
@@ -37,10 +38,9 @@ def test_cleanup_archived(global_integration_cli_args,
     assert all_indexed_uris == {test_dataset.uri}, "Only one uri should remain. The other was trashed."
 
 
-def test_dont_cleanup(global_integration_cli_args,
+def test_dont_cleanup(run_cleanup,
                       test_dataset: DatasetForTests,
-                      other_dataset: DatasetForTests,
-                      integration_test_data):
+                      other_dataset: DatasetForTests):
     """
     Active or unindexed datasets should be left alone.
     """
@@ -50,7 +50,7 @@ def test_dont_cleanup(global_integration_cli_args,
     # Not indexed. Don't clean up!
     # other_dataset
 
-    _call_cleanup(['archived', str(integration_test_data)], global_integration_cli_args)
+    run_cleanup()
 
     assert other_dataset.path.exists(), "Dataset shouldn't be touched"
 
@@ -62,10 +62,9 @@ def test_dont_cleanup(global_integration_cli_args,
     assert all_indexed_uris == {test_dataset.uri}
 
 
-def test_keep_stacks(global_integration_cli_args,
+def test_keep_stacks(run_cleanup,
                      test_dataset: DatasetForTests,
-                     other_dataset: DatasetForTests,
-                     integration_test_data):
+                     other_dataset: DatasetForTests):
     """
     Two datasets pointing to the same location should only be cleaned up when both are archived.
     """
@@ -79,7 +78,7 @@ def test_keep_stacks(global_integration_cli_args,
     # Archive the first location.
     other_dataset.archive_location_in_index(archived_dt=A_LONG_TIME_AGO)
 
-    _call_cleanup(['archived', str(integration_test_data)], global_integration_cli_args)
+    run_cleanup()
 
     # Both datasets point to this path, but the second is still active. Don't clean up.
     assert test_dataset.path.exists(), "Only clean-up a stack if all of it is archived"
@@ -89,6 +88,16 @@ def test_keep_stacks(global_integration_cli_args,
 
     all_indexed_uris = set(test_dataset.collection.iter_index_uris())
     assert all_indexed_uris == {test_dataset.uri}, "Only one uri should remain. The other was trashed."
+
+
+@pytest.fixture
+def run_cleanup(global_integration_cli_args, integration_test_data):
+    # Run cleanup over the integration test data directory
+    return functools.partial(
+        _call_cleanup,
+        ['archived', str(integration_test_data)],
+        global_integration_cli_args,
+    )
 
 
 def _call_cleanup(args, global_integration_cli_args) -> Result:
