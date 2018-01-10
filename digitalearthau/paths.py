@@ -355,5 +355,6 @@ def _make_work_directory(output_product, work_time, task_type):
         work_time=work_time,
         task_type=task_type,
         output_product=output_product,
+        request_uuid=uuid.uuid4()
     )
     return NCI_WORK_ROOT.joinpath(job_offset)
