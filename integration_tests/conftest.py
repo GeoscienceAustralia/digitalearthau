@@ -62,6 +62,8 @@ def load_yaml_file(path):
 def work_path(tmpdir):
     paths.NCI_WORK_ROOT = Path(tmpdir) / 'work'
     paths.NCI_WORK_ROOT.mkdir()
+    # The default use of timestamp will collide when run quickly, as in unit tests.
+    paths._JOB_WORK_OFFSET = '{output_product}-{task_type}-{request_uuid}'
     return paths.NCI_WORK_ROOT
 
 
@@ -135,8 +137,8 @@ class DatasetForTests(NamedTuple):
     def archive_in_index(self, archived_dt: datetime = None):
         archive_dataset(self.id_, self.collection, archived_dt=archived_dt)
 
-    def archive_location_in_index(self, archived_dt: datetime = None):
-        archive_location(self.id_, self.uri, self.collection, archived_dt=archived_dt)
+    def archive_location_in_index(self, archived_dt: datetime = None, uri: str = None):
+        archive_location(self.id_, uri or self.uri, self.collection, archived_dt=archived_dt)
 
     def add_location(self, uri: str) -> bool:
         return self.collection.index_.datasets.add_location(self.id_, uri)

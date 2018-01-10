@@ -89,6 +89,29 @@ def test_keep_stacks(run_cleanup,
     all_indexed_uris = set(test_dataset.collection.iter_index_uris())
     assert all_indexed_uris == {test_dataset.uri}, "Only one uri should remain. The other was trashed."
 
+    # Now archive the second reference to the stack. It should be cleaned up this time.
+    other_dataset.archive_location_in_index(archived_dt=A_LONG_TIME_AGO, uri=test_dataset.uri)
+    run_cleanup()
+    assert not test_dataset.path.exists(), "Stack should be cleaned up when all references are archived."
+
+
+@pytest.mark.xfail
+def test_only_clean_up_matching_uuids(run_cleanup,
+                                      test_dataset: DatasetForTests,
+                                      other_dataset: DatasetForTests):
+    # Archived, ready to clean up
+    test_dataset.add_to_index()
+    test_dataset.archive_location_in_index(archived_dt=A_LONG_TIME_AGO)
+
+    # But on disk is a completely different UUID
+    shutil.rmtree(test_dataset.copyable_path)
+    shutil.copytree(other_dataset.copyable_path, test_dataset.copyable_path)
+
+    run_cleanup()
+
+    # It shouldn't be cleaned up.
+    assert test_dataset.path.exists(), "Don't clean up if the on-disk UUID is different"
+
 
 @pytest.fixture
 def run_cleanup(global_integration_cli_args, integration_test_data):
