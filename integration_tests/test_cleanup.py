@@ -5,6 +5,9 @@ from click.testing import CliRunner, Result
 from digitalearthau import cleanup
 from integration_tests.conftest import DatasetForTests
 
+# Default is to clean up older than three days ago.
+A_LONG_TIME_AGO = datetime.utcnow() - timedelta(days=4)
+
 
 def test_cleanup_archived(global_integration_cli_args,
                           test_dataset: DatasetForTests,
@@ -19,7 +22,7 @@ def test_cleanup_archived(global_integration_cli_args,
 
     # Archived a while ago. Should be cleaned up.
     other_dataset.add_to_index()
-    other_dataset.archive_location_in_index(archived_dt=datetime.utcnow() - timedelta(days=5))
+    other_dataset.archive_location_in_index(archived_dt=A_LONG_TIME_AGO)
 
     # Archive folder
     _call_cleanup(['archived', str(integration_test_data)], global_integration_cli_args)
@@ -57,6 +60,35 @@ def test_dont_cleanup(global_integration_cli_args,
 
     # All still there
     assert all_indexed_uris == {test_dataset.uri}
+
+
+def test_keep_stacks(global_integration_cli_args,
+                     test_dataset: DatasetForTests,
+                     other_dataset: DatasetForTests,
+                     integration_test_data):
+    """
+    Two datasets pointing to the same location should only be cleaned up when both are archived.
+    """
+    # One archived
+    test_dataset.add_to_index()
+    test_dataset.archive_location_in_index(archived_dt=A_LONG_TIME_AGO)
+
+    other_dataset.add_to_index()
+    # A second location
+    other_dataset.add_location(test_dataset.uri)
+    # Archive the first location.
+    other_dataset.archive_location_in_index(archived_dt=A_LONG_TIME_AGO)
+
+    _call_cleanup(['archived', str(integration_test_data)], global_integration_cli_args)
+
+    # Both datasets point to this path, but the second is still active. Don't clean up.
+    assert test_dataset.path.exists(), "Only clean-up a stack if all of it is archived"
+
+    # The dataset had two locations, this one was archived and should have been cleaned up.
+    assert not other_dataset.path.exists(), "Archived location was not cleaned up"
+
+    all_indexed_uris = set(test_dataset.collection.iter_index_uris())
+    assert all_indexed_uris == {test_dataset.uri}, "Only one uri should remain. The other was trashed."
 
 
 def _call_cleanup(args, global_integration_cli_args) -> Result:

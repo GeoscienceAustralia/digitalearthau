@@ -138,6 +138,9 @@ class DatasetForTests(NamedTuple):
     def archive_location_in_index(self, archived_dt: datetime = None):
         archive_location(self.id_, self.uri, self.collection, archived_dt=archived_dt)
 
+    def add_location(self, uri: str) -> bool:
+        return self.collection.index_.datasets.add_location(self.id_, uri)
+
     def get_index_record(self) -> Optional[Dataset]:
         """If this is indexed, return the full Dataset record"""
         return self.collection.index_.datasets.get(self.id_)
