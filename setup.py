@@ -52,7 +52,7 @@ setup(
 
     entry_points={
         'console_scripts': [
-            'dea-clean = digitalearthau.cleanup:main',
+            'dea-clean = digitalearthau.cleanup:cli',
             'dea-coherence = digitalearthau.coherence:main',
             'dea-duplicates = digitalearthau.duplicates:cli',
             'dea-harvest = digitalearthau.harvest.iso19115:main',
