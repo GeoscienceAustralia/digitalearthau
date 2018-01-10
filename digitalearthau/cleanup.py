@@ -17,11 +17,11 @@ from dateutil import tz
 
 @click.group(help='Find and trash archived locations.')
 @ui.global_cli_options
-def main():
+def cli():
     pass
 
 
-@main.command('archived')
+@cli.command('archived')
 @click.option('--min-trash-age-hours',
               type=int,
               default=72,
@@ -150,4 +150,4 @@ def _as_utc(d):
 
 
 if __name__ == '__main__':
-    main()
+    cli()
