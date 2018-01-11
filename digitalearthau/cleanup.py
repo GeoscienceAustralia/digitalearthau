@@ -1,3 +1,9 @@
+"""
+Find and clean-up datasets.
+
+On a clean-up, a dataset is moved to a `.trash` folder, and its
+reference is removed from the index.
+"""
 import sys
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -16,7 +22,7 @@ from digitalearthau import paths, uiutil
 from dateutil import tz
 
 
-@click.group(help='Find and trash archived locations.')
+@click.group(help=__doc__)
 @ui.global_cli_options
 def cli():
     pass
@@ -39,9 +45,12 @@ def archived(index: Index,
              files: List[str],
              min_trash_age_hours: int):
     """
-    Cleanup any datasets within the given file path(s)
+    Clean-up archived locations.
 
-    It will trash any file with a location archived more than min-trash-age-hours ago.
+    Find any locations within the given folders that have been archived in the index.
+
+    It will only trash locations that were archived more than min-trash-age-hours
+    ago (default: 3 days).
     """
     total_count = 0
     total_trash_count = 0
