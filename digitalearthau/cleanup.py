@@ -11,6 +11,7 @@ from sqlalchemy import select, and_
 from datacube.index._api import Index
 from datacube.index.postgres import _api as pgapi
 from datacube.ui import click as ui
+from datacube.utils import uri_to_local_path
 from digitalearthau import paths, uiutil
 from dateutil import tz
 
@@ -87,17 +88,23 @@ def _cleanup_uri(dry_run: bool,
         for uri in location_iter:
             log = log.bind(uri=uri)
             # Multiple datasets can point to the same location (eg. a stacked file).
-            datasets = list(index.datasets.get_datasets_for_location(uri))
+            indexed_datasets = set(index.datasets.get_datasets_for_location(uri))
 
             # Check that there's no other active locations for this dataset.
-            active_dataset = _get_dataset_where_active(uri, datasets)
+            active_dataset = _get_dataset_where_active(uri, indexed_datasets)
             if active_dataset:
-                log.info(f"location.has_active", active_dataset_id=active_dataset.id)
+                log.info("location.has_active", active_dataset_id=active_dataset.id)
+                continue
+
+            # Are there any dataset ids in the file that we haven't indexed? Skip it.
+            unindexed_ids = get_unknown_dataset_ids(index, uri)
+            if unindexed_ids:
+                log.info('location.has_unknown', unknown_dataset_ids=unindexed_ids)
                 continue
 
             was_trashed = paths.trash_uri(uri, dry_run=dry_run, log=log)
             if not dry_run:
-                for dataset in datasets:
+                for dataset in indexed_datasets:
                     index.datasets.remove_location(dataset.id, uri)
 
             if was_trashed:
@@ -107,15 +114,26 @@ def _cleanup_uri(dry_run: bool,
     return len(locations), trash_count
 
 
+def get_unknown_dataset_ids(index, uri):
+    """Get ids of datasets in the file that have never been indexed"""
+    on_disk_dataset_ids = set(paths.get_path_dataset_ids(uri_to_local_path(uri)))
+    unknown_ids = set()
+    for dataset_id in on_disk_dataset_ids:
+        if not index.datasets.has(dataset_id):
+            unknown_ids.add(dataset_id)
+
+    return unknown_ids
+
+
 # TODO: expand api to support this?
 # pylint: disable=protected-access
-def _get_archived_locations_within(index, latest_time_to_archive, uri):
+def _get_archived_locations_within(index, latest_time_to_archive, uri) -> set:
     assert uri.startswith('file:')
 
     scheme, body = pgapi._split_uri(uri)
 
     with index.datasets._db.begin() as db:
-        locations = [
+        locations = set(
             uri for (uri,) in
             db._connection.execute(
                 select(
@@ -131,7 +149,8 @@ def _get_archived_locations_within(index, latest_time_to_archive, uri):
                     )
                 )
             )
-        ]
+        )
+
     return locations
 
 

@@ -95,10 +95,13 @@ def test_keep_stacks(run_cleanup,
     assert not test_dataset.path.exists(), "Stack should be cleaned up when all references are archived."
 
 
-@pytest.mark.xfail
 def test_only_clean_up_matching_uuids(run_cleanup,
                                       test_dataset: DatasetForTests,
                                       other_dataset: DatasetForTests):
+    """
+    If the disk location being cleaned up has a UUID that's not in the index, it shouldn't be touched.
+    It may be a newly processed dataset.
+    """
     # Archived, ready to clean up
     test_dataset.add_to_index()
     test_dataset.archive_location_in_index(archived_dt=A_LONG_TIME_AGO)
