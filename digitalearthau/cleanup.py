@@ -87,6 +87,13 @@ def _cleanup_uri(dry_run: bool,
                            file=sys.stderr) as location_iter:
         for uri in location_iter:
             log = log.bind(uri=uri)
+            local_path = uri_to_local_path(uri)
+            if not local_path.exists():
+                # An index record exists, but the file isn't on the disk.
+                # We won't remove the record from the index: maybe the filesystem is temporarily unmounted?
+                log.warning('location.not_exist')
+                continue
+
             # Multiple datasets can point to the same location (eg. a stacked file).
             indexed_datasets = set(index.datasets.get_datasets_for_location(uri))
 
