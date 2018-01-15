@@ -8,6 +8,7 @@ from typing import Tuple, NamedTuple, Optional, Mapping, Iterable
 import pytest
 import structlog
 import yaml
+from sqlalchemy import and_
 
 import digitalearthau.system
 from datacube.index._api import Index
@@ -55,6 +56,15 @@ def configure_log_output(request):
 def load_yaml_file(path):
     with path.open() as f:
         return list(yaml.load_all(f, Loader=SafeLoader))
+
+
+@pytest.fixture(autouse=True)
+def work_path(tmpdir):
+    paths.NCI_WORK_ROOT = Path(tmpdir) / 'work'
+    paths.NCI_WORK_ROOT.mkdir()
+    # The default use of timestamp will collide when run quickly, as in unit tests.
+    paths._JOB_WORK_OFFSET = '{output_product}-{task_type}-{request_uuid}'
+    return paths.NCI_WORK_ROOT
 
 
 @pytest.fixture
@@ -126,6 +136,12 @@ class DatasetForTests(NamedTuple):
 
     def archive_in_index(self, archived_dt: datetime = None):
         archive_dataset(self.id_, self.collection, archived_dt=archived_dt)
+
+    def archive_location_in_index(self, archived_dt: datetime = None, uri: str = None):
+        archive_location(self.id_, uri or self.uri, self.collection, archived_dt=archived_dt)
+
+    def add_location(self, uri: str) -> bool:
+        return self.collection.index_.datasets.add_location(self.id_, uri)
 
     def get_index_record(self) -> Optional[Dataset]:
         """If this is indexed, return the full Dataset record"""
@@ -221,7 +237,7 @@ def other_dataset(integration_test_data: Path, test_dataset: DatasetForTests) ->
     )
 
 
-def archive_dataset(dataset_id, collection, archived_dt=None):
+def archive_dataset(dataset_id: uuid.UUID, collection: Collection, archived_dt: datetime = None):
     if archived_dt is None:
         collection.index_.datasets.archive([dataset_id])
     else:
@@ -234,6 +250,29 @@ def archive_dataset(dataset_id, collection, archived_dt=None):
                     _api.DATASET.c.id == dataset_id
                 ).where(
                     _api.DATASET.c.archived == None
+                ).values(
+                    archived=archived_dt
+                )
+            )
+
+
+def archive_location(dataset_id: uuid.UUID, uri: str, collection: Collection, archived_dt: datetime = None):
+    if archived_dt is None:
+        collection.index_.datasets.archive_location(dataset_id, uri)
+    else:
+        scheme, body = _api._split_uri(uri)
+        # Hack until ODC allows specifying the archive time.
+        with collection.index_._db.begin() as transaction:
+            # SQLAlchemy queries require "column == None", not "column is None" due to operator overloading:
+            # pylint: disable=singleton-comparison
+            transaction._connection.execute(
+                _api.DATASET_LOCATION.update().where(
+                    and_(
+                        _api.DATASET_LOCATION.c.dataset_ref == dataset_id,
+                        _api.DATASET_LOCATION.c.uri_scheme == scheme,
+                        _api.DATASET_LOCATION.c.uri_body == body,
+                        _api.DATASET_LOCATION.c.archived == None,
+                    )
                 ).values(
                     archived=archived_dt
                 )

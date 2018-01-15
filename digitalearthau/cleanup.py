@@ -1,209 +1,180 @@
+"""
+Find and clean-up datasets.
+
+On a clean-up, a dataset is moved to a `.trash` folder, and its
+reference is removed from the index.
+"""
+import sys
 from datetime import datetime, timedelta
 from pathlib import Path
+from typing import List
 
 import click
 import structlog
-import sys
-
 from click import echo, style
-from dateutil import tz
-from typing import Iterable
+from sqlalchemy import select, and_
 
 from datacube.index._api import Index
-from datacube.model import DatasetType, Dataset
+from datacube.index.postgres import _api as pgapi
 from datacube.ui import click as ui
+from datacube.utils import uri_to_local_path
 from digitalearthau import paths, uiutil
-
-TRASH_OPTIONS = ui.compose(
-    click.option('--min-trash-age-hours',
-                 type=int,
-                 default=72,
-                 help="Only trash locations that were archive at least this many hours ago."),
-    click.option('--dry-run',
-                 is_flag=True,
-                 help="Don't make any changes (ie. don't trash anything)"),
-)
+from dateutil import tz
 
 
-@click.group(help='Find and trash archived locations.')
+@click.group(help=__doc__)
 @ui.global_cli_options
-def main():
+def cli():
     pass
 
 
-@main.command('indexed')
-@TRASH_OPTIONS
-@click.option('--only-redundant/--all',
+@cli.command('archived')
+@click.option('--min-trash-age-hours',
+              type=int,
+              default=72,
+              help="Only trash locations that were archive at least this many hours ago.")
+@click.option('--dry-run',
               is_flag=True,
-              default=True,
-              help='Only trash locations with a second active location')
-@ui.pass_index()
-@ui.parsed_search_expressions
-def indexed(index: Index,
-            expressions: dict,
-            dry_run: bool,
-            only_redundant: bool,
-            min_trash_age_hours: int):
-    """
-    Find and trash archived locations using an index search.
-
-    But only if they were archived more than  --min-trash-age-hours ago (default: 3 days)
-
-    By default it will also only trash a location if you've got another active location for it (as is
-    the case if the archived location was stacked or dea-move'd)
-    """
-    echo(f"query: {expressions!r}", err=True)
-
-    product_counts = {product.name: count for product, count in index.datasets.count_by_product(**expressions)}
-    echo(f"{len(product_counts)} product(s) to scan; around {sum(product_counts.values())} datasets", err=True)
-
-    # We only support cleaning one product on our pgbouncer, due to this bug:
-    # https://github.com/opendatacube/datacube-core/pull/317
-    # pylint: disable=protected-access
-    if len(product_counts) > 1 and ('6543' in str(index.datasets._db.url)):
-        echo("\nRunning against multiple products will fail on port 6432 at NCI until AGDC 1.5.4 is released.\n"
-             "Change port to 5432 or limit your search arguments to one product.", err=True)
-        sys.exit(1)
-
-    latest_time_to_archive = _as_utc(datetime.utcnow()) - timedelta(hours=min_trash_age_hours)
-
-    total_count = 0
-    total_trash_count = 0
-
-    for product, datasets in index.datasets.search_by_product(**expressions):
-        expected_count = product_counts.get(product.name, 0)
-
-        # Record results to the product's work folder.
-        work_path = paths.get_product_work_directory(product.name, task_type='clean')
-        uiutil.init_logging(work_path.joinpath('log.jsonl').open('a'))
-        log = structlog.getLogger("cleanup-indexed").bind(product=product.name)
-        echo(f"Cleaning {style(product.name, bold=True)}", err=True)
-        echo(f"  Expect {expected_count} datasets", err=True)
-        echo(f"  Output {work_path}", err=True)
-
-        log.info('arguments', arguments=dict(
-            query=expressions,
-            dry_run=dry_run,
-            only_redundant=only_redundant,
-            min_trash_age_hours=min_trash_age_hours
-        ))
-        count, trash_count = _cleanup_datasets(
-            # Yuck. Too many arguments.
-            index, product, datasets, expected_count, dry_run, latest_time_to_archive, only_redundant, log
-        )
-        total_count += count
-        total_trash_count += trash_count
-
-    echo(f"Finished {total_count} datasets; {total_trash_count} trashed.", err=True)
-
-
-def _cleanup_datasets(index: Index,
-                      product: DatasetType,
-                      datasets: Iterable[Dataset],
-                      expected_count: int,
-                      dry_run: bool,
-                      latest_time_to_archive: datetime,
-                      only_redundant: bool,
-                      log):
-    count = 0
-    trash_count = 0
-
-    log.info("cleanup.product.start", expected_count=expected_count, product=product.name)
-
-    with click.progressbar(datasets,
-                           length=expected_count,
-                           # stderr should be used for runtime information, not stdout
-                           file=sys.stderr) as dataset_iter:
-        for dataset in dataset_iter:
-            count += 1
-
-            log = log.bind(dataset_id=str(dataset.id))
-
-            archived_uri_times = index.datasets.get_archived_location_times(dataset.id)
-            if not archived_uri_times:
-                log.debug('dataset.nothing_archived')
-                continue
-
-            if only_redundant:
-                if dataset.uris is not None and len(dataset.uris) == 0:
-                    # This active dataset has no active locations to replace the ones we're archiving.
-                    # Probably a mistake? Don't trash the archived ones yet.
-                    log.warning("dataset.noactive", archived_paths=archived_uri_times)
-                    continue
-
-            for uri, archived_time in archived_uri_times:
-                if _as_utc(archived_time) > latest_time_to_archive:
-                    log.info('dataset.too_recent')
-                    continue
-
-                paths.trash_uri(uri, dry_run=dry_run, log=log)
-                if not dry_run:
-                    index.datasets.remove_location(dataset.id, uri)
-                trash_count += 1
-
-            log = log.unbind('dataset_id')
-
-    log.info("cleanup.product.finish", count=count, trash_count=trash_count)
-    return count, trash_count
-
-
-@main.command('files')
+              help="Don't make any changes (ie. don't trash anything)")
 @ui.pass_index()
 @click.argument('files',
                 type=click.Path(exists=True, readable=True),
                 nargs=-1)
-@TRASH_OPTIONS
-def trash_individual_files(index, dry_run, min_trash_age_hours, files):
+def archived(index: Index,
+             dry_run: bool,
+             files: List[str],
+             min_trash_age_hours: int):
     """
-    Trash the given datasets if they're archived.
+    Clean-up archived locations.
 
-    This expects exact dataset paths: *.nc files, or ga-metadata.yaml for scenes.
+    Find any locations within the given folders that have been archived in the index.
 
-    But only if they were archived more than  --min-trash-age-hours ago (default: 3 days)
+    It will only trash locations that were archived more than min-trash-age-hours
+    ago (default: 3 days).
     """
-    glog = structlog.getLogger('cleanup-paths')
-    glog.info('input_paths', input_paths=files)
+    total_count = 0
+    total_trash_count = 0
+
+    # TODO: Get defined collections for path?
+    work_path = paths.get_product_work_directory('all', task_type='clean')
+    uiutil.init_logging(work_path.joinpath('log.jsonl').open('a'))
+    log = structlog.getLogger("cleanup-archived")
+
+    log.info("cleanup.start", dry_run=dry_run, input_paths=files, min_trash_age_hours=min_trash_age_hours)
+    echo(f"Logging to {work_path}", err=True)
+
+    for input_file in files:
+        count, trash_count = _cleanup_uri(
+            dry_run,
+            index,
+            Path(input_file).absolute().as_uri(),
+            min_trash_age_hours,
+            log
+        )
+        total_count += count
+        total_trash_count += trash_count
+
+    log.info("cleanup.finish", total_count=total_count, trash_count=total_trash_count)
+    echo(f"Finished; {total_trash_count} trashed.", err=True)
+
+
+def _cleanup_uri(dry_run: bool,
+                 index: Index,
+                 input_uri: str,
+                 min_trash_age_hours: int,
+                 log):
+    trash_count = 0
 
     latest_time_to_archive = _as_utc(datetime.utcnow()) - timedelta(hours=min_trash_age_hours)
 
-    count = 0
-    trash_count = 0
-    for file in files:
-        count += 1
-        log = glog.bind(path=(Path(file).resolve()))
+    echo(f"Cleaning {'(dry run) ' if dry_run else ''}{style(input_uri, bold=True)}", err=True)
 
-        uri = Path(file).resolve().as_uri()
-        datasets = list(index.datasets.get_datasets_for_location(uri))
-
-        if datasets:
-            # Can't trash file if any linked datasets are still active. They should be archived first.
-            active_dataset_ids = [dataset.id for dataset in datasets if dataset.is_active]
-            if active_dataset_ids:
-                log.warning('dataset.is_active', dataset_ids=active_dataset_ids)
+    locations = _get_archived_locations_within(index, latest_time_to_archive, input_uri)
+    echo(f"  {len(locations)} locations archived more than {min_trash_age_hours}hr ago", err=True)
+    with click.progressbar(locations,
+                           # stderr should be used for runtime information, not stdout
+                           file=sys.stderr) as location_iter:
+        for uri in location_iter:
+            log = log.bind(uri=uri)
+            local_path = uri_to_local_path(uri)
+            if not local_path.exists():
+                # An index record exists, but the file isn't on the disk.
+                # We won't remove the record from the index: maybe the filesystem is temporarily unmounted?
+                log.warning('location.not_exist')
                 continue
 
-            assert all(d.is_archived for d in datasets)
+            # Multiple datasets can point to the same location (eg. a stacked file).
+            indexed_datasets = set(index.datasets.get_datasets_for_location(uri))
 
-            # Otherwise they're indexed and archived. Were they archived long enough ago?
-
-            # It's rare that you'd have two archived datasets with the same location, but we're handling it anyway...
-            archived_times = [dataset.archived_time for dataset in datasets]
-            archived_times.sort()
-            oldest_archived_time = archived_times[0]
-            if _as_utc(oldest_archived_time) > latest_time_to_archive:
-                log.info('dataset.too_recent', archived_time=oldest_archived_time)
+            # Check that there's no other active locations for this dataset.
+            active_dataset = _get_dataset_where_active(uri, indexed_datasets)
+            if active_dataset:
+                log.info("location.has_active", active_dataset_id=active_dataset.id)
                 continue
 
+            # Are there any dataset ids in the file that we haven't indexed? Skip it.
+            unindexed_ids = get_unknown_dataset_ids(index, uri)
+            if unindexed_ids:
+                log.info('location.has_unknown', unknown_dataset_ids=unindexed_ids)
+                continue
+
+            was_trashed = paths.trash_uri(uri, dry_run=dry_run, log=log)
             if not dry_run:
-                for d in datasets:
-                    log.info('dataset.remove_location', dataset_id=d.id)
-                    index.datasets.remove_location(d.id, uri)
-        else:
-            log.info('path.not_indexed')
-        paths.trash_uri(uri, dry_run=dry_run, log=log)
-        trash_count += 1
+                for dataset in indexed_datasets:
+                    index.datasets.remove_location(dataset.id, uri)
 
-    glog.info("cleanup.finish", count=count, trash_count=trash_count)
+            if was_trashed:
+                trash_count += 1
+
+            log = log.unbind('uri')
+    return len(locations), trash_count
+
+
+def get_unknown_dataset_ids(index, uri):
+    """Get ids of datasets in the file that have never been indexed"""
+    on_disk_dataset_ids = set(paths.get_path_dataset_ids(uri_to_local_path(uri)))
+    unknown_ids = set()
+    for dataset_id in on_disk_dataset_ids:
+        if not index.datasets.has(dataset_id):
+            unknown_ids.add(dataset_id)
+
+    return unknown_ids
+
+
+# TODO: expand api to support this?
+# pylint: disable=protected-access
+def _get_archived_locations_within(index, latest_time_to_archive, uri) -> set:
+    assert uri.startswith('file:')
+
+    scheme, body = pgapi._split_uri(uri)
+
+    with index.datasets._db.begin() as db:
+        locations = set(
+            uri for (uri,) in
+            db._connection.execute(
+                select(
+                    [pgapi._dataset_uri_field(pgapi.DATASET_LOCATION)]
+                ).select_from(
+                    pgapi.DATASET.join(pgapi.DATASET_LOCATION)
+                ).where(
+                    and_(
+                        pgapi.DATASET_LOCATION.c.archived != None,
+                        pgapi.DATASET_LOCATION.c.uri_scheme == 'file',
+                        pgapi.DATASET_LOCATION.c.uri_body.like(body + '%'),
+                        pgapi.DATASET_LOCATION.c.archived < latest_time_to_archive
+                    )
+                )
+            )
+        )
+
+    return locations
+
+
+def _get_dataset_where_active(uri, datasets):
+    for d in datasets:
+        if uri in d.uris:
+            return d
+    return None
 
 
 def _as_utc(d):
@@ -214,4 +185,4 @@ def _as_utc(d):
 
 
 if __name__ == '__main__':
-    main()
+    cli()

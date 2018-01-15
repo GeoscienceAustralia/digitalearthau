@@ -303,12 +303,12 @@ def _find_any_metadata_suffix(path):
     return existing_paths[0]
 
 
-def trash_uri(uri: str, dry_run=False, log=_LOG):
+def trash_uri(uri: str, dry_run=False, log=_LOG) -> bool:
     local_path = uri_to_local_path(uri)
 
     if not local_path.exists():
         log.warning("trash.not_exist", path=local_path)
-        return
+        return False
 
     # TODO: to handle sibling-metadata we should trash "all_dataset_paths" too.
     base_path, all_dataset_files = get_dataset_paths(local_path)
@@ -321,6 +321,8 @@ def trash_uri(uri: str, dry_run=False, log=_LOG):
         if not trash_path.parent.exists():
             os.makedirs(str(trash_path.parent))
         os.rename(str(base_path), str(trash_path))
+
+    return True
 
 
 def get_product_work_directory(
@@ -353,5 +355,6 @@ def _make_work_directory(output_product, work_time, task_type):
         work_time=work_time,
         task_type=task_type,
         output_product=output_product,
+        request_uuid=uuid.uuid4()
     )
     return NCI_WORK_ROOT.joinpath(job_offset)
