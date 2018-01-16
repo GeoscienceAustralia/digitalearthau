@@ -79,6 +79,7 @@ dependencies:
 - sqlalchemy
 - tqdm
 - xarray
+- voluptuous
 - pip:
   - autopep8
   - boltons
