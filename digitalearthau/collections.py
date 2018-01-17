@@ -12,7 +12,7 @@ from enum import Enum, auto
 from pathlib import Path
 from typing import Iterable, Optional, List, Dict, NamedTuple, Sequence
 
-from datacube.index._api import Index
+from datacube.index.index import Index
 
 
 class Trust(Enum):

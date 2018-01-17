@@ -10,7 +10,7 @@ import pytest
 import structlog
 from dateutil import tz
 
-from datacube.index._api import Index
+from datacube.index.index import Index
 from datacube.utils import uri_to_local_path
 from digitalearthau import paths
 from digitalearthau.collections import Collection

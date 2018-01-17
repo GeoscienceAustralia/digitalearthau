@@ -11,8 +11,10 @@ import yaml
 from sqlalchemy import and_
 
 import digitalearthau.system
-from datacube.index._api import Index
-from datacube.index.postgres import _api
+from datacube.index.index import Index
+from datacube.drivers.postgres._fields import DATASET
+from datacube.drivers.postgres._schema import DATASET_LOCATION
+from datacube.drivers.postgres._api import _split_uri
 from datacube.model import Dataset
 from digitalearthau import paths, collections
 from digitalearthau.collections import Collection
@@ -246,10 +248,10 @@ def archive_dataset(dataset_id: uuid.UUID, collection: Collection, archived_dt: 
             # SQLAlchemy queries require "column == None", not "column is None" due to operator overloading:
             # pylint: disable=singleton-comparison
             transaction._connection.execute(
-                _api.DATASET.update().where(
-                    _api.DATASET.c.id == dataset_id
+                DATASET.update().where(
+                    DATASET.c.id == dataset_id
                 ).where(
-                    _api.DATASET.c.archived == None
+                    DATASET.c.archived == None
                 ).values(
                     archived=archived_dt
                 )
@@ -260,18 +262,18 @@ def archive_location(dataset_id: uuid.UUID, uri: str, collection: Collection, ar
     if archived_dt is None:
         collection.index_.datasets.archive_location(dataset_id, uri)
     else:
-        scheme, body = _api._split_uri(uri)
+        scheme, body = _split_uri(uri)
         # Hack until ODC allows specifying the archive time.
         with collection.index_._db.begin() as transaction:
             # SQLAlchemy queries require "column == None", not "column is None" due to operator overloading:
             # pylint: disable=singleton-comparison
             transaction._connection.execute(
-                _api.DATASET_LOCATION.update().where(
+                DATASET_LOCATION.update().where(
                     and_(
-                        _api.DATASET_LOCATION.c.dataset_ref == dataset_id,
-                        _api.DATASET_LOCATION.c.uri_scheme == scheme,
-                        _api.DATASET_LOCATION.c.uri_body == body,
-                        _api.DATASET_LOCATION.c.archived == None,
+                        DATASET_LOCATION.c.dataset_ref == dataset_id,
+                        DATASET_LOCATION.c.uri_scheme == scheme,
+                        DATASET_LOCATION.c.uri_body == body,
+                        DATASET_LOCATION.c.archived == None,
                     )
                 ).values(
                     archived=archived_dt

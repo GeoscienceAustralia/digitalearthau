@@ -1,4 +1,4 @@
-from datacube.index._api import Index
+from datacube.index.index import Index
 
 
 def test_dea_config(dea_index: Index):

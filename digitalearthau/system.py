@@ -4,7 +4,7 @@ import logging
 import click
 
 import digitalearthau
-from datacube.index._api import Index
+from datacube.index.index import Index
 from datacube.scripts import ingest
 from datacube.ui.click import pass_index, global_cli_options
 from datacube.utils import read_documents
@@ -64,7 +64,7 @@ def init_dea(
         ingest_config = ingest.load_config_from_file(index, path)
 
         source_type, output_type = ingest.ensure_output_type(
-            index, ingest_config, allow_product_changes=True
+            index, ingest_config, 'NetCDF', allow_product_changes=True
         )
         log(f"{output_type.name:<20}\t\t← {source_type.name}")
 

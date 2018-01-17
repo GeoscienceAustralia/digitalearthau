@@ -14,7 +14,7 @@ import structlog
 from boltons import fileutils
 from eodatasets import verify
 
-from datacube.index._api import Index
+from datacube.index.index import Index
 from datacube.model import Dataset
 from datacube.ui import click as ui
 from digitalearthau.collections import init_nci_collections, get_collections_in_path

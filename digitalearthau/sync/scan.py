@@ -11,7 +11,7 @@ import structlog
 from boltons import fileutils
 from boltons import strutils
 
-from datacube.index._api import Index
+from datacube.index.index import Index
 from datacube.utils import uri_to_local_path, InvalidDocException
 from digitalearthau import paths
 from digitalearthau.collections import Collection
@@ -73,7 +73,7 @@ def build_pathset(
 # It's usually warned against to prevent datacube clients hitting the index from every worker, but it's a valid
 # use case with this sync tool, where we have a handful of small workers.
 # TODO: Push only the connection setup information? Or have a dedicated process for index info.
-logging.getLogger('datacube.index.postgres._connections').setLevel(logging.ERROR)
+logging.getLogger('datacube.drivers.postgres._connections').setLevel(logging.ERROR)
 
 
 def _find_uri_mismatches(index: Index, uri: str, validate_data=True) -> Iterable[Mismatch]:

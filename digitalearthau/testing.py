@@ -10,10 +10,10 @@ import pytest
 import digitalearthau
 import digitalearthau.system
 from datacube.config import LocalConfig
-from datacube.index._api import Index
-from datacube.index.postgres import PostgresDb
-from datacube.index.postgres import _dynamic
-from datacube.index.postgres.tables import _core
+from datacube.index.index import Index
+from datacube.drivers.postgres import PostgresDb
+from datacube.drivers.postgres import _dynamic
+from datacube.drivers.postgres import _core
 
 # These are unavoidable in pytests due to fixtures
 # pylint: disable=redefined-outer-name,protected-access,invalid-name
@@ -95,7 +95,7 @@ def db(local_config: LocalConfig):
 @pytest.fixture
 def index(db: PostgresDb):
     """
-    :type db: datacube.index.postgres._api.PostgresDb
+    :type db: datacube.drivers.postgres._api.PostgresDb
     """
     return Index(db)
 

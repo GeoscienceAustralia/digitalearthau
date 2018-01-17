@@ -4,7 +4,7 @@ from pathlib import Path
 import pytest
 from typing import Tuple
 
-from datacube.index._api import Index
+from datacube.index.index import Index
 from digitalearthau import duplicates
 from digitalearthau.index import add_dataset
 
