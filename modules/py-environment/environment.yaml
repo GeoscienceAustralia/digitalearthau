@@ -38,6 +38,7 @@ dependencies:
 - jupyter
 - jupyter_contrib_nbextensions
 - jupyter_dashboards
+- jupyterlab
 - line_profiler
 - luigi
 - matplotlib
