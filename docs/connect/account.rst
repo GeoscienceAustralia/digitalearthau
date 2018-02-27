@@ -2,8 +2,11 @@
 
 .. _account:
 
-Register
-========
+Getting Started
+***************
+
+Registration
+============
 
 Digital Earth Australia is currently in a private beta for Australian government and academic users
 eligible for accounts on National Computational Infrastructure (NCI).

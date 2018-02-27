@@ -2,8 +2,16 @@
 
 .. nci_basics:
 
-Running DEA Manually
-====================
+Command Line Usage (Advanced)
+=============================
+
+.. note:
+
+   This section is intended for advanced users, and describes using DEA from
+   a command line interface. This is mostly useful if you intend on running
+   batch jobs on ``raijin`` and need to do some testing on VDI. Or simply if
+   you're curious.
+
 
 On ``VDI``, you can start a terminal window from **Applications** -> **System Tools**.
 
