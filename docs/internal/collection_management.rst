@@ -1,5 +1,4 @@
 .. highlight:: console
-.. internal_git_best_practice:
 
 ================================================
 Collection Management
@@ -28,9 +27,8 @@ See their help commands for specific information:
 Note that many of these operate on collections, not products. To perform a move or sync on a new product you
 may first need add it as a collection.
 
-================================================
 Defining Collections
-================================================
+--------------------
 
 The Open Data Cube core keeps track of where individual datasets are in a product, but not where datasets as a
 whole should be (such as which filesystems).

@@ -11,7 +11,7 @@
 |
 
 Digital Earth Australia User Guide
-==================================
+##################################
 
 Digital Earth Australia is an analysis platform for satellite imagery and other Earth observations.
 
@@ -64,7 +64,6 @@ Publicly available data access and web services are currently in development.
    :caption: Developer Guide
 
    internal/new_product.rst
-   internal/release_process
    internal/git_best_practice.rst
    internal/release.rst
    internal/orchestration.rst

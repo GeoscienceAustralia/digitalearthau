@@ -1,8 +1,12 @@
 
 .. _Surface Reflectance:
 
-Surface Reflectance NBAR
-*************************
+Surface Reflectance
+*******************
+
+NBAR
+====
+
 Summary
 -------
 **Surface Reflectance (SR)** is a suite of **Earth Observation (EO)** products from GA.
@@ -44,8 +48,9 @@ Band_5  swir1  Short-wave Infra-red 1
 Band_7  swir2  Short-wave Infra-red 2
 ======  =====  ========================
 
-Surface Reflectance NBAR-T
-**************************
+NBAR-T
+======
+
 **Surface reflectance NBAR-T** includes the terrain illumination reflectance correction and has the same features of SR-NBAR and along with some of the features mentioned below.
 
 Features
@@ -111,12 +116,14 @@ Band_10  tirs1           Thermal Infrared Sensor1
 Band_11  tirs2           Thermal Infrared Sensor2
 =======  =============== ========================
 
-Landsat 5 and 7 has the same bands as NBAR table_.
+Landsat 5 and 7 have the same bands as NBAR table_.
 
 Pixel Quality
 **************
+
 Summary
 -------
+
 **Product name : Pixel Quality 25 - (PQ25)**
 
 The PQ25 product is a product which is designed to facilitate interpretation and processing of `Surface Reflectance`_ NBAR/NBART ,  `Fractional Cover`_

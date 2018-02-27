@@ -1,11 +1,12 @@
 
 .. _install:
 
-Install
-=======
+Installation and Software Setup
+*******************************
 
 Required Software
------------------
+=================
+
  * TurboVNC - https://sourceforge.net/projects/turbovnc/files/
  * Strudel - https://cvl.massive.org.au/launcher_files/stable/
 
@@ -17,8 +18,8 @@ For full details on installing the software, see http://vdi.nci.org.au/help.
    `Software Service Management System (SSMS) <http://intranet.ga.gov.au/CherwellPortal/SSMS>`_
    [internal link only].
 
-Setup
------
+Connecting to the VDI
+=====================
 
 To setup Studel to connect to the NCI, run the Strudel application, then:
 
@@ -40,8 +41,8 @@ To connect:
 * Click **Login**
 
 
-Activate
---------
+Setting up DEA
+==============
 
 Once you have logged on to the VDI, you can add a desktop shortcut to Digital Earth Australia.
 
@@ -61,7 +62,7 @@ You can then launch Jupyter Notebooks, with the Digital Earth Australia environm
 From within this environment you can access the notebooks from the User Guide below, or create your own notebooks to work with Digital Earth Australia.
 
 Shutting Down VDI
------------------
+=================
 
 After you have finished working on the VDI, any open terminals can be closed using the x in
 the corner of the tab and the VDI can be closed by clicking your name displayed in the top

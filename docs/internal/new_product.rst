@@ -1,13 +1,13 @@
 .. highlight:: console
 .. internal_new_product
 
-=============================================
-Creating New Product
-=============================================
+Creating a New Product
+**********************
 
 Notes for adding new products to NCI datacube
 
 .. warning ::
+
     This is still work in progress
 
 Profile/Module Setup
