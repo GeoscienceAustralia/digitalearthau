@@ -28,6 +28,7 @@ Publicly available data access and web services are currently in development.
 
    about/intro.rst
    about/glossary.rst
+   about/changelog.rst
 
 .. toctree::
    :maxdepth: 1
