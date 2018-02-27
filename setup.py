@@ -63,6 +63,7 @@ setup(
             'dea-sync = digitalearthau.sync:cli',
             'dea-stacker = digitalearthau.stacker:cli',
             'dea-system = digitalearthau.system:cli',
+            'dea-test-env = digitalearthau.test_env:cli'
         ]
     },
 )
