@@ -11,7 +11,7 @@ import click
 from dateutil import tz
 from psycopg2._range import Range
 
-from datacube.index._api import Index
+from datacube.index import Index
 from datacube.index.fields import Field
 from datacube.model import DatasetType, MetadataType
 from datacube.ui.click import global_cli_options, pass_index

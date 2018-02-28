@@ -36,7 +36,7 @@ import click
 import datacube
 import digitalearthau
 from datacube.api.query import Query
-from datacube.index._api import Index
+from datacube.index import Index
 from datacube.ui import click as ui
 from datacube.ui import task_app
 from datacube_apps.stacker import stacker

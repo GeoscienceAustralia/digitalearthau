@@ -11,7 +11,7 @@ import structlog
 from boltons import fileutils
 from boltons import strutils
 
-from datacube.index._api import Index
+from datacube.index import Index
 from datacube.utils import uri_to_local_path, InvalidDocException
 from digitalearthau import paths
 from digitalearthau.collections import Collection

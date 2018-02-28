@@ -4,7 +4,7 @@ import logging
 import click
 
 import digitalearthau
-from datacube.index._api import Index
+from datacube.index import Index
 from datacube.scripts import ingest
 from datacube.ui.click import pass_index, global_cli_options
 from datacube.utils import read_documents
