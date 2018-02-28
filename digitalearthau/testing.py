@@ -11,9 +11,9 @@ import digitalearthau
 import digitalearthau.system
 from datacube.config import LocalConfig
 from datacube.index import Index
-from datacube.index.postgres import PostgresDb
-from datacube.index.postgres import _dynamic
-from datacube.index.postgres.tables import _core
+from datacube.drivers.postgres import PostgresDb
+from datacube.drivers.postgres import _dynamic
+from datacube.drivers.postgres import _core
 
 # These are unavoidable in pytests due to fixtures
 # pylint: disable=redefined-outer-name,protected-access,invalid-name
