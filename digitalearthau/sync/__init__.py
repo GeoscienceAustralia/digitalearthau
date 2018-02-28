@@ -12,7 +12,7 @@ import click
 import structlog
 
 import digitalearthau.collections as cs
-from datacube.index._api import Index
+from datacube.index import Index
 from datacube.ui import click as ui
 from digitalearthau import uiutil
 from digitalearthau.sync import scan
