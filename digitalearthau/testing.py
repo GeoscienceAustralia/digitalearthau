@@ -95,7 +95,7 @@ def db(local_config: LocalConfig):
 @pytest.fixture
 def index(db: PostgresDb):
     """
-    :type db: datacube.index.postgres._api.PostgresDb
+    :type db: datacube.drivers.postgres.PostgresDb
     """
     return Index(db)
 
