@@ -14,7 +14,7 @@ import structlog
 from click import echo, style
 from sqlalchemy import select, and_
 
-from datacube.index._api import Index
+from datacube.index import Index
 from datacube.index.postgres import _api as pgapi
 from datacube.ui import click as ui
 from datacube.utils import uri_to_local_path
