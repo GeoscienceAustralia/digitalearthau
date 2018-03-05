@@ -1,3 +1,7 @@
+"""
+Model objects for tracking the state and outputs of a task in NCI,
+such as log locations, pbs parameters etc.
+"""
 from pathlib import Path
 
 import datetime
@@ -28,7 +32,7 @@ class PbsParameters(NamedTuple):
 
 class TaskAppState(NamedTuple):
     """
-    Parameters for apps using the task_app framework.
+    Common state for apps using the task_app framework.
     """
     # Input app config path
     config_path: Path
@@ -39,6 +43,11 @@ class TaskAppState(NamedTuple):
 
 
 class DefaultJobParameters(NamedTuple):
+    """
+    Input ("user") parameters for the job.
+
+    These will often be stored or shown as a way to distinguish the task.
+    """
     # Datacube query args used to select datasets to process (eg time=(1994, 1995), product=ls5_nbar_albers)
     query: dict
 
@@ -48,6 +57,14 @@ class DefaultJobParameters(NamedTuple):
 
 
 class TaskDescription(NamedTuple):
+    """
+    Representation of a task that has been submitted
+
+    It contains information useful to jobs: such as log locations, how to create
+    subtasks, information about the job for provenance etc.
+
+    It could correspond to several pbs jobs.
+    """
     # task type (eg. "fc")
     type_: str
     # The submission timestamp used for all files/directories produced in the job.

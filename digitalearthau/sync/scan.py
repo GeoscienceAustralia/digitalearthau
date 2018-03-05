@@ -11,10 +11,11 @@ import structlog
 from boltons import fileutils
 from boltons import strutils
 
+from datacube.index._api import Index
 from datacube.utils import uri_to_local_path, InvalidDocException
 from digitalearthau import paths
 from digitalearthau.collections import Collection
-from digitalearthau.index import DatasetPathIndex, DatasetLite
+from digitalearthau.index import DatasetLite, get_datasets_for_uri
 from digitalearthau.sync import validate
 from digitalearthau.sync.differences import UnreadableDataset, InvalidDataset
 from .differences import ArchivedDatasetOnDisk, Mismatch, LocationMissingOnDisk, LocationNotIndexed, \
@@ -75,7 +76,7 @@ def build_pathset(
 logging.getLogger('datacube.index.postgres._connections').setLevel(logging.ERROR)
 
 
-def _find_uri_mismatches(index: DatasetPathIndex, uri: str, validate_data=True) -> Iterable[Mismatch]:
+def _find_uri_mismatches(index: Index, uri: str, validate_data=True) -> Iterable[Mismatch]:
     """
     Compare the index and filesystem contents for the given uris,
     yielding Mismatches of any differences.
@@ -87,7 +88,7 @@ def _find_uri_mismatches(index: DatasetPathIndex, uri: str, validate_data=True) 
     path = uri_to_local_path(uri)
     log = _LOG.bind(path=path)
     log.debug("index.get_dataset_ids_for_uri")
-    indexed_datasets = set(index.get_datasets_for_uri(uri))
+    indexed_datasets = set(get_datasets_for_uri(index, uri))
 
     datasets_in_file = set()  # type: Set[DatasetLite]
     if path.exists():
@@ -123,16 +124,15 @@ def _find_uri_mismatches(index: DatasetPathIndex, uri: str, validate_data=True) 
 
     for dataset in file_ds_not_in_index:
         # If it's already indexed, we just need to add the location.
-        indexed_dataset = index.get(dataset.id)
+        indexed_dataset = index.datasets.get(dataset.id)
         if indexed_dataset:
-            yield LocationNotIndexed(indexed_dataset, uri)
+            yield LocationNotIndexed(DatasetLite.from_agdc(indexed_dataset), uri)
         else:
             yield DatasetNotIndexed(dataset, uri)
 
 
 def mismatches_for_collection(collection: Collection,
                               cache_folder: Path,
-                              path_index: DatasetPathIndex,
                               # Root folder of all file uris.
                               uri_prefix="file:///",
                               workers=2,
@@ -145,11 +145,11 @@ def mismatches_for_collection(collection: Collection,
     path_dawg = build_pathset(collection, cache_folder, log=log)
 
     # Clean up any open connections before we fork.
-    path_index.close()
+    collection.index_.close()
 
     with multiprocessing.Pool(processes=workers) as pool:
         result = pool.imap_unordered(
-            partial(_find_uri_mismatches_eager, path_index),
+            partial(_find_uri_mismatches_eager, collection.index_),
             path_dawg.iterkeys(uri_prefix),
             chunksize=work_chunksize
         )
@@ -157,8 +157,11 @@ def mismatches_for_collection(collection: Collection,
         for r in result:
             yield from r
 
+        pool.close()
+        pool.join()
 
-def _find_uri_mismatches_eager(index: DatasetPathIndex, uri: str) -> List[Mismatch]:
+
+def _find_uri_mismatches_eager(index: Index, uri: str) -> List[Mismatch]:
     return list(_find_uri_mismatches(index, uri))
 
 

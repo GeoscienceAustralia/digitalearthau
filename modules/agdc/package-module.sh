@@ -101,21 +101,6 @@ fi
 popd
 
 
-read -p "Do you want to also install datacube-stats? [y/N]" -n 1 -r
-echo    # (optional) move to a new line
-if [[ $REPLY =~ ^[Yy]$ ]]
-then
-    export PYTHONPATH=${PYTHONPATH:+${PYTHONPATH}:}${python_dest}
-    # Install datacube-stats as well
-    rm -rf agdc_statistics > /dev/null 2>&1
-    git clone https://github.com/GeoscienceAustralia/agdc_statistics.git
-    pushd agdc_statistics
-    python setup.py sdist
-    pip install dist/*.tar.gz --no-deps --prefix "${package_dest}"
-    popd
-fi
-
-
 # Should be immutable once built.
 chmod -R a-w "${package_dest}"
 

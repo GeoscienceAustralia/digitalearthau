@@ -1,5 +1,7 @@
 # coding=utf-8
 
+import numpy
+
 
 def simple_object_repr(o):
     """
@@ -13,3 +15,13 @@ def simple_object_repr(o):
         o.__class__.__name__,
         ", ".join("%s=%r" % (k, v) for k, v in sorted(o.__dict__.items()))
     )
+
+
+def wofs_fuser(dest, src):
+    """
+    Fuse two WOfS water measurements represented as `ndarray`s.
+    """
+    empty = (dest & 1).astype(numpy.bool)
+    both = ~empty & ~((src & 1).astype(numpy.bool))
+    dest[empty] = src[empty]
+    dest[both] |= src[both]

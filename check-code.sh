@@ -17,7 +17,7 @@ pylint --rcfile=integration_tests/pylintrc integration_tests/**/*.py
 # E711: "is None" instead of "= None". Duplicates pylint check.
 # E701: "multiple statements on one line" is buggy as it doesn't understand py 3 types
 # E501: "line too long" duplicates pylint check
-pep8 --ignore=E122,E711,E701,E501 --max-line-length 120  \
+pycodestyle --ignore=E122,E711,E701,E501 --max-line-length 120  \
     digitalearthau \
     integration_tests \
     scripts/**/*.py

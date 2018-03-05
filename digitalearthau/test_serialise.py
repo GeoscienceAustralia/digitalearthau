@@ -25,14 +25,14 @@ def test_roundtrip():
         my_enum: Status
 
     m = MyNamedTuple(
-        "a string",
-        [1, 2, 3],
-        MyEmbeddedNamedTuple(
-            "b string",
-            datetime.datetime.utcnow()
+        var1="a string",
+        var2=[1, 2, 3],
+        inner_tuple=MyEmbeddedNamedTuple(
+            arg1="b string",
+            my_dt=datetime.datetime.utcnow()
         ),
-        pathlib.Path("/tmp/test"),
-        Status.ACTIVE
+        my_path=pathlib.Path("/tmp/test"),
+        my_enum=Status.ACTIVE
     )
 
     d = serialise.type_to_dict(m)

@@ -1,9 +1,8 @@
-import collections
 import uuid
 from datetime import datetime
-from typing import Iterable, Optional, Mapping, List
+from functools import lru_cache
+from typing import Iterable
 
-from datacube.index import index_connect
 from datacube.index._api import Index
 from datacube.model import Dataset
 from datacube.scripts import dataset as dataset_script
@@ -59,163 +58,28 @@ class DatasetLite:
         return simple_object_repr(self)
 
 
-class DatasetPathIndex:
+def add_dataset(index: Index, dataset_id: uuid.UUID, uri: str):
     """
-    An index of datasets and their URIs.
+    Index a dataset from a file uri.
 
-    This is a slightly questionable attempt to make testing/mocking simpler.
-
-    There's two implementations: One in-memory and one that uses a real datacube.
-    (MemoryDatasetPathIndex and AgdcDatasetPathIndex)
+    A better api should be pushed upstream to core: it currently only has a "scripts" implementation
+    intended for cli use.
     """
-
-    def iter_all_uris(self, query: dict) -> Iterable[str]:
-        raise NotImplementedError
-
-    def get_datasets_for_uri(self, uri: str) -> Iterable[DatasetLite]:
-        raise NotImplementedError
-
-    def get(self, dataset_id: uuid.UUID) -> Optional[DatasetLite]:
-        raise NotImplementedError
-
-    def add_location(self, dataset: DatasetLite, uri: str) -> bool:
-        raise NotImplementedError
-
-    def remove_location(self, dataset: DatasetLite, uri: str) -> bool:
-        raise NotImplementedError
-
-    def add_dataset(self, dataset: DatasetLite, uri: str):
-        raise NotImplementedError
-
-    def as_map(self) -> Mapping[DatasetLite, Iterable[str]]:
-        """Map of all datasets to their uri list. Convenience method for tests"""
-        raise NotImplementedError
-
-    def close(self):
-        """Do any clean-up as needed before forking."""
-        # Default implementation: no-op
-        pass
+    path = uri_to_local_path(uri)
+    for d in dataset_script.load_datasets([path], _get_rules(index)):
+        if d.id == dataset_id:
+            index.datasets.add(d, sources_policy='ensure')
+            break
+    else:
+        raise RuntimeError('Dataset not found at path: %s, %s' % (dataset_id, uri))
 
 
-class AgdcDatasetPathIndex(DatasetPathIndex):
-    def __init__(self, index: Index) -> None:
-        super().__init__()
-        self._index = index
-        self._rules = dataset_script.load_rules_from_types(self._index)
-
-    def iter_all_uris(self, query: dict) -> Iterable[str]:
-        for uri, in self._index.datasets.search_returning(['uri'], **query):
-            yield str(uri)
-
-    @classmethod
-    def connect(cls) -> 'AgdcDatasetPathIndex':
-        return cls(index_connect(application_name='digitalearthau-pathsync'))
-
-    def get_datasets_for_uri(self, uri: str) -> Iterable[DatasetLite]:
-        for d in self._index.datasets.get_datasets_for_location(uri=uri):
-            yield DatasetLite.from_agdc(d)
-
-    def remove_location(self, dataset: DatasetLite, uri: str) -> bool:
-        was_removed = self._index.datasets.remove_location(dataset.id, uri)
-        return was_removed
-
-    def get(self, dataset_id: uuid.UUID) -> Optional[DatasetLite]:
-        agdc_dataset = self._index.datasets.get(dataset_id)
-        return DatasetLite.from_agdc(agdc_dataset) if agdc_dataset else None
-
-    def add_location(self, dataset: DatasetLite, uri: str) -> bool:
-        was_removed = self._index.datasets.add_location(dataset.id, uri)
-        return was_removed
-
-    def add_dataset(self, dataset: DatasetLite, uri: str):
-        path = uri_to_local_path(uri)
-
-        for d in dataset_script.load_datasets([path], self._rules):
-            if d.id == dataset.id:
-                self._index.datasets.add(d, sources_policy='ensure')
-                break
-        else:
-            raise RuntimeError('Dataset not found at path: %s, %s' % (dataset.id, uri))
-
-    def close(self):
-        self._index.close()
-
-    def as_map(self) -> Mapping[DatasetLite, Iterable[str]]:
-        """
-        All contained (dataset, [location]) values, to check test results.
-        """
-        return dict(
-            (
-                DatasetLite(dataset.id),
-                tuple(dataset.uris)
-            )
-            for dataset in self._index.datasets.search()
-        )
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, type_, value, traceback):
-        self.close()
+def get_datasets_for_uri(index: Index, uri: str) -> Iterable[DatasetLite]:
+    """Get all datasets at the given uri"""
+    for d in index.datasets.get_datasets_for_location(uri=uri):
+        yield DatasetLite.from_agdc(d)
 
 
-class MemoryDatasetPathIndex(DatasetPathIndex):
-    """
-    An in-memory implementation, so that we can test without using a real datacube index.
-    """
-
-    def get(self, dataset_id: uuid.UUID) -> Optional[DatasetLite]:
-        for d in self._records.keys():
-            if d.id == dataset_id:
-                return d
-        return None
-
-    def __init__(self):
-        super().__init__()
-        # Map of dataset to locations.
-        self._records = collections.defaultdict(list)  # type: Mapping[DatasetLite, List[str]]
-
-    def reset(self):
-        self._records = collections.defaultdict(list)
-
-    def iter_all_uris(self, query: dict) -> Iterable[str]:
-        for uris in self._records.values():
-            yield from uris
-
-    def add_location(self, dataset: DatasetLite, uri: str) -> bool:
-        if dataset not in self._records:
-            raise ValueError("Unknown dataset {} -> {}".format(dataset.id, uri))
-
-        return self._add(dataset, uri)
-
-    def _add(self, dataset_id, uri):
-        if uri in self._records[dataset_id]:
-            # Not added
-            return False
-
-        self._records[dataset_id].append(uri)
-        return True
-
-    def remove_location(self, dataset: DatasetLite, uri: str) -> bool:
-
-        if uri not in self._records[dataset]:
-            # Not removed
-            return False
-        # We never remove the dataset key, only the uris.
-        self._records[dataset].remove(uri)
-        return True
-
-    def get_datasets_for_uri(self, uri: str) -> Iterable[DatasetLite]:
-        for dataset, uris in self._records.items():
-            if uri in uris:
-                yield dataset
-
-    def as_map(self) -> Mapping[DatasetLite, Iterable[str]]:
-        """
-        All contained (dataset, [location]) values, to check test results.
-        """
-        return {id_: tuple(uris) for id_, uris in self._records.items()}
-
-    def add_dataset(self, dataset: DatasetLite, uri: str):
-        # We're not actually storing datasets...
-        return self._add(dataset, uri)
+@lru_cache()
+def _get_rules(index):
+    return dataset_script.load_rules_from_types(index)

@@ -28,20 +28,26 @@ lambda_modules directory.
 - The command must have a class variable "COMMAND_NAME" which is used to identify the command when logging.
 - To create a new function use *./scripts/package_lambda {{script_name}} {{zipfile_name}}* to create a packaged
   zipfile; this will need to be uploaded into AWS Lambda with the corresponding IAM roles and access to
-  ec2 parameter store
-    * Make sure the private keys are stored in
-      `aws ssm <http://docs.aws.amazon.com/systems-manager/latest/userguide/sysman-paramstore-walk.html>`_
-    * By default the user credentials will be retrieved from the ssm parameters:
+  ec2 parameter store.
 
-        * User: orchestrator.raijin.users.default.user
-        * Host: orchestrator.raijin.users.default.host
-        * Private Key: orchestrator.raijin.users.default.pkey
-        * The prefix orchestrator.raijin.users.default can be overwritten with
-          the ``DEA_RAIJIN_USER_PATH`` environment variable.
-    * When the lambda is configured it will need an associated role with policy permissions to access
-        the ssm to retrieve parameters and the
-        `kms <http://docs.aws.amazon.com/kms/latest/developerguide/key-policies.html>`_ decryption key.
-        Installs the requirements of a script into the current python env; useful to install internal modules.
+- Make sure the private keys are stored in
+  `aws ssm <http://docs.aws.amazon.com/systems-manager/latest/userguide/sysman-paramstore-walk.html>`_
+- By default the user credentials will be retrieved from the ssm parameters:
+
+:User: orchestrator.raijin.users.default.user
+:Host: orchestrator.raijin.users.default.host
+:Private Key: orchestrator.raijin.users.default.pkey
+
+.. note:
+
+   The prefix orchestrator.raijin.users.default can be overwritten with
+   the ``DEA_RAIJIN_USER_PATH`` environment variable.
+
+- When the lambda is configured it will need an associated role with policy permissions to access
+    the ssm to retrieve parameters and the
+    `kms <http://docs.aws.amazon.com/kms/latest/developerguide/key-policies.html>`_ decryption key.
+    Installs the requirements of a script into the current python env; useful to install internal modules.
+
 An `example lambda class <https://github.com/GeoscienceAustralia/dea-orchestration/blob/master/lambda_functions/example/example.py>`_
 is available to use a template.
 

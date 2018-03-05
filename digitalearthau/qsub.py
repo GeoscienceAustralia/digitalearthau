@@ -21,6 +21,7 @@ from .runners import celery_environment
 from .runners.model import TaskDescription
 
 NUM_CPUS_PER_NODE = 16
+RESERVED_MEM_PER_NODE = 1024   # in MB
 QSUB_L_FLAGS = 'mem ncpus walltime wd'.split(' ')
 
 # Keys that can be sent as-is to the qsub builder without normalisation (I think?)
@@ -35,18 +36,23 @@ class QSubLauncher(object):
     """ This class is for self-submitting as a PBS job.
     """
 
-    def __init__(self, params, internal_args=None):
+    def __init__(self, params, internal_args=None, auto_clean=None):
         """
         params -- normalised dictionary of qsub options, see `norm_qsub_params`
         internal_args -- optional extra command line arguments to add
                          when launching, particularly useful when using auto-mode
                          that passes through sys.argv arguments
+        auto_clean -- params to remove when self-submitting
         """
-        self._internal_args = internal_args
         self._raw_qsub_params = params
+        self._internal_args = internal_args
+        self._auto_clean = auto_clean
 
     def __repr__(self):
         return yaml.dump(dict(qsub=self._raw_qsub_params))
+
+    def clone(self):
+        return QSubLauncher(self._raw_qsub_params, self._internal_args, self._auto_clean)
 
     def add_internal_args(self, *args):
         if self._internal_args is None:
@@ -54,19 +60,31 @@ class QSubLauncher(object):
         else:
             self._internal_args = self._internal_args + args
 
-    def __call__(self, *args, **kwargs):
+    def reset_internal_args(self):
+        self._internal_args = None
+
+    def __call__(self, *args, auto=False, auto_clean=None, **kwargs):
         """ Submit self via qsub
 
         auto=True -- re-use arguments used during invocation, removing `--qsub` parameter
         auto=False -- ignore invocation arguments and just use suplied *args
 
         args -- command line arguments to launch with under qsub, only used if auto=False
+
+        auto_clean -- extra list of params to remove
         """
-        auto = kwargs.get('auto', False)
         if auto:
             args = sys.argv[1:]
-            args = remove_args('--qsub', args, n=1)
-            args = remove_args('--queue-size', args, n=1)
+
+            def to_pairs(ls):
+                if ls is None:
+                    return []
+
+                return [(x, 0) if isinstance(x, str) else x
+                        for x in ls]
+
+            for arg, nargs in to_pairs(self._auto_clean) + to_pairs(auto_clean):
+                args = remove_args(arg, args, n=nargs)
             args = tuple(args)
 
         qsub_args, script = self.build_submission(*args)
@@ -160,7 +178,8 @@ Examples:
                 p['wd'] = True
 
             p = norm_qsub_params(p)
-            return QSubLauncher(p, ('--celery', 'pbs-launch'))
+            return QSubLauncher(p, ('--celery', 'pbs-launch'),
+                                [('--qsub', 1), ('--queue-size', 1)])
         except ValueError:
             self.fail('Failed to parse: {}'.format(value), param, ctx)
 
@@ -298,7 +317,7 @@ def norm_qsub_params(p):
     ...    'name': 'staggering-fc-run',
     ... }))
     {'extra_qsub_args': [],
-     'mem': '129024MB',
+     'mem': '126976MB',
      'name': 'staggering-fc-run',
      'ncpus': 64,
      'noask': True,
@@ -311,7 +330,7 @@ def norm_qsub_params(p):
      'wd': True}
     >>> # Default params
     >>> norm_qsub_params({})
-    {'ncpus': 16, 'mem': '32256MB', 'walltime': None, 'extra_qsub_args': []}
+    {'ncpus': 16, 'mem': '31744MB', 'walltime': None, 'extra_qsub_args': []}
     >>> # TODO error on unknown args? It seems to explicitly pass through (PASS_THRU_KEYS) some, but not all valid keys?
     >>> # No error currently:
     >>> # norm_qsub_params({'ubermensch': 'understood'})
@@ -327,7 +346,7 @@ def norm_qsub_params(p):
     mem = normalise_mem(p.get('mem', 'small'))
 
     if nodes:
-        mem = int((mem * NUM_CPUS_PER_NODE * 1024 - 512) * nodes)
+        mem = int((mem * NUM_CPUS_PER_NODE * 1024 - RESERVED_MEM_PER_NODE) * nodes)
     else:
         mem = int(mem * ncpus * 1024)
 
@@ -506,6 +525,7 @@ class TaskRunner(object):
         self._shutdown = None
         self._queue_size = None
         self._user_queue_size = None
+        self._workers_per_node = None
 
     def __repr__(self):
         args = '' if self._opts is None else '-{}'.format(str(self._opts))
@@ -514,6 +534,9 @@ class TaskRunner(object):
     def set_qsize(self, qsize):
         self._user_queue_size = qsize
 
+    def set_workers_per_node(self, value):
+        self._workers_per_node = value
+
     def start(self, task_desc: TaskDescription = None):
         def noop():
             pass
@@ -521,10 +544,11 @@ class TaskRunner(object):
         def mk_pbs_celery(task_desc: TaskDescription):
             qsize = pbs.preferred_queue_size()
             port = 6379  # TODO: randomise
-            maxmemory = "1024mb"  # TODO: compute maxmemory from qsize
+            maxmemory = "4096mb"  # TODO: compute maxmemory from qsize
             executor, shutdown = celery_environment.launch_celery_worker_environment(
                 task_desc=task_desc,
-                redis_params=dict(port=port, maxmemory=maxmemory)
+                redis_params=dict(port=port, maxmemory=maxmemory),
+                workers_per_node=self._workers_per_node
             )
             return (executor, qsize, shutdown)
 
@@ -596,6 +620,7 @@ class QsubRunState:
         self.runner: TaskRunner = None
         self.qsub: QSubLauncher = None
         self.qsize: int = None
+        self.workers_per_node: int = None
 
 
 def with_qsub_runner():
@@ -645,7 +670,14 @@ def with_qsub_runner():
             return
         state(ctx).qsize = value
 
+    def set_workers_per_node(ctx, param, value):
+        if value is None:
+            return
+        state(ctx).workers_per_node = value
+
     def capture_qsub(ctx, param, value):
+        if value is None:
+            return None
         state(ctx).qsub = value
         return value
 
@@ -678,6 +710,11 @@ def with_qsub_runner():
                          help='Overwrite defaults for queue size',
                          expose_value=False,
                          callback=add_qsize),
+            click.option('--workers-per-node',
+                         type=int,
+                         expose_value=False,
+                         callback=set_workers_per_node,
+                         help='For code that parallelizes over cores'),
             click.option('--qsub',
                          type=QSubParamType(),
                          callback=capture_qsub,
@@ -700,6 +737,13 @@ def with_qsub_runner():
 
             if s.qsub is not None and s.qsize is not None:
                 s.qsub.add_internal_args('--queue-size', s.qsize)
+
+            if s.qsub is not None and s.workers_per_node is not None:
+                s.qsub.add_internal_args('--workers-per-node',
+                                         str(s.workers_per_node))
+
+            if s.runner is not None and s.workers_per_node is not None:
+                s.runner.set_workers_per_node(s.workers_per_node)
 
         def extract_runner(*args, **kwargs):
             finalise_state()

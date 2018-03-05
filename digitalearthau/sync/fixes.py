@@ -5,7 +5,8 @@ from typing import Iterable, Callable
 import structlog
 from dateutil import tz
 
-from digitalearthau.index import DatasetPathIndex
+from datacube.index._api import Index
+from digitalearthau.index import add_dataset, get_datasets_for_uri
 from digitalearthau.paths import trash_uri
 from digitalearthau.sync.differences import UnreadableDataset
 from .differences import DatasetNotIndexed, Mismatch, ArchivedDatasetOnDisk, LocationNotIndexed, LocationMissingOnDisk
@@ -16,36 +17,37 @@ _LOG = structlog.get_logger()
 # underscore function names are the norm with singledispatch
 # pylint: disable=function-redefined
 
+
 @singledispatch
-def do_index_missing(mismatch: Mismatch, index: DatasetPathIndex):
+def do_index_missing(mismatch: Mismatch, index: Index):
     pass
 
 
 @do_index_missing.register(DatasetNotIndexed)
-def _add_missing(mismatch: DatasetNotIndexed, index: DatasetPathIndex):
+def _add_missing(mismatch: DatasetNotIndexed, index: Index):
     _LOG.info("index_dataset", mismatch=mismatch)
-    index.add_dataset(mismatch.dataset, mismatch.uri)
+    add_dataset(index, mismatch.dataset.id, mismatch.uri)
 
 
 @singledispatch
-def do_update_locations(mismatch: Mismatch, index: DatasetPathIndex):
+def do_update_locations(mismatch: Mismatch, index: Index):
     pass
 
 
 @do_update_locations.register(LocationMissingOnDisk)
-def _remove_location(mismatch: LocationMissingOnDisk, index: DatasetPathIndex):
+def _remove_location(mismatch: LocationMissingOnDisk, index: Index):
     _LOG.info("remove_location", mismatch=mismatch)
-    index.remove_location(mismatch.dataset, mismatch.uri)
+    index.datasets.remove_location(mismatch.dataset.id, mismatch.uri)
 
 
 @do_update_locations.register(LocationNotIndexed)
-def _add_location(mismatch: LocationNotIndexed, index: DatasetPathIndex):
+def _add_location(mismatch: LocationNotIndexed, index: Index):
     _LOG.info("add_location", mismatch=mismatch)
-    index.add_location(mismatch.dataset, mismatch.uri)
+    index.datasets.add_location(mismatch.dataset.id, mismatch.uri)
 
 
 @singledispatch
-def do_trash_archived(mismatch: Mismatch, index: DatasetPathIndex, min_age_hours: int):
+def do_trash_archived(mismatch: Mismatch, index: Index, min_age_hours: int):
     pass
 
 
@@ -57,11 +59,11 @@ def _as_utc(d):
 
 
 @do_trash_archived.register(ArchivedDatasetOnDisk)
-def _trash_archived_dataset(mismatch: ArchivedDatasetOnDisk, index: DatasetPathIndex, min_age_hours: int):
+def _trash_archived_dataset(mismatch: ArchivedDatasetOnDisk, index: Index, min_age_hours: int):
     latest_archived_time = datetime.utcnow().replace(tzinfo=tz.tzutc()) - timedelta(hours=min_age_hours)
 
     # all datasets at location must have been archived to trash.
-    for dataset in index.get_datasets_for_uri(mismatch.uri):
+    for dataset in index.datasets.get_datasets_for_location(mismatch.uri):
         # Must be archived
         if dataset.archived_time is None:
             _LOG.warning("do_trash_archived.active_siblings", dataset_id=mismatch.dataset.id)
@@ -75,16 +77,16 @@ def _trash_archived_dataset(mismatch: ArchivedDatasetOnDisk, index: DatasetPathI
 
 
 @singledispatch
-def do_trash_missing(mismatch: Mismatch, index: DatasetPathIndex):
+def do_trash_missing(mismatch: Mismatch, index: Index):
     pass
 
 
 @do_trash_missing.register(DatasetNotIndexed)
 # An unreadable dataset that passes the below sibling check should be considered missing from the index.
 @do_trash_missing.register(UnreadableDataset)
-def _trash_missing_dataset(mismatch: DatasetNotIndexed, index: DatasetPathIndex):
+def _trash_missing_dataset(mismatch: DatasetNotIndexed, index: Index):
     # If any (other) indexed datasets exist at the same location we can't trash it.
-    datasets_at_location = list(index.get_datasets_for_uri(mismatch.uri))
+    datasets_at_location = list(get_datasets_for_uri(index, mismatch.uri))
     if datasets_at_location:
         _LOG.warning("do_trash_missing.indexed_siblings_exist", uri=mismatch.uri)
         return
@@ -93,7 +95,7 @@ def _trash_missing_dataset(mismatch: DatasetNotIndexed, index: DatasetPathIndex)
 
 
 def fix_mismatches(mismatches: Iterable[Mismatch],
-                   index: DatasetPathIndex,
+                   index: Index,
                    index_missing=False,
                    trash_missing=False,
                    trash_archived=False,

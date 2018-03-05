@@ -13,7 +13,7 @@ umask 002
 
 # Default module dirs. You can set the variables before calling this script to override them.
 agdc_module_dir="${agdc_module_dir:-/g/data/v10/public/modules}"
-module_dir="${module_dir:-/g/data/v10/private/modules}"
+module_dir="${module_dir:-/g/data/v10/public/modules}"
 
 
 if [[ $# -lt 1 ]] || [[ "$1" == "--help" ]];

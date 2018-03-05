@@ -1,0 +1,70 @@
+creation_dt: 2017-10-19T15:50:54.259199
+extent:
+  center_dt: 2016-10-18T00:00:35.500000
+  coord:
+    ll: {lat: -25.73901694876295, lon: 149.19794273627843}
+    lr: {lat: -25.615849571403892, lon: 150.19633085878846}
+    ul: {lat: -25.105819069649144, lon: 149.10153765505237}
+    ur: {lat: -24.983280846371933, lon: 150.09447584223076}
+  from_dt: 2016-10-18T00:00:35.500000
+  to_dt: 2016-10-18T00:00:35.500000
+format: {name: NetCDF}
+grid_spatial:
+  projection:
+    geo_ref_points:
+      ll: {x: 1700000.0, y: -2900000.0}
+      lr: {x: 1800000.0, y: -2900000.0}
+      ul: {x: 1700000.0, y: -2800000.0}
+      ur: {x: 1800000.0, y: -2800000.0}
+    spatial_reference: EPSG:3577
+    valid_data:
+      coordinates:
+      - - [1788394.306068444, -2900000.0]
+        - [1700000.0, -2900000.0]
+        - [1700000.0, -2828381.055575777]
+        - [1714967.6157059935, -2833988.74335441]
+        - [1800000.0, -2865861.784622513]
+        - [1800000.0, -2868026.3247520067]
+        - [1788394.306068444, -2900000.0]
+      type: Polygon
+id: 6b8d2798-cbc2-4244-847f-807cd068e9ad
+image:
+  bands:
+    blue:
+      layer: blue
+      path: ''
+    coastal_aerosol:
+      layer: coastal_aerosol
+      path: ''
+    green:
+      layer: green
+      path: ''
+    nir:
+      layer: nir
+      path: ''
+    red:
+      layer: red
+      path: ''
+    swir1:
+      layer: swir1
+      path: ''
+    swir2:
+      layer: swir2
+      path: ''
+instrument: {name: OLI_TIRS}
+lineage:
+  algorithm:
+    name: datacube-ingest
+    parameters: {configuration_file: ls8_nbar_albers.yaml}
+    repo_url: https://github.com/GeoscienceAustralia/datacube-ingester.git
+    version: ${version}
+  machine:
+    hostname: r2983
+    software_versions:
+      datacube: {repo_url: 'https://github.com/opendatacube/datacube-core.git', version: 1.5.3}
+      python: {version: "3.6.3 | packaged by conda-forge | (default, Oct  5 2017,
+          14:07:33) \\n[GCC 4.8.2 20140120 (Red Hat 4.8.2-15)]"}
+    uname: 'Linux r2983 3.10.0-693.2.1.el6.x86_64 #1 SMP Thu Sep 7 10:50:09 AEST 2017 x86_64'
+  source_datasets: {}
+platform: {code: LANDSAT_8}
+product_type: nbar

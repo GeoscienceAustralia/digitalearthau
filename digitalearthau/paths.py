@@ -19,12 +19,14 @@ _LOG = structlog.getLogger()
 
 # This may eventually go to a config file...
 # ".trash" directories will be created at this level for any datasets contained within.
+# TODO: Could these be inferred from the collections paths?
 BASE_DIRECTORIES = [
     '/g/data/fk4/datacube',
     '/g/data/rs0/datacube',
     '/g/data/v10/reprocess',
     '/g/data/rs0/scenes',
     '/short/v10/scenes',
+    '/g/data/v10/public/data',
 ]
 
 # Use a static variable so that trashed items in the same run will be in the same trash bin.
@@ -121,7 +123,7 @@ def split_path_from_base(file_path):
     raise ValueError("Unknown location: can't calculate base directory: " + str(file_path))
 
 
-def write_files(file_dict, containing_dir=None):
+def write_files(files_spec, containing_dir=None):
     """
     Convenience method for writing a tree of files to a temporary directory.
 
@@ -133,21 +135,22 @@ def write_files(file_dict, containing_dir=None):
 
     write_files({'test.txt': 'contents of text file'})
 
-    :param containing_dir: Optionally specify the directory to add the files to.
-    :type file_dict: dict
+    :param containing_dir: Optionally specify the directory to add the files to,
+                           otherwise a temporary directory will be created.
+    :type files_spec: dict
     :rtype: pathlib.Path
     :return: Created temporary directory path
     """
     if not containing_dir:
         containing_dir = Path(tempfile.mkdtemp(suffix='neotestrun'))
 
-    _write_files_to_dir(str(containing_dir), file_dict)
+    _write_files_to_dir(containing_dir, files_spec)
 
     def remove_if_exists(path):
         if os.path.exists(path):
             shutil.rmtree(path)
 
-    atexit.register(remove_if_exists, str(containing_dir))
+    atexit.register(remove_if_exists, containing_dir)
     return containing_dir
 
 
@@ -300,12 +303,12 @@ def _find_any_metadata_suffix(path):
     return existing_paths[0]
 
 
-def trash_uri(uri: str, dry_run=False, log=_LOG):
+def trash_uri(uri: str, dry_run=False, log=_LOG) -> bool:
     local_path = uri_to_local_path(uri)
 
     if not local_path.exists():
         log.warning("trash.not_exist", path=local_path)
-        return
+        return False
 
     # TODO: to handle sibling-metadata we should trash "all_dataset_paths" too.
     base_path, all_dataset_files = get_dataset_paths(local_path)
@@ -318,6 +321,8 @@ def trash_uri(uri: str, dry_run=False, log=_LOG):
         if not trash_path.parent.exists():
             os.makedirs(str(trash_path.parent))
         os.rename(str(base_path), str(trash_path))
+
+    return True
 
 
 def get_product_work_directory(
@@ -350,5 +355,6 @@ def _make_work_directory(output_product, work_time, task_type):
         work_time=work_time,
         task_type=task_type,
         output_product=output_product,
+        request_uuid=uuid.uuid4()
     )
     return NCI_WORK_ROOT.joinpath(job_offset)

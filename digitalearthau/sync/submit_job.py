@@ -1,16 +1,5 @@
 #!/usr/bin/env python
-"""
-Submit sync PBS jobs.
 
-The task_split function is currently specific to tiles, but can be generalised
-
-Example usage: submit_job.py 5fc /g/data/fk4/datacube/002/LS5_TM_FC
-
-5fc is just the name for the job: subsequent resubmissions will not rerun jobs with the same name
-if output files exist.
-
-A run folder is used (defaulting to `runs` in current dir) for output.
-"""
 import datetime
 import logging
 import os
@@ -30,7 +19,7 @@ from click import style
 
 from datacube.index import index_connect
 from digitalearthau import collections
-from digitalearthau.index import AgdcDatasetPathIndex
+from digitalearthau.collections import Trust
 from digitalearthau.paths import get_dataset_paths
 from digitalearthau.sync import scan
 
@@ -140,11 +129,11 @@ class SyncSubmission(object):
                 # Only complete scenes are written to fs, so '--index-missing' instead of trash.
 
                 trust_options = {
-                    'disk': ['--index-missing'],
-                    'index': ['--trash-missing'],
+                    Trust.DISK: ['--index-missing'],
+                    Trust.INDEX: ['--trash-missing'],
                 }
                 if task.collection.trust not in trust_options:
-                    raise RuntimeError("Unknown trust type %r", task.collection.trust)
+                    raise RuntimeError(f"Unknown trust type {task.collection.trust}")
                 sync_opts.extend(trust_options[task.collection.trust])
 
         sync_command = [
@@ -221,10 +210,23 @@ def main(folders: Iterable[str],
          max_jobs: int,
          concurrent_jobs: int,
          submit_limit: int):
+    """
+    Submit PBS jobs to run dea-sync
+
+    Note that this is currently specific to tiled products, as it expects their folder naming conventions
+    when splitting up jobs. TODO generalise function task_split()
+
+    Example usage: dea-submit-sync 5fc /g/data/fk4/datacube/002/LS5_TM_FC
+
+    5fc is just the name for the job: subsequent resubmissions will not rerun jobs with the same name
+    if output files exist.
+
+    A run folder is used (defaulting to `runs` in current dir) for storing output status.
+    """
     input_paths = [Path(folder).absolute() for folder in folders]
 
     with index_connect(application_name='sync-submit') as index:
-        collections.init_nci_collections(AgdcDatasetPathIndex(index))
+        collections.init_nci_collections(index)
         submitter = SyncSubmission(cache_folder, project, queue, dry_run, verbose=True, workers=4)
         click.echo(
             "{} input path(s)".format(len(input_paths))

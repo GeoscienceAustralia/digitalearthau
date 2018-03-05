@@ -17,7 +17,7 @@ dependencies:
 - distributed
 - ephem
 - fiona
-- flask
+- ffmpeg
 - folium
 - future
 - gdal >=1.9
@@ -26,7 +26,6 @@ dependencies:
 - glueviz
 # This is only graphviz itself, not the python bindings. The latter are in the pip section.
 - graphviz
-- gunicorn
 - h5py
 - hdf5
 - hypothesis
@@ -39,6 +38,7 @@ dependencies:
 - jupyter
 - jupyter_contrib_nbextensions
 - jupyter_dashboards
+- jupyterlab
 - line_profiler
 - luigi
 - matplotlib
@@ -52,23 +52,22 @@ dependencies:
 - openblas
 - openssl
 - pandas
-- pathlib
-- pathlib2
 - pep8
 - pip
 - plotly
 - psutil
 - psycopg2
 - py6s
-- pylint = 1.6.4
+- pylint
 - pytables
 - pytest
 - pytest-cov
 - python-dateutil
 - pyyaml
-- rasterio >=0.9 # required for zip reading, 0.9 gets around 1.0a ordering problems
+- rasterio >=0.9  # required for zip reading, 0.9 gets around 1.0a ordering problems
 - redis
 - redis-py
+- rsgislib
 - rtree
 - scikit-image
 - scikit-learn
@@ -82,16 +81,22 @@ dependencies:
 - sqlalchemy
 - tqdm
 - xarray
+- voluptuous
 - pip:
   - autopep8
   - boltons
   - celery >= 4
   - ciso8601
+  - click-datetime
   - compliance-checker
   - DAWG
+  - flask
+  - Flask-Caching
   - graphviz
+  - gunicorn
   - hdmedians
   - ipython-sql
+  - meinheld
   - modernize
   - mypy
   - opencv-python

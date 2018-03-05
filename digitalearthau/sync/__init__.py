@@ -15,7 +15,6 @@ import digitalearthau.collections as cs
 from datacube.index._api import Index
 from datacube.ui import click as ui
 from digitalearthau import uiutil
-from digitalearthau.index import AgdcDatasetPathIndex, DatasetPathIndex, MemoryDatasetPathIndex
 from digitalearthau.sync import scan
 from . import fixes, differences
 from .differences import Mismatch
@@ -37,7 +36,7 @@ _LOG = structlog.get_logger()
               type=int,
               default=4,
               help="Number of worker processes to use")
-@click.option('-f',
+@click.option('-f', '--format', 'format_',
               type=click.Path(exists=True, readable=True, dir_okay=False),
               help="Input from file instead of scanning collections")
 @click.option('--index-missing', is_flag=True, default=False,
@@ -53,24 +52,26 @@ _LOG = structlog.get_logger()
 # TODO
 # @click.option('--validate', is_flag=True, default=False,
 #               help="Run any available checksums or validation checks for the file type")
-@click.option('-o',
+@click.option('-o', '--output', 'output_file',
               type=click.Path(writable=True, dir_okay=False),
               help="Output to file instead of stdout")
-@click.argument('collections',
+@click.argument('collection_specifiers',
                 # help = "Either names of collections or subfolders of collections"
-                # type=click.Choice(cs.registered_collection_names()),
                 nargs=-1, )
 @ui.pass_index(expect_initialised=False)
 def cli(index: Index,
-        collections: Iterable[str],
+        collection_specifiers: Iterable[str],
         cache_folder: str,
-        # format
-        f: str,
-        # output file
-        o: str,
+        format_: str,
+        output_file: str,
         min_trash_age_hours: bool,
         jobs: int,
         **fix_settings):
+    """
+    Update a datacube index to the state of the filesystem.
+
+    This will update locations, trash or index new datasets, depending on the chosen options.
+    """
     uiutil.init_logging()
 
     if fix_settings['index_missing'] and fix_settings['trash_missing']:
@@ -78,30 +79,29 @@ def cli(index: Index,
                    'but not both at the same time.', err=True)
         sys.exit(1)
 
-    with AgdcDatasetPathIndex(index) as path_index:
-        cs.init_nci_collections(path_index)
+    cs.init_nci_collections(index)
 
-        mismatches = get_mismatches(cache_folder, collections, f, path_index, jobs)
+    mismatches = get_mismatches(cache_folder, collection_specifiers, format_, jobs)
 
-        out_f = sys.stdout
-        try:
-            if o:
-                out_f = open(o, 'w')
+    out_f = sys.stdout
+    try:
+        if output_file:
+            out_f = open(output_file, 'w')
 
-            fixes.fix_mismatches(
-                mismatches,
-                path_index,
-                min_trash_age_hours=min_trash_age_hours,
-                **fix_settings
-            )
-        finally:
-            if o:
-                out_f.close()
+        fixes.fix_mismatches(
+            mismatches,
+            index,
+            min_trash_age_hours=min_trash_age_hours,
+            **fix_settings
+        )
+    finally:
+        if output_file:
+            out_f.close()
 
 
 def resolve_collections(collection_specifiers: Iterable[str]) -> List[Tuple[cs.Collection, str]]:
     """
-    >>> cs.init_nci_collections(MemoryDatasetPathIndex())
+    >>> cs.init_nci_collections(None)
     >>> [(c.name, p) for c, p in resolve_collections(['ls8_level1_scene'])]
     [('ls8_level1_scene', 'file:///')]
     >>> [(c.name, p) for c, p in resolve_collections(['/g/data/v10/repackaged/rawdata/0/2015'])]
@@ -151,7 +151,6 @@ def resolve_collections(collection_specifiers: Iterable[str]) -> List[Tuple[cs.C
 def get_mismatches(cache_folder: str,
                    collection_specifiers: Iterable[str],
                    input_file: str,
-                   path_index: DatasetPathIndex,
                    job_count: int):
     if input_file:
         yield from differences.mismatches_from_file(Path(input_file))
@@ -160,7 +159,6 @@ def get_mismatches(cache_folder: str,
             yield from scan.mismatches_for_collection(
                 collection,
                 Path(cache_folder),
-                path_index,
                 uri_prefix=uri_prefix,
                 workers=job_count
             )

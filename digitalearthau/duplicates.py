@@ -1,9 +1,5 @@
 # coding=utf-8
-"""
-Find duplicate datasets
-(eg. if a dataset has been reprocessed but both versions are indexed and active)
 
-"""
 import csv
 import sys
 from datetime import datetime
@@ -29,13 +25,13 @@ def parse_field_expression(md: MetadataType, expression: str):
     name = parts.pop(0)
     field = md.dataset_fields.get(name)
     if not field:
-        raise ValueError('No field named %r in %r', name, md.name)
+        raise ValueError(f'No field named {name} in {md.name}')
 
     while parts:
         name = parts.pop(0)
         field = getattr(field, name, None)
         if not field:
-            raise ValueError('No field %s for expression %s in %s', name, expression, md.name)
+            raise ValueError(f'No field {name} for expression {expression} in {md.name}')
 
     return field
 
@@ -150,6 +146,20 @@ collections.init_nci_collections(None)
 @click.argument('collections_', type=click.Choice(collections.registered_collection_names()), nargs=-1)
 @pass_index(app_name="find-duplicates")
 def cli(index, all_, collections_):
+    """
+    Find duplicate datasets for a collection.
+
+    (eg. if a dataset has been reprocessed but both versions are indexed and active)
+
+    This uses the unique fields defined in a collection to try to group them.
+
+    Note that this is really a prototype: it won't report all duplicates as the unique fields aren't good enough.
+
+      - Scenes group by "day" not "solar day"
+
+      - Tiled products should be grouped by tile_index, but it's not in the metadata.
+
+    """
     collections.init_nci_collections(index)
 
     if all_:

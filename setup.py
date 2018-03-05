@@ -4,10 +4,10 @@ from setuptools import setup, find_packages
 
 import versioneer
 
-tests_require = ['pytest', 'pytest-cov', 'mock', 'pep8', 'pylint==1.6.4', 'hypothesis', 'compliance-checker']
+tests_require = ['pytest', 'pytest-cov', 'mock', 'pep8', 'pylint', 'hypothesis', 'compliance-checker']
 
 extras_require = {
-    'doc': ['Sphinx', 'setuptools', 'sphinx_rtd_theme'],
+    'doc': ['Sphinx', 'nbsphinx', 'setuptools', 'sphinx_rtd_theme'],
     'test': tests_require,
 }
 
@@ -20,7 +20,10 @@ setup(
     author='Geoscience Australia',
     license='Apache License 2.0',
 
-    packages=find_packages(),
+    packages=find_packages(
+        exclude=('tests', 'tests.*',
+                 'integration_tests', 'integration_tests.*')
+    ),
     package_data={
         '': ['*.yaml', '*/*.yaml'],
     },
@@ -49,15 +52,16 @@ setup(
 
     entry_points={
         'console_scripts': [
-            'dea-clean = digitalearthau.cleanup:main',
+            'dea-clean = digitalearthau.cleanup:cli',
             'dea-coherence = digitalearthau.coherence:main',
-            'dea-duplicates = digitalearthau.duplicates:main',
+            'dea-duplicates = digitalearthau.duplicates:cli',
             'dea-harvest = digitalearthau.harvest.iso19115:main',
-            'dea-move = digitalearthau.move:main',
+            'dea-move = digitalearthau.move:cli',
             'dea-submit-ingest = digitalearthau.submit.ingest:cli',
             'dea-submit-ncmler = digitalearthau.submit.ncmler:cli',
             'dea-submit-sync = digitalearthau.sync.submit_job:main',
             'dea-sync = digitalearthau.sync:cli',
+            'dea-stacker = digitalearthau.stacker:cli',
             'dea-system = digitalearthau.system:cli',
         ]
     },

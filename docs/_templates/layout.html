@@ -1,0 +1,20 @@
+
+{% extends "!layout.html" %}
+
+{% block footer %}
+{% if not READTHEDOCS %}
+{% if theme_analytics_id %}
+<!-- Theme Analytics -->
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id={{ theme_analytics_id }}"></script>
+<script>
+ window.dataLayer = window.dataLayer || [];
+ function gtag(){dataLayer.push(arguments);}
+ gtag('js', new Date());
+ 
+ gtag('config', '{{ theme_analytics_id }}');
+</script>
+
+    {% endif %}
+  {% endif %}
+{% endblock %}

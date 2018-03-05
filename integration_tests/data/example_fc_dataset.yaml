@@ -1,0 +1,71 @@
+creation_dt: '2017-10-20T11:16:35.598998'
+extent:
+  center_dt: '1989-09-07T00:12:31.500000'
+  coord:
+    ll: {lat: -36.586929923540985, lon: 134.20244074953945}
+    lr: {lat: -36.586530293219305, lon: 134.2308942253773}
+    ul: {lat: -36.50043883542415, lon: 134.2005996670824}
+    ur: {lat: -36.5000396442146, lon: 134.2290293674532}
+  from_dt: '1989-09-07T00:12:31.500000'
+  to_dt: '1989-09-07T00:12:31.500000'
+format: {name: NetCDF}
+grid_spatial:
+  projection:
+    geo_ref_points:
+      ll: {x: 100000.0, y: -4000000.0}
+      lr: {x: 200000.0, y: -4000000.0}
+      ul: {x: 100000.0, y: -3900000.0}
+      ur: {x: 200000.0, y: -3900000.0}
+    spatial_reference: EPSG:3577
+    valid_data:
+      coordinates:
+      - - [200000.0, -4000000.0]
+        - [197448.63290386382, -4000000.0]
+        - [200000.0, -3990416.9091419443]
+        - [200000.0, -4000000.0]
+      type: Polygon
+id: a402cb5a-df15-4f90-af18-c635f743a3c5
+image:
+  bands:
+    BS: {layer: BS, path: ''}
+    NPV: {layer: NPV, path: ''}
+    PV: {layer: PV, path: ''}
+    UE: {layer: UE, path: ''}
+instrument: {name: TM}
+lineage:
+  algorithm:
+    name: datacube-fc
+    parameters: {configuration_file: /g/data2/v10/public/modules/fc/1.2.4/lib/python3.6/site-packages/fc/config/ls5_fc_albers.yaml}
+    repo_url: https://github.com/GeoscienceAustralia/fc.git
+    version: 1.2.4
+  machine:
+    hostname: r1626
+    software_versions:
+      datacube: {repo_url: 'https://github.com/opendatacube/datacube-core.git', version: 1.5.3}
+      python: {version: "3.6.3 | packaged by conda-forge | (default, Oct  5 2017,
+          14:07:33) n[GCC 4.8.2 20140120 (Red Hat 4.8.2-15)]"}
+    uname: 'Linux r1626 3.10.0-693.2.1.el6.x86_64 #1 SMP Thu Sep 7 10:50:09 AEST 2017
+      x86_64'
+  source_datasets:
+    '0':
+      creation_dt: '2016-07-27T05:23:08.759021'
+      extent:
+        center_dt: '1989-09-07T00:12:31.500000'
+        coord:
+          ll: {lat: -36.586929923541, lon: 134.20244074953945}
+          lr: {lat: -36.586530293219305, lon: 134.23089422537734}
+          ul: {lat: -36.50043883542418, lon: 134.20059966708243}
+          ur: {lat: -36.50003964421462, lon: 134.22902936745322}
+        from_dt: '1989-09-07T00:12:31.500000'
+        to_dt: '1989-09-07T00:12:31.500000'
+      format: {name: NetCDF}
+      grid_spatial:
+        projection:
+          geo_ref_points:
+            ll: {x: 100000.0, y: -4000000.0}
+            lr: {x: 200000.0, y: -4000000.0}
+            ul: {x: 100000.0, y: -3900000.0}
+            ur: {x: 200000.0, y: -3900000.0}
+          spatial_reference: EPSG:3577
+platform: {code LANDSAT_5}
+product_typ: fractional_cover

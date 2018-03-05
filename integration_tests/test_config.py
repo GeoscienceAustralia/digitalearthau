@@ -66,3 +66,14 @@ def test_dea_config(dea_index: Index):
         'pq_count_summary',
         'pq_count_annual_summary',
     }
+
+
+def test_metadata_type(dea_index):
+    # this came from a bug in the ingestion script
+    # where the metadata_type specified in the ingest config
+    # was not respected in the output product that inherited
+    # the metadata_type from the source product instead
+    ls8_nbar_albers = dea_index.products.get_by_name('ls8_nbar_albers')
+    expected = ls8_nbar_albers.metadata_type.name
+    recorded = ls8_nbar_albers.definition['metadata_type']
+    assert expected == recorded
