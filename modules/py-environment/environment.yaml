@@ -38,6 +38,7 @@ dependencies:
 - jupyter
 - jupyter_contrib_nbextensions
 - jupyter_dashboards
+- jupyterlab
 - line_profiler
 - luigi
 - matplotlib
@@ -66,6 +67,7 @@ dependencies:
 - rasterio >=0.9  # required for zip reading, 0.9 gets around 1.0a ordering problems
 - redis
 - redis-py
+- rsgislib
 - rtree
 - scikit-image
 - scikit-learn

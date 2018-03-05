@@ -6,7 +6,7 @@ Build a version
 #. Pick a release name for the next version
     Releases are versioned using the ``major.minor.bugfix`` numbering system.
 
-#. Update the release notes on the :ref:`whats_new` page
+#. Update the release notes on the :ref:`odc:whats_new` page
     Check the git log for changes since the last release.
 
 #. Check that Travis_ and readthedocs_ are passing for the latest commit

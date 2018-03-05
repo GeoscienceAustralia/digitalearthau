@@ -167,8 +167,10 @@ either algorithm or both algorithms.
 
 Fractional Cover
 *****************
+
 Summary
 --------
+
 **Product Name - Fractional Cover (FC25)**
 The Fractional Cover product is derived from Geoscience Australias Australian
 Reflectance Grid 25 (ARG25) product and provides a 25m scale fractional cover
@@ -177,6 +179,7 @@ representation of the proportions of :
  * green or photosynthetic vegetation,
  * nonphotosynthetic vegetation, and
  * bare surface cover across the Australian continent
+
 It is generated using the algorithm developed by the Joint Remote Sensing Research Program (JRSRP)
 and described in Scarth et al. (2010)
 The FC25 product suite is currently available for every scene Landsat Thematic Mapper
