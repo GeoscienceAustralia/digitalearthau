@@ -48,6 +48,20 @@ Publicly available data access and web services are currently in development.
 
 .. toctree::
    :maxdepth: 1
+   :caption: Notebook Gallery
+
+   notebooks/index
+   notebooks/README
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Data Guide
+
+   data/data.rst
+
+
+.. toctree::
+   :maxdepth: 1
    :caption: Developer Guide
 
    internal/new_product.rst
@@ -58,10 +72,4 @@ Publicly available data access and web services are currently in development.
    internal/collection_management.rst
    internal/goalkeeper_instructions.rst
    internal/requirements_met.ipynb
-
-.. toctree::
-   :maxdepth: 1
-   :caption: Data
-
-   data/data.rst
 

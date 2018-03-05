@@ -39,6 +39,7 @@ extensions = [
     'sphinx.ext.mathjax',
     'sphinx.ext.viewcode',
     'sphinx.ext.githubpages',
+    'sphinx_nbexamples',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -94,6 +95,15 @@ pygments_style = 'sphinx'
 todo_include_todos = False
 
 
+
+# -- Options relating to Jupyter Notebook Examples
+example_gallery_config = {
+    'examples_dirs': ['notebooks'],
+    'pattern': '.*.ipynb',
+    'preprocess': [],
+    'urls': 'https://nbviewer.jupyter.org/github/GeoscienceAustralia/dea-notebooks/blob/master/'
+}
+
 # -- Options for HTML output ----------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
@@ -120,6 +130,8 @@ html_static_path = ['_static']
 html_logo = '_static/DEA-logo-light.png'
 
 html_favicon = '_static/dea-favicon.ico'
+
+html_use_index = True
 
 # -- Options for HTMLHelp output ------------------------------------------
 
@@ -182,6 +194,6 @@ texinfo_documents = [
 
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {
-    'python': ('https://docs.python.org/', None),
+    'python': ('https://docs.python.org/3/', None),
     'odc': ('http://datacube-core.readthedocs.io/en/stable/', None),
 }
