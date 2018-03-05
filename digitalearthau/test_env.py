@@ -24,8 +24,6 @@ CREATE DATABASE {db_database}
 WITH
 OWNER = agdc_admin
 ENCODING = 'UTF8'
-LC_COLLATE = 'en_AU.UTF-8'
-LC_CTYPE = 'en_AU.UTF-8'
 TABLESPACE = pg_default
 CONNECTION LIMIT = -1;
 
