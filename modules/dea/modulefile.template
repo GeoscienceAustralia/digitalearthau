@@ -28,3 +28,41 @@ if { [ module-info mode remove ] } {
     module unload ${agdc_instance_module}
     module unload udunits
 }
+
+
+if { ! [is-loaded ${agdc_module}/${version}] } {
+    module load ${agdc_module}/${version}
+}
+
+if { [module-info mode load] } {
+    if { [catch {exec -ignorestderr ${module_dest}/datacube-ensure-user.py ${dbhost} ${dbport}} results options] } {
+        puts stderr "Error: database connection check failed!"
+        puts stderr "  see log above for more details"
+    }
+
+    if { [file exists ~/.datacube.conf]==1 } {
+        puts stderr "Warning: ~/.datacube.conf detected"
+        puts stderr "  it might conflict with this module"
+        puts stderr "  consider removing or renaming it"
+    }
+}
+
+setenv DATACUBE_CONFIG_PATH ${module_dest}/datacube.conf
+
+if { [ module-info mode remove ] } {
+    module unload ${agdc_module}
+}
+
+
+if { ! [is-loaded ${agdc_env_module}] } {
+    module load ${agdc_env_module}
+}
+prepend-path PYTHONPATH ${python_dest}
+prepend-path PATH ${package_dest}/bin
+
+setenv LC_ALL en_AU.utf8
+setenv LANG C.UTF-8
+
+if { [ module-info mode remove ] } {
+    module unload ${agdc_env_module}
+}
