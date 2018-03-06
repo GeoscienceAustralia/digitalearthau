@@ -1,4 +1,4 @@
-name: agdc
+name: dea
 channels:
 - conda-forge/label/dev
 - conda-forge

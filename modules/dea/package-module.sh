@@ -125,6 +125,10 @@ then
     echo "Installing digitalearthau"
     installrepo dea "${version}" git@github.com:GeoscienceAustralia/digitalearthau.git
 
+    mkdir -v -p "${module_dest}"
+    cp -v datacube-ensure-user.py "${module_dest}/"
+    chmod 775 "${module_dest}/datacube-ensure-user.py"
+
     # Releases should be immutable once built (other than develop)
     [[ "${version}" == 'develop' ]] || chmod -R a-w "${package_dest}"
 

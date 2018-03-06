@@ -55,9 +55,9 @@ subvariant="py${python_major}"
 
 temp_dir="$(mktemp -d)"
 cd "${temp_dir}"
-rm -rf agdc-v2 > /dev/null 2>&1
-git clone -b develop https://github.com/data-cube/agdc-v2.git
-pushd agdc-v2
+rm -rf datacube-core > /dev/null 2>&1
+git clone -b develop https://github.com/opendatacube/datacube-core.git
+pushd datacube-core
 if [ ! -z "${version+x}" ]
 then
   git checkout "tags/datacube-${version}" -b module_package

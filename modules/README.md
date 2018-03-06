@@ -1,21 +1,41 @@
-[![Build Status](https://travis-ci.org/GeoscienceAustralia/ga-datacube-env.svg?branch=develop)](https://travis-ci.org/GeoscienceAustralia/ga-datacube-env)
+[![Build Status](https://travis-ci.org/GeoscienceAustralia/digitalearthau.svg?branch=develop)](https://travis-ci.org/GeoscienceAustralia/digitalearthau)
 
-# Building a Release
+# Introduction
+
+These scripts are all about our deployment of code onto the NCI.
+
+We are going to have have three modules, with date-based version numbers:
+
+ 1. A *Python Environment* module
+    * Contains third party dependencies of all of the GA code, installed via
+      a `conda` environment.
+ 2. A *DEA* module, which depends on the _environment module_ and contains:
+    * A script for initial user creation in the Production Database
+    * A configuration file including environments for the available _Indexes_
+    * [Open Data Cube Core](https://github.com/opendatacube/datacube-core/)
+    * [Data Cube Stats](https://github.com/GeoscienceAustralia/datacube-stats/)
+    * [Fractional Cover](https://github.com/GeoscienceAustralia/fc/)
+    * [EO Datasets](https://github.com/GeoscienceAustralia/eo-datasets/)
+ 3. An *LPGS* module, which depends on a _DEA_ module, and contains:
+    * [IDL Functions](https://github.com/sixy6e/idl-functions/)
+    * [EO Tools](https://github.com/GeoscienceAustralia/eo-tools/)
+    * [GAIP/WAGL](https://github.com/GeoscienceAustralia/gaip/)
+    * [GQA](https://github.com/GeoscienceAustralia/gqa/)
+    * [GALPGS](https://github.com/jeremyh/galpgs/)
 
 The `package-release.sh` script will build all modules for a given datacube version:
 
     ./package-release.sh 1.2.0
 
-(Note that it's currently interactive: each section will ask for confirmation
-of options before starting)
+Note that it's an interactive script: each section will ask for confirmation
+of options before starting.
 
 ### Usage
 
-    module load agdc-py3-prod
+    module load dea
     datacube system check
 
-This will load `agdc-py3-env/<build_date>`, `agdc-py3/<version>` and
-`agdc-py3-prod/<version>` modules
+This will load `dea-env/<build_date>` and `dea/<build_date>` modules.
 
 # Update the Default Version
 
@@ -23,7 +43,7 @@ Once a module has been tested and approved, it can be made the default.
 
 Edit the `.version` file in the modulefiles directory.
 
-Eg. For agdc-py2-prod this is: `/g/data/v10/public/modules/modulefiles/agdc-py2-prod/.version`
+Eg. For `dea` this is: `/g/data/v10/public/modules/modulefiles/dea/.version`
 
 # Individual Modules
 
