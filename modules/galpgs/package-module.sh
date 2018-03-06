@@ -8,11 +8,11 @@ unset PYTHONPATH
 echo "##########################"
 echo
 echo "module_dir = ${module_dir:=/g/data/v10/private/modules}"
-echo "agdc_module_dir = ${agdc_module_dir:=/g/data/v10/public/modules}"
+echo "dea_module_dir = ${dea_module_dir:=/g/data/v10/public/modules}"
 echo
-echo "agdc_instance_module = ${agdc_instance_module:=agdc-py3-prod/1.3.2}"
-agdc_instance_module_name=${agdc_instance_module%/*}
-instance=${agdc_instance_module_name##*-}
+echo "dea_module = ${dea_module:=agdc-py3-prod/1.3.2}"
+dea_module_name=${dea_module%/*}
+instance=${dea_module_name##*-}
 echo "instance = ${instance}"
 echo
 echo "eodatasets_head = ${eodatasets_head:=develop}"
@@ -20,7 +20,7 @@ echo "gqa_head = ${gqa_head:=develop}"
 echo "gaip_head = ${gaip_head:=develop}"
 echo
 echo "##########################"
-export module_dir agdc_instance_module
+export module_dir dea_module
 
 echoerr() { echo "$@" 1>&2; }
 
@@ -33,8 +33,8 @@ fi
 export version="$1"
 
 module use ${module_dir}/modulefiles
-module use -a ${agdc_module_dir}/modulefiles
-module load ${agdc_instance_module}
+module use -a ${dea_module_dir}/modulefiles
+module load ${dea_module}
 
 python_version=$(python -c 'from __future__ import print_function; import sys; print("%s.%s"%sys.version_info[:2])')
 python_major=$(python -c 'from __future__ import print_function; import sys; print(sys.version_info[0])')

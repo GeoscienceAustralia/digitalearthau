@@ -64,6 +64,7 @@ dependencies:
 - pytest-cov
 - python-dateutil
 - pyyaml
+- python = 3.6
 - rasterio >=0.9  # required for zip reading, 0.9 gets around 1.0a ordering problems
 - redis
 - redis-py

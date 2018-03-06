@@ -64,10 +64,6 @@ then
     # update root env to the latest python and packages
     "${package_dest}/bin/conda" update --all -y
 
-    # append required version of python
-    cp environment.yaml "${tmp_dir}/env.yaml"
-    echo "- python=${python}" >> "${tmp_dir}/env.yaml"
-
     # make sure no .local stuff interferes with the install
     export PYTHONNOUSERSITE=1
 
