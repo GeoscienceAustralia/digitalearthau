@@ -102,7 +102,7 @@ def cli(ctx, config_file, test_env):
     ctx.obj['test_db'] = load_config(config_file, env=test_env)
 
 
-@cli.command('check')
+@cli.command('check', help="Check which test database to connect to.")
 @click.pass_context
 def check(ctx):
     config = ctx.obj['test_db']
