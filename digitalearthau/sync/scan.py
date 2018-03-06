@@ -84,6 +84,7 @@ def _find_uri_mismatches(index_url: str, uri: str, validate_data=True) -> Iterab
     yielding Mismatches of any differences.
     """
 
+    # pylint: disable=protected-access
     index = Index(PostgresDb(PostgresDb._create_engine(index_url)))
 
     def ids(datasets):
