@@ -10,7 +10,7 @@ import click
 import yaml
 
 from datacube import Datacube
-from datacube.config import DEFAULT_CONF_PATHS
+from datacube.config import DEFAULT_CONF_PATHS, LocalConfig
 from datacube.index import index_connect
 from datacube.api.query import Query
 from datacube.utils import intersects
@@ -49,9 +49,6 @@ _LOG.setLevel(logging.ERROR)
 _OUT = logging.StreamHandler()
 _OUT.setLevel(logging.ERROR)
 _LOG.addHandler(_OUT)
-
-
-from datacube.config import LocalConfig
 
 
 def run_shell(*args, **kwargs):
