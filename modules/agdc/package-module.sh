@@ -7,7 +7,6 @@ script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 umask 002
 
 export module_dir=/g/data/v10/public/modules
-export agdc_env_module=agdc-py2-env/anaconda2-2.5.0
 
 export LC_ALL=en_AU.utf8
 export LANG=C.UTF-8
