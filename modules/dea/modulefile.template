@@ -15,25 +15,22 @@ set name          ${package_name}
 set base          ${module_dir}
 
 module-whatis   "${package_description} ${version}"
-if { ! [is-loaded udunits ] } {
-    module load udunits
-}
-if { ! [is-loaded ${agdc_instance_module}] } {
-    module load ${agdc_instance_module}
-}
+
+module load udunits
+module load ${agdc_instance_module}
+
 prepend-path PYTHONPATH ${python_dest}
 prepend-path PATH ${package_dest}/bin
 
-if { [ module-info mode remove ] } {
-    module unload ${agdc_instance_module}
-    module unload udunits
-}
+setenv DATACUBE_CONFIG_PATH ${module_dest}/datacube.conf
 
+setenv LC_ALL en_AU.utf8
+setenv LANG C.UTF-8
 
-if { ! [is-loaded ${agdc_module}/${version}] } {
-    module load ${agdc_module}/${version}
-}
-
+#############################################################
+# When loading, ensure a database username has been created
+# and warn if a ~/.datacube.conf file exists
+#-------------------------------------------------------------
 if { [module-info mode load] } {
     if { [catch {exec -ignorestderr ${module_dest}/datacube-ensure-user.py ${dbhost} ${dbport}} results options] } {
         puts stderr "Error: database connection check failed!"
@@ -47,22 +44,3 @@ if { [module-info mode load] } {
     }
 }
 
-setenv DATACUBE_CONFIG_PATH ${module_dest}/datacube.conf
-
-if { [ module-info mode remove ] } {
-    module unload ${agdc_module}
-}
-
-
-if { ! [is-loaded ${agdc_env_module}] } {
-    module load ${agdc_env_module}
-}
-prepend-path PYTHONPATH ${python_dest}
-prepend-path PATH ${package_dest}/bin
-
-setenv LC_ALL en_AU.utf8
-setenv LANG C.UTF-8
-
-if { [ module-info mode remove ] } {
-    module unload ${agdc_env_module}
-}

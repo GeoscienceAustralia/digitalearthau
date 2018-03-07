@@ -32,7 +32,7 @@ module_dir="/g/data/v10/public/modules"
 
 function build_variant() {
     py=$1
-    pushd "${dir}/py-environment"
+    pushd "${dir}/dea-env"
         if [ ! -e "${module_dir}/modulefiles/agdc-${py}-env/${py_module_version}" ];
         then
             echo
