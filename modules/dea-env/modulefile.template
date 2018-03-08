@@ -7,27 +7,29 @@ proc ModulesHelp { } {
         global version
 
         puts stderr "   ${package_description}"
-        puts stderr "   Version ${version}"
+        puts stderr "   Version ${module_version}"
 }
 
 set name          ${package_name}
-set version       ${version}
+set version       ${module_version}
 set base          ${module_dir}
 
-module-whatis   "${package_description} ${version}"
+module-whatis   "${package_description} ${module_version}"
 
-if {[info exists env(PYTHONPATH)] && ${esc}env(PYTHONPATH) != ""} {
-        puts stderr "Warning: PYTHONPATH is ${esc}env(PYTHONPATH)"
+if {[info exists env(PYTHONPATH)] && $$env(PYTHONPATH) != ""} {
+        puts stderr "Warning: PYTHONPATH is $$env(PYTHONPATH)"
         puts stderr "Try unloading all python modules if you experience any issues."
 }
 
 # Enable segfault tracebacks in py3. https://docs.python.org/3/library/faulthandler.html
 setenv PYTHONFAULTHANDLER 1
 
-prepend-path PATH ${module_dir}/${package_name}/${version}/envs/dea/bin
-setenv GDAL_DATA ${module_dir}/${package_name}/${version}/envs/dea/share/gdal
+prepend-path PATH ${module_path}/bin
+setenv GDAL_DATA ${module_path}/share/gdal
 
-# This disables loading modules and .pth files from ~/.local/lib/python3.6/...
-setenv PYTHONUSERBASE ~/.digitalearthau/${version}/local
-prepend-path PATH ~/.digitalearthau/${version}/local/bin
+# Disable loading modules and .pth files from ~/.local/lib/python3.6/...
+# This allows users to install packages with "pip install --user <package>",
+# while still meaning that a new module release will have a clean user environment.
+setenv PYTHONUSERBASE ~/.digitalearthau/${module_version}/local
+prepend-path PATH ~/.digitalearthau/${module_version}/local/bin
 

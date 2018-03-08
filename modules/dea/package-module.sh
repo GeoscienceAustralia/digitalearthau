@@ -65,41 +65,6 @@ module load "${agdc_instance_module}"
 python_version=$(python -c 'from __future__ import print_function; import sys; print("%s.%s"%sys.version_info[:2])')
 
 
-function installrepo() {
-    destination_name=$1
-    head=${2:=develop}
-    repo=$3
-
-    repo_cache="cache/${destination_name}.git"
-
-    if [ -e "${repo_cache}" ]
-    then
-        pushd "${repo_cache}"
-            git remote update
-        popd
-    else
-        git clone --mirror "${repo}" "${repo_cache}"
-    fi
-
-    build_dest="build/${destination_name}"
-    [ -e "${build_dest}" ] && rm -rf "${build_dest}"
-
-    # If no branch by that name exists, it's probably a tag, add the prefix
-    if git --git-dir "${repo_cache}" rev-parse --verify "$head";
-    then
-        clone_name="${head}"
-    else
-        clone_name="${destination_name}-${head}"
-    fi
-    git clone -b "${clone_name}" "${repo_cache}" "${build_dest}"
-
-    pushd "${build_dest}"
-        rm -r dist build > /dev/null 2>&1 || true
-        python setup.py sdist
-        pip install dist/*.tar.gz "--prefix=${package_dest}"
-    popd
-}
-
 export package_name=dea-${instance}
 export package_description="DEA tools for NCI"
 
