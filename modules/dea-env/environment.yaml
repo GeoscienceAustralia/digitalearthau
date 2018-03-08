@@ -105,7 +105,6 @@ dependencies:
   - pudb
   - pydash
   - pypeg2
-  - skyfield
   - structlog[dev]
   - yamllint
   - yappi

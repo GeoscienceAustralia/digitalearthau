@@ -41,7 +41,7 @@ def prep(config_path):
 
 
 def date(date_format="%Y%m%d") -> str:
-    return datetime.datetime.utcnow().strftime(date_format)
+    return datetime.datetime.now().strftime(date_format)
 
 
 def make_output_dir(base_path) -> Path:
@@ -79,14 +79,14 @@ def install_conda(conda_conf, variables):
     conda = destination_path / "bin/conda"
     pip = destination_path / "bin/pip"
 
-    # For some reason, conda is broken on raijin without this
+    # As of 9 March 2018, conda is broken on raijin without this
     run(f"{pip} install -U pyopenssl")
 
     run(f"{conda} update -n base -y conda")
 
     run(f"{conda} config --prepend channels conda-forge --system")
     # update root env to the latest python and packages
-    run(f"{conda} update --all -y")
+#    run(f"{conda} update --all -y")
 
 
 def install_conda_packages(conda_bin_path, from_file):
@@ -94,7 +94,7 @@ def install_conda_packages(conda_bin_path, from_file):
     # make sure no .local stuff interferes with the install
     os.environ['PYTHONNOUSERSITE'] = "1"
 
-    run(f"{conda_bin_path} env update -n base -v --yes --file {from_file}")
+    run(f"{conda_bin_path} env update -n root -v --file {from_file}")
 
 
 def write_template(template_file, variables, output_file):
