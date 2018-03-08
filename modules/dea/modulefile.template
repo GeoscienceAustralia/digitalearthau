@@ -10,14 +10,14 @@ proc ModulesHelp { } {
         puts stderr "   Version ${version}"
 }
 
-set version       ${version}
 set name          ${package_name}
+set version       ${version}
 set base          ${module_dir}
 
 module-whatis   "${package_description} ${version}"
 
 module load udunits
-module load ${agdc_instance_module}
+module load dea-env/${dea_env_version}
 
 prepend-path PYTHONPATH ${python_dest}
 prepend-path PATH ${package_dest}/bin
