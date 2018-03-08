@@ -62,20 +62,29 @@ def run(cmd: str):
     return subprocess.run(cmd, shell=True, check=True, stdout=sys.stdout, stderr=sys.stderr)
 
 
-def install_conda(conda_conf):
+def install_conda(conda_conf, variables):
+    fill_templates_from_variables(conda_conf, variables)
     destination_path = Path(conda_conf['dest'])
     LOG.debug('Installing miniconda to %s', destination_path)
     with tempfile.TemporaryDirectory() as tmpdir:
+        tmpdir = Path(tmpdir)
         miniconda_installer = tmpdir / "miniconda.sh"
+        LOG.debug('Downloading miniconda installer from "%s" to "%s"',
+                  conda_conf['url'], miniconda_installer)
         urllib.request.urlretrieve(conda_conf['url'], miniconda_installer)
+        miniconda_installer.chmod(0x755)
 
         run(f"{miniconda_installer} -b -p {destination_path}")
 
     conda = destination_path / "bin/conda"
+    pip = destination_path / "bin/pip"
+
+    # For some reason, conda is broken on raijin without this
+    run(f"{pip} install -U pyopenssl")
 
     run(f"{conda} config --prepend channels conda-forge --system")
     # update root env to the latest python and packages
-    run(f"${conda} update --all - y")
+    run(f"{conda} update --all -y")
 
 
 def install_conda_packages(conda_bin_path, from_file):
@@ -114,7 +123,7 @@ def copy_files(copy_tasks, variables):
 
 
 def read_config(path):
-    return yaml.safe_load(path)
+    return yaml.safe_load(path.read_text())
 
 
 def copy_and_fill_templates(template_tasks, variables):
@@ -138,7 +147,7 @@ def include_templated_vars(config):
 
 def fix_module_permissions(module_path):
     LOG.debug('Setting module "%s" to read-only', module_path)
-    run(f'chmod -R a-w "${module_path}"')
+    run(f'chmod -R a-w "{module_path}"')
 
 
 def install_pip_packages(pip_conf, variables):
@@ -152,6 +161,7 @@ def install_pip_packages(pip_conf, variables):
 
 
 def main(config_path):
+    logging.basicConfig(level=logging.DEBUG)
     LOG.debug('Reading config file')
     config = read_config(config_path)
     config['variables']['module_version'] = date()
@@ -163,7 +173,7 @@ def main(config_path):
     prep(config_path)
 
     if 'install_conda' in config:
-        install_conda(config['install_conda'])
+        install_conda(config['install_conda'], variables)
 
     if 'install_conda_packages' in config:
         install_conda_packages(variables['conda_bin_path'], config['install_conda_packages'])

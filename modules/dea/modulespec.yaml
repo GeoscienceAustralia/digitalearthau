@@ -8,22 +8,22 @@ variables:
   python_version: 3.6
 
 templated_variables:
-  module_path: ${modules_base}/${module_name}/${module_version}
+  module_path: "{modules_base}/{module_name}/{module_version}"
 
 install_pip_packages:
   requirements: requirements.txt
-  dest: ${module_path}
+  dest: "{module_path}"
   pip_cmd: "module load dea-env; pip "
 
 copy_files:
 - src: requirements.txt
-  dest: ${module_path}/requirements.txt
+  dest: "{module_path}/requirements.txt"
 - src: datacube.conf
-  dest: ${module_path}/datacube.conf
+  dest: "{module_path}/datacube.conf"
 - src: datacube-ensure-user.py
-  dest: ${module_path}/bin/datacube-ensure-user.py
+  dest: "{module_path}/bin/datacube-ensure-user.py"
   chmod: 0o755
 
 template_files:
 - src: modulefile.template
-  dest: ${modules_base}/modulefiles/${module_name}/${module_version}
+  dest: "{modules_base}/modulefiles/{module_name}/{module_version}"
