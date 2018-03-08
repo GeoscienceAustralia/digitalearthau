@@ -82,6 +82,8 @@ def install_conda(conda_conf, variables):
     # For some reason, conda is broken on raijin without this
     run(f"{pip} install -U pyopenssl")
 
+    run(f"{conda} update -n base -y conda")
+
     run(f"{conda} config --prepend channels conda-forge --system")
     # update root env to the latest python and packages
     run(f"{conda} update --all -y")
@@ -92,7 +94,7 @@ def install_conda_packages(conda_bin_path, from_file):
     # make sure no .local stuff interferes with the install
     os.environ['PYTHONNOUSERSITE'] = "1"
 
-    run(f"{conda_bin_path} install -v --yes --file {from_file}")
+    run(f"{conda_bin_path} env update -n base -v --yes --file {from_file}")
 
 
 def write_template(template_file, variables, output_file):
