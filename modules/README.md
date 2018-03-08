@@ -55,6 +55,9 @@ It includes a config file, which it specifies by setting the
 Only run these scripts from Raijin. We've seen filesystem sync issues when
 run from VDI.
 
+    module load python3/3.6.2
+    pip3 install --user yaml
+
 ## Building a new _Environment Module_
 
     ./build_environment_module.py
