@@ -1,28 +1,28 @@
 #%Module########################################################################
 ##
-## ${package_name} modulefile
+## ${module_name} modulefile
 ##
 
 proc ModulesHelp { } {
         global version
 
-        puts stderr "   ${package_description}"
-        puts stderr "   Version ${version}"
+        puts stderr "   ${module_description}"
+        puts stderr "   Version ${module_version}"
 }
 
-set name          ${package_name}
-set version       ${version}
-set base          ${module_dir}
+set name          ${module_name}
+set version       ${module_version}
+set base          ${module_path}
 
-module-whatis   "${package_description} ${version}"
+module-whatis   "${module_description} ${module_version}"
 
 module load udunits
-module load dea-env/${dea_env_version}
+module load dea-env
 
-prepend-path PYTHONPATH ${python_dest}
-prepend-path PATH ${package_dest}/bin
+prepend-path PYTHONPATH ${python_path}
+prepend-path PATH ${module_path}/bin
 
-setenv DATACUBE_CONFIG_PATH ${module_dest}/datacube.conf
+setenv DATACUBE_CONFIG_PATH ${module_path}/datacube.conf
 
 setenv LC_ALL en_AU.utf8
 setenv LANG C.UTF-8
@@ -32,7 +32,7 @@ setenv LANG C.UTF-8
 # and warn if a ~/.datacube.conf file exists
 #-------------------------------------------------------------
 if { [module-info mode load] } {
-    if { [catch {exec -ignorestderr ${module_dest}/datacube-ensure-user.py ${dbhost} ${dbport}} results options] } {
+    if { [catch {exec -ignorestderr ${module_path}/datacube-ensure-user.py ${dbhost} ${dbport}} results options] } {
         puts stderr "Error: database connection check failed!"
         puts stderr "  see log above for more details"
     }
