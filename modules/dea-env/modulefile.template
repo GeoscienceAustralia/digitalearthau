@@ -12,7 +12,7 @@ proc ModulesHelp { } {
 
 set name          ${module_name}
 set version       ${module_version}
-set base          ${module_dir}
+set base          ${module_path}
 
 module-whatis   "${module_description} ${module_version}"
 
