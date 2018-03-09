@@ -105,6 +105,8 @@ def install_conda_packages(env_file, variables):
 
 def write_template(template_file, variables, output_file):
     LOG.debug('Filling template file %s to %s', template_file, output_file)
+    output_file.parent.mkdir(parents=True, exist_ok=True)
+
     template_contents = template_file.read_text()
     template = string.Template(template_contents)
     output_file.write_text(template.substitute(variables))
@@ -125,8 +127,8 @@ def copy_files(copy_tasks, variables):
         shutil.copy(src, dest)
 
         if 'chmod' in task:
-            perms = task['chmod']
-            LOG.debug('Setting %s permissions to %s', dest, perms)
+            perms = int(task['chmod'], base=8)
+            LOG.debug('Setting %s permissions to %s', dest, oct(perms))
             dest.chmod(perms)
 
 
@@ -143,7 +145,8 @@ def copy_and_fill_templates(template_tasks, variables):
         write_template(src, variables, dest)
 
         if 'chmod' in task:
-            dest.chmod(task['chmod'])
+            perms = int(task['chmod'], base=8)
+            dest.chmod(perms)
 
 
 def include_templated_vars(config):
