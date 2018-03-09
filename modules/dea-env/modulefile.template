@@ -1,20 +1,20 @@
 #%Module########################################################################
 ##
-## ${package_name} modulefile
+## ${module_name} modulefile
 ##
 
 proc ModulesHelp { } {
         global version
 
-        puts stderr "   ${package_description}"
+        puts stderr "   ${module_description}"
         puts stderr "   Version ${module_version}"
 }
 
-set name          ${package_name}
+set name          ${module_name}
 set version       ${module_version}
 set base          ${module_dir}
 
-module-whatis   "${package_description} ${module_version}"
+module-whatis   "${module_description} ${module_version}"
 
 if {[info exists env(PYTHONPATH)] && $$env(PYTHONPATH) != ""} {
         puts stderr "Warning: PYTHONPATH is $$env(PYTHONPATH)"
@@ -28,7 +28,7 @@ prepend-path PATH ${module_path}/bin
 setenv GDAL_DATA ${module_path}/share/gdal
 
 # Disable loading modules and .pth files from ~/.local/lib/python3.6/...
-# This allows users to install packages with "pip install --user <package>",
+# This allows users to install python packages with "pip install --user <package>",
 # while still meaning that a new module release will have a clean user environment.
 setenv PYTHONUSERBASE ~/.digitalearthau/${module_version}/local
 prepend-path PATH ~/.digitalearthau/${module_version}/local/bin

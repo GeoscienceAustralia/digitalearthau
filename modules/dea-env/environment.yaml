@@ -1,8 +1,8 @@
-name: dea
+name: dea-env
 channels:
+- defaults
 - conda-forge/label/dev
 - conda-forge
-- defaults
 - nodefaults
 dependencies:
 - basemap
@@ -65,7 +65,7 @@ dependencies:
 - python-dateutil
 - pyyaml
 - python = 3.6
-- rasterio >=0.9  # required for zip reading, 0.9 gets around 1.0a ordering problems
+- rasterio >= 1.0a12  # required for zip reading
 - redis
 - redis-py
 - rsgislib
