@@ -2,17 +2,17 @@ variables:
   module_name: dea-env
   module_description: DEA Environment Module
   modules_dir: "/g/data/v10/public/modules"
+  conda_path: "/g/data/v10/private/miniconda3/bin/conda"
 #  module_version: This is filled in automatically
 
 # These templated variables are filled and included in the available variables used
 # in template files and configuration sections below
 templated_variables:
   module_path: "{modules_dir}/{module_name}/{module_version}"
-  conda_bin_path: "{modules_dir}/{module_name}/{module_version}/bin/conda"
 
-install_conda:
-  url: https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
-  dest: "{module_path}"
+#install_conda:
+#  url: https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
+#  dest: "{module_path}"
 
 install_conda_packages: environment.yaml
 
@@ -20,7 +20,7 @@ copy_files:
 - src: environment.yaml
   dest: "{modules_dir}/{module_name}/{module_version}/environment.yaml"
 
-templates:
+template_files:
 - src: modulefile.template
   dest: "{modules_dir}/modulefiles/{module_name}/{module_version}"
   chmod: 0o444

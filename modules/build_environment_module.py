@@ -84,17 +84,23 @@ def install_conda(conda_conf, variables):
 
     run(f"{conda} update -n base -y conda")
 
-    run(f"{conda} config --prepend channels conda-forge --system")
+    run(f"{conda} update --all -y")
+
+#    run(f"{conda} config --prepend channels conda-forge --system")
     # update root env to the latest python and packages
-#    run(f"{conda} update --all -y")
 
 
-def install_conda_packages(conda_bin_path, from_file):
-    LOG.debug('Installing conda packages from %s', from_file)
+def install_conda_packages(env_file, variables):
+    LOG.debug('Installing conda packages from %s', env_file)
     # make sure no .local stuff interferes with the install
     os.environ['PYTHONNOUSERSITE'] = "1"
 
-    run(f"{conda_bin_path} env update -n root -v --file {from_file}")
+    env_name = variables['module_name']
+    #run(f"{conda_bin_path} env update -n root -v --file {env_file}")
+    conda_path = variables['conda_path']
+    module_path = variables['module_path']
+
+    run(f"{conda_path} env create -p {module_path} -v --file {env_file}")
 
 
 def write_template(template_file, variables, output_file):
@@ -178,7 +184,7 @@ def main(config_path):
         install_conda(config['install_conda'], variables)
 
     if 'install_conda_packages' in config:
-        install_conda_packages(variables['conda_bin_path'], config['install_conda_packages'])
+        install_conda_packages(config['install_conda_packages'], variables)
 
     if 'install_pip_packages' in config:
         install_pip_packages(config['install_pip_packages'], variables)
