@@ -67,6 +67,7 @@ Publicly available data access and web services are currently in development.
    internal/new_product.rst
    internal/git_best_practice.rst
    internal/release.rst
+   internal/modules.rst
    internal/orchestration.rst
    internal/collection_management.rst
    internal/goalkeeper_instructions.rst
