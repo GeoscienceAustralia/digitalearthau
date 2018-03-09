@@ -105,6 +105,7 @@ def install_conda_packages(env_file, variables):
 
 def write_template(template_file, variables, output_file):
     LOG.debug('Filling template file %s to %s', template_file, output_file)
+    LOG.debug('Ensuring parent dir %s exists', output_file.parent)
     output_file.parent.mkdir(parents=True, exist_ok=True)
 
     template_contents = template_file.read_text()
@@ -124,6 +125,8 @@ def copy_files(copy_tasks, variables):
         dest = Path(task['dest'])
 
         LOG.debug('Copying %s to %s', src, dest)
+        LOG.debug('Ensuring parent dir %s exists', dest.parent)
+        dest.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy(src, dest)
 
         if 'chmod' in task:
