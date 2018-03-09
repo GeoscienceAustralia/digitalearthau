@@ -119,7 +119,7 @@ Band_11  tirs2           Thermal Infrared Sensor2
 Landsat 5 and 7 have the same bands as NBAR table_.
 
 Pixel Quality
-**************
+=============
 
 Summary
 -------
@@ -173,7 +173,7 @@ either algorithm or both algorithms.
 .. _Fractional Cover:
 
 Fractional Cover
-*****************
+================
 
 Summary
 --------
