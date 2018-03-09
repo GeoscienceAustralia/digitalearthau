@@ -171,7 +171,7 @@ def install_pip_packages(pip_conf, variables):
     requirements = pip_conf['requirements']
     LOG.debug('Installing pip packages from "%s" into directory "%s"',
               requirements, dest)
-    run(f'{pip} install --no-deps --target {dest} --requirement {requirements}')
+    run(f'{pip} install -v --no-deps --prefix {dest} --compile --requirement {requirements}')
 
 
 def main(config_path):
