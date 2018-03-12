@@ -21,26 +21,27 @@ To manually use the modules on ``raijin`` or ``VDI``, add the datacube module pa
 
 (you can add the above to your ``.bashrc`` to avoid running it every time)
 
-You should now have access to the following modules:
+You should now be able to load the DEA module by running::
 
- * **agdc-py2-prod** - Python 2.7
- * **agdc-py3-prod** - Python 3.5
+    $ module load dea
+
+.. note::
+   Behind the scenes this will load a second module called ``dea-env``
+   which contains all required libraries and supporting software to use ``dea``.
+   
 
 You can see a list of available modules by running::
 
     $ module avail
 
-To load the production module with Python 3 (which is highly recommended over 2), run::
-
-    $ module load agdc-py3-prod
 
 The first time you load the module, it will register your account with the datacube, granting you read-only access.
 
 It will store your password in the file `~/.pgpass`.
 
-You can then launch the jupyter notebook by running::
+You can then launch the jupyter-lab notebook by running::
 
-    $ jupyter notebook
+    $ jupyter-lab notebook
 
 .. note::
     VDI and Raijin have separate home directories, so you must copy your pgpass to the other if
