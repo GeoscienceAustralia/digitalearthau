@@ -1,4 +1,26 @@
 #!/usr/bin/env python3
+"""
+This program is used for deploying code modules onto the NCI.
+
+It is configured by a YAML file, which specifies:
+ - variables
+ - files to copy with permissions
+ - template files with their destination (eg, modulefiles)
+ - (opt) Conda environment to create
+ - (opt) Pip style requirements.txt to install to a directory
+
+It requires python 3.6+ and pyyaml. To run it on raijin at the NCI:
+
+  module load python3/3.6.2
+  pip install --user pyyaml
+  ./build_environment_module.py dea-env/modulespec.yaml
+
+It used to be able to perform a miniconda installation, but that turned out to
+be flaky, so we now maintain a central miniconda install, and create environments
+as an where required. With the added benefit of keeping a central cache of
+packages.
+"""
+
 
 import datetime
 import os
@@ -13,7 +35,6 @@ import logging
 import yaml
 
 MODULE_DIR = '/g/data/v10/public/modules'
-MINICONDA_URL = 'https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh'
 
 LOG = logging.getLogger('environment_module_builder')
 
@@ -27,9 +48,6 @@ def pre_check(config):
         raise Exception(f"The destination path {module_path} already exists, "
                         f"please remove it and try again.")
 
-
-#    "LOADEDMODULES=pbs"
-#    "MODULEPATH=/g/data/v10/public/modules/modulefiles:/apps/.mf:/opt/Modules/modulefiles:/apps/Modules/modulefiles:"
 
 def prep(config_path):
     LOG.debug('Preparing environment variables')
@@ -60,34 +78,6 @@ def make_output_dir(base_path) -> Path:
 def run(cmd: str):
     LOG.debug('Running command: %s', cmd)
     return subprocess.run(cmd, shell=True, check=True, stdout=sys.stdout, stderr=sys.stderr)
-
-
-def install_conda(conda_conf, variables):
-    fill_templates_from_variables(conda_conf, variables)
-    destination_path = Path(conda_conf['dest'])
-    LOG.debug('Installing miniconda to %s', destination_path)
-    with tempfile.TemporaryDirectory() as tmpdir:
-        tmpdir = Path(tmpdir)
-        miniconda_installer = tmpdir / "miniconda.sh"
-        LOG.debug('Downloading miniconda installer from "%s" to "%s"',
-                  conda_conf['url'], miniconda_installer)
-        urllib.request.urlretrieve(conda_conf['url'], miniconda_installer)
-        miniconda_installer.chmod(0x755)
-
-        run(f"{miniconda_installer} -b -p {destination_path}")
-
-    conda = destination_path / "bin/conda"
-    pip = destination_path / "bin/pip"
-
-    # As of 9 March 2018, conda is broken on raijin without this
-    run(f"{pip} install -U pyopenssl")
-
-    run(f"{conda} update -n base -y conda")
-
-    run(f"{conda} update --all -y")
-
-#    run(f"{conda} config --prepend channels conda-forge --system")
-    # update root env to the latest python and packages
 
 
 def install_conda_packages(env_file, variables):
