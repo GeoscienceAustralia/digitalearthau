@@ -4,10 +4,11 @@ import logging
 import click
 
 import digitalearthau
-from datacube.index._api import Index
+from datacube.index import Index
 from datacube.scripts import ingest
 from datacube.ui.click import pass_index, global_cli_options
 from datacube.utils import read_documents
+from datacube.drivers import storage_writer_by_name
 
 DEA_MD_TYPES = digitalearthau.CONFIG_DIR / 'metadata-types.yaml'
 DEA_PRODUCTS_DIR = digitalearthau.CONFIG_DIR / 'products'
@@ -63,8 +64,13 @@ def init_dea(
     for path in DEA_INGESTION_DIR.glob('*.yaml'):
         ingest_config = ingest.load_config_from_file(index, path)
 
+        driver_name = ingest_config['storage']['driver']
+        driver = storage_writer_by_name(driver_name)
+        if driver is None:
+            raise ValueError("No driver found for {}".format(driver_name))
+
         source_type, output_type = ingest.ensure_output_type(
-            index, ingest_config, allow_product_changes=True
+            index, ingest_config, driver.format, allow_product_changes=True
         )
         log(f"{output_type.name:<20}\t\t← {source_type.name}")
 

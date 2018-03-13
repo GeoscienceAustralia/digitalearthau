@@ -11,7 +11,9 @@ import structlog
 from boltons import fileutils
 from boltons import strutils
 
-from datacube.index._api import Index
+from datacube.index.index import Index  # DEA index
+from datacube.drivers.postgres import PostgresDb
+
 from datacube.utils import uri_to_local_path, InvalidDocException
 from digitalearthau import paths
 from digitalearthau.collections import Collection
@@ -73,14 +75,17 @@ def build_pathset(
 # It's usually warned against to prevent datacube clients hitting the index from every worker, but it's a valid
 # use case with this sync tool, where we have a handful of small workers.
 # TODO: Push only the connection setup information? Or have a dedicated process for index info.
-logging.getLogger('datacube.index.postgres._connections').setLevel(logging.ERROR)
+logging.getLogger('datacube.drivers.postgres._connections').setLevel(logging.ERROR)
 
 
-def _find_uri_mismatches(index: Index, uri: str, validate_data=True) -> Iterable[Mismatch]:
+def _find_uri_mismatches(index_url: str, uri: str, validate_data=True) -> Iterable[Mismatch]:
     """
     Compare the index and filesystem contents for the given uris,
     yielding Mismatches of any differences.
     """
+
+    # pylint: disable=protected-access
+    index = Index(PostgresDb(PostgresDb._create_engine(index_url)))
 
     def ids(datasets):
         return [d.id for d in datasets]
@@ -146,10 +151,11 @@ def mismatches_for_collection(collection: Collection,
 
     # Clean up any open connections before we fork.
     collection.index_.close()
+    index_url = collection.index_.url
 
     with multiprocessing.Pool(processes=workers) as pool:
         result = pool.imap_unordered(
-            partial(_find_uri_mismatches_eager, collection.index_),
+            partial(_find_uri_mismatches_eager, index_url),
             path_dawg.iterkeys(uri_prefix),
             chunksize=work_chunksize
         )
@@ -161,8 +167,8 @@ def mismatches_for_collection(collection: Collection,
         pool.join()
 
 
-def _find_uri_mismatches_eager(index: Index, uri: str) -> List[Mismatch]:
-    return list(_find_uri_mismatches(index, uri))
+def _find_uri_mismatches_eager(index_url: str, uri: str) -> List[Mismatch]:
+    return list(_find_uri_mismatches(index_url, uri))
 
 
 def query_name(query: Mapping[str, Any]) -> str:

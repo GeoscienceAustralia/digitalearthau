@@ -3,7 +3,7 @@ from datetime import datetime
 from functools import lru_cache
 from typing import Iterable
 
-from datacube.index._api import Index
+from datacube.index import Index
 from datacube.model import Dataset
 from datacube.scripts import dataset as dataset_script
 from datacube.utils import uri_to_local_path

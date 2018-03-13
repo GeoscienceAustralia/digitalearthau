@@ -11,8 +11,8 @@ import yaml
 from sqlalchemy import and_
 
 import digitalearthau.system
-from datacube.index._api import Index
-from datacube.index.postgres import _api
+from datacube.index import Index
+from datacube.drivers.postgres import _api
 from datacube.model import Dataset
 from digitalearthau import paths, collections
 from digitalearthau.collections import Collection

@@ -5,7 +5,7 @@ from typing import Iterable, Callable
 import structlog
 from dateutil import tz
 
-from datacube.index._api import Index
+from datacube.index import Index
 from digitalearthau.index import add_dataset, get_datasets_for_uri
 from digitalearthau.paths import trash_uri
 from digitalearthau.sync.differences import UnreadableDataset
