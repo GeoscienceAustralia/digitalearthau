@@ -62,19 +62,6 @@ def date(date_format="%Y%m%d") -> str:
     return datetime.datetime.now().strftime(date_format)
 
 
-def make_output_dir(base_path) -> Path:
-    today = date()
-
-    output_dir = base_path / today
-
-    while output_dir.exists():
-        index = 1
-        output_dir = base_path / f"{today}_{index}"
-
-    output_dir.mkdir(exist_ok=False)
-    return output_dir
-
-
 def run(cmd: str):
     LOG.debug('Running command: %s', cmd)
     return subprocess.run(cmd, shell=True, check=True, stdout=sys.stdout, stderr=sys.stderr)
@@ -82,11 +69,10 @@ def run(cmd: str):
 
 def install_conda_packages(env_file, variables):
     LOG.debug('Installing conda packages from %s', env_file)
-    # make sure no .local stuff interferes with the install
+    # make sure no ~/.local stuff interferes with the install
     os.environ['PYTHONNOUSERSITE'] = "1"
 
     env_name = variables['module_name']
-    #run(f"{conda_bin_path} env update -n root -v --file {env_file}")
     conda_path = variables['conda_path']
     module_path = variables['module_path']
 
@@ -163,6 +149,18 @@ def install_pip_packages(pip_conf, variables):
               requirements, dest)
     run(f'{pip} install -v --no-deps --prefix {dest} --compile --requirement {requirements}')
 
+
+def find_default_version(module_name):
+    cmd = f"module --terse avail {module_name}"
+    output = subprocess.run(cmd, shell=True, check=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='ascii')
+    versions = [version for version in output.stdout.splitlines() if f'{module_name}/' in version]
+    default_version = [version for version in versions if '(default)' in version]
+    if default_version:
+        return default_version[0].replace('(default)', '')
+    elif len(versions) > 0:
+        return versions[-1]
+    else:
+        raise Exception('No version of module %s is available.' % module_name)
 
 def main(config_path):
     logging.basicConfig(level=logging.DEBUG)

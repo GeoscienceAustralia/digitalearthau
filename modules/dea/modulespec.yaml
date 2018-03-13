@@ -11,6 +11,9 @@ templated_variables:
   module_path: "{modules_base}/{module_name}/{module_version}"
   python_path: "{modules_base}/{module_name}/{module_version}/lib/python{python_version}/site-packages/"
 
+stable_module_deps:
+- dea-env
+
 install_pip_packages:
   requirements: requirements.txt
   dest: "{module_path}"
