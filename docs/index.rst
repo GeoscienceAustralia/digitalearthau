@@ -51,7 +51,6 @@ Publicly available data access and web services are currently in development.
    :caption: Notebook Gallery
 
    notebooks/index
-   notebooks/README
 
 .. toctree::
    :maxdepth: 1
@@ -73,3 +72,8 @@ Publicly available data access and web services are currently in development.
    internal/goalkeeper_instructions.rst
    internal/requirements_met.ipynb
 
+
+.. toctree::
+   :hidden:
+
+   genindex

@@ -39,7 +39,6 @@ extensions = [
     'sphinx.ext.mathjax',
     'sphinx.ext.viewcode',
     'sphinx.ext.githubpages',
-    'sphinx_nbexamples',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -94,15 +93,6 @@ pygments_style = 'sphinx'
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = False
 
-
-
-# -- Options relating to Jupyter Notebook Examples
-example_gallery_config = {
-    'examples_dirs': ['notebooks'],
-    'pattern': '.*.ipynb',
-    'preprocess': [],
-    'urls': 'https://nbviewer.jupyter.org/github/GeoscienceAustralia/dea-notebooks/blob/master/'
-}
 
 # -- Options for HTML output ----------------------------------------------
 
