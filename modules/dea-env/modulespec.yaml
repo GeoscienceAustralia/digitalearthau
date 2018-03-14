@@ -10,10 +10,6 @@ variables:
 templated_variables:
   module_path: "{modules_dir}/{module_name}/{module_version}"
 
-#install_conda:
-#  url: https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
-#  dest: "{module_path}"
-
 install_conda_packages: environment.yaml
 
 copy_files:
