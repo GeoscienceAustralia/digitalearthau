@@ -16,8 +16,7 @@ AUTHOR_NAME_EMAIL=$(git show --format="%aN <%aE>" -s)
 ENCRYPTION_LABEL="c4bf5207aec3"
 
 function doCompile {
-  pip install Sphinx sphinx_rtd_theme nbsphinx
-  pip install recommonmark
+  pip install Sphinx sphinx_rtd_theme nbsphinx recommonmark IPython
   make html
 }
 
