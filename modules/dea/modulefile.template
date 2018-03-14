@@ -17,10 +17,11 @@ set base          ${module_path}
 module-whatis   "${module_description} ${module_version}"
 
 module load udunits
-module load dea-env
 
 prepend-path PYTHONPATH ${python_path}
 prepend-path PATH ${module_path}/bin
+
+module load dea-env
 
 setenv DATACUBE_CONFIG_PATH ${module_path}/datacube.conf
 
