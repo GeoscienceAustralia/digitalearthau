@@ -84,7 +84,7 @@ Building a new *Environment Module*
 
 ::
 
-    ./build_environment_module.py
+    ./build_environment_module.py dea-env/modulespec.yaml
 
 This will build a new environment module for today.
 
