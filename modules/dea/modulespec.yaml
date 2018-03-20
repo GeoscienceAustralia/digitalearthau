@@ -15,7 +15,7 @@ stable_module_deps:
 
 install_pip_packages:
   requirements: requirements.txt
-  dest: "{module_path}"
+  prefix: "{module_path}"
   pip_cmd: "module load dea-env; pip "
 
 copy_files:
