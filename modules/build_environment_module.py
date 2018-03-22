@@ -176,12 +176,19 @@ def run_final_commands_on_module(commands, module_name):
         command = f'module load {module_name}; {command}'
         run(command)
 
+def include_stable_module_dep_versions(config):
+    stable_module_deps = config.get('stable_module_deps', [])
+    for dep in stable_module_deps:
+        default_version = find_default_version(dep)
+        config['variables'][f'fixed_{dep}'] = default_version
+
 def main(config_path):
     logging.basicConfig(level=logging.DEBUG)
     LOG.debug('Reading config file')
     config = read_config(config_path)
     config['variables']['module_version'] = date()
     include_templated_vars(config)
+    include_stable_module_dep_versions(config)
 
     variables = config['variables']
 
