@@ -1,8 +1,8 @@
 name: dea-env
 channels:
-- defaults
 - conda-forge/label/dev
 - conda-forge
+- defaults
 - nodefaults
 dependencies:
 - basemap
@@ -24,8 +24,7 @@ dependencies:
 - geopandas
 - geopy
 - glueviz
-# This is only graphviz itself, not the python bindings. The latter are in the pip section.
-- graphviz
+- graphviz # This is only graphviz itself, not the python bindings. The latter are in the pip section.
 - h5py
 - hdf5
 - hypothesis
@@ -62,7 +61,6 @@ dependencies:
 - pytables
 - pytest
 - pytest-cov
-- python-dateutil
 - pyyaml
 - python = 3.6
 - rasterio >= 1.0a12  # required for zip reading
