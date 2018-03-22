@@ -9,6 +9,12 @@ echo Testing module: "$module_to_test"
 # Reset modules directory
 export MODULEPATH=/apps/.mf:/opt/Modules/modulefiles:/apps/Modules/modulefiles:
 
+# Ensure that all files are world readable
+if [[ $(find $module_to_test ! -perm /004) ]]; then
+    echo "ERROR: Some files in $module_to_test are not world readable."
+    exit 1
+fi
+
 
 # Prepare to load the DEA module
 module use /g/data/v10/public/modules/modulefiles
