@@ -20,3 +20,12 @@ template_files:
 - src: modulefile.template
   dest: "{modules_dir}/modulefiles/{module_name}/{module_version}"
   chmod: 0o444
+
+finalise_commands:
+- jupyter labextension install --no-build jupyterlab_voyager
+- jupyter labextension install --no-build jupyterlab-toc
+- jupyter labextension install --no-build jupyterlab_bokeh
+- jupyter labextension install --no-build @jupyterlab/github
+- jupyter labextension install --no-build @jupyterlab/geojson-extension
+- jupyter labextension install --no-build jupyter-leaflet
+- jupyter lab build
