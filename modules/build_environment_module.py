@@ -171,6 +171,11 @@ def find_default_version(module_name):
     else:
         raise Exception('No version of module %s is available.' % module_name)
 
+def run_final_commands_on_module(commands, module_name):
+    for command in commands:
+        command = f'module load {module_name}; {command}'
+        run(command)
+
 def main(config_path):
     logging.basicConfig(level=logging.DEBUG)
     LOG.debug('Reading config file')
@@ -194,6 +199,13 @@ def main(config_path):
 
     copy_files(config.get('copy_files', []), variables)
     copy_and_fill_templates(config.get('template_files', []), variables)
+
+    if 'finalise_commands' in config:
+        module_name_and_version = variables['module_name'] + '/' + variables['module_version']
+        run_final_commands_on_module(config['finalise_commands'], module_name_and_version)
+
+
+
     fix_module_permissions(variables['module_path'])
 
 if __name__ == '__main__':
