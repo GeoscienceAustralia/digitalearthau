@@ -95,6 +95,7 @@ dependencies:
   - gunicorn
   - hdmedians
   - ipython-sql
+  - jupyterlab_github
   - meinheld
   - modernize
   - mypy
