@@ -16,5 +16,5 @@ module load dea
 module load udunits
 jupyter nbconvert --to notebook --execute requirements_met.ipynb --ExecutePreprocessor.timeout=14400
 jupyter nbconvert --to html requirements_met.nbconvert.ipynb
-mv -f requirements_met.nbconvert.html requirements_met-`date '+%Y-%m-%d'`.html
+mv -f requirements_met.nbconvert.html requirements_met-$(date '+%Y-%m-%d').html
 rm -f requirements_met.nbconvert.ipynb
