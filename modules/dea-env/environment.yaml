@@ -103,6 +103,7 @@ dependencies:
   - perf
   - pudb
   - pydash
+  - pyDEM
   - pypeg2
   - structlog[dev]
   - yamllint
