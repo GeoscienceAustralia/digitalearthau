@@ -24,7 +24,7 @@ dependencies:
 - geopandas
 - geopy
 - glueviz
-- graphviz # This is only graphviz itself, not the python bindings. The latter are in the pip section.
+- graphviz  # This is only graphviz itself, not the python bindings. The latter are in the pip section.
 - h5py
 - hdf5
 - hypothesis
@@ -45,6 +45,7 @@ dependencies:
 - mkl-service
 - mock
 - netcdf4
+- nodejs
 - numba
 - numexpr
 - numpy
@@ -83,6 +84,7 @@ dependencies:
 - voluptuous
 - pip:
   - autopep8
+  - awscli
   - boltons
   - celery >= 4
   - ciso8601
