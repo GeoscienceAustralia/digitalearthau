@@ -153,7 +153,7 @@ Following parameters are understood:
    nodes    = <int> number of nodes
    ncpus    = <int> number of cores if your don't need whole node
    walltime = <duration> e.g. "10m" -- ten minutes, "5h" -- five hours
-   mem      = (small|medium|high) or 2G, 4G memory per core
+   mem      = (small|medium|large) or 2G, 4G memory per core
    name     = job name
    project  = (u46|v10 etc.)
    queue    = (normal|express)
