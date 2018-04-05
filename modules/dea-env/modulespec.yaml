@@ -22,7 +22,6 @@ template_files:
   chmod: 0o444
 
 finalise_commands:
-- jupyter labextension install --no-build jupyterlab_voyager
 - jupyter labextension install --no-build jupyterlab-toc
 - jupyter labextension install --no-build jupyterlab_bokeh
 - jupyter labextension install --no-build @jupyterlab/github
