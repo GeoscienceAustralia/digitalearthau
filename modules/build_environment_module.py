@@ -180,6 +180,7 @@ def include_stable_module_dep_versions(config):
     stable_module_deps = config.get('stable_module_deps', [])
     for dep in stable_module_deps:
         default_version = find_default_version(dep)
+        dep = dep.replace('-', '_')
         config['variables'][f'fixed_{dep}'] = default_version
 
 def main(config_path):
