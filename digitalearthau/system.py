@@ -62,7 +62,7 @@ def init_dea(
     log_header('Checking DEA ingested definitions')
 
     for path in DEA_INGESTION_DIR.glob('*.yaml'):
-        ingest_config = ingest.load_config_from_file(index, path)
+        ingest_config = ingest.load_config_from_file(path)
 
         driver_name = ingest_config['storage']['driver']
         driver = storage_writer_by_name(driver_name)
