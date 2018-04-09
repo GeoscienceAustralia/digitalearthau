@@ -38,6 +38,7 @@ Publicly available data access and web services are currently in development.
    connect/install.rst
    connect/nci_basics.rst
    connect/jupyter.rst
+   connect/qgis_plugin.rst
 
 .. toctree::
    :maxdepth: 1

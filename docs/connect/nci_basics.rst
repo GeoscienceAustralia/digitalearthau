@@ -1,6 +1,6 @@
 .. highlight:: console
 
-.. nci_basics:
+.. _nci_basics:
 
 Command Line Usage (Advanced)
 =============================
