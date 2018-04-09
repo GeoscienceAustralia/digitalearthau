@@ -44,7 +44,6 @@ If you notice an error in this documentation, things that could be explained mor
    connect/qgis_plugin.rst
    internal/other_modules.rst
 
-
 .. toctree::
    :caption: User Guide
    :glob:
