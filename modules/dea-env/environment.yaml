@@ -64,6 +64,7 @@ dependencies:
 - pytest-cov
 - pyyaml
 - python = 3.6
+- qgis >= 3.0
 - rasterio >= 1.0a12  # required for zip reading
 - redis
 - redis-py

@@ -140,23 +140,24 @@ def fix_module_permissions(module_path):
     run(f'chmod -R a-w "{module_path}"')
 
 
-def install_pip_packages(pip_conf, variables):
-    fill_templates_from_variables(pip_conf, variables)
-    pip = pip_conf['pip_cmd']
-    prefix = pip_conf.get('prefix',pip_conf.get('dest'))  # 'dest' for backwards compatibility
-    target = pip_conf.get('target')
-    requirements = pip_conf['requirements']
-    if prefix and target is None:
-        dest = prefix
-        arg = f'--prefix {prefix}'
-    elif target and prefix is None:
-        dest = target
-        arg = f'--target {target}'
-    else:  # Either no target or prefix OR target and prefix were in the conf
-        raise Exception('Either prefix: <prefix path> or target: <target path> is required by install_pip_packages:')
+def install_pip_packages(pip_confs, variables):
+    for pip_conf in pip_confs:
+        fill_templates_from_variables(pip_conf, variables)
+        pip = pip_conf['pip_cmd']
+        prefix = pip_conf.get('prefix',pip_conf.get('dest'))  # 'dest' for backwards compatibility
+        target = pip_conf.get('target')
+        requirements = pip_conf['requirements']
+        if prefix and target is None:
+            dest = prefix
+            arg = f'--prefix {prefix}'
+        elif target and prefix is None:
+            dest = target
+            arg = f'--target {target}'
+        else:  # Either no target or prefix OR target and prefix were in the conf
+            raise Exception('Either prefix: <prefix path> or target: <target path> is required by install_pip_packages:')
 
-    LOG.debug(f'Installing pip packages from "{requirements}" into directory "{dest}"')
-    run(f'{pip} install -v --no-deps {arg} --compile --requirement {requirements}')
+        LOG.debug(f'Installing pip packages from "{requirements}" into directory "{dest}"')
+        run(f'{pip} install -v --no-deps {arg} --compile --requirement {requirements}')
 
 
 def find_default_version(module_name):

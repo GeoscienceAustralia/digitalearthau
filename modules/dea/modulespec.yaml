@@ -14,13 +14,18 @@ stable_module_deps:
 - dea-env
 
 install_pip_packages:
-  requirements: requirements.txt
-  prefix: "{module_path}"
-  pip_cmd: "module load {fixed_dea_env}; pip "
+-  requirements: requirements.txt
+   prefix: "{module_path}"
+   pip_cmd: "module load {fixed_dea_env}; pip "
+-  requirements: requirements-target.txt
+   target: "{module_path}/plugins"
+   pip_cmd: "module load {fixed_dea_env}; pip "
 
 copy_files:
 - src: requirements.txt
   dest: "{module_path}/requirements.txt"
+- src: requirements-target.txt
+  dest: "{module_path}/requirements-target.txt"
 - src: datacube.conf
   dest: "{module_path}/datacube.conf"
 - src: datacube-ensure-user.py

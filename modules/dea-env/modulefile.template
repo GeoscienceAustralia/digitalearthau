@@ -33,3 +33,15 @@ setenv GDAL_DATA ${module_path}/share/gdal
 setenv PYTHONUSERBASE ~/.digitalearthau/${module_version}/local
 prepend-path PATH ~/.digitalearthau/${module_version}/local/bin
 
+# Fix reading Sentinel 2 zip files - https://github.com/conda-forge/gdal-feedstock/issues/83
+setenv CPL_ZIP_ENCODING UTF-8
+
+# Some QGIS requirements
+
+setenv FONTCONFIG_FILE ${module_path}/etc/fonts/fonts.conf
+setenv FONTCONFIG_PATH ${module_path}/etc/fonts/
+
+# Not required unless you _really_ want to segregate dea-env QGIS 3.x from a future system-wide QGIS 3.x
+# but there shouldn't really be a need to.  Left in just to illustrate how to do so.
+# set-alias qgis "${module_path}/bin/qgis --configpath ~/.digitalearthau/qgis3 --optionspath ~/.digitalearthau/qgis3"
+

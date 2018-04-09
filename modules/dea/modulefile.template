@@ -24,6 +24,8 @@ prepend-path PYTHONPATH ${python_path}
 prepend-path PATH ${module_path}/bin
 
 setenv DATACUBE_CONFIG_PATH ${module_path}/datacube.conf
+setenv QGIS_PLUGINPATH ${module_path}/plugins
+
 
 setenv LC_ALL en_AU.utf8
 setenv LANG C.UTF-8
