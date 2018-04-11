@@ -308,26 +308,28 @@ def init_nci_collections(index: Index):
     # Legacy PQ Scenes
     # /g/data/rs0/scenes/pq-legacy-scenes-tmp/ls7/2005/01/output/pqa/
     #           LS7_ETM_PQ_P55_GAPQ01-002_108_075_20050113/ga-metadata.yaml
+
+    pq_scene_offset = '[0-9][0-9][0-9][0-9]/[0-9][0-9]/output/pqa/LS*/ga-metadata.yaml'
     _add(
         scene_collection(
             name='ls5_pq_legacy_scene',
             query={'product': 'ls5_pq_legacy_scene'},
             file_patterns=[
-                '/g/data/rs0/scenes/pq-legacy-scenes-tmp/ls5/[0-9][0-9][0-9][0-9]/[0-9][0-9]/output/pqa/LS*/ga-metadata.yaml',
+                '/g/data/rs0/scenes/pq-legacy-scenes-tmp/ls5/' + pq_scene_offset,
             ],
         ),
         scene_collection(
             name='ls7_pq_legacy_scene',
             query={'product': 'ls7_pq_legacy_scene'},
             file_patterns=[
-                '/g/data/rs0/scenes/pq-legacy-scenes-tmp/ls7/[0-9][0-9][0-9][0-9]/[0-9][0-9]/output/pqa/LS*/ga-metadata.yaml',
+                '/g/data/rs0/scenes/pq-legacy-scenes-tmp/ls7/' + pq_scene_offset,
             ],
         ),
         scene_collection(
             name='ls8_pq_scene',
             query={'product': 'ls8_pq_legacy_scene'},
             file_patterns=[
-                '/g/data/rs0/scenes/pq-legacy-scenes-tmp/ls8/[0-9][0-9][0-9][0-9]/[0-9][0-9]/output/pqa/LS*/ga-metadata.yaml',
+                '/g/data/rs0/scenes/pq-legacy-scenes-tmp/ls8/' + pq_scene_offset,
             ],
         )
     )
