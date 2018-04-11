@@ -305,6 +305,33 @@ def init_nci_collections(index: Index):
         )
     )
 
+    # Legacy PQ Scenes
+    # /g/data/rs0/scenes/pq-legacy-scenes-tmp/ls7/2005/01/output/pqa/
+    #           LS7_ETM_PQ_P55_GAPQ01-002_108_075_20050113/ga-metadata.yaml
+    _add(
+        scene_collection(
+            name='ls5_pq_legacy_scene',
+            query={'product': 'ls5_pq_legacy_scene'},
+            file_patterns=[
+                '/g/data/rs0/scenes/pq-legacy-scenes-tmp/ls5/[0-9][0-9][0-9][0-9]/[0-9][0-9]/output/pqa/LS*/ga-metadata.yaml',
+            ],
+        ),
+        scene_collection(
+            name='ls7_pq_legacy_scene',
+            query={'product': 'ls7_pq_legacy_scene'},
+            file_patterns=[
+                '/g/data/rs0/scenes/pq-legacy-scenes-tmp/ls7/[0-9][0-9][0-9][0-9]/[0-9][0-9]/output/pqa/LS*/ga-metadata.yaml',
+            ],
+        ),
+        scene_collection(
+            name='ls8_pq_scene',
+            query={'product': 'ls8_pq_legacy_scene'},
+            file_patterns=[
+                '/g/data/rs0/scenes/pq-legacy-scenes-tmp/ls8/[0-9][0-9][0-9][0-9]/[0-9][0-9]/output/pqa/LS*/ga-metadata.yaml',
+            ],
+        )
+    )
+
     # Example: ingested fractional cover:
     # LS5_TM_FC  LS7_ETM_FC  LS8_OLI_FC
     # /g/data/fk4/datacube/002/LS5_TM_FC/13_-22/LS5_TM_FC_3577_13_-22_20030901235428500000_v1490733226.nc
