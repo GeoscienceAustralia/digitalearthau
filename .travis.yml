@@ -21,7 +21,9 @@ addons:
     postgresql: "9.6"
     services:
         - postgresql
-
+env:
+  global:
+    - CC_TEST_REPORTER_ID=7fabf748ee918a406d3cd9dfeace7d4f599a4d9c3c70c65e877e8448cc0d4a3b
 cache:
     apt: true
     directories:
@@ -45,16 +47,21 @@ install:
     - travis_retry pip install git+https://github.com/GeoscienceAustralia/eo-datasets.git
     - travis_retry pip install git+https://github.com/opendatacube/datacube-core.git@develop
     - travis_retry pip install -e .
-
+before_script:
+  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+  - chmod +x ./cc-test-reporter
+  - ./cc-test-reporter before-build
 script:
     - ./check-code.sh integration_tests
-
+after_script:
+  - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
 after_success:
     - pushd docs
     - bash ./deploy.sh
     - popd
 
 before_deploy:
+    - pip install s3pypi
     - python setup.py sdist --dist-dir dist/$TRAVIS_PYTHON_VERSION
     - DEPLOY_PATH=$TRAVIS_REPO_SLUG/${TRAVIS_TAG:-$TRAVIS_BRANCH}  # eg GeoscienceAustralia/digitalearthau/datacube-1.0.0
 
@@ -63,7 +70,7 @@ deploy:
     # Deploy the source dist tarball to s3 for tags or the develop branch, so that it can be installed on other systems
     # For tags, the object will be GeoscienceAustralia/digitalearthau/datacube-1.0.0/3.6/digitalearthau-1.0.0.tar.gz
     # For develop, the object will be GeoscienceAustralia/digitalearthau/develop/3.6/digitalearthau-1.0.0+91.g43bd4e12.tar.gz
-    provider: s3
+ -  provider: s3
     access_key_id: "AKIAJMZN4F5L5KXPQKVQ"
     secret_access_key:
         secure: IbZqx3lZwAegcfcFAxiitr4gwc3VPYCd5wF0Su5u2hPktycd5ZLOQ40BZFqGDy/2D4jFsVJnP4lK3W2ZxJ09rkY/z5rSMQPmEbFv3ubNvEx/ozhGZq8W4RmB8dsktuhiCUW4AhjJl06cDe7f+EByRJo0P76MKXk1+kbRyehoDwt++e2fcddoQ1RTDeHgDVVCTACNBR2vP3rIMZY8C/Djxoy48vebmh8L2XcCpXfogbS2k7APKigxIXEMsl86LfHIcecBQjXUt0XcU7EDvbz6xgzUiXWdGMtrJByYfVfjGl+Gm/9zUjOxrjJBz01CEU+qCspM6bLHWkXcOSED3HNVuMAmSHf+dFAY8lormS1Y2+HUETnPiFOOOAXt5yMbVuk4VIkWo9KaYPInuWdTpbE81XTkudeYl0PuZRk+aATE313vcR5aJYqP4iPiKVvFQSKcrm78wMJ5YZRijpvsLQ5HW1TZjTAC4DjqCID+vRBc88OB2auouZDhSe7vYoLRS+0eSm+6rh/E5/hdWtKw0IFOAugizxuOcki0c9iFoMIMshQphnc6oq3WdgCq/XoM3xHx9rrmqLhf8bN61iXj3IkAfPBlaaLqZwXoxJBwsU1z4J1p0LmGwFunNzhaqQAJCkGq1VFOLSj5maCgdPKouOWMv7vkM5T2TJhB8I1oWJ11kPE=
@@ -77,6 +84,14 @@ deploy:
         condition: $TRAVIS_BRANCH = "develop" || ! -z "${TRAVIS_TAG}"  # develop branch or tags
         repo: GeoscienceAustralia/digitalearthau
         python: "3.6"
+ -  provider: script
+    script: s3pypi --bucket datacube-core-deployment
+    on:
+        all_branches: true  # Let the condition below decide if the branch is to be deployed
+        condition: $TRAVIS_BRANCH = "develop" || ! -z "${TRAVIS_TAG}"  # develop branch or tags
+        repo: GeoscienceAustralia/digitalearthau
+        python: "3.6"
+
 
 notifications:
     slack:
