@@ -101,7 +101,7 @@ def fix_mismatches(mismatches: Iterable[Mismatch],
                    trash_archived=False,
                    min_trash_age_hours=72,
                    update_locations=False,
-                   pre_fix: Callable[[Mismatch], None]= None):
+                   pre_fix: Callable[[Mismatch], None] = None):
     if index_missing and trash_missing:
         raise RuntimeError("Datasets missing from the index can either be indexed or trashed, but not both.")
 
