@@ -1,5 +1,5 @@
 include versioneer.py
 include digitalearthau/_version.py
 include digitalearthau/*.sh
-recursive-include digitalearthau/config *.yaml *.xml
+recursive-include digitalearthau/config *.yaml
 recursive-include digitalearthau/harvest *.yaml
