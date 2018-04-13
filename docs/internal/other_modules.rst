@@ -12,7 +12,7 @@ Pycharm
 Pycharm (Community Edition) is a free
 The easiest way to run Pycharm is to copy the launcher on to your desktop.
 
-You can do this by running:
+You can do this by running::
 
     cp /g/data/v10/public/modules/pycharm/PyCharm.desktop ~/Desktop/
 
@@ -20,7 +20,7 @@ You can do this by running:
 To upgrade the version, download the latest tarball from the jetbrains website and place it in the folder
 ``/g/data/v10/public/modules/pycharm/``
 
-If you have a license for Pycharm Professional Edition, you can use your JetBrains Account with the version at:
+If you have a license for Pycharm Professional Edition, you can use your JetBrains Account with the version at::
 
     cp /g/data/v10/public/modules/pycharm-pro/PyCharmPro.desktop ~/Desktop/
 
@@ -41,4 +41,3 @@ The Java NetCDF ToolsUI can be run by calling:
     nctools
 
 More information can be found at https://www.unidata.ucar.edu/downloads/netcdf/netcdf-java-4/index.jsp
-

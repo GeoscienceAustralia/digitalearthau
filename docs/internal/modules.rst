@@ -1,3 +1,7 @@
+***********
+DEA Modules
+***********
+
 |Build Status|
 
 Introduction
@@ -51,7 +55,7 @@ It will also load ``dea-env/<build_date>`` which contains all of the
 software dependencies for using DEA.
 
 Notes
-~~~~~
+-----
 
 Loading these module might conflict with other python modules you have
 loaded.
