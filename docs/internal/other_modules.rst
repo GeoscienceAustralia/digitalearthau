@@ -2,7 +2,7 @@
 Other Modules
 =============
 
-To use these modules, you will need the public modules available:
+To use these modules, you will need the public modules available::
 
     module use /g/data/v10/public/modules/modulefiles
 
@@ -17,8 +17,6 @@ You can do this by running::
     cp /g/data/v10/public/modules/pycharm/PyCharm.desktop ~/Desktop/
 
 
-To upgrade the version, download the latest tarball from the jetbrains website and place it in the folder
-``/g/data/v10/public/modules/pycharm/``
 
 If you have a license for Pycharm Professional Edition, you can use your JetBrains Account with the version at::
 
@@ -31,11 +29,14 @@ To set up your virtual environment, in PyCharm:
     - In **Existing Environment** -> **Interpreter**, enter the path to the python executable,
       eg `/g/data/v10/public/modules/dea-env/20180405/bin/python`
 
+.. note::
+   Administrators can upgrade the version by downloading the latest tarball from the jetbrains website to the folder
+   ``/g/data/v10/public/modules/pycharm/``
 
 NC Tools
 --------
 
-The Java NetCDF ToolsUI can be run by calling:
+The Java NetCDF ToolsUI can be run by calling::
 
     module load nctools
     nctools
