@@ -18,6 +18,7 @@ setup(
 
     url='https://github.com/GeoscienceAustralia/digitalearthau',
     author='Geoscience Australia',
+    author_email='damien.ayers@ga.gov.au',
     license='Apache License 2.0',
 
     packages=find_packages(
