@@ -81,8 +81,8 @@ def submit(index: Index,
 
     task_desc, task_path = init_task_app(
         job_type="stack",
-        source_type=[app_config['output_type']],  # With stacker, source=output
-        output_type=[app_config['output_type']],  # With stacker, source=output
+        source_products=[app_config['output_type']],  # With stacker, source=output
+        output_products=[app_config['output_type']],  # With stacker, source=output
         # TODO: Use @datacube.ui.click.parsed_search_expressions to allow params other than time from the cli?
         datacube_query_args=Query(index=index, time=time_range).search_terms,
         app_config_path=app_config_path,
