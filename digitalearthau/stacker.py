@@ -81,8 +81,8 @@ def submit(index: Index,
 
     task_desc, task_path = init_task_app(
         job_type="stack",
-        source_products=[app_config['output_product']],  # With stacker, source=output
-        output_products=[app_config['output_product']],  # With stacker, source=output
+        source_type=[app_config['output_type']],  # With stacker, source=output
+        output_type=[app_config['output_type']],  # With stacker, source=output
         # TODO: Use @datacube.ui.click.parsed_search_expressions to allow params other than time from the cli?
         datacube_query_args=Query(index=index, time=time_range).search_terms,
         app_config_path=app_config_path,
@@ -176,7 +176,7 @@ def _make_config_and_description(index: Index, task_desc_path: Path) -> Tuple[di
 
     config = paths.read_document(app_config)
 
-    config['output_type'] = config['output_product']  # TODO: Temporary until ODC code is updated
+    config['output_type'] = config['output_type']  # TODO: Temporary until ODC code is updated
     config['app_config_file'] = str(app_config)
     config = stacker.make_stacker_config(index, config)
     config['taskfile_version'] = make_tag(task_desc)
