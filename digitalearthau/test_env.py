@@ -1,10 +1,9 @@
 """
 Set up and tear down test database environments at the NCI.
 """
-import subprocess
-import pathlib
-import sys
 import logging
+import subprocess
+import sys
 
 import click
 import yaml
@@ -12,10 +11,8 @@ import yaml
 from datacube import Datacube
 from datacube.config import DEFAULT_CONF_PATHS, LocalConfig
 from datacube.index import index_connect
-from datacube.api.query import Query
-from datacube.utils import intersects
-from datacube.scripts.dataset import load_rules_from_types
 from datacube.scripts.dataset import index_dataset_paths
+from datacube.scripts.dataset import load_rules_from_types
 from datacube.ui.expression import parse_expressions
 from digitalearthau.system import init_dea
 

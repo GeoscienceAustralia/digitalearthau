@@ -27,9 +27,6 @@ from integration_tests.conftest import DatasetForTests, freeze_index
 def test_new_and_old_on_disk(test_dataset: DatasetForTests,
                              integration_test_data: Path,
                              other_dataset: DatasetForTests):
-    # type: (Tuple[Collection, DatasetLite, str, Path]) -> None
-    # ls8_collection, on_disk, on_disk_uri, root = syncable_environment
-
     old_indexed = DatasetLite(uuid.UUID('5294efa6-348d-11e7-a079-185e0f80a5c0'))
 
     # An indexed file not on disk, and disk file not in index.
@@ -64,7 +61,6 @@ def test_new_and_old_on_disk(test_dataset: DatasetForTests,
 def test_replace_on_disk(test_dataset: DatasetForTests,
                          integration_test_data: Path,
                          other_dataset: DatasetForTests):
-    # type: (Tuple[Collection, DatasetLite, str, Path]) -> None
     """
     File on disk has a different id to the one in the index (ie. it was quietly reprocessed)
     """
@@ -95,7 +91,6 @@ def test_replace_on_disk(test_dataset: DatasetForTests,
 def test_move_on_disk(test_dataset: DatasetForTests,
                       integration_test_data: Path,
                       other_dataset: DatasetForTests):
-    # type: (Tuple[Collection, DatasetLite, str, Path]) -> None
     """
     Indexed dataset was moved over the top of another indexed dataset
     """
@@ -127,7 +122,6 @@ def test_move_on_disk(test_dataset: DatasetForTests,
 
 def test_archived_on_disk(test_dataset: DatasetForTests,
                           integration_test_data: Path):
-    # type: (Tuple[Collection, DatasetLite, str, Path]) -> None
     """
     A an already-archived dataset on disk. Should report it, but not touch the file (trash_archived is false)
     """
@@ -159,7 +153,6 @@ def test_archived_on_disk(test_dataset: DatasetForTests,
 
 def test_detect_corrupt_existing(test_dataset: DatasetForTests,
                                  integration_test_data: Path):
-    # type: (Tuple[Collection, str, str, Path]) -> None
     """If a dataset exists but cannot be read, report as corrupt"""
     path = uri_to_local_path(test_dataset.uri)
 
@@ -192,7 +185,6 @@ def test_detect_corrupt_existing(test_dataset: DatasetForTests,
 
 def test_detect_corrupt_new(test_dataset: DatasetForTests,
                             integration_test_data: Path):
-    # type: (Tuple[Collection, str, str, Path]) -> None
     """If a dataset exists but cannot be read handle as corrupt"""
 
     path = uri_to_local_path(test_dataset.uri)
