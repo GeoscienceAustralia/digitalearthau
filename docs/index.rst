@@ -46,6 +46,7 @@ Publicly available data access and web services are currently in development.
    query/Getting Started.ipynb
    query/List Products.ipynb
    query/Loading Data.ipynb
+   query/Advanced Querying.ipynb
 
 .. toctree::
    :maxdepth: 1
