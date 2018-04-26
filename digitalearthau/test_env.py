@@ -21,7 +21,6 @@ CREATE DATABASE {db_database}
 WITH
 OWNER = agdc_admin
 ENCODING = 'UTF8'
-TABLESPACE = pg_default
 CONNECTION LIMIT = -1;
 
 GRANT ALL ON DATABASE {db_database} TO agdc_admin;
