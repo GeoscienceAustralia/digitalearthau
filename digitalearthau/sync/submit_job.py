@@ -18,7 +18,7 @@ from boltons import fileutils
 from click import style
 
 from datacube.index import index_connect
-from digitalearthau import collections
+from digitalearthau import collections, MODULE_NAME, MODULES_PATH
 from digitalearthau.collections import Trust
 from digitalearthau.paths import get_dataset_paths
 from digitalearthau.sync import scan
@@ -163,6 +163,8 @@ class SyncSubmission(object):
             '-o', str(output_file),
             '-W', ','.join(attributes),
             '--',
+            'module use %s; ' % MODULES_PATH,
+            'module load %s; ' % MODULE_NAME,
             *sync_command
         ]
 

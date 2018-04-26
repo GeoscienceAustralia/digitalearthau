@@ -16,6 +16,7 @@ def _get_module_name():
 
 
 MODULE_NAME = _get_module_name()
+MODULES_PATH = '/g/data/v10/public/modules/modulefiles'
 
 BASE_DIR = Path(__file__).absolute().parent
 SCRIPT_DIR = BASE_DIR
