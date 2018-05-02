@@ -1,0 +1,68 @@
+---
+
+name: sentinel_2_alpha
+description: Minimal s2 alpha definition
+dataset:
+    id: ['id']
+    creation_dt: ['creation_dt']
+    label: ['ga_label']
+    measurements: ['image', 'bands']
+    grid_spatial: ['grid_spatial', 'projection']
+    format: ['format', 'name']
+    sources: ['lineage', 'source_datasets']
+
+    search_fields:
+        platform:
+            description: Platform code
+            offset: [platform, code]
+
+        instrument:
+            description: Instrument name
+            offset: [instrument, name]
+
+        product_type:
+            description: Product code
+            offset: [product_type]
+
+        format:
+            description: File format (GeoTiff, NetCDF)
+            offset: [format, name]
+            indexed: false
+
+        lat:
+            description: Latitude range
+            type: double-range
+            max_offset:
+                - [extent, coord, ur, lat]
+                - [extent, coord, lr, lat]
+                - [extent, coord, ul, lat]
+                - [extent, coord, ll, lat]
+            min_offset:
+                - [extent, coord, ur, lat]
+                - [extent, coord, lr, lat]
+                - [extent, coord, ul, lat]
+                - [extent, coord, ll, lat]
+
+        lon:
+            description: Longitude range
+            type: double-range
+            max_offset:
+                - [extent, coord, ul, lon]
+                - [extent, coord, ur, lon]
+                - [extent, coord, ll, lon]
+                - [extent, coord, lr, lon]
+            min_offset:
+                - [extent, coord, ul, lon]
+                - [extent, coord, ur, lon]
+                - [extent, coord, ll, lon]
+                - [extent, coord, lr, lon]
+
+        time:
+            description: Acquisition time
+            type: datetime-range
+            min_offset:
+                - [extent, from_dt]
+                - [extent, center_dt]
+            max_offset:
+                - [extent, to_dt]
+                - [extent, center_dt]
