@@ -326,7 +326,7 @@ def init_nci_collections(index: Index):
             ],
         ),
         scene_collection(
-            name='ls8_pq_scene',
+            name='ls8_pq_legacy_scene',
             query={'product': 'ls8_pq_legacy_scene'},
             file_patterns=[
                 '/g/data/rs0/scenes/pq-legacy-scenes-tmp/ls8/' + pq_scene_offset,
