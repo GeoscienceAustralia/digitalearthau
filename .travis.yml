@@ -4,6 +4,10 @@ language: python
 python:
     - '3.6'
 sudo: true
+git:
+  # We need a deeper depth for 'git descibe' to ensure
+  # we can reach the last tagged version. Defaults to only 50
+  depth: 99999
 addons:
     apt:
         packages:
