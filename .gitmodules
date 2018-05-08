@@ -1,4 +1,0 @@
-[submodule "docs/notebooks"]
-	path = docs/notebooks
-	url = https://github.com/GeoscienceAustralia/dea-notebooks.git
-	branch = master
