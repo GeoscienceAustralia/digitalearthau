@@ -19,5 +19,11 @@ help:
 %: Makefile
 	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
+fetchnotebooks:
+	[ -d notebooks ] || git clone https://github.com/GeoscienceAustralia/dea-notebooks.git notebooks
+	cd notebooks && git pull
+#	rm -rf notebooks
+#	git clone --depth 1 
+
 livehtml:
 	sphinx-autobuild -b html -p 8123 --watch . --ignore _build --ignore "*_tmp_*" --ignore "*_old_*" . $(ALLSPHINXOPTS) $(BUILDDIR)/html
