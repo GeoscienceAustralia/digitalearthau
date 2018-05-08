@@ -60,9 +60,7 @@ before_script:
 
 script:
     - ./check-code.sh integration_tests
-    - pushd docs
-    - make html
-    - popd
+    - pushd docs && make fetchnotebooks html && popd
 
 after_script:
   - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT

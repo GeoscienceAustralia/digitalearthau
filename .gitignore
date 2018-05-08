@@ -67,6 +67,8 @@ docs/html/
 
 # Generated Documentation
 docs/dev/generate/
+# Notebooks are pulled from the dea-notebooks repo
+docs/notebooks
 
 # MYPY static type checker cache
 .mypy_cache
