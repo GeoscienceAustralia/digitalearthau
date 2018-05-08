@@ -45,29 +45,31 @@ install:
     - popd
     - export CPLUS_INCLUDE_PATH="/usr/include/gdal"
     - export C_INCLUDE_PATH="/usr/include/gdal"
-    - travis_retry pip install pylint yamllint pytest-cov pycodestyle GDAL==1.10.0
+    - travis_retry pip install pylint yamllint pytest-cov pycodestyle GDAL==1.10.0 codecov
     # Dask.array seems to need this?
     - travis_retry pip install cloudpickle
+    # For building documentation
+    - travis_retry pip install Sphinx sphinx_rtd_theme nbsphinx recommonmark IPython
     - travis_retry pip install git+https://github.com/GeoscienceAustralia/eo-datasets.git
     - travis_retry pip install git+https://github.com/opendatacube/datacube-core.git@develop
     - travis_retry pip install -e .
 before_script:
-  - travis_retry pip install codecov
   - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
   - chmod +x ./cc-test-reporter
   - ./cc-test-reporter before-build
+
 script:
     - ./check-code.sh integration_tests
+    - pushd docs
+    - make html
+    - popd
+
 after_script:
   - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
 after_success:
     - codecov
-    - pushd docs
-    - bash ./deploy.sh
-    - popd
-
-before_deploy:
     - python setup.py sdist bdist_wheel
+
 
 # On success, upload a package to an S3 Bucket. Used for continuous deployment.
 deploy:
@@ -88,6 +90,16 @@ deploy:
         condition: $TRAVIS_BRANCH = "develop" || ! -z "${TRAVIS_TAG}"  # develop branch or tags
         repo: GeoscienceAustralia/digitalearthau
         python: "3.6"
+
+ -  provider: pages
+    skip-cleanup: true
+    github-token: $GITHUB_TOKEN  # Set in the settings page of your repository, as a secure variable
+    local-dir: docs/_build/html/
+    keep-history: true
+    committer-from-gh: true
+    verbose: true
+    on:
+      branch: develop
 
 
 notifications:
