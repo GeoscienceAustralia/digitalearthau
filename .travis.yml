@@ -100,6 +100,7 @@ deploy:
     verbose: true
     on:
       branch: develop
+      repo: GeoscienceAustralia/digitalearthau
 
 
 notifications:
