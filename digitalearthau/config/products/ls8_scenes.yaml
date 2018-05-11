@@ -267,7 +267,7 @@ metadata:
         name: OLI_TIRS
     product_type: legacy_pqa
     format:
-        name: GeoTiff
+        name: GeoTIFF
 
 measurements:
     - name: 'pqa'
@@ -597,7 +597,7 @@ metadata:
         name: OLI
     product_type: legacy_pqa
     format:
-        name: GeoTiff
+        name: GeoTIFF
 
 
 measurements:
