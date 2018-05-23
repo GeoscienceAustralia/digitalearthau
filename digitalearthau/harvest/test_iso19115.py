@@ -31,7 +31,7 @@ def sample_cmi_doc():
 def test_harvest_load_mapping_table(mapping_yaml):
     mapping_table = iso19115.load_mapping_table(mapping_yaml)
 
-    assert 'title' in mapping_table.keys()
+    assert 'title' in list(mapping_table.keys())
 
 
 def test_harvest_attrs(sample_iso19115_doc, mapping_yaml):
