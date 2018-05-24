@@ -1,10 +1,14 @@
 
 [MESSAGES CONTROL]
+enable=python3
+
 #
 # Below is copied from the root config, with these customisation for tests:
 # - redefined-outer-name allowed, as it's the norm in pytest usage (fixtures name the same as parameters)
 # - protected-access allowed
 disable=no-self-use,
+    no-absolute-import,
+    old-division,
     star-args,
     duplicate-code,
     unused-argument,
@@ -26,7 +30,6 @@ disable=no-self-use,
 
 
 
-enable=python3
 
 [BASIC]
 

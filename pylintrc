@@ -1,6 +1,11 @@
 
 [MESSAGES CONTROL]
+enable=python3
+
 disable=no-self-use,
+    comprehension-escape,
+    no-absolute-import,
+    old-division,
     star-args,
     duplicate-code,
     unused-argument,
@@ -26,7 +31,6 @@ disable=no-self-use,
 #      if dataset.uris is not None and not dataset.uris:
 
 
-enable=python3
 
 [BASIC]
 

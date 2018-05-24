@@ -141,7 +141,7 @@ class SyncSubmission(object):
             '-j', str(self.workers),
             '--cache-folder', str(task.resolve_path(self.cache_folder)),
             *sync_opts,
-            *(map(str, task.input_paths))
+            *list(map(str, task.input_paths))
         ]
         qsub_opts = []
         notify_email = os.environ.get('COMPLETION_NOTIFY_EMAIL')
