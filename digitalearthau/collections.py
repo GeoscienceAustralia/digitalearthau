@@ -157,7 +157,7 @@ def get_collection(name: str) -> Optional[Collection]:
 
 
 def get_collections() -> Iterable[Collection]:
-    return _COLLECTIONS.values()
+    return list(_COLLECTIONS.values())
 
 
 def registered_collection_names():
