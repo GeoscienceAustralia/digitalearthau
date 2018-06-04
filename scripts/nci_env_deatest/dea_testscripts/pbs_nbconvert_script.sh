@@ -37,22 +37,23 @@ echo "Running on the node: $PBS_NODEFILE"
 # Run a Notebook convert on the requirements met notebook
 NBFILE=$FL_PATH/dea_testscripts/requirements_met.ipynb
 OUTPUTDIR=$FL_PATH/output_files/nbconvert/requirements_met-"$(date '+%Y-%m-%d')".html
-cd $FL_PATH || exit 1
+cd "$FL_PATH" || exit 1
 
 # Load DEA module
-source $FL_PATH/python-env/setup_default.sh $DC_CONF
+# shellcheck source=/dev/null
+source "$FL_PATH"/python-env/setup_default.sh "$DC_CONF"
 
 ## Convert a notebook to an python script and print the stdout
 ## To remove code cells from the output, use templateExporter
-jupyter nbconvert --to python $NBFILE --stdout --TemplateExporter.exclude_markdown=True
+jupyter nbconvert --to python "$NBFILE" --stdout --TemplateExporter.exclude_markdown=True
 
 ## Execute the notebook
 ## Cell execution timeout = 5000s, --ExecutePreprocessor.timeout=5000
 ## --allow-errors shall allow conversion will continue and the output from 
 ## any exception be included in the cell output
-jupyter nbconvert --ExecutePreprocessor.timeout=5000 --to notebook --execute $NBFILE --allow-errors
-mv -f $FL_PATH/dea_testscripts/requirements_met.nbconvert.ipynb $FL_PATH/output_files/nbconvert
+jupyter nbconvert --ExecutePreprocessor.timeout=5000 --to notebook --execute "$NBFILE" --allow-errors
+mv -f "$FL_PATH"/dea_testscripts/requirements_met.nbconvert.ipynb "$FL_PATH"/output_files/nbconvert
 
 ## Finally convert using notebook to html file
-jupyter nbconvert --to html $NBFILE --stdout > "$OUTPUTDIR"
+jupyter nbconvert --to html "$NBFILE" --stdout > "$OUTPUTDIR"
 
