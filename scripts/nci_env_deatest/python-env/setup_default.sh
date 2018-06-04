@@ -22,6 +22,6 @@ module load dea-env
 module load udunits
 
 [[ -z "${DATACUBE_CONFIG_PATH}" ]] && export DATACUBE_CONFIG_PATH=$DC_CONFIG_PATH
-[[ ":$PATH:" != *":$ENV/bin:"* ]] && export PATH="$ENV/bin":"$PATH"
+[[ ":$PATH:" != *":$ENV/bin:"* ]] && export PATH="$ENV/bin:$PATH"
 export PYTHONUSERBASE="$ENV"
 unset PYTHONNOUSERSITE

@@ -32,5 +32,6 @@
 ## batch job
 #PBS -V
 
-source $FL_PATH/python-env/setup_default.sh $DC_CONF
-sh $FL_PATH/dea_testscripts/index_and_ingest.sh $MUT $CONFIG_FILE $FL_PATH > $FL_PATH/output_files/idx_ingest/PBS_Raijin.log
+# shellcheck source=/dev/null
+source "$FL_PATH"/python-env/setup_default.sh "$DC_CONF"
+sh "$FL_PATH"/dea_testscripts/index_and_ingest.sh "$MUT" "$CONFIG_FILE" "$FL_PATH" > "$FL_PATH"/output_files/idx_ingest/PBS_Raijin.log
