@@ -68,7 +68,7 @@ class Collection(NamedTuple):
 
         >>> init_nci_collections(None)
         >>> get_collection('telemetry').constrained_file_patterns(Path('/g/data/v10/repackaged'))
-        ['/g/data/v10/repackaged/rawdata/0/[0-9][0-9][0-9][0-9]/[0-9][0-9]/*/ga-metadata.yaml']
+        ['/g/data/v10/repackaged/rawdata/0/[0-9][0-9][0-9][0-9]/[0-9][0-9]/LS*/ga-metadata.yaml']
         >>> get_collection('ls8_level1_scene').constrained_file_patterns(
         ...     Path('/g/data/v10/reprocess/ls8/level1/2016/04')
         ... )
@@ -431,7 +431,6 @@ def init_nci_collections(index: Index):
                 trust=Trust.INDEX
             )
         )
-
 
     # PQ/NBAR/NBART Albers
     add_albers_collections('pq')

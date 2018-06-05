@@ -63,7 +63,7 @@ global_attributes:
   product_suite: Fractional Cover 25m
   acknowledgment: |
     Landsat data is provided by the United States Geological Survey (USGS) through direct reception of the data at Geoscience Australias satellite reception facility or download.
-    
+
     The fractional cover algorithm was developed by the Joint Remote Sensing Research Program (JRSRP) and is
     described in Scarth et al. (2010). While originally calibrated in Queensland, a large collaborative effort
     between The Department of Agriculture & ABARES and State and Territory governments to collect additional
