@@ -388,7 +388,7 @@ def init_nci_collections(index: Index):
                 file_patterns=(
                     '/g/data/{project}/datacube/002/FC/'
                     'LS5_TM_{name}/*_*/LS5*{name}*.nc'.format(project=project,
-                                                                name=name.upper()),
+                                                              name=name.upper()),
                     '/g/data/v10/public/data/fc/'
                     'LS8_OLI_{name}/*_*/LS8*{name}*.nc'.format(name=name.upper()),
                 ),
@@ -404,7 +404,7 @@ def init_nci_collections(index: Index):
                 file_patterns=(
                     '/g/data/{project}/datacube/002/FC/'
                     'LS7_ETM_{name}/*_*/LS7*{name}*.nc'.format(project=project,
-                                                                name=name.upper()),
+                                                               name=name.upper()),
                     '/g/data/v10/public/data/fc/'
                     'LS8_OLI_{name}/*_*/LS8*{name}*.nc'.format(name=name.upper()),
                 ),
@@ -420,7 +420,7 @@ def init_nci_collections(index: Index):
                 file_patterns=(
                     '/g/data/{project}/datacube/002/FC/'
                     'LS8_OLI_{name}/*_*/LS8*{name}*.nc'.format(project=project,
-                                                                name=name.upper()),
+                                                               name=name.upper()),
                     '/g/data/v10/public/data/fc/'
                     'LS8_OLI_{name}/*_*/LS8*{name}*.nc'.format(name=name.upper()),
                 ),
