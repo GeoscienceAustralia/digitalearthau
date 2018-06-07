@@ -25,7 +25,7 @@ try:
 except ImportError:
     from yaml import SafeLoader
 
-pytest_plugins = "digitalearthau.testing"
+pytest_plugins = "digitalearthau.testing.plugin"
 
 INTEGRATION_DEFAULT_CONFIG_PATH = Path(__file__).parent.joinpath('deaintegration.conf')
 
