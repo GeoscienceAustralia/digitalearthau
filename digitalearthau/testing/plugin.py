@@ -9,7 +9,7 @@ import datacube
 import digitalearthau
 import digitalearthau.system
 from datacube.config import LocalConfig
-from digitalearthau.testing import factories as factories
+from . import factories as factories
 
 # These are unavoidable in pytests due to fixtures
 # pylint: disable=redefined-outer-name,protected-access,invalid-name
