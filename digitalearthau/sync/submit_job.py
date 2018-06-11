@@ -354,10 +354,10 @@ def _find_and_submit(tasks: List[Task],
         require_job_id = last_job_slots.get(submitted % concurrent_jobs)
 
         run_path = task.resolve_path(work_folder).joinpath('{:03d}'.format(submitted))
-        if run_path.exists():
-            raise RuntimeError("Calculated job folder should be unique? Got %r" % (run_path,))
-
-        fileutils.mkdir_p(run_path)
+        if not run_path.exists():
+            fileutils.mkdir_p(run_path)
+        else:
+            _LOG.warning("Calculated job folder should be unique? Got %r", run_path)
 
         job_id, command = submitter.submit(
             task=task,
