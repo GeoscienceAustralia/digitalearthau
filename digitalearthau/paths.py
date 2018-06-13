@@ -9,10 +9,12 @@ from typing import List, Iterable, Union, Tuple
 
 import pathlib
 import structlog
+import logging
 
 from datacube.utils import is_supported_document_type, read_documents, InvalidDocException, uri_to_local_path
 
 _LOG = structlog.getLogger()
+_LOG1 = logging.getLogger(__file__)
 
 # This check is buggy when used with Tuple[] type: https://github.com/PyCQA/pylint/issues/867
 # pylint: disable=invalid-sequence-index
@@ -320,7 +322,9 @@ def trash_uri(uri: str, dry_run=False, log=_LOG) -> bool:
     if not dry_run:
         if not trash_path.parent.exists():
             os.makedirs(str(trash_path.parent))
-        os.rename(str(base_path), str(trash_path))
+
+        if trash_path.parent.exists():
+            os.rename(str(base_path), str(trash_path))
 
     return True
 
@@ -336,7 +340,8 @@ def get_product_work_directory(
     :param task_type: Informally the kind of work you're doing on the product: create, sync, archive, ...
     """
     if not NCI_WORK_ROOT.exists():
-        raise ValueError("Work folder doesn't exist: %s" % NCI_WORK_ROOT)
+        _LOG1.info('Create new NCI_WORK_ROOT directory.')
+        os.makedirs(NCI_WORK_ROOT)
 
     d = _make_work_directory(output_product, time, task_type)
     d.mkdir(parents=True, exist_ok=False)
