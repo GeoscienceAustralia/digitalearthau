@@ -68,7 +68,7 @@ class Collection(NamedTuple):
 
         >>> init_nci_collections(None)
         >>> get_collection('telemetry').constrained_file_patterns(Path('/g/data/v10/repackaged'))
-        ['/g/data/v10/repackaged/rawdata/0/[0-9][0-9][0-9][0-9]/[0-9][0-9]/*/ga-metadata.yaml']
+        ['/g/data/v10/repackaged/rawdata/0/[0-9][0-9][0-9][0-9]/[0-9][0-9]/LS*/ga-metadata.yaml']
         >>> get_collection('ls8_level1_scene').constrained_file_patterns(
         ...     Path('/g/data/v10/reprocess/ls8/level1/2016/04')
         ... )
@@ -196,7 +196,7 @@ def init_nci_collections(index: Index):
             name='telemetry',
             query={'metadata_type': 'telemetry'},
             file_patterns=(
-                '/g/data/v10/repackaged/rawdata/0/[0-9][0-9][0-9][0-9]/[0-9][0-9]/*/ga-metadata.yaml',
+                '/g/data/v10/repackaged/rawdata/0/[0-9][0-9][0-9][0-9]/[0-9][0-9]/LS*/ga-metadata.yaml',
             ),
             unique=('time.lower.day', 'platform'),
             index_=index,
@@ -233,7 +233,7 @@ def init_nci_collections(index: Index):
             name='ls7_level1_scene',
             query={'product': 'ls7_level1_scene'},
             file_patterns=[
-                '/g/data/v10/reprocess/ls7/level1/[0.-9][0-9][0-9][0-9]/[0-9][0-9]/LS*/ga-metadata.yaml',
+                '/g/data/v10/reprocess/ls7/level1/[0-9][0-9][0-9][0-9]/[0-9][0-9]/LS*/ga-metadata.yaml',
             ],
         ),
         scene_collection(
@@ -334,10 +334,6 @@ def init_nci_collections(index: Index):
         )
     )
 
-    # Example: ingested fractional cover:
-    # LS5_TM_FC  LS7_ETM_FC  LS8_OLI_FC
-    # /g/data/fk4/datacube/002/LS5_TM_FC/13_-22/LS5_TM_FC_3577_13_-22_20030901235428500000_v1490733226.nc
-
     def add_albers_collections(name: str, project='rs0'):
         _add(
             Collection(
@@ -384,46 +380,68 @@ def init_nci_collections(index: Index):
             )
         )
 
+    def add_fc_albers_collections(name: str, project='fk4'):
+        _add(
+            Collection(
+                name='ls5_{}_albers'.format(name),
+                query={'product': 'ls5_{}_albers'.format(name)},
+                file_patterns=(
+                    '/g/data/{project}/datacube/002/FC/'
+                    'LS5_TM_{name}/*_*/LS5*{name}*.nc'.format(project=project,
+                                                              name=name.upper()),
+                    '/g/data/v10/public/data/fc/'
+                    'LS8_OLI_{name}/*_*/LS8*{name}*.nc'.format(name=name.upper()),
+                ),
+                unique=('time.lower.day', 'lat', 'lon'),
+                index_=index,
+                # Tiles default to trusting index over the disk: they were indexed at the end of the job,
+                # so unfinished tiles could be left on disk.
+                trust=Trust.INDEX
+            ),
+            Collection(
+                name='ls7_{}_albers'.format(name),
+                query={'product': 'ls7_{}_albers'.format(name)},
+                file_patterns=(
+                    '/g/data/{project}/datacube/002/FC/'
+                    'LS7_ETM_{name}/*_*/LS7*{name}*.nc'.format(project=project,
+                                                               name=name.upper()),
+                    '/g/data/v10/public/data/fc/'
+                    'LS8_OLI_{name}/*_*/LS8*{name}*.nc'.format(name=name.upper()),
+                ),
+                unique=('time.lower.day', 'lat', 'lon'),
+                index_=index,
+                # Tiles default to trusting index over the disk: they were indexed at the end of the job,
+                # so unfinished tiles could be left on disk.
+                trust=Trust.INDEX
+            ),
+            Collection(
+                name='ls8_{}_albers'.format(name),
+                query={'product': 'ls8_{}_albers'.format(name)},
+                file_patterns=(
+                    '/g/data/{project}/datacube/002/FC/'
+                    'LS8_OLI_{name}/*_*/LS8*{name}*.nc'.format(project=project,
+                                                               name=name.upper()),
+                    '/g/data/v10/public/data/fc/'
+                    'LS8_OLI_{name}/*_*/LS8*{name}*.nc'.format(name=name.upper()),
+                ),
+                unique=('time.lower.day', 'lat', 'lon'),
+                index_=index,
+                # Tiles default to trusting index over the disk: they were indexed at the end of the job,
+                # so unfinished tiles could be left on disk.
+                trust=Trust.INDEX
+            )
+        )
+
+    # PQ/NBAR/NBART Albers
     add_albers_collections('pq')
     add_albers_collections('nbar')
     add_albers_collections('nbart')
 
-    # Old FC
-    for sat in ['ls5', 'ls7', 'ls8']:
-        name = 'fc'
-        glob_offset = f'{sat.upper()}_TM_{name.upper()}/*_*/{sat.upper()}*{name.upper()}*.nc'
-        _add(
-            Collection(
-                name=f'{sat}_{name}_albers',
-                query={'product': '{sat}_{name}_albers'},
-                file_patterns=(
-                    f'/g/data/fk4/datacube/002/' + glob_offset,
-                    f'/g/data/fk4/datacube/.trash/' + glob_offset,
-                ),
-                unique=('time.lower.day', 'lat', 'lon'),
-                # Tiles default to trusting index over the disk: they were indexed at the end of the job,
-                # so unfinished tiles could be left on disk.
-                trust=Trust.INDEX
-            )
-        )
-    # New FC
-    for sat in ['ls5', 'ls7', 'ls8']:
-        name = 'fc'
-        glob_offset = f'{sat.upper()}_TM_{name.upper()}/*_*/{sat.upper()}*{name.upper()}*.nc'
-        _add(
-            Collection(
-                name=f'{sat}_{name}_albers_staging',
-                query={'product': '{sat}_{name}_albers_staging'},
-                file_patterns=(
-                    f'/g/data/v10/public/data/fc/' + glob_offset,
-                    f'/g/data/fk4/datacube/002/' + glob_offset,
-                ),
-                unique=('time.lower.day', 'lat', 'lon'),
-                # Tiles default to trusting index over the disk: they were indexed at the end of the job,
-                # so unfinished tiles could be left on disk.
-                trust=Trust.INDEX
-            )
-        )
+    # FC
+    # Example: ingested fractional cover:
+    # LS5_TM_FC  LS7_ETM_FC  LS8_OLI_FC
+    # /g/data/fk4/datacube/002/FC/LS5_TM_FC/13_-22/LS5_TM_FC_3577_13_-22_20030901235428500000_v1490733226.nc
+    add_fc_albers_collections('fc')
 
     # PQ stats
     _add(
@@ -445,7 +463,7 @@ def init_nci_collections(index: Index):
         )
     )
 
-    assert '/g/data/fk4/datacube/002/LS5_TM_FC/*_*/LS5*FC*.nc' in get_collection('ls5_fc_albers').file_patterns
+    assert '/g/data/fk4/datacube/002/FC/LS5_TM_FC/*_*/LS5*FC*.nc' in get_collection('ls5_fc_albers').file_patterns
     assert get_collection('ls8_nbar_albers').file_patterns == (
         '/g/data/rs0/datacube/002/LS8_OLI_NBAR/*_*/LS8*NBAR*.nc',
     )

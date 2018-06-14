@@ -1,0 +1,149 @@
+source_product: ls7_nbart_albers
+output_product: ls7_fc_albers
+
+description: Landsat 7 Fractional Cover 25 metre, 100km tile, Australian Albers Equal Area projection (EPSG:3577)
+product_type: fractional_cover
+
+location: '/g/data/u46/users/sm9911/output_files/fc/001'
+file_path_template: 'LS7_ETM_FC/{tile_index[0]}_{tile_index[1]}/LS7_ETM_FC_3577_{tile_index[0]}_{tile_index[1]}_{start_time}_v{version}.nc'
+partial_ncml_path_template: 'LS7_ETM_FC/{tile_index[0]}_{tile_index[1]}/LS7_ETM_FC_3577_{tile_index[0]}_{tile_index[1]}_{start_time}.ncml'
+ncml_path_template: 'LS7_ETM_FC/LS7_ETM_FC_3577_{tile_index[0]}_{tile_index[1]}.ncml'
+
+global_attributes:
+  title: Fractional Cover 25 v2
+  summary: 'The Fractional Cover (FC) algorithm was developed by the Joint Remote
+    Sensing Research Program and is described in described in Scarth et al. (2010).
+    It has been implemented by Geoscience Australia for every observation from Landsat
+    Thematic Mapper (Landsat 5), Enhanced Thematic Mapper (Landsat 7) and Operational
+    Land Imager (Landsat 8) acquired since 1987. It is calculated from terrain corrected
+    surface reflectance (SR-NT_25_2.0.0).
+
+
+    FC_25 provides a 25m scale fractional cover representation of the proportions
+    of green vegetation, non-green vegetation, and bare surface cover across the Australian
+    continent. The fractions are retrieved by inverting multiple linear regression
+    estimates and using synthetic endmembers in a constrained non-negative least squares
+    unmixing model. For further information please see the articles below describing
+    the method implemented which are free to read:
+
+
+    Scarth, P, Roder, A and Schmidt, M 2010, ''Tracking grazing pressure and climate
+    interaction - the role of Landsat fractional cover in time series analysis'',
+    Proceedings of the 15th Australasian Remote Sensing & Photogrammetry Conference,
+
+
+    Schmidt, M, Denham, R and Scarth, P 2010, ''Fractional ground cover monitoring
+    of pastures and agricultural areas in Queensland'', Proceedings of the 15th Australasian
+    Remote Sensing & Photogrammetry Conference
+
+
+    A summary of the algorithm developed by the Joint Remote Sensing Centre is also
+    available from the AusCover website: http://www.auscover.org.au/purl/landsat-fractional-cover-jrsrp
+
+
+    Fractional cover data can be used to identify large scale patterns and trends
+    and inform evidence based decision making and policy on topics including wind
+    and water erosion risk, soil carbon dynamics, land management practices and rangeland
+    condition. This information is used by policy agencies, natural and agricultural
+    land resource managers, and scientists to monitor land conditions over large areas
+    over long time frames.'
+
+  institution: Commonwealth of Australia (Geoscience Australia)
+  instrument: ETM
+  keywords: AU/GA,NASA/GSFC/SED/ESD/LANDSAT,REFLECTANCE,ETM+,TM,OLI,EARTH SCIENCE
+  keywords_vocabulary: GCMD
+  platform: LANDSAT-7
+  publisher_email: earth.observation@ga.gov.au
+  publisher_name: Section Leader, Operations Section, NEMO, Geoscience Australia
+  publisher_url: http://www.ga.gov.au
+  license: CC BY Attribution 4.0 International License
+  cdm_data_type: Grid
+  source: fractional cover unmixing model v2017_06_09
+  uuid: cc2b37b8-e1f4-454b-a1be-09f72814c5a2
+  product_suite: Fractional Cover 25m
+  acknowledgment: |
+    Landsat data is provided by the United States Geological Survey (USGS) through direct reception of the data at Geoscience Australias satellite reception facility or download.
+
+    The fractional cover algorithm was developed by the Joint Remote Sensing Research Program (JRSRP) and is
+    described in Scarth et al. (2010). While originally calibrated in Queensland, a large collaborative effort
+    between The Department of Agriculture & ABARES and State and Territory governments to collect additional
+    calibration data has enabled the calibration to extend to the entire Australian continent.
+
+    FC_25 was made possible by new scientific and technical capabilities, the collaborative framework established by
+    the Terrestrial Ecosystem Research Network (TERN) through the National Collaborative Research Infrastructure
+    Strategy (NCRIS), and collaborative effort between state and Commonwealth governments.
+  references: |
+    - ABARES, 2014 Australian ground cover reference sites database 2014. Australian Bureau of Agricultural and Resource Economics and Sciences, Canberra, Australia. (https://remote-sensing.nci.org.au/u39/public/html/modis/fractionalcover-sitedata-abares/index.shtml).
+    - Flood, N., 2014.Continuity of Reflectance Data between Landsat-7 ETM+ and Landsat-8 OLI, for Both Top-of-Atmosphere and Surface Reflectance: A Study in the Australian Landscape. Remote Sensing, 6, 7952-7970.
+    - Muir, J., Schmidt, M., Tindall, D., Trevithick, R., Scarth, P., Stewart, J., 2011. Guidelines for Field measurement of fractional ground cover: a technical handbook supporting the Australian collaborative land use and management program. Tech. rep., Queensland Department of Environment and Resource Management for the Australian Bureau of Agricultural and Resource Economics and Sciences, Canberra.
+    - Scarth, P., Roder, A. and Schmidt, M., 2010. Tracking grazing pressure and climate interaction -  the role of Landsat fractional cover in the time series analysis, Proceedings of the 15th Australasian Remote Sensing & Photogrammetry Conference, viewed 4 January 2011, scribd.com/doc/37455672/15arspc-Submission-140.
+    - Schmidt, M., Denham, R. and Scarth, P., 2010. 'Fractional ground cover monitoring of pastures and agricultural areas in Queensland', Proceedings of the 15th Australasian Remote Sensing & Photogrammetry Conference, viewed 4 January 2011, www.scribd.com/doc/37455826/15arspc-Submission-119.
+storage:
+  driver: NetCDF CF
+
+  crs: EPSG:3577
+  tile_size:
+          x: 100000.0
+          y: 100000.0
+  resolution:
+          x: 25
+          y: -25
+  chunking:
+      x: 200
+      y: 200
+      time: 5
+  dimension_order: ['time', 'y', 'x']
+
+measurements:
+    - name: BS
+      src_var: BS
+      units: "percent"
+      dtype: int8
+      nodata: -1
+      zlib: True
+      fletcher32: True
+      attrs:
+          long_name: "Bare ground fraction percentage"
+          comment: "Fraction of bare ground including rock, bare and disturbed soil, within the Landsat pixel as percentages"
+          alias: "bare"
+          coverage_content_type: modelResult
+      aliases: ["bare"]
+    - name: PV
+      src_var: PV
+      units: "percent"
+      dtype: int8
+      nodata: -1
+      zlib: True
+      fletcher32: True
+      attrs:
+          long_name: "Green cover fraction percentage"
+          comment: "Fraction of green cover including green groundcover and green leaf material over all strata, within the Landsat pixel, as percentages"
+          alias: "green"
+          coverage_content_type: modelResult
+      aliases: ["green_veg"]
+    - name: NPV
+      src_var: NPV
+      units: "percent"
+      dtype: int8
+      nodata: -1
+      zlib: True
+      fletcher32: True
+      attrs:
+          long_name: "Non-green cover fraction percentage"
+          comment: "Fraction of non green cover including litter, dead leaf and branches over all strata, within the Landsat pixel, as percentages"
+          alias: "dead"
+          coverage_content_type: modelResult
+      aliases: ["dead_veg"]
+    - name: UE
+      src_var: UE
+      units: "1"
+      dtype: int8
+      nodata: -1
+      zlib: True
+      fletcher32: True
+      attrs:
+          long_name: "Unmixing error"
+          comment: "Eclidean Norm of the Residual Vector"
+          alias: "err"
+          coverage_content_type: qualityInformation
+      aliases: ["err"]
