@@ -143,4 +143,3 @@ measurements:
     dtype: int16
     nodata: -999
     units: '1'
-
