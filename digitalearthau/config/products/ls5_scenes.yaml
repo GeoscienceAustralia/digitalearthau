@@ -22,7 +22,7 @@ metadata:
         name: TM
     product_type: level1
     format:
-        name: GeoTiff
+        name: GeoTIFF
 
 metadata_type: landsat_l1_scene
 
@@ -39,7 +39,7 @@ metadata:
         name: TM
     product_type: nbar
     format:
-        name: GeoTiff
+        name: GeoTIFF
 
 measurements:
     - name: '1'
@@ -104,7 +104,7 @@ metadata:
         name: TM
     product_type: nbart
     format:
-        name: GeoTiff
+        name: GeoTIFF
 
 measurements:
     - name: '1'
@@ -170,7 +170,7 @@ metadata:
         name: TM
     product_type: pqa
     format:
-        name: GeoTiff
+        name: GeoTIFF
 
 measurements:
     - name: pqa
@@ -252,7 +252,7 @@ metadata:
         name: TM
     product_type: legacy_pqa
     format:
-        name: GeoTiff
+        name: GeoTIFF
 
 measurements:
     - name: pqa
