@@ -1,8 +1,6 @@
 name: ls8_nbart_geomedian_annual
 description: Surface Reflectance Geometric Median 25 metre, 100km tile, Australian Albers Equal Area projection (EPSG:3577)
-
 metadata_type: eo
-
 metadata:
   product_type: surface_reflectance_statistical_summary
   platform:
@@ -11,7 +9,6 @@ metadata:
     period: '1y'
   format:
     name: GeoTIFF
-
 storage:
   driver: GeoTIFF
   crs: EPSG:3577
@@ -22,7 +19,6 @@ storage:
     x: 25
     y: -25
   dimension_order: [time, y, x]
-
 # possibly fix the dtype
 measurements:
   - name: blue
@@ -49,13 +45,11 @@ measurements:
     dtype: int16
     nodata: -999
     units: '1'
-
 ---
+
 name: ls7_nbart_geomedian_annual
 description: Surface Reflectance Geometric Median 25 metre, 100km tile, Australian Albers Equal Area projection (EPSG:3577)
-
 metadata_type: eo
-
 metadata:
   product_type: surface_reflectance_statistical_summary
   platform:
@@ -64,7 +58,6 @@ metadata:
     period: '1y'
   format:
     name: GeoTIFF
-
 storage:
   driver: GeoTIFF
   crs: EPSG:3577
@@ -75,7 +68,6 @@ storage:
     x: 25
     y: -25
   dimension_order: [time, y, x]
-
 # possibly fix the dtype
 measurements:
   - name: blue
@@ -102,13 +94,11 @@ measurements:
     dtype: int16
     nodata: -999
     units: '1'
-
 ---
+
 name: ls5_nbart_geomedian_annual
 description: Surface Reflectance Geometric Median 25 metre, 100km tile, Australian Albers Equal Area projection (EPSG:3577)
-
 metadata_type: eo
-
 metadata:
   product_type: surface_reflectance_statistical_summary
   platform:
@@ -117,7 +107,6 @@ metadata:
     period: '1y'
   format:
     name: GeoTIFF
-
 storage:
   driver: GeoTIFF
   crs: EPSG:3577
@@ -128,7 +117,6 @@ storage:
     x: 25
     y: -25
   dimension_order: [time, y, x]
-
 # possibly fix the dtype
 measurements:
   - name: blue
