@@ -1,11 +1,11 @@
 description: Sentinel-2A MSI ARD - NBAR NBART and Pixel Quality
 measurements:
-- aliases: [mask, CFmask]
+- aliases: [mask, Fmask]
   dtype: uint8
   flags_definition:
-    cfmask:
+    fmask:
       bits: [0, 1, 2, 3, 4, 5, 6, 7]
-      description: CFmask
+      description: Fmask
       values: {0: nodata, 1: valid, 2: cloud, 3: shadow, 4: snow, 5: water}
   name: pixel_quality
   nodata: 255
@@ -519,12 +519,12 @@ name: s2a_ard_granule
 ---
 description: Sentinel-2B MSI ARD - NBAR NBART and Pixel Quality
 measurements:
-- aliases: [mask, CFmask]
+- aliases: [mask, Fmask]
   dtype: uint8
   flags_definition:
-    cfmask:
+    fmask:
       bits: [0, 1, 2, 3, 4, 5, 6, 7]
-      description: CFmask
+      description: Fmask
       values: {0: nodata, 1: valid, 2: cloud, 3: shadow, 4: snow, 5: water}
   name: pixel_quality
   nodata: 255
