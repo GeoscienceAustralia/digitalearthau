@@ -1,0 +1,54 @@
+## Define inputs to perform statistics on
+sources:
+  - product: ls8_nbar_albers
+    measurements: [blue, green, red, nir, swir1, swir2]
+    group_by: solar_day
+
+## Define whether and how to chunk over time
+date_ranges:
+  start_date: 2018-01-01
+  end_date: 2019-01-01
+  stats_duration: 1y
+  step_size: 1y
+
+## Define output directory and file structure
+location: '/g/data/u46/users/sm9911/output_files/stats/001'
+
+storage:
+  driver: NetCDF CF
+
+  crs: EPSG:3577
+  tile_size:
+          x: 100000.0
+          y: 100000.0
+  resolution:
+          x: 25
+          y: -25
+  chunking:
+      x: 200
+      y: 200
+      time: 1
+  dimension_order: [time, y, x]
+
+## Computational
+computation:
+  chunking:
+    x: 1000
+    y: 1000
+
+## Define statistics to perform and how to store the data
+output_products:
+ - name: landsat_seasonal_mean
+   product_type: landsat_seasonal_summary
+   metadata:
+       format:
+           name: NetCDF
+       platform:
+           code: LANDSAT-8
+   statistic: simple
+   statistic_args:
+     reduction_function: mean
+   output_params:
+     zlib: True
+     fletcher32: True
+   file_path_template: 'SR_N_MEAN/SR_N_MEAN_3577_{x:02d}_{y:02d}_{epoch_start:%Y%m%d}.nc'
