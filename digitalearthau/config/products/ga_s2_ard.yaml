@@ -123,7 +123,7 @@ measurements:
   units: '1'
 - aliases: [band_08, B08, Band8]
   dtype: int16
-  name: nir
+  name: nir1
   nodata: -999
   spectral_definition:
     response: [0.000451, 0.007614, 0.019072, 0.033498, 0.056536, 0.087148, 0.13246,
@@ -155,7 +155,7 @@ measurements:
   units: '1'
 - aliases: [band_8A, B8A, Band8A]
   dtype: int16
-  name: rededge4
+  name: nir2
   nodata: -999
   spectral_definition:
     response: [0.001651, 0.013242, 0.02471, 0.051379, 0.104944, 0.216577, 0.384865,
