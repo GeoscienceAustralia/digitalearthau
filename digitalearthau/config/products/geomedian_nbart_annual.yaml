@@ -4,7 +4,7 @@ metadata_type: eo
 metadata:
   product_type: surface_reflectance_statistical_summary
   platform:
-    code: LANDSAT_8
+    code: LANDSAT-8
   statistics:
     period: '1y'
   format:
@@ -53,7 +53,7 @@ metadata_type: eo
 metadata:
   product_type: surface_reflectance_statistical_summary
   platform:
-    code: LANDSAT_7
+    code: LANDSAT-7
   statistics:
     period: '1y'
   format:
@@ -102,7 +102,7 @@ metadata_type: eo
 metadata:
   product_type: surface_reflectance_statistical_summary
   platform:
-    code: LANDSAT_5
+    code: LANDSAT-5
   statistics:
     period: '1y'
   format:
