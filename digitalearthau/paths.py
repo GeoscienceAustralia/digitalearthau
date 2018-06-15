@@ -14,7 +14,6 @@ import logging
 from datacube.utils import is_supported_document_type, read_documents, InvalidDocException, uri_to_local_path
 
 _LOG = structlog.getLogger()
-_LOG1 = logging.getLogger(__file__)
 
 # This check is buggy when used with Tuple[] type: https://github.com/PyCQA/pylint/issues/867
 # pylint: disable=invalid-sequence-index
@@ -340,7 +339,7 @@ def get_product_work_directory(
     :param task_type: Informally the kind of work you're doing on the product: create, sync, archive, ...
     """
     if not NCI_WORK_ROOT.exists():
-        _LOG1.info('Create new NCI_WORK_ROOT directory.')
+        _LOG.info('Create new NCI_WORK_ROOT directory.')
         os.makedirs(NCI_WORK_ROOT)
 
     d = _make_work_directory(output_product, time, task_type)

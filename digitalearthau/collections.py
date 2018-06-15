@@ -380,15 +380,14 @@ def init_nci_collections(index: Index):
             )
         )
 
-    def add_fc_albers_collections(name: str, project='fk4'):
+    def add_fc_albers_collections(project='fk4'):
         _add(
             Collection(
-                name='ls5_{}_albers'.format(name),
-                query={'product': 'ls5_{}_albers'.format(name)},
+                name='ls5_fc_albers',
+                query={'product': 'ls5_fc_albers'},
                 file_patterns=(
                     '/g/data/{project}/datacube/002/FC/'
-                    'LS5_TM_{name}/*_*/LS5*{name}*.nc'.format(project=project,
-                                                              name=name.upper()),
+                    'LS5_TM_FC/*_*/LS5*FC*.nc'.format(project=project),
                 ),
                 unique=('time.lower.day', 'lat', 'lon'),
                 index_=index,
@@ -397,12 +396,11 @@ def init_nci_collections(index: Index):
                 trust=Trust.INDEX
             ),
             Collection(
-                name='ls7_{}_albers'.format(name),
-                query={'product': 'ls7_{}_albers'.format(name)},
+                name='ls7_fc_albers',
+                query={'product': 'ls7_fc_albers'},
                 file_patterns=(
                     '/g/data/{project}/datacube/002/FC/'
-                    'LS7_ETM_{name}/*_*/LS7*{name}*.nc'.format(project=project,
-                                                               name=name.upper()),
+                    'LS7_ETM_FC/*_*/LS7*FC*.nc'.format(project=project),
                 ),
                 unique=('time.lower.day', 'lat', 'lon'),
                 index_=index,
@@ -411,12 +409,11 @@ def init_nci_collections(index: Index):
                 trust=Trust.INDEX
             ),
             Collection(
-                name='ls8_{}_albers'.format(name),
-                query={'product': 'ls8_{}_albers'.format(name)},
+                name='ls8_fc_albers',
+                query={'product': 'ls8_fc_albers'},
                 file_patterns=(
                     '/g/data/{project}/datacube/002/FC/'
-                    'LS8_OLI_{name}/*_*/LS8*{name}*.nc'.format(project=project,
-                                                               name=name.upper()),
+                    'LS8_OLI_FC/*_*/LS8*FC*.nc'.format(project=project),
                 ),
                 unique=('time.lower.day', 'lat', 'lon'),
                 index_=index,
@@ -449,7 +446,7 @@ def init_nci_collections(index: Index):
     # Example: ingested fractional cover:
     # LS5_TM_FC  LS7_ETM_FC  LS8_OLI_FC
     # /g/data/fk4/datacube/002/FC/LS5_TM_FC/13_-22/LS5_TM_FC_3577_13_-22_20030901235428500000_v1490733226.nc
-    add_fc_albers_collections('fc')
+    add_fc_albers_collections()
 
     # PQ stats
     _add(
