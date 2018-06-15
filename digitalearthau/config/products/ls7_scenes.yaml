@@ -23,7 +23,7 @@ metadata:
         name: ETM
     product_type: level1
     format:
-        name: GeoTiff
+        name: GeoTIFF
 
 ---
 
@@ -38,7 +38,7 @@ metadata:
         name: ETM
     product_type: nbar
     format:
-        name: GeoTiff
+        name: GeoTIFF
 
 measurements:
     - name: '1'
@@ -103,7 +103,7 @@ metadata:
         name: ETM
     product_type: nbart
     format:
-        name: GeoTiff
+        name: GeoTIFF
 
 measurements:
     - name: '1'
@@ -169,7 +169,7 @@ metadata:
         name: ETM
     product_type: pqa
     format:
-        name: GeoTiff
+        name: GeoTIFF
 
 measurements:
     - name: 'pqa'
@@ -255,7 +255,7 @@ metadata:
         name: ETM
     product_type: legacy_pqa
     format:
-        name: GeoTiff
+        name: GeoTIFF
 
 measurements:
     - name: 'pqa'
