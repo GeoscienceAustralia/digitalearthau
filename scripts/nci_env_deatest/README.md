@@ -63,8 +63,8 @@ where:
 2) Execute the shell script by issuing the following:
 **Test_DeaStacker.sh [--help] [DEA_MODULE_TO_TEST] [YEAR_TO_STACK]**
 where:
-**DEA_MODULE_TO_TEST**  is Module under test (ex. dea/20180503 or dea-env or dea)
-**YEAR_TO_STACK** is year in YYYY format (ex. 2018)
+* **DEA_MODULE_TO_TEST**  is Module under test (ex. dea/20180503 or dea-env or dea)
+* **YEAR_TO_STACK** is year in YYYY format (ex. 2018)
 3) Once the the execution is complete, verify the logs within **output_files\deastacker** folder created within the test script directory.
 
 
