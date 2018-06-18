@@ -21,7 +21,7 @@ metadata:
         name: OLI_TIRS
     product_type: level1
     format:
-        name: GeoTiff
+        name: GeoTIFF
 
 ---
 
@@ -36,7 +36,7 @@ metadata:
         name: OLI_TIRS
     product_type: nbar
     format:
-        name: GeoTiff
+        name: GeoTIFF
 
 measurements:
     - name: '1'
@@ -108,7 +108,7 @@ metadata:
         name: OLI_TIRS
     product_type: nbart
     format:
-        name: GeoTiff
+        name: GeoTIFF
 
 measurements:
     - name: '1'
@@ -181,7 +181,7 @@ metadata:
         name: OLI_TIRS
     product_type: pqa
     format:
-        name: GeoTiff
+        name: GeoTIFF
 
 measurements:
     - name: 'pqa'
@@ -267,7 +267,7 @@ metadata:
         name: OLI_TIRS
     product_type: legacy_pqa
     format:
-        name: GeoTiff
+        name: GeoTIFF
 
 measurements:
     - name: 'pqa'
@@ -354,7 +354,7 @@ metadata:
         name: OLI
     product_type: level1
     format:
-        name: GeoTiff
+        name: GeoTIFF
 
 ---
 name: ls8_nbar_oli_scene
@@ -368,7 +368,7 @@ metadata:
         name: OLI
     product_type: nbar
     format:
-        name: GeoTiff
+        name: GeoTIFF
 
 measurements:
     - name: '1'
@@ -440,7 +440,7 @@ metadata:
         name: OLI
     product_type: nbart
     format:
-        name: GeoTiff
+        name: GeoTIFF
 
 measurements:
     - name: '1'
@@ -512,7 +512,7 @@ metadata:
         name: OLI
     product_type: pqa
     format:
-        name: GeoTiff
+        name: GeoTIFF
 
 
 measurements:
@@ -597,7 +597,7 @@ metadata:
         name: OLI
     product_type: legacy_pqa
     format:
-        name: GeoTiff
+        name: GeoTIFF
 
 
 measurements:
