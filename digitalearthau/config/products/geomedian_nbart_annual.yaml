@@ -9,6 +9,8 @@ metadata:
     period: '1y'
   format:
     name: GeoTIFF
+  instrument:
+    name: OLI_TIRS
 storage:
   driver: GeoTIFF
   crs: EPSG:3577
@@ -58,6 +60,8 @@ metadata:
     period: '1y'
   format:
     name: GeoTIFF
+  instrument:
+    name: ETM
 storage:
   driver: GeoTIFF
   crs: EPSG:3577
@@ -107,6 +111,8 @@ metadata:
     period: '1y'
   format:
     name: GeoTIFF
+  instrument:
+    name: TM
 storage:
   driver: GeoTIFF
   crs: EPSG:3577
