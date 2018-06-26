@@ -10,7 +10,7 @@ metadata:
   format:
     name: GeoTIFF
   instrument:
-    name: OLI_TIRS
+    name: OLI
 storage:
   driver: GeoTIFF
   crs: EPSG:3577
