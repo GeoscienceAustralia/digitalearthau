@@ -74,6 +74,9 @@ def test_dea_config(dea_index: Index):
         's2b_ard_granule',
         's2a_level1c_granule',
         's2a_ard_granule',
+        'ls5_nbart_geomedian_annual',
+        'ls7_nbart_geomedian_annual',
+        'ls8_nbart_geomedian_annual',
     }
 
 

@@ -1,14 +1,14 @@
 description: Sentinel-2A MSI ARD - NBAR NBART and Pixel Quality
 measurements:
-- aliases: [mask, CFmask]
+- aliases: [mask, Fmask]
   dtype: uint8
   flags_definition:
-    cfmask:
+    fmask:
       bits: [0, 1, 2, 3, 4, 5, 6, 7]
-      description: CFmask
-      values: {0: clear, 1: water, 2: shadow, 3: snow, 4: cloud}
+      description: Fmask
+      values: {0: nodata, 1: valid, 2: cloud, 3: shadow, 4: snow, 5: water}
   name: pixel_quality
-  nodata: 255
+  nodata: 0
   units: '1'
 - dtype: uint8
   flags_definition:
@@ -123,7 +123,7 @@ measurements:
   units: '1'
 - aliases: [band_08, B08, Band8]
   dtype: int16
-  name: nir
+  name: nir1
   nodata: -999
   spectral_definition:
     response: [0.000451, 0.007614, 0.019072, 0.033498, 0.056536, 0.087148, 0.13246,
@@ -155,7 +155,7 @@ measurements:
   units: '1'
 - aliases: [band_8A, B8A, Band8A]
   dtype: int16
-  name: rededge4
+  name: nir2
   nodata: -999
   spectral_definition:
     response: [0.001651, 0.013242, 0.02471, 0.051379, 0.104944, 0.216577, 0.384865,
@@ -372,7 +372,7 @@ measurements:
   units: '1'
 - aliases: [t_band_08, t_B08, t_Band8]
   dtype: int16
-  name: t_nir
+  name: t_nir1
   nodata: -999
   spectral_definition:
     response: [0.000451, 0.007614, 0.019072, 0.033498, 0.056536, 0.087148, 0.13246,
@@ -404,7 +404,7 @@ measurements:
   units: '1'
 - aliases: [t_band_8A, t_B8A, t_Band8A]
   dtype: int16
-  name: t_rededge4
+  name: t_nir2
   nodata: -999
   spectral_definition:
     response: [0.001651, 0.013242, 0.02471, 0.051379, 0.104944, 0.216577, 0.384865,
@@ -519,15 +519,15 @@ name: s2a_ard_granule
 ---
 description: Sentinel-2B MSI ARD - NBAR NBART and Pixel Quality
 measurements:
-- aliases: [mask, CFmask]
+- aliases: [mask, Fmask]
   dtype: uint8
   flags_definition:
-    cfmask:
+    fmask:
       bits: [0, 1, 2, 3, 4, 5, 6, 7]
-      description: CFmask
-      values: {0: clear, 1: water, 2: shadow, 3: snow, 4: cloud}
+      description: Fmask
+      values: {0: nodata, 1: valid, 2: cloud, 3: shadow, 4: snow, 5: water}
   name: pixel_quality
-  nodata: 255
+  nodata: 0
   units: '1'
 - dtype: uint8
   flags_definition:
@@ -654,7 +654,7 @@ measurements:
   units: '1'
 - aliases: [band_08, B08, Band8]
   dtype: int16
-  name: nir
+  name: nir1
   nodata: -999
   spectral_definition:
     response: [0.000386696, 0.003018401, 0.01669158, 0.028340486, 0.0502885, 0.08626388,
@@ -692,7 +692,7 @@ measurements:
   units: '1'
 - aliases: [band_8A, B8A, Band8A]
   dtype: int16
-  name: rededge4
+  name: nir2
   nodata: -999
   spectral_definition:
     response: [0.001661751, 0.01602581, 0.032253895, 0.073411273, 0.168937582, 0.345506138,
@@ -937,7 +937,7 @@ measurements:
   units: '1'
 - aliases: [t_band_08, t_B08, t_Band8]
   dtype: int16
-  name: t_nir
+  name: t_nir1
   nodata: -999
   spectral_definition:
     response: [0.000386696, 0.003018401, 0.01669158, 0.028340486, 0.0502885, 0.08626388,
@@ -975,7 +975,7 @@ measurements:
   units: '1'
 - aliases: [t_band_8A, t_B8A, t_Band8A]
   dtype: int16
-  name: t_rededge4
+  name: t_nir2
   nodata: -999
   spectral_definition:
     response: [0.001661751, 0.01602581, 0.032253895, 0.073411273, 0.168937582, 0.345506138,

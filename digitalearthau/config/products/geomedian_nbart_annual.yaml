@@ -1,0 +1,151 @@
+name: ls8_nbart_geomedian_annual
+description: Surface Reflectance Geometric Median 25 metre, 100km tile, Australian Albers Equal Area projection (EPSG:3577)
+metadata_type: eo
+metadata:
+  product_type: surface_reflectance_statistical_summary
+  platform:
+    code: LANDSAT_8
+  statistics:
+    period: '1y'
+  format:
+    name: GeoTIFF
+  instrument:
+    name: OLI
+storage:
+  driver: GeoTIFF
+  crs: EPSG:3577
+  tile_size:
+    x: 100000.0
+    y: 100000.0
+  resolution:
+    x: 25
+    y: -25
+  dimension_order: [time, y, x]
+# possibly fix the dtype
+measurements:
+  - name: blue
+    dtype: int16
+    nodata: -999
+    units: '1'
+  - name: green
+    dtype: int16
+    nodata: -999
+    units: '1'
+  - name: red
+    dtype: int16
+    nodata: -999
+    units: '1'
+  - name: nir
+    dtype: int16
+    nodata: -999
+    units: '1'
+  - name: swir1
+    dtype: int16
+    nodata: -999
+    units: '1'
+  - name: swir2
+    dtype: int16
+    nodata: -999
+    units: '1'
+---
+
+name: ls7_nbart_geomedian_annual
+description: Surface Reflectance Geometric Median 25 metre, 100km tile, Australian Albers Equal Area projection (EPSG:3577)
+metadata_type: eo
+metadata:
+  product_type: surface_reflectance_statistical_summary
+  platform:
+    code: LANDSAT_7
+  statistics:
+    period: '1y'
+  format:
+    name: GeoTIFF
+  instrument:
+    name: ETM
+storage:
+  driver: GeoTIFF
+  crs: EPSG:3577
+  tile_size:
+    x: 100000.0
+    y: 100000.0
+  resolution:
+    x: 25
+    y: -25
+  dimension_order: [time, y, x]
+# possibly fix the dtype
+measurements:
+  - name: blue
+    dtype: int16
+    nodata: -999
+    units: '1'
+  - name: green
+    dtype: int16
+    nodata: -999
+    units: '1'
+  - name: red
+    dtype: int16
+    nodata: -999
+    units: '1'
+  - name: nir
+    dtype: int16
+    nodata: -999
+    units: '1'
+  - name: swir1
+    dtype: int16
+    nodata: -999
+    units: '1'
+  - name: swir2
+    dtype: int16
+    nodata: -999
+    units: '1'
+---
+
+name: ls5_nbart_geomedian_annual
+description: Surface Reflectance Geometric Median 25 metre, 100km tile, Australian Albers Equal Area projection (EPSG:3577)
+metadata_type: eo
+metadata:
+  product_type: surface_reflectance_statistical_summary
+  platform:
+    code: LANDSAT_5
+  statistics:
+    period: '1y'
+  format:
+    name: GeoTIFF
+  instrument:
+    name: TM
+storage:
+  driver: GeoTIFF
+  crs: EPSG:3577
+  tile_size:
+    x: 100000.0
+    y: 100000.0
+  resolution:
+    x: 25
+    y: -25
+  dimension_order: [time, y, x]
+# possibly fix the dtype
+measurements:
+  - name: blue
+    dtype: int16
+    nodata: -999
+    units: '1'
+  - name: green
+    dtype: int16
+    nodata: -999
+    units: '1'
+  - name: red
+    dtype: int16
+    nodata: -999
+    units: '1'
+  - name: nir
+    dtype: int16
+    nodata: -999
+    units: '1'
+  - name: swir1
+    dtype: int16
+    nodata: -999
+    units: '1'
+  - name: swir2
+    dtype: int16
+    nodata: -999
+    units: '1'
