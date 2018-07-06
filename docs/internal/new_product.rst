@@ -58,13 +58,13 @@ First create empty database
 
 .. literalinclude:: datacube_helpers.sh
    :language: bash
-   :lines: 3-21, 58-60
+   :lines: 5-23, 60-62
 
 Create datacube config file that uses new database
 
 .. literalinclude:: datacube_helpers.sh
    :language: bash
-   :lines: 23-32, 61-62
+   :lines: 25-34, 63-65
 
 Tell datacube to use dev config via environment variable
 
@@ -266,7 +266,7 @@ script for PQ stats. Customise for your needs:
 
 .. literalinclude:: datacube_helpers.sh
    :language: bash
-   :lines: 34-55, 63-64
+   :lines: 36-57, 65-66
 
 Create empty QGIS project and add generated ``*.vrt`` files to it. In the menu
 select ``Layer> Add from Layer Definition File...`` navigate to
