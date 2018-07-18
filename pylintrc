@@ -6,33 +6,7 @@
 # vs
 #      if dataset.uris is not None and not dataset.uris:
 
-
-disable=missing-docstring,
-        bad-whitespace,
-        wrong-import-order,
-        ungrouped-imports,
-        len-as-condition,
-        no-name-in-module,
-        no-member,
-        no-value-for-parameter,
-        raw-checker-failed,
-        bad-inline-option,
-        locally-disabled,
-        locally-enabled,
-        file-ignored,
-        suppressed-message,
-        useless-suppression,
-        deprecated-pragma,
-        no-self-use,
-        duplicate-code,
-        no-else-return,
-        fixme,
-        unused-import,
-        unused-variable,
-        unused-argument,
-        no-absolute-import,
-        old-division,
-        comprehension-escape
+disable=all
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option
@@ -108,7 +82,6 @@ enable=print-statement,
        xreadlines-attribute,
        deprecated-sys-function,
        exception-escape,
-       logging-fstring-interpolation,
        useless-import-alias
 
 
