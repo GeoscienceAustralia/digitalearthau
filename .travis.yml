@@ -51,7 +51,8 @@ install:
     # For building documentation
     - travis_retry pip install Sphinx sphinx_rtd_theme nbsphinx recommonmark IPython
     - travis_retry pip install git+https://github.com/GeoscienceAustralia/eo-datasets.git
-    - travis_retry pip install git+https://github.com/opendatacube/datacube-core.git@develop
+#    - travis_retry pip install git+https://github.com/opendatacube/datacube-core.git@develop
+    - travis_retry pip install datacube==1.6rc1
     - travis_retry pip install -e .
 before_script:
   - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
