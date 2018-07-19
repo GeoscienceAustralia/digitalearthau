@@ -164,7 +164,7 @@ def _run_celery_task_logging(
         task: celery_state.Task = state.tasks.get(event['uuid'])
 
         if not task:
-            _LOG.warning(f"No task found {%s}", event_type)
+            _LOG.warning(f"No task found %s", event_type)
             return
         output.write_item(_celery_event_to_task(task_desc, task))
         _log_task_states(state)
@@ -337,12 +337,12 @@ def _spawn_pbs_workers(redis_host: str,
         if workers_per_node is not None:
             nprocs = min(workers_per_node, nprocs)
 
-        _LOG.info(f'datacube_apps.worker --executor celery {%s}:{%s} --nprocs {%s}', redis_host, redis_port, nprocs)
+        _LOG.info(f'datacube_apps.worker --executor celery %s:%s --nprocs %s', redis_host, redis_port, nprocs)
 
         proc = pbs.pbsdsh(
             node.offset,
             f'exec python -m datacube_apps.worker --executor celery {redis_host}:{redis_port} --nprocs {nprocs}',
             env=worker_env
         )
-        _LOG.info(f"Started node {%s} named {%s} (pbsdsh pid {%s})", node.offset, node.name, proc.pid)
+        _LOG.info(f"Started node %s named %s (pbsdsh pid: %s)", node.offset, node.name, proc.pid)
         yield proc
