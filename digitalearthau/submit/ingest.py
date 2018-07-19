@@ -26,7 +26,6 @@ def list_products():
         echo(cfg.stem)
 
 
-#pylint: disable-msg=too-many-arguments,too-many-locals
 @cli.command('qsub')
 @click.option('--queue', '-q', default='normal',
               type=click.Choice(['normal', 'express']))
@@ -97,7 +96,6 @@ def do_qsub(product_name, year, queue, project, nodes, walltime, name, allow_pro
                       product_changes_flag=product_changes_flag)
     if click.confirm('\n' + cmd + '\nRUN?', default=True):
         subprocess.check_call(cmd, shell=True)
-#pylint: enable-msg=too-many-arguments,too-many-locals
 
 
 @cli.command()

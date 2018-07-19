@@ -38,7 +38,6 @@ def main(dry_run=True):
                     index.datasets.archive_location(dataset.id, dataset.local_uri)
 
 
-#pylint: disable-msg=consider-using-set-comprehension
 def _choose_removable(dataset_ids: List[UUID], index: Index, log) -> List[Dataset]:
     # for each id: does one of them have active children?
     with_children, without_children = _group_by_has_children(dataset_ids, index)
@@ -79,7 +78,6 @@ def _choose_removable(dataset_ids: List[UUID], index: Index, log) -> List[Datase
         return []
 
     return to_remove
-#pylint: enable-msg=consider-using-set-comprehension
 
 
 def _group_by_has_children(ids: Iterable[UUID], index: Index) -> Tuple[Set[UUID], Set[UUID]]:
