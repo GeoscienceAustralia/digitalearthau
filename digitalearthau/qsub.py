@@ -32,7 +32,7 @@ VALID_KEYS = PASS_THRU_KEYS + 'walltime ncpus nodes mem extra_qsub_args'.split('
 _LOG = logging.getLogger(__name__)
 
 
-class QSubLauncher(object):
+class QSubLauncher():
     """ This class is for self-submitting as a PBS job.
     """
 
@@ -517,7 +517,7 @@ def run_tasks(tasks, executor, run_task, process_result=None, queue_size=50):
     return successful, failed
 
 
-class TaskRunner(object):
+class TaskRunner():
     def __init__(self, kind='serial', opts=None):
         self._kind = kind
         self._opts = opts
