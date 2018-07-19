@@ -76,7 +76,7 @@ def do_qsub(product_name, year, queue, project, nodes, walltime, name, allow_pro
         subprocess.check_call(cmd, shell=True)
 
     name = name or taskfile.stem
-    qsub = 'qsub -q %(queue)s -N %(name)s -P %(project)s ' \
+    qsub = 'qsub -V -q %(queue)s -N %(name)s -P %(project)s ' \
            '-m %(email_options)s -M %(email_id)s -W %(job_attributes)s ' \
            '-l ncpus=%(ncpus)d,mem=%(mem)dgb,walltime=%(walltime)d:00:00 ' \
            '-- /bin/bash "%(distr)s" "%(dea_module)s" --ppn 16 ' \
