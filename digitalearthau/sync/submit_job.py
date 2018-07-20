@@ -72,7 +72,7 @@ class Task:
         )
 
 
-class SyncSubmission(object):
+class SyncSubmission():
     def __init__(self,
                  cache_folder: str,
                  project='v10',
@@ -314,10 +314,10 @@ def group_tasks(tasks: List[Task], maximum) -> List[Task]:
     return tasks
 
 
-T = typing.TypeVar('T')
+TVAR = typing.TypeVar('T')
 
 
-def uniq_counts(paths: Iterable[T]) -> List[Tuple[T, int]]:
+def uniq_counts(paths: Iterable[TVAR]) -> List[Tuple[TVAR, int]]:
     """
     Group unique items, retuning them with a count of instances.
 

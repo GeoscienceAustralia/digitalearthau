@@ -2,7 +2,7 @@ import shutil
 from subprocess import call
 
 
-class MDSSClient(object):
+class MDSSClient():
     def __init__(self, project):
         self.project = project
 

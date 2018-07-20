@@ -1,4 +1,3 @@
-import json
 from io import StringIO
 from uuid import UUID
 
@@ -18,7 +17,6 @@ from digitalearthau.runners.celery_environment import _celery_event_to_task
 from . import qsub
 
 import celery.events.state as celery_state
-import sys
 
 from datacube import _celery_runner as cr
 

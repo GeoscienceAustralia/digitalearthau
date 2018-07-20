@@ -158,7 +158,7 @@ def _get_archived_locations_within(index, latest_time_to_archive, uri) -> set:
                     pgapi.DATASET.join(pgapi.DATASET_LOCATION)
                 ).where(
                     and_(
-                        pgapi.DATASET_LOCATION.c.archived != None,
+                        pgapi.DATASET_LOCATION.c.archived is not None,
                         pgapi.DATASET_LOCATION.c.uri_scheme == 'file',
                         pgapi.DATASET_LOCATION.c.uri_body.like(body + '%'),
                         pgapi.DATASET_LOCATION.c.archived < latest_time_to_archive
