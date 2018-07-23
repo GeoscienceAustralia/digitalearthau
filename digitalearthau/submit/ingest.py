@@ -63,7 +63,7 @@ def do_qsub(product_name, year, queue, project, nodes, walltime, name, allow_pro
 
     if not config_path.exists():
         raise click.BadParameter("No config found for product {!r}".format(product_name))
- 
+
     subprocess.check_call('datacube -v system check', shell=True)
 
     product_changes_flag = '--allow-product-changes' if allow_product_changes else ''
