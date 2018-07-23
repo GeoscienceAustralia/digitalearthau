@@ -34,20 +34,36 @@ def list_products():
               help='Number of nodes to request',
               type=click.IntRange(1, 100))
 @click.option('--walltime', '-t', default=10,
-              help='Number of hours to request',
+              help='Number of hours (range: 1-48hrs) to request',
               type=click.IntRange(1, 48))
 @click.option('--name', help='Job name to use')
 @click.option('--allow-product-changes', help='allow changes to product definition', is_flag=True)
+@click.option('--email_options', '-m', default='a',
+              type=click.Choice(['a', 'b', 'e', 'n']),
+              help='Send Email options when execution, \n'
+              '[aborted | begins | ends | do not send email]')
+@click.option('--email_id', '-M', default='nci.monitor@dea.ga.gov.au',
+              help='Email Recipient List')
+@click.option('--job_attributes', '-W', default='umask=33',
+              help='Setting job attributes\n'
+              '<attribute>=<value>')
+@click.option('--config-file', '-c', default='',
+              type=click.Path(exists=True, readable=True, writable=False, dir_okay=False),
+              help='Ingest configuration file')
 @click.argument('product_name')
 @click.argument('year')
-def do_qsub(product_name, year, queue, project, nodes, walltime, name, allow_product_changes):
+def do_qsub(product_name, year, queue, project, nodes, walltime, name, allow_product_changes, email_options, email_id,
+            job_attributes, config_file):
     """Submits an ingest job to qsub."""
-    config_path = INGEST_CONFIG_DIR / '{}.yaml'.format(product_name)
+    if not config_file:
+        config_path = INGEST_CONFIG_DIR / '{}.yaml'.format(product_name)
+    else:
+        config_path = Path(config_file).absolute()
     taskfile = Path(product_name + '_' + year.replace('-', '_') + '.bin').absolute()
 
     if not config_path.exists():
         raise click.BadParameter("No config found for product {!r}".format(product_name))
-
+ 
     subprocess.check_call('datacube -v system check', shell=True)
 
     product_changes_flag = '--allow-product-changes' if allow_product_changes else ''
@@ -65,7 +81,8 @@ def do_qsub(product_name, year, queue, project, nodes, walltime, name, allow_pro
         subprocess.check_call(cmd, shell=True)
 
     name = name or taskfile.stem
-    qsub = 'qsub -q %(queue)s -N %(name)s -P %(project)s ' \
+    qsub = 'qsub -V -q %(queue)s -N %(name)s -P %(project)s ' \
+           '-m %(email_options)s -M %(email_id)s -W %(job_attributes)s ' \
            '-l ncpus=%(ncpus)d,mem=%(mem)dgb,walltime=%(walltime)d:00:00 ' \
            '-- /bin/bash "%(distr)s" "%(dea_module)s" --ppn 16 ' \
            'datacube -v ingest %(product_changes_flag)s --load-tasks "%(taskfile)s" ' \
@@ -77,8 +94,11 @@ def do_qsub(product_name, year, queue, project, nodes, walltime, name, allow_pro
                       name=name,
                       project=project,
                       ncpus=nodes * 16,
-                      mem=nodes * 31,
+                      mem=nodes * 20,
                       walltime=walltime,
+                      email_options=email_options,
+                      job_attributes=job_attributes,
+                      email_id=email_id,
                       product_changes_flag=product_changes_flag)
     if click.confirm('\n' + cmd + '\nRUN?', default=True):
         subprocess.check_call(cmd, shell=True)
