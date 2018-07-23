@@ -425,6 +425,20 @@ def init_nci_collections(index: Index):
             )
         )
 
+    # WOfS
+    name = 'wofs_albers'
+    _add(
+        Collection(
+            name=name,
+            query={'product': name},
+            file_patterns=['/g/data/fk4/datacube/002/WOfS/WOfS_25_2_1/netcdf/*_*/LS_WATER_3577_*.nc'],
+            unique=('time.lower.day', 'lat', 'lon'),
+            # Tiles default to trusting index over the disk: they were indexed at the end of the job,
+            # so unfinished tiles could be left on disk.
+            trust=Trust.INDEX
+        )
+    )
+
     # PQ stats
     _add(
         Collection(
