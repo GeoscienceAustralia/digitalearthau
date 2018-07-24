@@ -7,8 +7,8 @@ metadata:
     code: LANDSAT_8
   statistics:
     period: '1y'
-  format:
-    name: GeoTIFF
+  instrument:
+    name: OLI
 storage:
   driver: GeoTIFF
   crs: EPSG:3577
@@ -56,8 +56,8 @@ metadata:
     code: LANDSAT_7
   statistics:
     period: '1y'
-  format:
-    name: GeoTIFF
+  instrument:
+    name: ETM
 storage:
   driver: GeoTIFF
   crs: EPSG:3577
@@ -105,8 +105,8 @@ metadata:
     code: LANDSAT_5
   statistics:
     period: '1y'
-  format:
-    name: GeoTIFF
+  instrument:
+    name: TM
 storage:
   driver: GeoTIFF
   crs: EPSG:3577
