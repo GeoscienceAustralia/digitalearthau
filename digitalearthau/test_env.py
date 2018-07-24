@@ -11,8 +11,6 @@ import yaml
 from datacube import Datacube
 from datacube.config import DEFAULT_CONF_PATHS, LocalConfig
 from datacube.index import index_connect
-from datacube.scripts.dataset import index_dataset_paths
-from datacube.scripts.dataset import load_rules_from_types
 from datacube.ui.expression import parse_expressions
 from digitalearthau.system import init_dea
 
@@ -177,6 +175,8 @@ def index_uris(test_index, uris, rules):
     #   target: /g/data/u46/users/ia1511/data/datacube/
     # or something similar
 
+    # TODO - Need to find a file where index_dataset_paths has been moved and import from that file
+    index_dataset_paths = None
     # there are too many DuplicateRecordError warnings
     # can they be prevented?
     if sys.stdout.isatty():
@@ -196,6 +196,8 @@ def migrate(test_db, prod_db, products, expressions):
     # connect to the source database
     prod_index = index_connect(prod_db, application_name='test-env')
 
+    # TODO - Need to find file where load_rules_from_types have been moved and import from that file
+    load_rules_from_types = None
     uris = collect_uris(prod_index, products, expressions)
     rules = load_rules_from_types(prod_index)
 
