@@ -8,30 +8,22 @@
 ## The total memory limit across all nodes for the job
 #PBS -l mem=32GB
 
-## The requested job scratch space. 
+## The requested job scratch space.
 #PBS -l jobfs=1GB
 
-## The number of cpus required for the job to run.
+## The number of cpus required for the job to run
 #PBS -l ncpus=16
-#PBS -l walltime=20:00:00
+#PBS -l walltime=05:00:00
 
-## The job will be executed from current working directory instead of home.
-## PBS -l wd
-
-## Paths for outputs and Error files
-#PBS -e output_files/nbconvert
-#PBS -o output_files/nbconvert
-
-#PBS -N NBConvert_Test
-
-## Export all environment vairables in the qsub command environment to be exported to the 
-## batch job
-#PBS -V
+#PBS -N Test_NBConvert
 
 ##########################################
 ###      PBS job information.          ###
 ##########################################
+##########################################
+SUBMISSION_LOG="$TEST_BASE"/work/nbconvert/nbconvert-$(date '+%F-%T').log
 
+echo "" > "$SUBMISSION_LOG"
 echo "
   ------------------------------------------------------
    -n 'Job is running on node '; cat $PBS_NODEFILE
@@ -46,17 +38,17 @@ echo "
    PBS: Node_file              = $PBS_NODEFILE
    PBS: Current home directory = $PBS_O_HOME
    PBS: PATH                   = $PBS_O_PATH
-  ------------------------------------------------------" > "$TEST_BASE"/output_files/nbconvert/PBS_NB_Convert.log
-echo "" >> "$TEST_BASE"/output_files/nbconvert/PBS_NB_Convert.log
+  ------------------------------------------------------" >> "$SUBMISSION_LOG"
+echo "" >> "$SUBMISSION_LOG"
 
 # Run a Notebook convert on the requirements met notebook
-NBFILE="$TEST_BASE"/dea_testscripts/requirements_met.ipynb
-OUTPUTDIR="$TEST_BASE"/output_files/nbconvert/requirements_met-"$(date '+%Y-%m-%d')".html
+NBFILE="$TEST_BASE"/../dea_testscripts/requirements_met.ipynb
+OUTPUTDIR="$TEST_BASE"/work/nbconvert/requirements_met-"$(date '+%Y-%m-%d')".html
 cd "$TEST_BASE" || exit 0
 
 # Load DEA module
 # shellcheck source=/dev/null
-source "$TEST_BASE"/dea_testscripts/setup_deamodule_env.sh "$MUT" "$DC_CONF"
+source "$TEST_BASE"/../dea_testscripts/setup_deamodule_env.sh "$MUT" "$DC_CONF"
 
 ## Convert a notebook to an python script and print the stdout
 ## To remove code cells from the output, use templateExporter
@@ -67,8 +59,10 @@ jupyter nbconvert --to python "$NBFILE" --stdout --TemplateExporter.exclude_mark
 ## --allow-errors shall allow conversion will continue and the output from 
 ## any exception be included in the cell output
 jupyter nbconvert --ExecutePreprocessor.timeout=5000 --to notebook --execute "$NBFILE" --allow-errors
-mv -f "$TEST_BASE"/dea_testscripts/requirements_met.nbconvert.ipynb "$TEST_BASE"/output_files/nbconvert
+[ -d "$TEST_BASE"/../dea_testscripts/requirements_met.nbconvert.ipynb ] || mv -f "$TEST_BASE"/../dea_testscripts/requirements_met.nbconvert.ipynb "$TEST_BASE"/work/nbconvert
 
 ## Finally convert using notebook to html file
 jupyter nbconvert --to html "$NBFILE" --stdout > "$OUTPUTDIR"
 
+## Remove temp file
+[ -d "$TEST_BASE"/../dea_testscripts/mydask.png ] || rm -f "$TEST_BASE"/../dea_testscripts/mydask.png
