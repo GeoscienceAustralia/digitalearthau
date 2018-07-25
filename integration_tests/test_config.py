@@ -77,6 +77,10 @@ def test_dea_config(dea_index: Index):
         'ls5_nbart_geomedian_annual',
         'ls7_nbart_geomedian_annual',
         'ls8_nbart_geomedian_annual',
+        'wofs_albers',
+        'ls5_fc_albers',
+        'ls7_fc_albers',
+        'ls8_fc_albers',
     }
 
 
