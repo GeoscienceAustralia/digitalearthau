@@ -2,12 +2,9 @@
 
 LANG=en_AU.UTF-8
 
-TEST_BASE=$(pwd)
-export TEST_BASE
-
 if [ "$#" -eq 2 ]
 then
-   DC_CONFIG_PATH="$TEST_BASE/$2"
+   DC_CONFIG_PATH=$(pwd)/../"$2"
 else
   echo "       Usage: $(basename "$0") [--help] [DEA_MODULE_TO_TEST] [DATACUBE_CONFIG_FILE]
                  where:
@@ -17,9 +14,9 @@ else
   exit 0
 fi
 
-echo "  ********************************************************************"
-echo "   CONFIG PATH USED:  $DC_CONFIG_PATH " 
-echo "  ********************************************************************"
+echo "********************************************************************"
+echo "   Test Environment DC Config:  $DC_CONFIG_PATH " 
+echo "********************************************************************"
 
 module use /g/data/v10/public/modules/modulefiles
 if [[ -n "$(module avail git 2>&1)" ]]; then

@@ -8,30 +8,28 @@
 ## The total memory limit across all nodes for the job
 #PBS -l mem=32GB
 
-## The requested job scratch space. 
+## The requested job scratch space
 #PBS -l jobfs=1GB
 
-## The number of cpus required for the job to run.
+## The number of cpus required for the job to run
 #PBS -l ncpus=16
-#PBS -l walltime=1:00:00
+#PBS -l walltime=20:00:00
 
-## The job will be executed from current working directory instead of home.
-## PBS -l wd
+#PBS -N Test_Ingest
 
-## Paths for outputs and Error files
-#PBS -e output_files/idx_ingest
-#PBS -o output_files/idx_ingest
+## Block qsub job until it completes and report the exit value of the job
+#PBS block=true
 
-#PBS -N Index_Ingest_Test
-
-## Export all environment vairables in the qsub command environment to be exported to the 
-## batch job
-#PBS -V
+MUT="$1"
+CONFIG_FILE="$2"
+TESTBASE="$3"
+DATABASENAME="$4"
 
 ##########################################
 ###      PBS job information.          ###
 ##########################################
-
+SUBMISSION_LOG="$TESTBASE"/work/ingest/ingest-$(date '+%F-%T').log
+echo "" > "$SUBMISSION_LOG"
 echo "
   ------------------------------------------------------
    -n 'Job is running on node '; cat $PBS_NODEFILE
@@ -46,9 +44,9 @@ echo "
    PBS: Node_file              = $PBS_NODEFILE
    PBS: Current home directory = $PBS_O_HOME
    PBS: PATH                   = $PBS_O_PATH
-  ------------------------------------------------------" > "$TEST_BASE"/output_files/idx_ingest/PBS_Index_Ingest.log
-echo "" >> "$TEST_BASE"/output_files/idx_ingest/PBS_Index_Ingest.log
+  ------------------------------------------------------" >> "$SUBMISSION_LOG"
+echo "" >> "$SUBMISSION_LOG"
 
 # shellcheck source=/dev/null
-source "$TEST_BASE"/dea_testscripts/setup_deamodule_env.sh "$MUT" "$DC_CONF"
-sh "$TEST_BASE"/dea_testscripts/index_and_ingest.sh "$MUT" "$CONFIG_FILE" "$TEST_BASE" >> "$TEST_BASE"/output_files/idx_ingest/PBS_Index_Ingest.log
+source "$TESTBASE"/../dea_testscripts/setup_deamodule_env.sh "$MUT" "$TESTBASE"/../"$(basename "$CONFIG_FILE")"
+sh "$TESTBASE"/../dea_testscripts/index_and_ingest.sh "$MUT" "$CONFIG_FILE" "$TESTBASE" "$DATABASENAME" >> "$SUBMISSION_LOG"

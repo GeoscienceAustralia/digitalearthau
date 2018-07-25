@@ -1,7 +1,19 @@
 #!/usr/bin/env bash
 
-# Check if we can connect to the database
-datacube -C "$2" system check
+# Function to wait till pbs job is completed
+wait_pbs_job() 
+{
+
+   pbs_qstatus=$(qstat -u "$USER")
+   while [ ! -z "$pbs_qstatus" ] && [ "$pbs_qstatus" != " " ]
+   do
+        echo 
+        echo "$(date '+%F-%T'): $1 job is executing in Raijin System....."
+        sleep 30s
+        pbs_qstatus=$(qstat -u "$USER")
+   done
+
+}
 
 # Run the initialise Test Database Script
 # Dea-System Init adds all the products to the database (i.e., No need to do datacube product add)
@@ -12,91 +24,80 @@ dea-system -C "$2" init
 datacube -vv -C "$2" system check
 
 # Index some test datasets
-echo "
-  ===================================================================
-  |  Index datasets : $1                                             
-  ==================================================================="
-echo ""
-
 # In order for the double-asterisk glob to work, the globstar option needs to be set
 # To disable globstar: shopt -u globstar
 shopt -s globstar
 
-# Telemetry
-cd /g/data/v10/repackaged/rawdata/0/2016 || exit 0
-datacube -vv -C "$2" dataset add --auto-match ./**/**/ga-metadata.yaml
-cd /g/data/v10/repackaged/rawdata/0/2017 || exit 0
-datacube -vv -C "$2" dataset add --auto-match ./**/**/ga-metadata.yaml
-cd /g/data/v10/repackaged/rawdata/0/2018 || exit 0
-datacube -vv -C "$2" dataset add --auto-match ./**/**/ga-metadata.yaml
+# LS8_OLITIRS_NBAR/NBART/PQ Scenes
+#sh "$3"/../dea_testscripts/dea-sync.sh "$1" 2018 ls8_nbart_scene no /g/data/rs0/scenes/nbar-scenes-tmp/ls8/2018/05/output/nbart "$3"
+#sleep 10s
 
-# Level1 Scenes
-cd /g/data/v10/reprocess/ls7/level1/2016 || exit 0
-datacube -vv -C "$2" dataset add --auto-match ./**/**/ga-metadata.yaml
-cd /g/data/v10/reprocess/ls7/level1/2017 || exit 0
-datacube -vv -C "$2" dataset add --auto-match ./**/**/ga-metadata.yaml
-cd /g/data/v10/reprocess/ls7/level1/2018 || exit 0
-datacube -vv -C "$2" dataset add --auto-match ./**/**/ga-metadata.yaml
+sh "$3"/../dea_testscripts/dea-sync.sh "$1" 2018 ls8_pq_scene no /g/data/rs0/scenes/pq-scenes-tmp/ls8/2018/05/output/pqa/LS8_OLITIRS_PQ_P55_GAPQ01-032_088_076_20180504 "$3"
+sleep 10s
+sh "$3"/../dea_testscripts/dea-sync.sh "$1" 2018 ls8_pq_scene no /g/data/rs0/scenes/pq-scenes-tmp/ls8/2018/05/output/pqa/LS8_OLITIRS_PQ_P55_GAPQ01-032_088_077_20180504 "$3"
+sleep 10s
+sh "$3"/../dea_testscripts/dea-sync.sh "$1" 2018 ls8_pq_scene no /g/data/rs0/scenes/pq-scenes-tmp/ls8/2018/05/output/pqa/LS8_OLITIRS_PQ_P55_GAPQ01-032_088_078_20180504 "$3"
+sleep 10s
+sh "$3"/../dea_testscripts/dea-sync.sh "$1" 2018 ls8_pq_scene no /g/data/rs0/scenes/pq-scenes-tmp/ls8/2018/05/output/pqa/LS8_OLITIRS_PQ_P55_GAPQ01-032_088_079_20180504 "$3"
+sleep 10s
+sh "$3"/../dea_testscripts/dea-sync.sh "$1" 2018 ls8_pq_scene no /g/data/rs0/scenes/pq-scenes-tmp/ls8/2018/05/output/pqa/LS8_OLITIRS_PQ_P55_GAPQ01-032_088_080_20180504 "$3"
+sleep 10s
+sh "$3"/../dea_testscripts/dea-sync.sh "$1" 2018 ls8_pq_scene no /g/data/rs0/scenes/pq-scenes-tmp/ls8/2018/05/output/pqa/LS8_OLITIRS_PQ_P55_GAPQ01-032_088_081_20180504 "$3"
+sleep 10s
+sh "$3"/../dea_testscripts/dea-sync.sh "$1" 2018 ls8_pq_scene no /g/data/rs0/scenes/pq-scenes-tmp/ls8/2018/05/output/pqa/LS8_OLITIRS_PQ_P55_GAPQ01-032_088_082_20180504 "$3"
+sleep 10s
+sh "$3"/../dea_testscripts/dea-sync.sh "$1" 2018 ls8_pq_scene no /g/data/rs0/scenes/pq-scenes-tmp/ls8/2018/05/output/pqa/LS8_OLITIRS_PQ_P55_GAPQ01-032_088_083_20180504 "$3"
+sleep 10s
 
-cd /g/data/v10/reprocess/ls8/level1/2016 || exit 0
-datacube -vv -C "$2" dataset add --auto-match ./**/**/ga-metadata.yaml
-cd /g/data/v10/reprocess/ls8/level1/2017 || exit 0
-datacube -vv -C "$2" dataset add --auto-match ./**/**/ga-metadata.yaml
-cd /g/data/v10/reprocess/ls8/level1/2018 || exit 0
-datacube -vv -C "$2" dataset add --auto-match ./**/**/ga-metadata.yaml
+cd /g/data/u46/users/dra547/dea_odc_testing/LS8_OLITIRS_NBAR_P54_GANBAR01-032_099_077_20180110 || exit 0
+datacube -vv -C "$2" dataset add ./**/ga-metadata.yaml
 
-# LS7_ETM_NBAR/NBART, LS8_OLITIRS_NBAR/NBART Scenes
-cd /g/data/u46/users/dra547/dea_odc_testing || exit 0
-datacube -vv -C "$2" dataset add --auto-match ./**/ga-metadata.yaml
+cd /g/data/u46/users/dra547/dea_odc_testing/LS8_OLITIRS_NBAR_P54_GANBAR01-032_099_077_20180126 || exit 0
+datacube -vv -C "$2" dataset add ./**/ga-metadata.yaml
+
+cd /g/data/u46/users/dra547/dea_odc_testing/LS8_OLITIRS_NBART_P54_GANBART01-032_099_077_20180110 || exit 0
+datacube -vv -C "$2" dataset add ./**/ga-metadata.yaml
+
+cd /g/data/u46/users/dra547/dea_odc_testing/LS8_OLITIRS_NBART_P54_GANBART01-032_099_077_20180126 || exit 0
+datacube -vv -C "$2" dataset add ./**/ga-metadata.yaml
+
+sleep 60s  
+
+# Wait till sync and nbconvert job is completed
+wait_pbs_job "Dea-Sync and NBConvert"
+
+# Read agdc datasets from the database before Ingest process
+echo ""
+echo "**********************************************************************"
+echo "Read previous agdc_dataset product names and count before Ingest process"
+psql -h agdcdev-db.nci.org.au -p 6432  -d "$4"  -c 'select name, count(*) FROM agdc.dataset a, agdc.dataset_type b where a.dataset_type_ref = b.id group by b.name'
+echo "**********************************************************************"
+echo ""
 
 # Run a test ingest on NCI PC
 echo "
-  ===================================================================
-  | Indexing Landsat 7 Surface Reflectance NBAR 25 metre, 100km tile|
-  | Australian Albers Equal Area projection (EPSG:3577)             |
-  ==================================================================="
+===================================================================
+| Ingest Landsat 8 Surface Reflectance NBAR 25 metre, 100km tile  |
+| Australian Albers Equal Area projection (EPSG:3577)             |
+==================================================================="
 echo ""
-cd "$3"/ingest_configfiles/ || exit 0
+echo "********************************************************************"
+echo "   Datacube Config Path (Ingest):  $DATACUBE_CONFIG_PATH" 
+echo "********************************************************************"
+
 ## Declare datacube array of yaml files to download
-declare -a dc_yaml_array=("ls8_nbart_albers.yaml"
-                          "ls8_nbar_albers.yaml"
-                          "ls8_pq_albers.yaml"
-                          "ls7_nbart_albers.yaml"
-                          "ls7_nbar_albers.yaml"
-                          "ls7_pq_albers.yaml"
-                          "ls5_nbar_albers.yaml"
-                          "ls5_nbart_albers.yaml"
-                          "ls5_pq_albers.yaml")
+declare -a albers_yaml_array=("ls8_nbart_albers.yaml"
+                              "ls8_nbar_albers.yaml"
+                              "ls8_pq_albers.yaml")
 
-for i in "${dc_yaml_array[@]}"
+DC_PATH="$3"/../"$(basename "$2")"
+export DATACUBE_CONFIG_PATH="$DC_PATH"
+
+cd "$3"/work/ingest || exit 0
+for i in "${albers_yaml_array[@]}"
 do
-  datacube -vv -C "$2" ingest -c "$i"
+  productname=$(echo "$i" | cut -f 1 -d '.')
+  yes Y | dea-submit-ingest qsub --project u46 --queue express -n 5 -t 10 -m a -M santosh.mohan@ga.gov.au -W umask=33 --name ingest_"$productname" -c "$3"/ingest_configfiles/"$i" --allow-product-changes "$productname" 2018
 done
 
-## Declare fractiona cover array of yaml files to download
-declare -a fc_yaml_array=("ls5_fc_albers.yaml"
-                          "ls7_fc_albers.yaml"
-                          "ls8_fc_albers.yaml")
-
-for i in "${fc_yaml_array[@]}"
-do
-  datacube -vv -C "$2" ingest -c "$i"
-done
-
-## Declare datacube stats array of yaml files to download
-declare -a fcstats_yaml_array=("fc_stats_annual.yaml"
-                               "fc_percentile_albers_seasonal.yaml"
-                               "fc_percentile_albers_annual.yaml"
-                               "fc_percentile_albers.yaml")
-
-for i in "${fcstats_yaml_array[@]}"
-do
-  datacube -vv -C "$2" ingest -c "$i"
-done
-
-declare -a nbarstats_yaml_array=("nbar_stats.yaml")
-
-for i in "${nbarstats_yaml_array[@]}"
-do
-  datacube -vv -C "$2" ingest -c "$i"
-done
+sleep 60s
