@@ -1,0 +1,46 @@
+name: landsat_seasonal_mean
+description: Landsat 8 seasonal mean Albers
+metadata_type: eo
+metadata:
+       format:
+           name: NetCDF
+       platform:
+           code: LANDSAT-8
+       statistics:
+           period: 1y
+       product_type: landsat_seasonal_summary
+
+measurements:
+   - name: blue
+     units: '1'
+     nodata: -999
+     dtype: int16
+   - name: green
+     units: '1'
+     nodata: -999
+     dtype: int16
+   - name: red
+     units: '1'
+     nodata: -999
+     dtype: int16
+   - name: nir
+     units: '1'
+     nodata: -999
+     dtype: int16
+   - name: swir1
+     units: '1'
+     nodata: -999
+     dtype: int16
+   - name: swir2
+     units: '1'
+     nodata: -999
+     dtype: int16
+
+storage:
+    crs: EPSG:3577
+    resolution:
+        x: 25
+        y: -25
+    tile_size:
+        x: 100000.0
+        y: 100000.0
