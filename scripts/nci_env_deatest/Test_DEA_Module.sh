@@ -26,7 +26,7 @@ wait_pbs_job()
    do
         echo 
         echo "$(date '+%F-%T'): $1 job is executing in Raijin System....."
-        sleep 30s
+        sleep 60s
         pbs_qstatus=$(qstat -u "$USER")
    done
 
@@ -51,9 +51,6 @@ done < "$CONFIGFILE"
 # Check if output directory exists, else create one
 [ -d "$WORKDIR/work/ingest/001" ] || mkdir -p "$WORKDIR"/work/ingest/001
 [ -d "$WORKDIR/work/stats/001" ] || mkdir -p "$WORKDIR"/work/stats/001
-[ -d "$WORKDIR/work/stats/fc_01" ] || mkdir -p "$WORKDIR"/work/stats/fc_01
-[ -d "$WORKDIR/work/stats/fc_02" ] || mkdir -p "$WORKDIR"/work/stats/fc_02
-[ -d "$WORKDIR/work/stats/nbar" ] || mkdir -p "$WORKDIR"/work/stats/nbar
 [ -d "$WORKDIR/work/fc/001" ] || mkdir -p "$WORKDIR"/work/fc/001
 [ -d "$WORKDIR/work/nbconvert" ] || mkdir -p "$WORKDIR"/work/nbconvert
 
@@ -159,15 +156,8 @@ psql -h agdcdev-db.nci.org.au -p 6432  -d "$databasename"  -c 'select name, coun
 echo "**********************************************************************"
 # If ncpus != 4 'qsub will throw an error: You have requested more memory per node (125.0GB) than the nodes in queue express can provide.'
 export DATACUBE_CONFIG_PATH="$CONFIGFILE"
-cd "$WORKDIR/work/stats/nbar" || exit 0
-datacube-stats -C "$CONFIGFILE" -vvv --log-queries --qsub 'project=v10,nodes=2,ncpus=4,walltime=10h,mem=medium,queue=express,name=Nbar_Stats,noask' "$WORKDIR"/stats_configfiles/nbar_stats.yaml
-
-cd "$WORKDIR/work/stats/fc_02" || exit 0
-datacube-stats -C "$CONFIGFILE" -vvv --log-queries --qsub 'project=v10,nodes=2,ncpus=4,walltime=10h,mem=medium,queue=express,name=FC_PStats,noask' "$WORKDIR"/stats_configfiles/fc_percentile_albers.yaml
-
-cd "$WORKDIR/work/stats/fc_01" || exit 0
-datacube-stats -C "$CONFIGFILE" -vvv --log-queries --qsub 'project=v10,nodes=2,ncpus=4,walltime=10h,mem=medium,queue=express,name=FC_PSStats,noask' "$WORKDIR"/stats_configfiles/fc_percentile_albers_seasonal.yaml
-datacube-stats -C "$CONFIGFILE" -vvv --log-queries --qsub 'project=v10,nodes=2,ncpus=4,walltime=10h,mem=medium,queue=express,name=FC_PAStats,noask' "$WORKDIR"/stats_configfiles/fc_percentile_albers_annual.yaml
+cd "$WORKDIR/work/stats" || exit 0
+datacube-stats -C "$CONFIGFILE" -vvv --log-queries --qsub 'project=v10,nodes=2,ncpus=4,walltime=1h,mem=medium,queue=express,name=ls8fc_Stats,noask' "$WORKDIR"/stats_configfiles/fc_ls8_2018_medoid.yaml
 
 # Wait till Stats job is completed
 wait_pbs_job "Stats"
@@ -176,8 +166,7 @@ echo "
 ===================================================================
 | Add new stats product to the test database                      |
 ==================================================================="
-datacube -C "$CONFIGFILE" dataset add "$WORKDIR"/work/fc/001/LS8_OLI_FC/*.nc
-datacube -C "$CONFIGFILE" dataset add "$WORKDIR"/work/stats/001/SR_N_MEAN/*.nc
+datacube -C "$CONFIGFILE" dataset add "$WORKDIR"/work/stats/001/*/*/*.nc
 }  > "$SUBMISSION_LOG"
 
 ##################################################################################################

@@ -49,29 +49,23 @@ The objective of the script (Test_DEA_Module.sh) is to verify the following on N
 
 ## Steps to run the script:
 ### Test DEA module:
-1) Clone the git repo [nci_env_deatest](https://github.com/GeoscienceAustralia/digitalearthau/tree/new_nci_scripts/scripts/nci_env_deatest) to local directory.
+1) Clone the git repo [nci_env_deatest](https://github.com/GeoscienceAustralia/digitalearthau/tree/develop/scripts/nci_env_deatest) to local directory.
 2) Modify the datacube_config.conf file (if we need to customise the datacube configurations).
 3) Navigate on the terminal window to the folder where the test script (Test_DEA_Module.sh) is placed.
 4) Execute the shell script by issuing the following:
 **sh Test_DEA_Module.sh [--help] [DEA_MODULE_TO_TEST]**
-where:
-**DEA_MODULE_TO_TEST**  is Module under test (ex. dea/20180503 or dea-env or dea)
-5) Once the the execution is complete, verify the logs within **output_files** folder created within the test script directory.
+
+    where:
+    * **DEA_MODULE_TO_TEST**  is Module under test (ex. dea/20180503 or dea-env or dea)
+5) Once the the execution is complete, verify the logs within **test_dea<module name>** folder created within the test script directory.
 
 ### Test DEA Stacker:
-1) Navigate on the terminal window to the folder where the test script (Test_DeaStacker.sh) is placed.
+1) Navigate on the terminal window to the folder where the test script (dea_testscripts/dea-stacker.sh) is placed.
 2) Execute the shell script by issuing the following:
-**Test_DeaStacker.sh [--help] [DEA_MODULE_TO_TEST] [YEAR_TO_STACK]**
-where:
-* **DEA_MODULE_TO_TEST**  is Module under test (ex. dea/20180503 or dea-env or dea)
-* **YEAR_TO_STACK** is year in YYYY format (ex. 2018)
+**dea-stacker.sh [--help] [DEA_MODULE_TO_TEST] [YEAR_TO_STACK]**
+
+    where:
+    * **DEA_MODULE_TO_TEST**  is Module under test (ex. dea/20180503 or dea-env or dea)
+    * **YEAR_TO_STACK** is year in YYYY format (ex. 2018)
 3) Once the the execution is complete, verify the logs within **output_files\deastacker** folder created within the test script directory.
 
-
-### Test DEA Submit Sync:
-1) Navigate on the terminal window to the folder where the test script (Test_DeaSubmitSync.sh) is placed.
-2) Execute the shell script by issuing the following:
-**Test_DeaSubmitSync.sh [--help] [DEA_MODULE_TO_TEST]**
-where:
-**DEA_MODULE_TO_TEST**  is Module under test (ex. dea/20180503 or dea-env or dea)
-3) Once the the execution is complete, verify the logs within **output_files\submit_sync** folder created within the test script directory.

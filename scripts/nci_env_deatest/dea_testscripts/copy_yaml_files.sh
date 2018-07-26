@@ -30,13 +30,8 @@ declare -a dc_yaml_array=("ls8_nbart_albers.yaml"
 ## Declare fractiona cover array of yaml files to download
 declare -a fc_yaml_array=("ls8_fc_albers.yaml")
 
-## Declare datacube fc stats, percentile albers (seasonal and annual) array of yaml files to download
-declare -a fcstats_yaml_array=("fc_percentile_albers_seasonal.yaml"
-                               "fc_percentile_albers_annual.yaml")
-
-## Declare datacube fc percentile albers stats and nbar stats yaml files to download
-declare -a fcpercentiltstats_yaml_array=("fc_percentile_albers.yaml")
-declare -a nbarstats_yaml_array=("nbar_stats.yaml")
+## Declare datacube ls8 fc stats yaml file to download
+declare -a fcstats_yaml_array=("fc_ls8_2015_medoid.yaml")
 
 # Replace NBAR/NBART/PQ product output location in the yaml file
 cd "$WORKDIR"/ingest_configfiles || exit 0
@@ -68,37 +63,12 @@ do
   yaml_filename=$(basename "$FC_STATS_CONF_DIR")
 
   wget -q "$FC_STATS_CONF_DIR"
-  sed -i -e 's,location: .*,location: "'"$WORKDIR"'/work/stats/fc_01",' "$yaml_filename"
-  sed -i -e 's,2018-01-01,2019-01-01,' "$yaml_filename"
+  sed -i -e 's,location: .*,location: "'"$WORKDIR"'/work/stats/001",' "$yaml_filename"
   sed -i -e 's,  start_date: .*,  start_date: 2018-01-01,' "$yaml_filename"
   sed -i -e 's,  end_date: .*,  end_date: 2019-01-01,' "$yaml_filename"
-  sed -i -e 's,2017-01-01,2019-01-01,' "$yaml_filename"
-done
-
-for i in "${fcpercentiltstats_yaml_array[@]}"
-do
-  FC_STATS_CONF_DIR="https://github.com/GeoscienceAustralia/datacube-stats/raw/master/configurations/fc/$i"
-  yaml_filename=$(basename "$FC_STATS_CONF_DIR")
-
-  wget -q "$FC_STATS_CONF_DIR"
-  sed -i -e 's,location: .*,location: "'"$WORKDIR"'/work/stats/fc_02",' "$yaml_filename"
-  sed -i -e 's,2018-01-01,2019-01-01,' "$yaml_filename"
-  sed -i -e 's,  start_date: .*,  start_date: 2018-01-01,' "$yaml_filename"
-  sed -i -e 's,  end_date: .*,  end_date: 2019-01-01\n  stats_duration: 3m\n  step_size: 3m,' "$yaml_filename"
-  sed -i -e 's,2017-01-01,2019-01-01,' "$yaml_filename"
-done
-
-# Replace NBAR stats product output location in the yaml file
-cd "$WORKDIR"/stats_configfiles || exit 0
-for i in "${nbarstats_yaml_array[@]}"
-do
-  NBAR_STATS_CONF_DIR="https://github.com/GeoscienceAustralia/datacube-stats/raw/master/configurations/nbar/$i"
-  yaml_filename=$(basename "$NBAR_STATS_CONF_DIR")
-  
-  wget -q "$NBAR_STATS_CONF_DIR"
-  sed -i -e 's,location: .*,location: "'"$WORKDIR"'/work/stats/nbar",' "$yaml_filename"
-  sed -i -e 's,  start_date: .*,  start_date: 2018-01-01,' "$yaml_filename"
-  sed -i -e 's,  end_date: .*,  end_date: 2019-01-01,' "$yaml_filename"
+  sed -i -e 's,LS8_2014_FC_MEDOID,LS8_2018_FC_MEDOID,' "$yaml_filename"
+  newfile=${yaml_filename//*/fc_ls8_2018_medoid.yaml}
+  mv "$yaml_filename" "$newfile"
 done
 
 #cp "$WORKDIR"/../dea_testscripts/landsat_seasonal_mean.yaml "$WORKDIR"/stats_configfiles
