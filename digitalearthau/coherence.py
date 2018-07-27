@@ -67,19 +67,19 @@ def main(expressions, check_locationless, archive_locationless, check_ancestors,
             if check_locationless or archive_locationless:
                 if dataset.uris is not None and len(dataset.uris) == 0:
                     locationless_count += 1
-                    
+
                     if archive_locationless:
                         dc.index.datasets.archive([dataset.id])
                         archive_count += 1
                         _LOG.info("locationless_dataset_id.archived", dataset_id=str(dataset.id))
                     else:
                         _LOG.info("locationless_dataset_id", dataset_id=str(dataset.id))
-            
+
             # If an ancestor is archived, it may have been replaced. This one may need
             # to be reprocessed too.
             if check_ancestors or archive_siblings or check_siblings:
                 archive_count += _check_ancestors(check_ancestors, check_siblings, archive_siblings, dc, dataset)
-        
+
         _LOG.info("coherence.finish",
                   datasets_count=count,
                   locationless_count=locationless_count,
@@ -90,15 +90,15 @@ def main(expressions, check_locationless, archive_locationless, check_ancestors,
 def _archive_dataset_ids(dc, ds_id, sibling_ids):
     # sibling/s indexed_time dictionary
     sb_itime_dict = dict()
-    
+
     # Count of dataset id's archived
     archive_count = 0
-    
+
     # dataset indexed time
     ds_itime = dc.index.datasets.get(ds_id).indexed_time
     for key, s_id in enumerate(sibling_ids):
         sb_itime_dict[s_id] = dc.index.datasets.get(s_id).indexed_time
-    
+
     # new dataset id to retain
     new_id = ds_id
     for id, itime in sb_itime_dict.items():
@@ -106,18 +106,18 @@ def _archive_dataset_ids(dc, ds_id, sibling_ids):
         if ds_itime <= itime:
             ds_id_archive = new_id
             ds_archive_time = ds_itime
-            
+
             # Latest sibling dataset id to retain
             new_id = id
             ds_itime = itime
         else:
             ds_id_archive = id
             ds_archive_time = itime
-        
+
         dc.index.datasets.archive([ds_id_archive])
         _LOG.info("\tarchived_dataset_id", id=str(ds_id_archive), indexed_time=str(ds_archive_time))
         archive_count += 1
-    
+
     _LOG.info("\trecent_dataset_id", id=str(new_id), indexed_time=str(ds_itime))
     return archive_count
 
@@ -144,7 +144,7 @@ def _check_ancestors(check_ancestors: bool,
                 # (this only applies to source products that are 1:1 with
                 # descendants, not pass-to-scene or scene-to-tile conversions)
                 siblings = dc.index.datasets.get_derived(source_dataset.id)
-                
+
                 # Only active siblings of the same type.
                 siblings = [
                     s for s in siblings
@@ -156,11 +156,11 @@ def _check_ancestors(check_ancestors: bool,
                     _LOG.info("dataset.siblings_exist",
                               dataset_id=str(dataset.id),
                               siblings=sibling_ids)
-                    
+
                     # Choose the most recent sibling and archive others
                     if archive_siblings:
                         ancestors_archive_count += _archive_dataset_ids(dc, dataset.id, sibling_ids)
-    
+
     return ancestors_archive_count
 
 
