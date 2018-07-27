@@ -1,0 +1,72 @@
+name: fc_percentile_albers_annual
+description: Landsat Fractional Cover percentile 25 metre, 100km tile, Australian Albers Equal Area projection (EPSG:3577)
+
+metadata_type: eo
+
+metadata:
+  product_type: fractional_cover_statistical_summary
+  statistics:
+    period: '1y'
+  format:
+    name: NetCDF
+  platform:
+    code: LANDSAT_5,LANDSAT_7,LANDSAT_8
+  instrument:
+    name: TM,ETM+,OLI
+
+storage:
+  driver: NetCDF CF
+  crs: EPSG:3577
+  tile_size:
+    x: 100000.0
+    y: 100000.0
+  resolution:
+    x: 25
+    y: -25
+  dimension_order: [time, y, x]
+
+measurements:
+  - name: BS_PC_10
+    dtype: int8
+    nodata: -1
+    units: 'percent'
+
+  - name: PV_PC_10
+    dtype: int8
+    nodata: -1
+    units: 'percent'
+
+  - name: NPV_PC_10
+    dtype: int8
+    nodata: -1
+    units: 'percent'
+
+  - name: BS_PC_50
+    dtype: int8
+    nodata: -1
+    units: 'percent'
+
+  - name: PV_PC_50
+    dtype: int8
+    nodata: -1
+    units: 'percent'
+
+  - name: NPV_PC_50
+    dtype: int8
+    nodata: -1
+    units: 'percent'
+
+  - name: BS_PC_90
+    dtype: int8
+    nodata: -1
+    units: 'percent'
+
+  - name: PV_PC_90
+    dtype: int8
+    nodata: -1
+    units: 'percent'
+
+  - name: NPV_PC_90
+    dtype: int8
+    nodata: -1
+    units: 'percent'
