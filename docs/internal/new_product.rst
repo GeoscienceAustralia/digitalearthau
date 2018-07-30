@@ -232,8 +232,7 @@ Role of Metadata
 ^^^^^^^^^^^^^^^^
 
 Each dataset has a metadata document attached to it, for files produced by the
-datacube tools this metadata is automatically generated. See `Metadata
-<http://datacube-core.readthedocs.io/en/latest/ops/config.html#dataset-metadata-document>`_
+datacube tools this metadata is automatically generated. See :doc:`ops/dataset_documents`
 documentation online for a detailed overview.
 
 Metadata embedded inside the NetCDF file is used during indexing process for two purposes
