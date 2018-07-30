@@ -48,5 +48,5 @@ echo "
 echo "" >> "$SUBMISSION_LOG"
 
 # shellcheck source=/dev/null
-source "$TESTBASE"/../dea_testscripts/setup_deamodule_env.sh "$MUT" "$TESTBASE"/../"$(basename "$CONFIG_FILE")"
+source "$TESTBASE"/../dea_testscripts/setup_deamodule_env.sh "$MUT" "$CONFIG_FILE"
 sh "$TESTBASE"/../dea_testscripts/index_and_ingest.sh "$MUT" "$CONFIG_FILE" "$TESTBASE" "$DATABASENAME" >> "$SUBMISSION_LOG"
