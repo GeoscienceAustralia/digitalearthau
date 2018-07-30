@@ -34,4 +34,4 @@ This guide focuses on accessing and exploring DEA via the VDI environment.
 Getting help
 ============
 
-`Join our Slack community <https://opendatacube.signup.team/>`_ if you need help setting up or using DEA.
+`Join our Slack community <http://slack.opendatacube.org/>`_ if you need help setting up or using DEA.
