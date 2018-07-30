@@ -1,13 +1,18 @@
 import uuid
-from datetime import datetime
-from functools import lru_cache
-from typing import Iterable
+import structlog
 
+from datetime import datetime
+from typing import Iterable
+from datacube.ui.common import ui_path_doc_stream
 from datacube.index import Index
 from datacube.model import Dataset
 from datacube.scripts import dataset as dataset_script
 from datacube.utils import uri_to_local_path
 from digitalearthau.utils import simple_object_repr
+from datacube.index.hl import Doc2Dataset
+
+
+_LOG = structlog.getLogger('dea-dataset')
 
 
 class DatasetLite:
@@ -65,21 +70,23 @@ def add_dataset(index: Index, dataset_id: uuid.UUID, uri: str):
     A better api should be pushed upstream to core: it currently only has a "scripts" implementation
     intended for cli use.
     """
-    path = uri_to_local_path(uri)
-    for d in dataset_script.load_datasets([path], _get_rules(index)):
-        if d.id == dataset_id:
-            index.datasets.add(d, sources_policy='ensure')
-            break
-    else:
-        raise RuntimeError('Dataset not found at path: %s, %s' % (dataset_id, uri))
+    yaml_path = uri_to_local_path(uri)
+
+    ds_resolve = Doc2Dataset(index)
+    doc_stream = ui_path_doc_stream([yaml_path], logger=_LOG, uri=True)
+    dss = dataset_script.dataset_stream(doc_stream, ds_resolve)
+
+    try:
+        dataset_script.index_datasets(dss,
+                                      index,
+                                      auto_add_lineage=True,
+                                      dry_run=False)
+        _LOG.info("dataset indexing successful", dataset_id=dataset_id)
+    except ValueError as err:
+        _LOG.error('failed to index dataset', dataset_id=dataset_id, error=err)
 
 
 def get_datasets_for_uri(index: Index, uri: str) -> Iterable[DatasetLite]:
     """Get all datasets at the given uri"""
     for d in index.datasets.get_datasets_for_location(uri=uri):
         yield DatasetLite.from_agdc(d)
-
-
-@lru_cache()
-def _get_rules(index):
-    return dataset_script.load_rules_from_types(index)

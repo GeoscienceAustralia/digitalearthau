@@ -125,14 +125,18 @@ def _find_uri_mismatches(index_url: str, uri: str, validate_data=True) -> Iterab
 
     # For all file ids not in the index.
     file_ds_not_in_index = datasets_in_file.difference(indexed_datasets)
-    log.debug("files_not_in_index", files_not_in_index=file_ds_not_in_index)
+
+    if not file_ds_not_in_index:
+        log.info("no mismatch found (dataset already indexed)")
 
     for dataset in file_ds_not_in_index:
         # If it's already indexed, we just need to add the location.
         indexed_dataset = index.datasets.get(dataset.id)
         if indexed_dataset:
+            log.info("location_not_indexed", indexed_dataset=indexed_dataset)
             yield LocationNotIndexed(DatasetLite.from_agdc(indexed_dataset), uri)
         else:
+            log.info("dataset_not_index", dataset=dataset, uri=uri)
             yield DatasetNotIndexed(dataset, uri)
 
 
