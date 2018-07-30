@@ -49,7 +49,7 @@ install:
     # Dask.array seems to need this?
     - travis_retry pip install cloudpickle
     # For building documentation
-    - travis_retry pip install Sphinx sphinx_rtd_theme nbsphinx recommonmark IPython
+    - travis_retry pip install Sphinx sphinx_rtd_theme nbsphinx recommonmark IPython jupyter_sphinx
     - travis_retry pip install git+https://github.com/GeoscienceAustralia/eo-datasets.git
 #    - travis_retry pip install git+https://github.com/opendatacube/datacube-core.git@develop
     - travis_retry pip install datacube==1.6rc1
