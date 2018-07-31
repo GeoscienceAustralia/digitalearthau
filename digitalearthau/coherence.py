@@ -1,5 +1,6 @@
 import click
 import structlog
+import collections
 
 from datacube import Datacube
 from datacube.model import Dataset
@@ -87,39 +88,27 @@ def main(expressions, check_locationless, archive_locationless, check_ancestors,
                   archived_count=archive_count)
 
 
-def _archive_dataset_ids(dc, ds_id, sibling_ids):
-    # sibling/s indexed_time dictionary
-    sb_itime_dict = dict()
+def _archive_duplicate_siblings(dc, ids):
+    """Archive old versions of duplicate datasets.
 
-    # Count of dataset id's archived
-    archive_count = 0
+    When given a list of duplicate sibling datasets, keep the most recently
+    indexed one and delete all the older ones.
 
-    # dataset indexed time
-    ds_itime = dc.index.datasets.get(ds_id).indexed_time
-    for key, s_id in enumerate(sibling_ids):
-        sb_itime_dict[s_id] = dc.index.datasets.get(s_id).indexed_time
+    Return the number of archived duplicates.
+    """
+    # Look up the indexed time for each datset and store in a dict
+    id_to_index_time = {ds_id: dc.index.datasets.get(ds_id).indexed_time
+                        for ds_id in ids}
 
-    # new dataset id to retain
-    new_id = ds_id
-    for id, itime in sb_itime_dict.items():
-        # Check if dataset indexed time is less than or equal to sibling dataset indexed time
-        if ds_itime <= itime:
-            ds_id_archive = new_id
-            ds_archive_time = ds_itime
+    # Sort by indexed time, and split into [newest : older_duplicates]
+    newest_ds, *older_duplicates = collections.OrderedDict(sorted(id_to_index_time.items(), key=lambda t: t[1], reverse=True))
 
-            # Latest sibling dataset id to retain
-            new_id = id
-            ds_itime = itime
-        else:
-            ds_id_archive = id
-            ds_archive_time = itime
+    dc.index.datasets.archive(older_duplicates)
 
-        dc.index.datasets.archive([ds_id_archive])
-        _LOG.info("\tarchived_dataset_id", id=str(ds_id_archive), indexed_time=str(ds_archive_time))
-        archive_count += 1
+    _LOG.info("dataset_id.archived", ids=older_duplicates)
+    _LOG.info("dataset_id.kept", id=newest_ds)
 
-    _LOG.info("\trecent_dataset_id", id=str(new_id), indexed_time=str(ds_itime))
-    return archive_count
+    return len(older_duplicates)
 
 
 def _check_ancestors(check_ancestors: bool,
@@ -132,7 +121,7 @@ def _check_ancestors(check_ancestors: bool,
     dataset = dc.index.datasets.get(dataset.id, include_sources=True)
     if dataset.sources:
         for classifier, source_dataset in dataset.sources.items():
-            if check_ancestors and source_dataset.is_archived:
+            if source_dataset.is_archived:
                 _LOG.info(
                     "ancestor.dataset_id",
                     dataset_id=str(dataset.id),
@@ -159,7 +148,7 @@ def _check_ancestors(check_ancestors: bool,
 
                     # Choose the most recent sibling and archive others
                     if archive_siblings:
-                        ancestors_archive_count += _archive_dataset_ids(dc, dataset.id, sibling_ids)
+                        ancestors_archive_count += _archive_duplicate_siblings(dc, sibling_ids + [str(dataset.id)])
 
     return ancestors_archive_count
 
