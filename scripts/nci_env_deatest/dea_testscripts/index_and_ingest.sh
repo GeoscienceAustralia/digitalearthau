@@ -28,38 +28,52 @@ datacube -vv -C "$2" system check
 # To disable globstar: shopt -u globstar
 shopt -s globstar
 
+declare -a nbart_scene_folders=("LS8_OLITIRS_NBART_P54_GANBART01-032_088_076_20180504"
+                                "LS8_OLITIRS_NBART_P54_GANBART01-032_088_077_20180504"
+                                "LS8_OLITIRS_NBART_P54_GANBART01-032_088_078_20180504"
+                                "LS8_OLITIRS_NBART_P54_GANBART01-032_088_079_20180504"
+                                "LS8_OLITIRS_NBART_P54_GANBART01-032_088_080_20180504"
+                                "LS8_OLITIRS_NBART_P54_GANBART01-032_088_081_20180504"
+                                "LS8_OLITIRS_NBART_P54_GANBART01-032_088_082_20180504"
+                                "LS8_OLITIRS_NBART_P54_GANBART01-032_088_083_20180504")
+                             
+declare -a nbar_scene_folders=("LS8_OLITIRS_NBAR_P54_GANBAR01-032_088_076_20180504"
+                               "LS8_OLITIRS_NBAR_P54_GANBAR01-032_088_077_20180504"
+                               "LS8_OLITIRS_NBAR_P54_GANBAR01-032_088_078_20180504"
+                               "LS8_OLITIRS_NBAR_P54_GANBAR01-032_088_079_20180504"
+                               "LS8_OLITIRS_NBAR_P54_GANBAR01-032_088_080_20180504"
+                               "LS8_OLITIRS_NBAR_P54_GANBAR01-032_088_081_20180504"
+                               "LS8_OLITIRS_NBAR_P54_GANBAR01-032_088_082_20180504"
+                               "LS8_OLITIRS_NBAR_P54_GANBAR01-032_088_083_20180504")
+
+declare -a pq_scene_folders=("LS8_OLITIRS_PQ_P55_GAPQ01-032_088_076_20180504"
+                             "LS8_OLITIRS_PQ_P55_GAPQ01-032_088_077_20180504"
+                             "LS8_OLITIRS_PQ_P55_GAPQ01-032_088_078_20180504"
+                             "LS8_OLITIRS_PQ_P55_GAPQ01-032_088_079_20180504"
+                             "LS8_OLITIRS_PQ_P55_GAPQ01-032_088_080_20180504"
+                             "LS8_OLITIRS_PQ_P55_GAPQ01-032_088_081_20180504"
+                             "LS8_OLITIRS_PQ_P55_GAPQ01-032_088_082_20180504"
+                             "LS8_OLITIRS_PQ_P55_GAPQ01-032_088_083_20180504")
+
 # LS8_OLITIRS_NBAR/NBART/PQ Scenes
-#sh "$3"/../dea_testscripts/dea-sync.sh "$1" 2018 ls8_nbart_scene no /g/data/rs0/scenes/nbar-scenes-tmp/ls8/2018/05/output/nbart "$3"
-#sleep 10s
+for i in "${nbart_scene_folders[@]}"
+do
+    sh "$3"/../dea_testscripts/dea-sync.sh "$1" 2018 ls8_nbart_scene no "/g/data/rs0/scenes/nbar-scenes-tmp/ls8/2018/05/output/nbart/$i" "$3"
+    sleep 10s
+done
 
-sh "$3"/../dea_testscripts/dea-sync.sh "$1" 2018 ls8_pq_scene no /g/data/rs0/scenes/pq-scenes-tmp/ls8/2018/05/output/pqa/LS8_OLITIRS_PQ_P55_GAPQ01-032_088_076_20180504 "$3"
-sleep 10s
-sh "$3"/../dea_testscripts/dea-sync.sh "$1" 2018 ls8_pq_scene no /g/data/rs0/scenes/pq-scenes-tmp/ls8/2018/05/output/pqa/LS8_OLITIRS_PQ_P55_GAPQ01-032_088_077_20180504 "$3"
-sleep 10s
-sh "$3"/../dea_testscripts/dea-sync.sh "$1" 2018 ls8_pq_scene no /g/data/rs0/scenes/pq-scenes-tmp/ls8/2018/05/output/pqa/LS8_OLITIRS_PQ_P55_GAPQ01-032_088_078_20180504 "$3"
-sleep 10s
-sh "$3"/../dea_testscripts/dea-sync.sh "$1" 2018 ls8_pq_scene no /g/data/rs0/scenes/pq-scenes-tmp/ls8/2018/05/output/pqa/LS8_OLITIRS_PQ_P55_GAPQ01-032_088_079_20180504 "$3"
-sleep 10s
-sh "$3"/../dea_testscripts/dea-sync.sh "$1" 2018 ls8_pq_scene no /g/data/rs0/scenes/pq-scenes-tmp/ls8/2018/05/output/pqa/LS8_OLITIRS_PQ_P55_GAPQ01-032_088_080_20180504 "$3"
-sleep 10s
-sh "$3"/../dea_testscripts/dea-sync.sh "$1" 2018 ls8_pq_scene no /g/data/rs0/scenes/pq-scenes-tmp/ls8/2018/05/output/pqa/LS8_OLITIRS_PQ_P55_GAPQ01-032_088_081_20180504 "$3"
-sleep 10s
-sh "$3"/../dea_testscripts/dea-sync.sh "$1" 2018 ls8_pq_scene no /g/data/rs0/scenes/pq-scenes-tmp/ls8/2018/05/output/pqa/LS8_OLITIRS_PQ_P55_GAPQ01-032_088_082_20180504 "$3"
-sleep 10s
-sh "$3"/../dea_testscripts/dea-sync.sh "$1" 2018 ls8_pq_scene no /g/data/rs0/scenes/pq-scenes-tmp/ls8/2018/05/output/pqa/LS8_OLITIRS_PQ_P55_GAPQ01-032_088_083_20180504 "$3"
-sleep 10s
+for i in "${pq_scene_folders[@]}"
+do
+    sh "$3"/../dea_testscripts/dea-sync.sh "$1" 2018 ls8_pq_scene no "/g/data/rs0/scenes/pq-scenes-tmp/ls8/2018/05/output/pqa/$i" "$3"
+    sleep 10s
+done
 
-cd /g/data/u46/users/dra547/dea_odc_testing/LS8_OLITIRS_NBAR_P54_GANBAR01-032_099_077_20180110 || exit 0
-datacube -vv -C "$2" dataset add ./**/ga-metadata.yaml
-
-cd /g/data/u46/users/dra547/dea_odc_testing/LS8_OLITIRS_NBAR_P54_GANBAR01-032_099_077_20180126 || exit 0
-datacube -vv -C "$2" dataset add ./**/ga-metadata.yaml
-
-cd /g/data/u46/users/dra547/dea_odc_testing/LS8_OLITIRS_NBART_P54_GANBART01-032_099_077_20180110 || exit 0
-datacube -vv -C "$2" dataset add ./**/ga-metadata.yaml
-
-cd /g/data/u46/users/dra547/dea_odc_testing/LS8_OLITIRS_NBART_P54_GANBART01-032_099_077_20180126 || exit 0
-datacube -vv -C "$2" dataset add ./**/ga-metadata.yaml
+for i in "${nbar_scene_folders[@]}"
+do
+    cd "/g/data/rs0/scenes/nbar-scenes-tmp/ls8/2018/05/output/nbar/$i" || exit 0
+    datacube -vv -C "$2" dataset add ./**/ga-metadata.yaml
+    sleep 10s
+done
 
 sleep 60s  
 
