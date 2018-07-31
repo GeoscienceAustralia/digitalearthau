@@ -76,12 +76,12 @@ def add_dataset(index: Index, dataset_id: uuid.UUID, uri: str):
             dataset, err = ds_resolve(ds, uri)
 
             if dataset is None:
-                _LOG.error('%s', str(err))
+                _LOG.error('dataset is empty', error=str(err))
                 continue
 
             is_consistent, reason = check_dataset_consistent(dataset)
             if not is_consistent:
-                _LOG.error("Dataset %s inconsistency: %s", dataset.id, reason)
+                _LOG.error("dataset inconsistency", dataset=dataset.id, reason=str(reason))
                 continue
 
             yield dataset
