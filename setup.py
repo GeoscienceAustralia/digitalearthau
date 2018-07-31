@@ -4,10 +4,12 @@ from setuptools import setup, find_packages
 
 import versioneer
 
-tests_require = ['pytest', 'pytest-cov', 'mock', 'pep8', 'pylint', 'hypothesis', 'compliance-checker']
+tests_require = ['pytest', 'pytest-cov', 'mock', 'pycodestyle', 'pylint',
+                 'hypothesis', 'compliance-checker']
 
 extras_require = {
-    'doc': ['Sphinx', 'nbsphinx', 'setuptools', 'sphinx_rtd_theme'],
+    'doc': ['Sphinx', 'nbsphinx', 'setuptools', 'sphinx_rtd_theme', 'IPython', 'jupyter_sphinx',
+            'recommonmark'],
     'test': tests_require,
 }
 
@@ -36,7 +38,6 @@ setup(
     ],
     install_requires=[
         'click>=5.0',
-        'compliance-checker',
         'datacube[celery]',
         'python-dateutil',
         'gdal',
