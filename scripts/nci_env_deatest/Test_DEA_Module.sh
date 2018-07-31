@@ -60,7 +60,7 @@ echo "
 ==================================================================="
 echo ""
 # shellcheck source=/dev/null
-source "$HOMEDIR"/dea_testscripts/setup_deamodule_env.sh "$MODULE" "$DCCONF"
+source "$HOMEDIR"/dea_testscripts/setup_deamodule_env.sh "$MODULE" "$CONFIGFILE"
 
 # Delete previous database (If any)
 dea-test-env -C "$CONFIGFILE" teardown

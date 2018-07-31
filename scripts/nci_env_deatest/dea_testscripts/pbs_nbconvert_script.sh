@@ -48,7 +48,7 @@ cd "$TEST_BASE" || exit 0
 
 # Load DEA module
 # shellcheck source=/dev/null
-source "$TEST_BASE"/../dea_testscripts/setup_deamodule_env.sh "$MUT" "$DC_CONF"
+source "$TEST_BASE"/../dea_testscripts/setup_deamodule_env.sh "$MUT" "$TEST_BASE"/../"$DC_CONF"
 
 ## Convert a notebook to an python script and print the stdout
 ## To remove code cells from the output, use templateExporter

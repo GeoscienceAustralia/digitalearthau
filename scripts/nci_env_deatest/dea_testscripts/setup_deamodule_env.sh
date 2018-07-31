@@ -4,12 +4,12 @@ LANG=en_AU.UTF-8
 
 if [ "$#" -eq 2 ]
 then
-   DC_CONFIG_PATH=$(pwd)/../"$2"
+   DC_CONFIG_PATH="$2"
 else
   echo "       Usage: $(basename "$0") [--help] [DEA_MODULE_TO_TEST] [DATACUBE_CONFIG_FILE]
                  where:
                        DEA_MODULE_TO_TEST  Module under test (ex. dea/20180503 or dea-env or dea)
-                       DATACUBE_CONFIG_FILE  Datacube Config Filename"
+                       DATACUBE_CONFIG_FILE  Datacube Config file path"
   echo
   exit 0
 fi

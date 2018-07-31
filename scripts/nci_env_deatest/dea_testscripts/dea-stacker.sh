@@ -11,7 +11,6 @@ echo "
   ********************************************************************" > "$HOMEDIR"/output_files/deastacker/DEA_Stacker.log
 
 CONFIGFILE=$HOMEDIR/datacube_config.conf
-DCCONF="datacube_config.conf"
 
 if [ "$1" == "--help" ] || [ "$#" -ne 2 ] || [ "$1" == "-help" ]; then
   echo "       Usage: $(basename "$0") [--help] [DEA_MODULE_TO_TEST] [YEAR_TO_STACK]
@@ -48,7 +47,7 @@ echo "
 echo "" >> "$HOMEDIR"/output_files/deastacker/DEA_Stacker.log
 
 # shellcheck source=/dev/null
-source "$HOMEDIR"/dea_testscripts/setup_deamodule_env.sh "$MODULE" "$DCCONF"
+source "$HOMEDIR"/dea_testscripts/setup_deamodule_env.sh "$MODULE" "$CONFIGFILE"
 
 ##################################################################################################
 # Run a test index and ingest on NCI and Raijin system
