@@ -5,7 +5,7 @@ from setuptools import setup, find_packages
 import versioneer
 
 tests_require = ['pytest', 'pytest-cov', 'mock', 'pycodestyle', 'pylint',
-                 'hypothesis', 'compliance-checker']
+                 'hypothesis', 'compliance-checker', 'yamllint']
 
 extras_require = {
     'doc': ['Sphinx', 'nbsphinx', 'setuptools', 'sphinx_rtd_theme', 'IPython', 'jupyter_sphinx',
