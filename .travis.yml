@@ -48,7 +48,7 @@ install:
     - travis_retry pip install GDAL==1.10.0 codecov
     # For building documentation
     - travis_retry pip install git+https://github.com/GeoscienceAustralia/eo-datasets.git
-    - travis_retry pip install --extra-index-url https://packages.dea.gadevs.ga/ datacube
+    - travis_retry pip install --pre --extra-index-url https://packages.dea.gadevs.ga/ datacube
     - travis_retry pip install -e .[doc,test]
 before_script:
   - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
