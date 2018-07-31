@@ -45,15 +45,11 @@ install:
     - popd
     - export CPLUS_INCLUDE_PATH="/usr/include/gdal"
     - export C_INCLUDE_PATH="/usr/include/gdal"
-    - travis_retry pip install pylint yamllint pytest-cov pycodestyle GDAL==1.10.0 codecov
-    # Dask.array seems to need this?
-    - travis_retry pip install cloudpickle
+    - travis_retry pip install GDAL==1.10.0 codecov
     # For building documentation
-    - travis_retry pip install Sphinx sphinx_rtd_theme nbsphinx recommonmark IPython
     - travis_retry pip install git+https://github.com/GeoscienceAustralia/eo-datasets.git
-#    - travis_retry pip install git+https://github.com/opendatacube/datacube-core.git@develop
-    - travis_retry pip install datacube==1.6rc1
-    - travis_retry pip install -e .
+    - travis_retry pip install --pre --extra-index-url https://packages.dea.gadevs.ga/ datacube
+    - travis_retry pip install -e .[doc,test]
 before_script:
   - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
   - chmod +x ./cc-test-reporter
