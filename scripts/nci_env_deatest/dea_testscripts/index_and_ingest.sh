@@ -59,13 +59,15 @@ declare -a pq_scene_folders=("LS8_OLITIRS_PQ_P55_GAPQ01-032_088_076_20180504"
 for i in "${nbart_scene_folders[@]}"
 do
     sh "$3"/../dea_testscripts/dea-sync.sh "$1" 2018 ls8_nbart_scene no "/g/data/rs0/scenes/nbar-scenes-tmp/ls8/2018/05/output/nbart/$i" "$3"
-    sleep 10s
+    sleep 60s
+    wait_pbs_job "NBART Index"
 done
 
 for i in "${pq_scene_folders[@]}"
 do
     sh "$3"/../dea_testscripts/dea-sync.sh "$1" 2018 ls8_pq_scene no "/g/data/rs0/scenes/pq-scenes-tmp/ls8/2018/05/output/pqa/$i" "$3"
-    sleep 10s
+    sleep 60s
+    wait_pbs_job "PQ Index"
 done
 
 for i in "${nbar_scene_folders[@]}"
@@ -74,8 +76,6 @@ do
     datacube -vv -C "$2" dataset add ./**/ga-metadata.yaml
     sleep 10s
 done
-
-sleep 60s  
 
 # Wait till sync and nbconvert job is completed
 wait_pbs_job "Dea-Sync and NBConvert"
@@ -105,13 +105,14 @@ declare -a albers_yaml_array=("ls8_nbart_albers.yaml"
                               "ls8_pq_albers.yaml")
 
 DC_PATH="$3"/../"$(basename "$2")"
-export DATACUBE_CONFIG_PATH="$DC_PATH"
 
 cd "$3"/work/ingest || exit 0
+export DATACUBE_CONFIG_PATH="$DC_PATH"
 for i in "${albers_yaml_array[@]}"
 do
   productname=$(echo "$i" | cut -f 1 -d '.')
   yes Y | dea-submit-ingest qsub --project u46 --queue express -n 5 -t 10 -m a -M santosh.mohan@ga.gov.au -W umask=33 --name ingest_"$productname" -c "$3"/ingest_configfiles/"$i" --allow-product-changes "$productname" 2018
+  wait_pbs_job "dea-submit-ingest"
 done
 
 sleep 60s

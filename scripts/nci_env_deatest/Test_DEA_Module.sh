@@ -5,6 +5,7 @@ MODULE="$1"
 HOMEDIR=$(pwd)
 modname=$(echo "$MODULE" | sed -r "s/[/]+/_/g")
 WORKDIR="$HOMEDIR"/test"$modname"-$(date '+%d%m%yT%H%M')
+LOGFILE="$WORKDIR"/'Not_World_Readable_Files.log'
 
 CONFIGFILE="$HOMEDIR/datacube_config.conf"
 DCCONF="datacube_config.conf"
@@ -15,6 +16,16 @@ if [ "$1" == "--help" ] || [ "$#" -ne 1 ] || [ "$1" == "-help" ]; then
                        DEA_MODULE_TO_TEST  Module under test (ex. dea/20180503 or dea-env or dea)"
   echo
   exit 0
+fi
+
+# Ensure that all files are world readable
+if [[ $(find "/g/data/v10/public/modules/$MODULE" ! -perm -o=r) ]]; then
+    echo "Error: Some files in $MODULE are not world readable"
+    echo "
+Following files in $MODULE are not world readable:
+-----------------------------------------------------------------
+$(find /g/data/v10/public/modules/"$MODULE" ! -perm -o=r)" > "$LOGFILE"
+    exit 0
 fi
 
 # Function to wait till pbs job is completed
