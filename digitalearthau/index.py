@@ -3,14 +3,12 @@ import structlog
 
 from datetime import datetime
 from typing import Iterable
-from datacube.ui.common import ui_path_doc_stream
 from datacube.index import Index
 from datacube.model import Dataset
-from datacube.scripts import dataset as dataset_script
 from datacube.utils import uri_to_local_path
 from digitalearthau.utils import simple_object_repr
-from datacube.index.hl import Doc2Dataset
-
+from datacube.ui.common import ui_path_doc_stream
+from datacube.index.hl import Doc2Dataset, check_dataset_consistent
 
 _LOG = structlog.getLogger('dea-dataset')
 
@@ -72,18 +70,34 @@ def add_dataset(index: Index, dataset_id: uuid.UUID, uri: str):
     """
     yaml_path = uri_to_local_path(uri)
 
-    ds_resolve = Doc2Dataset(index)
-    doc_stream = ui_path_doc_stream([yaml_path], logger=_LOG, uri=True)
-    dss = dataset_script.dataset_stream(doc_stream, ds_resolve)
+    def load_datasets(path, ds_resolve):
+        for uri, ds in ui_path_doc_stream(path):
 
-    try:
-        dataset_script.index_datasets(dss,
-                                      index,
-                                      auto_add_lineage=True,
-                                      dry_run=False)
-        _LOG.info("dataset indexing successful", dataset_id=dataset_id)
-    except ValueError as err:
-        _LOG.error('failed to index dataset', dataset_id=dataset_id, error=err)
+            dataset, err = ds_resolve(ds, uri)
+
+            if dataset is None:
+                _LOG.error('%s', str(err))
+                continue
+
+            is_consistent, reason = check_dataset_consistent(dataset)
+            if not is_consistent:
+                _LOG.error("Dataset %s inconsistency: %s", dataset.id, reason)
+                continue
+
+            yield dataset
+
+    ds_resolve = Doc2Dataset(index)
+
+    for d in load_datasets([yaml_path], ds_resolve):
+        if d.id == dataset_id:
+            try:
+                index.datasets.add(d)
+                _LOG.info("dataset indexing successful", dataset_id=dataset_id)
+                break
+            except ValueError as err:
+                _LOG.error('failed to index dataset', dataset_id=dataset_id, error=err)
+    else:
+        raise RuntimeError('dataset not found at path: %s, %s' % (dataset_id, uri))
 
 
 def get_datasets_for_uri(index: Index, uri: str) -> Iterable[DatasetLite]:
