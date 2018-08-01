@@ -48,7 +48,7 @@ def list_products():
               help='Setting job attributes\n'
               '<attribute>=<value>')
 @click.option('--config-file', '-c', default='',
-              type=click.Path(exists=True, readable=True, writable=False, dir_okay=False),
+              type=click.Path(exists=False, readable=True, writable=False, dir_okay=False),
               help='Ingest configuration file')
 @click.argument('product_name')
 @click.argument('year')
