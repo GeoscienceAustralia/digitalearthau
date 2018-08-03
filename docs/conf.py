@@ -40,6 +40,7 @@ extensions = [
     'sphinx.ext.mathjax',
     'sphinx.ext.viewcode',
     'sphinx.ext.githubpages',
+    'sphinx.ext.todo',
     'jupyter_sphinx.embed_widgets',
 ]
 
@@ -65,7 +66,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'Digital Earth Australia'
-copyright = '2017, Geoscience Australia'
+copyright = '2017-2018, Geoscience Australia'
 author = 'Geoscience Australia'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -90,7 +91,7 @@ language = None
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store',  '**.ipynb_checkpoints']
 
 # The name of the Pygments (syntax highlighting) style to use.
-pygments_style = 'sphinx'
+#pygments_style = 'sphinx'
 
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = False
@@ -109,6 +110,7 @@ try:
     html_theme_options = {
         'logo_only': True,
         'analytics_id': 'UA-113800428-1',
+        'display_version': False,
     }
 except ImportError:
     html_theme = 'alabaster'
@@ -119,7 +121,7 @@ except ImportError:
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
 
-html_logo = '_static/DEA-logo-light.png'
+html_logo = '_static/dea-logo-inline.svg'
 
 html_favicon = '_static/dea-favicon.ico'
 
@@ -189,3 +191,6 @@ intersphinx_mapping = {
     'python': ('https://docs.python.org/3/', None),
     'odc': ('http://datacube-core.readthedocs.io/en/stable/', None),
 }
+
+def setup(app):
+    app.add_stylesheet('css/custom.css')

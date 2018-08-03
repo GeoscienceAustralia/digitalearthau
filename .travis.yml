@@ -58,7 +58,8 @@ before_script:
 script:
     - pip freeze
     - ./check-code.sh integration_tests
-    - pushd docs && make fetchnotebooks html && popd
+# We only deploy docs from develop, so lets only build them there too
+    - [ "$TRAVIS_BRANCH" = "develop" ] && pushd docs && make fetchnotebooks html && popd
 
 after_script:
   - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
