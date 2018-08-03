@@ -38,22 +38,14 @@ Publicly available data access and web services are currently in development.
    connect/install.rst
    connect/nci_basics.rst
    connect/jupyter.rst
+   internal/other_modules.rst
 
 
 .. toctree::
-   :maxdepth: 1
    :caption: User Guide
+   :glob:
 
-   notebooks/Getting_started/README.rst
-   notebooks/DEA_datasets/README.rst
-   notebooks/Integrating_external_data/README.rst
-   notebooks/Index_calculation/README.rst
-   notebooks/Temporal_analysis/README.rst
-   notebooks/Composite_generation/README.rst
-   notebooks/Image_classification/README.rst
-   notebooks/Outputting_data/README.rst
-   notebooks/Workflows/README.rst
-   notebooks/Scripts/README.rst
+   notebooks/*/README
 
 
 .. toctree::
@@ -71,14 +63,12 @@ Publicly available data access and web services are currently in development.
    internal/git_best_practice.rst
    internal/release.rst
    internal/modules.rst
-   internal/other_modules.rst
-   internal/orchestration.rst
    internal/collection_management.rst
-   internal/goalkeeper_instructions.rst
    internal/requirements_met.ipynb
 
 
 .. toctree::
-   :hidden:
+  :caption: Indexes
 
-   genindex
+  genindex
+

@@ -30,3 +30,7 @@ div.document a:visited {
 /* Same colour as unvisited */
     color: #2980B9;
 }
+
+.wy-nav-content {
+    background-color: white;
+}
