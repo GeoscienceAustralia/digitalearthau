@@ -21,7 +21,7 @@ For full details on installing the software, see http://vdi.nci.org.au/help.
 Connecting to the VDI
 =====================
 
-To setup Studel to connect to the NCI, run the Strudel application, then:
+To setup Strudel to connect to the NCI, run the Strudel application, then:
 
 * Select **File** -> **Manage Sites**
 * Click **New**
