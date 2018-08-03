@@ -3,7 +3,7 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-.. image:: _static/DEA-Logo-Inline.png
+.. image:: _static/dea-logo-inline.svg
    :align: center
    :alt: Digital Earth Australia Logo
 
@@ -39,20 +39,22 @@ Publicly available data access and web services are currently in development.
    connect/nci_basics.rst
    connect/jupyter.rst
 
+
 .. toctree::
    :maxdepth: 1
    :caption: User Guide
 
-   query/Getting Started.ipynb
-   query/List Products.ipynb
-   query/Loading Data.ipynb
-   query/Advanced Querying.ipynb
+   notebooks/Getting_started/README.rst
+   notebooks/DEA_datasets/README.rst
+   notebooks/Integrating_external_data/README.rst
+   notebooks/Index_calculation/README.rst
+   notebooks/Temporal_analysis/README.rst
+   notebooks/Composite_generation/README.rst
+   notebooks/Image_classification/README.rst
+   notebooks/Outputting_data/README.rst
+   notebooks/Workflows/README.rst
+   notebooks/Scripts/README.rst
 
-.. toctree::
-   :maxdepth: 1
-   :caption: Notebook Gallery
-
-   notebooks/index
 
 .. toctree::
    :maxdepth: 1
