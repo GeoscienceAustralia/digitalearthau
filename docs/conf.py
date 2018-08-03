@@ -88,7 +88,8 @@ language = None
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This patterns also effect to html_static_path and html_extra_path
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store',  '**.ipynb_checkpoints']
+exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store',  '**.ipynb_checkpoints',
+                    'notebooks/*.rst']
 
 # The name of the Pygments (syntax highlighting) style to use.
 #pygments_style = 'sphinx'
@@ -189,8 +190,9 @@ texinfo_documents = [
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {
     'python': ('https://docs.python.org/3/', None),
-    'odc': ('http://datacube-core.readthedocs.io/en/stable/', None),
+    'odc': ('https://datacube-core.readthedocs.io/en/stable/', None),
 }
+
 
 def setup(app):
     app.add_stylesheet('css/custom.css')
