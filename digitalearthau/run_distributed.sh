@@ -68,6 +68,11 @@ sleep 5s
 
 echo "*** APPLICATION ***"
 echo "${@/DSCHEDULER/${SCHEDULER_ADDR}}"
+echo
+echo "*** Datacube Check ***"
+datacube -vv system check
+set | grep -i datacube
+echo "PATH=$PATH"
 
 "${@/DSCHEDULER/${SCHEDULER_ADDR}}"
 
