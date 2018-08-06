@@ -51,15 +51,22 @@ install:
     - travis_retry pip install --extra-index-url https://packages.dea.gadevs.ga/ 'datacube>=0.0.dev0'
     - travis_retry pip install -e .[doc,test]
 before_script:
+
   - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
   - chmod +x ./cc-test-reporter
   - ./cc-test-reporter before-build
 
+# For debugging, show versions of all installed python packages
+  - pip freeze
+
 script:
-    - pip freeze
     - ./check-code.sh integration_tests
+
 # We only deploy docs from develop, so lets only build them there too
-    - [ "$TRAVIS_BRANCH" = "develop" ] && pushd docs && make fetchnotebooks html && popd
+    - |
+      if [ "$TRAVIS_BRANCH" = "develop" ]; then
+          pushd docs && make fetchnotebooks html && popd
+      fi
 
 after_script:
   - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
