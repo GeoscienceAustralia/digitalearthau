@@ -28,6 +28,8 @@ measurements:
     nodata: -1
     units: '1'
 metadata:
+  format:
+    name: NetCDF
   instrument:
     name: TM
   platform:
@@ -73,6 +75,8 @@ measurements:
     nodata: -1
     units: '1'
 metadata:
+  format:
+    name: NetCDF
   instrument:
     name: ETM
   platform:
@@ -118,6 +122,8 @@ measurements:
     nodata: -1
     units: '1'
 metadata:
+  format:
+    name: NetCDF
   instrument:
     name: OLI_TIRS
   platform:
