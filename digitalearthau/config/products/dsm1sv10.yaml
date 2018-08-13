@@ -6,12 +6,11 @@ metadata_type: eo
 metadata:
     platform:
         code: SRTM
+    format:
+        name: GeoTIFF
     instrument:
         name: SIR
     product_type: DEM
-    format:
-        name: ENVI
-
 storage:
     crs: EPSG:4326
     resolution:
