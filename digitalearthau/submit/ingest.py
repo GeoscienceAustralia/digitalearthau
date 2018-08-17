@@ -15,7 +15,7 @@ from digitalearthau import INGEST_CONFIG_DIR
 from datacube.ui import click as ui
 
 DISTRIBUTED_SCRIPT = digitalearthau.SCRIPT_DIR / 'run_distributed.sh'
-APP_NAME='dea-submit-ingest'
+APP_NAME = 'dea-submit-ingest'
 
 
 @click.group()
@@ -87,7 +87,7 @@ def do_qsub(queue, project, nodes, walltime, name, allow_product_changes, email_
     else:
         click.echo('Two stage ingest PBS job not requested, hence exiting!')
         click.get_current_context().exit(0)
-    
+
     test = 'qsub -V -q %(queue)s -N ingest_dry_run -P %(project)s -W depend=afterok:%(savetask_job)s ' \
            '-l walltime=05:00:00,mem=31GB ' \
            '-- datacube -v ingest %(product_changes_flag)s --load-tasks "%(taskfile)s" --dry-run'
@@ -158,7 +158,7 @@ def stack(queue, project, nodes, walltime, name, product_name, year):
            '-l walltime=05:00:00,mem=31GB ' \
            '-- datacube-stacker -v --app-config "%(config)s" --year %(year)s ' \
            '--save-tasks "%(taskfile)s"'
-    cmd = prep % dict(queue=queue, project=project, config=config_path,  year=year, taskfile=taskfile)
+    cmd = prep % dict(queue=queue, project=project, config=config_path, year=year, taskfile=taskfile)
     if click.confirm('\n' + cmd + '\nRUN?', default=True):
         savetask_job = subprocess.check_output(cmd, shell=True).decode("utf-8").split('\n')[0]
     else:
@@ -216,7 +216,7 @@ def fix(queue, project, nodes, walltime, name, product_name, year):
     prep = 'qsub -V -q %(queue)s -N fix_save_tasks -P %(project)s ' \
            '-l walltime=05:00:00,mem=31GB ' \
            '-- datacube-fixer -v --app-config "%(config)s" --year %(year)s --save-tasks "%(taskfile)s"'
-    cmd = prep % dict(queue=queue, project=project, config=config_path,  year=year, taskfile=taskfile)
+    cmd = prep % dict(queue=queue, project=project, config=config_path, year=year, taskfile=taskfile)
     if click.confirm('\n' + cmd + '\nRUN?', default=True):
         savetask_job = subprocess.check_output(cmd, shell=True).decode("utf-8").split('\n')[0]
     else:
