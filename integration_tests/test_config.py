@@ -84,6 +84,7 @@ def test_dea_config(dea_index: Index):
         'fc_percentile_albers_annual',
         'mangrove_extent_cover_albers',
         'wofs_summary',
+        'wofs_filtered_summary',
     }
 
 
