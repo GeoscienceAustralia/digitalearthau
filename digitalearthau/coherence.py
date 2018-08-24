@@ -1,3 +1,4 @@
+import os
 import click
 import structlog
 import collections
@@ -54,7 +55,7 @@ def main(expressions, check_locationless, archive_locationless, check_ancestors,
     """
     global _siblings_count
     uiutil.init_logging()
-    config_file = test_dc_config if test_dc_config else ''
+    config_file = test_dc_config if test_dc_config else os.environ.get('DATACUBE_CONFIG_PATH')
     with Datacube(config=config_file) as dc:
         _LOG.info('query', query=expressions)
         count = 0
