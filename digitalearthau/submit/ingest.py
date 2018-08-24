@@ -76,7 +76,7 @@ def do_qsub(queue, project, nodes, walltime, name, allow_product_changes, email_
     product_changes_flag = '--allow-product-changes' if allow_product_changes else ''
 
     prep = 'qsub -V -q %(queue)s -N ingest_save_tasks -P %(project)s ' \
-           '-l walltime=05:00:00,mem=31GB ' \
+           '-l walltime=05:00:00,mem=31GB -W umask=33 ' \
            '-- datacube -v ingest -c "%(config)s" %(product_changes_flag)s --year %(year)s ' \
            '--save-tasks "%(taskfile)s"'
     cmd = prep % dict(queue=queue, project=project, config=config_path,
@@ -89,7 +89,7 @@ def do_qsub(queue, project, nodes, walltime, name, allow_product_changes, email_
         click.get_current_context().exit(0)
 
     test = 'qsub -V -q %(queue)s -N ingest_dry_run -P %(project)s -W depend=afterok:%(savetask_job)s ' \
-           '-l walltime=05:00:00,mem=31GB ' \
+           '-l walltime=05:00:00,mem=31GB -W umask=33 ' \
            '-- datacube -v ingest %(product_changes_flag)s --load-tasks "%(taskfile)s" --dry-run'
     cmd = test % dict(queue=queue, project=project, savetask_job=savetask_job,
                       product_changes_flag=product_changes_flag, taskfile=taskfile)
@@ -155,7 +155,7 @@ def stack(queue, project, nodes, walltime, name, product_name, year):
     subprocess.check_call('datacube -v system check', shell=True)
 
     prep = 'qsub -V -q %(queue)s -N stack_save_tasks -P %(project)s ' \
-           '-l walltime=05:00:00,mem=31GB ' \
+           '-l walltime=05:00:00,mem=31GB -W umask=33 ' \
            '-- datacube-stacker -v --app-config "%(config)s" --year %(year)s ' \
            '--save-tasks "%(taskfile)s"'
     cmd = prep % dict(queue=queue, project=project, config=config_path, year=year, taskfile=taskfile)
@@ -169,7 +169,7 @@ def stack(queue, project, nodes, walltime, name, product_name, year):
     name = name or taskfile.stem
     qsub = 'qsub -V -q %(queue)s -N %(name)s -P %(project)s ' \
            '-l ncpus=%(ncpus)d,mem=%(mem)dgb,walltime=%(walltime)d:00:00 ' \
-           '-W depend=afterok:%(savetask_job)s -- "%(distr)s" "%(dea_module)s" --ppn 16 ' \
+           '-W depend=afterok:%(savetask_job)s,umask=33 -- "%(distr)s" "%(dea_module)s" --ppn 16 ' \
            'datacube-stacker -v -C %(datacube_config)s --load-tasks "%(taskfile)s" --executor distributed DSCHEDULER'
     cmd = qsub % dict(queue=queue,
                       name=name,
@@ -214,7 +214,7 @@ def fix(queue, project, nodes, walltime, name, product_name, year):
     subprocess.check_call('datacube -v system check', shell=True)
 
     prep = 'qsub -V -q %(queue)s -N fix_save_tasks -P %(project)s ' \
-           '-l walltime=05:00:00,mem=31GB ' \
+           '-l walltime=05:00:00,mem=31GB -W umask=33 ' \
            '-- datacube-fixer -v --app-config "%(config)s" --year %(year)s --save-tasks "%(taskfile)s"'
     cmd = prep % dict(queue=queue, project=project, config=config_path, year=year, taskfile=taskfile)
     if click.confirm('\n' + cmd + '\nRUN?', default=True):
@@ -227,7 +227,7 @@ def fix(queue, project, nodes, walltime, name, product_name, year):
     name = name or taskfile.stem
     qsub = 'qsub -V -q %(queue)s -N %(name)s -P %(project)s ' \
            '-l ncpus=%(ncpus)d,mem=%(mem)dgb,walltime=%(walltime)d:00:00 ' \
-           '-W depend=afterok:%(savetask_job)s -- "%(distr)s" "%(dea_module)s" --ppn 16 ' \
+           '-W depend=afterok:%(savetask_job)s,umask=33 -- "%(distr)s" "%(dea_module)s" --ppn 16 ' \
            'datacube-fixer -v -C %(datacube_config)s --load-tasks "%(taskfile)s" --executor distributed DSCHEDULER'
     cmd = qsub % dict(queue=queue,
                       name=name,
