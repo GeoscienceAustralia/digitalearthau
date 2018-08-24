@@ -33,6 +33,7 @@ _siblings_count = 0
               default=False,
               help="Archive sibling datasets (forces --check-ancestors)")
 @click.option('--test-dc-config', '-C',
+              default=None,
               help='Custom datacube config file (testing purpose only)')
 @ui.parsed_search_expressions
 def main(expressions, check_locationless, archive_locationless, check_ancestors, check_siblings, archive_siblings,
@@ -54,8 +55,7 @@ def main(expressions, check_locationless, archive_locationless, check_ancestors,
     """
     global _siblings_count
     uiutil.init_logging()
-    config_file = test_dc_config if test_dc_config else ''
-    with Datacube(config=config_file) as dc:
+    with Datacube(config=test_dc_config) as dc:
         _LOG.info('query', query=expressions)
         count = 0
         archive_count = 0
