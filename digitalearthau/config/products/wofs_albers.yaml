@@ -74,6 +74,8 @@ measurements:
     units: '1'
 metadata:
   product_type: wofs
+  format:
+    name: NetCDF
 metadata_type: eo
 name: wofs_albers
 storage:
