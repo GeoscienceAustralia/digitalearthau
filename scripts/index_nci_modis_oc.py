@@ -1,3 +1,39 @@
+#!/usr/bin/env python
+"""
+This program allows indexing the CSIRO MODIS Ocean Colour Data stored on the NCI into an ODC Database
+
+It runs in two modes, one to create the product definition in the database, and the second to record
+dataset details. Both modes need to be pointed at a directory of OC data stored in NetCDF format.
+
+::
+
+    ./index_nci_modis_oc.py create_product /g/data2/u39/public/data/modis/oc-1d-aust.v201508.recent/2016/12
+    ./index_nci_modis_oc.py index_data /g/data2/u39/public/data/modis/oc-1d-aust.v201508.recent/2016/12
+
+::
+
+    psql -h agdcdev-db.nci.org.au
+    CREATE DATABASE modis_oc WITH OWNER agdc_admin;
+    GRANT TEMPORARY, CONNECT ON DATABASE modis_oc to public;
+
+modis_oc.conf::
+
+    [datacube]
+    db_hostname: agdcdev-db.nci.org.au
+    db_port: 6432
+    db_database: modis_oc
+
+::
+
+    datacube --config modis_oc.conf system init
+
+::
+
+    for i in /g/data2/u39/public/data/modis/oc-1d-aust.v201508.recent/2016/*; do
+        ./index_nci_modis_oc.py --config modis_oc.conf index_data $i
+    done
+
+"""
 import json
 import logging
 import re
@@ -19,7 +55,7 @@ LOG = logging.getLogger(__name__)
 
 
 @click.group()
-@click.option('--config', '-c', help=" Pass the configuration file to access the database",
+@click.option('--config', '-c', help="Pass the configuration file to access the database",
               type=click.Path(exists=True))
 @click.pass_context
 def cli(ctx, config):
@@ -27,7 +63,7 @@ def cli(ctx, config):
 
 
 @cli.command()
-@cli.argument('path')
+@click.argument('path')
 @click.pass_obj
 def create_product(index, path):
     datasets = find_datasets(Path(path))
@@ -39,19 +75,33 @@ def create_product(index, path):
     product_def = generate_product_defn(variables)
     print_dict(product_def)
 
+    print(index)
     product = index.products.from_doc(product_def)
-    index.products.add(product)
+    print(product)
+    indexed_product = index.products.add(product)
+    print(indexed_product)
 
 
 @cli.command()
-@cli.argument('path')
+@click.argument('path')
 @click.pass_obj
 def index_data(index, path):
-    datasets = find_datasets(Path(path))
+    path = Path(path)
+    datasets = find_datasets(path)
 
+    resolver = Doc2Dataset(index)
     for name, dataset in datasets.items():
-        dataset_doc = generate_dataset_doc(name, dataset)
-        print_dict(dataset_doc)
+        doc = generate_dataset_doc(name, dataset)
+        print_dict(doc)
+        dataset, err = resolver(doc, path.as_uri())
+
+        if err is not None:
+            logging.error("%s", err)
+        try:
+            index.datasets.add(dataset)
+        except Exception as e:
+            logging.error("Couldn't index %s%s", path, name)
+            logging.exception("Exception", e)
 
 
 def print_dict(doc):
@@ -104,15 +154,16 @@ def describe_variables(ncfile):
     """
     Each NetCDF file in this Ocean Colour set represents a single data variable.
 
-    Pull all the useful information out of the variable for construction Product and Dataset docs.
+    Pull all the useful information out of the variable inside the NetCDF file, to be later used
+    for constructing the Product and Dataset docs.
     """
     nco = netCDF4.Dataset(ncfile)
     non_axis_variables = nco.get_variables_by_attributes(axis=lambda v: v is None)
     for vs in non_axis_variables:
         doc = {'name': vs.name,
-               'description': vs.long_name,
+               # 'description': vs.long_name,
                'dtype': str(vs.dtype),
-               'nodata': vs._FillValue,
+               'nodata': normlise_np_to_python(vs._FillValue),
                'units': str(vs.units)}
         yield vs.name, doc
 
@@ -127,6 +178,15 @@ def generate_product_defn(variables):
             'version': 1,
             'coverage': 'aust'
         },
+        'storage': {
+            'crs': 'EPSG:4326',
+            'resolution': {
+                'latitude': -0.01,
+                'longitude': 0.01
+            }
+
+        },
+        'description': 'MODIS Ocean Cover Daily',
         'measurements': sorted(list(variables.values()), key=lambda d: d['name'])
     }
 
@@ -167,12 +227,13 @@ def generate_dataset_doc(dataset_name, dataset):
         'image': {
             'bands': {
                 var_name: {
-                    'path': f'NETCDF:{path}:{var_name}',
-                    # 'layer': 1,
+                    'path': str(path),
+                    'layer': var_name,
                 } for var_name, path in dataset.items()
             }
         },
-
+        'version': 1,
+        'coverage': 'aust',
         'lineage': {'source_datasets': {}}
     }
     return doc
@@ -219,6 +280,17 @@ def add_dataset(doc, uri, index, sources_policy):
         logging.error("Unhandled exception %s", e)
 
     return uri
+
+
+def normlise_np_to_python(obj):
+    if isinstance(obj, np.integer):
+        return int(obj)
+    elif isinstance(obj, np.floating):
+        return float(obj)
+    elif isinstance(obj, np.ndarray):
+        return obj.tolist()
+    else:
+        return obj
 
 
 class NumpySafeEncoder(json.JSONEncoder):
