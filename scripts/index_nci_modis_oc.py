@@ -67,7 +67,7 @@ from datacube.utils import changes
 LOG = logging.getLogger(__name__)
 
 
-@click.group()
+@click.group(help=__doc__)
 @click.option('--config', '-c', help="Pass the configuration file to access the database",
               type=click.Path(exists=True))
 @click.pass_context
