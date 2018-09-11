@@ -5,6 +5,19 @@ This program allows indexing the CSIRO MODIS Ocean Colour Data stored on the NCI
 It runs in two modes, one to create the product definition in the database, and the second to record
 dataset details. Both modes need to be pointed at a directory of OC data stored in NetCDF format.
 
+The data is stored in sets of NetCDF file on a daily basis
+in `/g/data/u39/public/data/modis/oc-1d-aust.v201508.recent/`
+up until 2017, with more to become available (hopefully) soon.
+
+The script  can be run in either with either a `create_product`
+or `index_data` parameter mode, and an output directory of OC
+NetCDF files. It reads the NetCDF files to create the Product/Dataset
+definitions, and write them directly into an ODC database.
+
+It doesn't write out intermediate YAML files, and attempts to create
+stable UUIDs for the generate Datasets, based on the file path
+and modification time of the underlying NetCDF Data.
+
 ::
 
     ./index_nci_modis_oc.py create_product /g/data2/u39/public/data/modis/oc-1d-aust.v201508.recent/2016/12
