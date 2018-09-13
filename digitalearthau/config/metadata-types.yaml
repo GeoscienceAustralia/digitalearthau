@@ -1,3 +1,72 @@
+name: gqa_eo
+description: Minimal eo metadata for products with GQA.
+dataset:
+    id: ['id']
+    creation_dt: ['creation_dt']
+    label: ['ga_label']
+    measurements: ['image', 'bands']
+    grid_spatial: ['grid_spatial', 'projection']
+    format: ['format', 'name']
+    sources: ['lineage', 'source_datasets']
+
+    search_fields:
+        region_code:
+            description: Spatial reference code from the provider
+            offset: [provider, reference_code]
+
+        platform:
+            description: Platform code
+            offset: [platform, code]
+
+        instrument:
+            description: Instrument name
+            offset: [instrument, name]
+
+        product_type:
+            description: Product code
+            offset: [product_type]
+
+        format:
+            description: File format (GeoTIFF, NetCDF)
+            offset: [format, name]
+            indexed: false
+
+        lat:
+            description: Latitude range
+            type: double-range
+            max_offset:
+            - [extent, coord, ur, lat]
+            - [extent, coord, lr, lat]
+            - [extent, coord, ul, lat]
+            - [extent, coord, ll, lat]
+            min_offset:
+            - [extent, coord, ur, lat]
+            - [extent, coord, lr, lat]
+            - [extent, coord, ul, lat]
+            - [extent, coord, ll, lat]
+
+        lon:
+            description: Longitude range
+            type: double-range
+            max_offset:
+            - [extent, coord, ul, lon]
+            - [extent, coord, ur, lon]
+            - [extent, coord, ll, lon]
+            - [extent, coord, lr, lon]
+            min_offset:
+            - [extent, coord, ul, lon]
+            - [extent, coord, ur, lon]
+            - [extent, coord, ll, lon]
+            - [extent, coord, lr, lon]
+
+        time:
+            description: Acquisition time
+            type: datetime-range
+            min_offset:
+            - [extent, from_dt]
+            max_offset:
+            - [extent, to_dt]
+---
 name: eo
 description: Minimal eo metadata for products without custom fields.
 dataset:

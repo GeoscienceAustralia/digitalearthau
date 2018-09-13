@@ -22,6 +22,7 @@ addons:
             - libxslt-dev
             - pandoc
             - shellcheck
+            - libudunits2-dev
     postgresql: "9.6"
     services:
         - postgresql
