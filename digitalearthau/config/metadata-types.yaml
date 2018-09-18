@@ -2,7 +2,7 @@ name: gqa_eo
 description: Minimal eo metadata for products with GQA.
 dataset:
     id: ['id']
-    creation_dt: ['creation_dt']
+    creation_dt: ['system_information', 'time_processed']
     label: ['ga_label']
     measurements: ['image', 'bands']
     grid_spatial: ['grid_spatial', 'projection']
