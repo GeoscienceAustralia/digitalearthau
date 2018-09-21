@@ -82,9 +82,6 @@ deploy:
     # For tags, the object will be GeoscienceAustralia/digitalearthau/datacube-1.0.0/3.6/digitalearthau-1.0.0.tar.gz
     # For develop, the object will be GeoscienceAustralia/digitalearthau/develop/3.6/digitalearthau-1.0.0+91.g43bd4e12.tar.gz
  -  provider: s3
-    access_key_id: "AKIAJMZN4F5L5KXPQKVQ"
-    secret_access_key:
-        secure: IbZqx3lZwAegcfcFAxiitr4gwc3VPYCd5wF0Su5u2hPktycd5ZLOQ40BZFqGDy/2D4jFsVJnP4lK3W2ZxJ09rkY/z5rSMQPmEbFv3ubNvEx/ozhGZq8W4RmB8dsktuhiCUW4AhjJl06cDe7f+EByRJo0P76MKXk1+kbRyehoDwt++e2fcddoQ1RTDeHgDVVCTACNBR2vP3rIMZY8C/Djxoy48vebmh8L2XcCpXfogbS2k7APKigxIXEMsl86LfHIcecBQjXUt0XcU7EDvbz6xgzUiXWdGMtrJByYfVfjGl+Gm/9zUjOxrjJBz01CEU+qCspM6bLHWkXcOSED3HNVuMAmSHf+dFAY8lormS1Y2+HUETnPiFOOOAXt5yMbVuk4VIkWo9KaYPInuWdTpbE81XTkudeYl0PuZRk+aATE313vcR5aJYqP4iPiKVvFQSKcrm78wMJ5YZRijpvsLQ5HW1TZjTAC4DjqCID+vRBc88OB2auouZDhSe7vYoLRS+0eSm+6rh/E5/hdWtKw0IFOAugizxuOcki0c9iFoMIMshQphnc6oq3WdgCq/XoM3xHx9rrmqLhf8bN61iXj3IkAfPBlaaLqZwXoxJBwsU1z4J1p0LmGwFunNzhaqQAJCkGq1VFOLSj5maCgdPKouOWMv7vkM5T2TJhB8I1oWJ11kPE=
     bucket: "datacube-core-deployment"
     region: "ap-southeast-2"
     local_dir: dist
