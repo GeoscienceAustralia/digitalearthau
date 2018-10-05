@@ -8,7 +8,7 @@ shift
 
 ppn=1
 tpp=1
-mem=4e9
+mem=4e9 # Ten gigabytes per worker process.
 umask=0027
 
 while [[ $# -gt 0 ]]
@@ -57,11 +57,11 @@ n0ppn=$(( n0ppn > 0 ? n0ppn : 1 ))
 pbsdsh -n 0 -- /bin/bash -c "${init_env}; dask-scheduler --port $SCHEDULER_PORT"&
 sleep 5s
 
-pbsdsh -n 0 -- /bin/bash -c "${init_env}; dask-worker $SCHEDULER_ADDR --nprocs ${n0ppn} --nthreads ${tpp} --memory-limit ${mem}"&
+pbsdsh -n 0 -- /bin/bash -c "${init_env}; dask-worker $SCHEDULER_ADDR --nprocs ${n0ppn} --nthreads ${tpp} --memory-limit ${mem} --local-directory $PBS_O_WORKDIR --name worker-0-$PBS_JOBNAME"&
 sleep 0.5s
 
 for ((i=NCPUS; i<PBS_NCPUS; i+=NCPUS)); do
-  pbsdsh -n $i -- /bin/bash -c "${init_env}; dask-worker $SCHEDULER_ADDR --nprocs ${ppn} --nthreads ${tpp} --memory-limit ${mem}"&
+  pbsdsh -n $i -- /bin/bash -c "${init_env}; dask-worker $SCHEDULER_ADDR --nprocs ${ppn} --nthreads ${tpp} --memory-limit ${mem} --local-directory $PBS_O_WORKDIR --name worker-$i-$PBS_JOBNAME"&
   sleep 0.5s
 done
 sleep 5s
@@ -72,7 +72,21 @@ echo
 echo "*** Datacube Check ***"
 datacube -vv system check
 set | grep -i datacube
-echo "PATH=$PATH"
+
+echo "
+  #------------------------------------------------------
+  # PBS Info
+  #------------------------------------------------------
+  # PBS: Qsub is running on $PBS_O_HOST login node
+  # PBS: Originating queue      = $PBS_O_QUEUE
+  # PBS: Executing queue        = $PBS_QUEUE
+  # PBS: Working directory      = $PBS_O_WORKDIR
+  # PBS: Execution mode         = $PBS_ENVIRONMENT
+  # PBS: Job identifier         = $PBS_JOBID
+  # PBS: Job name               = $PBS_JOBNAME
+  # PBS: Node_file              = $PBS_NODEFILE
+  # PBS: Current home directory = $PBS_O_HOME
+  # PBS: PATH                   = $PBS_O_PATH
+  #------------------------------------------------------"
 
 "${@/DSCHEDULER/${SCHEDULER_ADDR}}"
-
