@@ -8,7 +8,7 @@ shift
 
 ppn=1
 tpp=1
-mem=4e9 # Ten gigabytes per worker process.
+mem=4e9 # Four gigabytes per worker process
 umask=0027
 
 while [[ $# -gt 0 ]]
@@ -57,12 +57,12 @@ n0ppn=$(( n0ppn > 0 ? n0ppn : 1 ))
 pbsdsh -n 0 -- /bin/bash -c "${init_env}; dask-scheduler --port $SCHEDULER_PORT"&
 sleep 5s
 
-pbsdsh -n 0 -- /bin/bash -c "${init_env}; dask-worker $SCHEDULER_ADDR --nprocs ${n0ppn} --nthreads ${tpp} --memory-limit ${mem} --local-directory $PBS_O_WORKDIR --name worker-0-$PBS_JOBNAME"&
-sleep 0.5s
+pbsdsh -n 0 -- /bin/bash -c "${init_env}; dask-worker $SCHEDULER_ADDR --nprocs ${n0ppn} --nthreads ${tpp} --memory-limit ${mem} --name worker-0-$PBS_JOBNAME"&
+sleep 1s
 
 for ((i=NCPUS; i<PBS_NCPUS; i+=NCPUS)); do
-  pbsdsh -n $i -- /bin/bash -c "${init_env}; dask-worker $SCHEDULER_ADDR --nprocs ${ppn} --nthreads ${tpp} --memory-limit ${mem} --local-directory $PBS_O_WORKDIR --name worker-$i-$PBS_JOBNAME"&
-  sleep 0.5s
+  pbsdsh -n $i -- /bin/bash -c "${init_env}; dask-worker $SCHEDULER_ADDR --nprocs ${ppn} --nthreads ${tpp} --memory-limit ${mem} --name worker-$i-$PBS_JOBNAME"&
+  sleep 1s
 done
 sleep 5s
 

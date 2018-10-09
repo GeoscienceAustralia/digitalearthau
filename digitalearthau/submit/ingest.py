@@ -44,10 +44,10 @@ def list_products():
               type=click.IntRange(1, 48))
 @click.option('--name', help='Job name to use')
 @click.option('--allow-product-changes', help='allow changes to product definition', is_flag=True)
-@click.option('--email_options', '-m', default='abe',
-              type=click.Choice(['a', 'b', 'e', 'n']),
+@click.option('--email_options', '-m', default='ae',
+              type=click.Choice(['a', 'b', 'e', 'n', 'ae', 'ab', 'be', 'abe']),
               help='Send Email when execution is, \n'
-              '[aborted | begins | ends | do not send email]')
+              '[a = aborted | b = begins | e = ends | n = do not send email]')
 @click.option('--email_id', '-M', default='nci.monitor@dea.ga.gov.au',
               help='Email Recipient List')
 @click.option('--job_attributes', '-W', default='umask=33',
@@ -95,14 +95,14 @@ def do_qsub(queue, project, nodes, walltime, name, allow_product_changes, email_
                       email_options=email_options, email_id=email_id,
                       product_changes_flag=product_changes_flag, taskfile=taskfile)
     if click.confirm('\n' + cmd + '\nRUN?', default=False):
-        dryrun_job = subprocess.check_call(cmd, shell=True)
+        dryrun_job = subprocess.check_output(cmd, shell=True).decode("utf-8").split('\n')[0]
     else:
         click.echo('Dry run not requested!')
         dryrun_job = savetask_job
 
     datacube_config = os.environ.get('DATACUBE_CONFIG_PATH')
     name = name or taskfile.stem
-    qsub = 'qsub -V -q %(queue)s -N %(name)s -P %(project)s -W depend=afterok:%(dryrun_job)s ' \
+    qsub = 'qsub -V -q %(queue)s -N %(name)s -P %(project)s -W depend=afterok:%(savetask_job)s:%(dryrun_job)s: ' \
            '-m %(email_options)s -M %(email_id)s -W %(job_attributes)s ' \
            '-l ncpus=%(ncpus)d,mem=%(mem)dgb,walltime=%(walltime)d:00:00 ' \
            '-- "%(distr)s" "%(dea_module)s" --ppn 16 ' \
@@ -111,6 +111,7 @@ def do_qsub(queue, project, nodes, walltime, name, allow_product_changes, email_
     cmd = qsub % dict(queue=queue,
                       name=name,
                       project=project,
+                      savetask_job=savetask_job,
                       dryrun_job=dryrun_job,
                       email_options=email_options,
                       email_id=email_id,
@@ -144,10 +145,10 @@ def do_qsub(queue, project, nodes, walltime, name, allow_product_changes, email_
               help='Number of hours to request',
               type=click.IntRange(1, 48))
 @click.option('--name', help='Job name to use')
-@click.option('--email_options', '-m', default='abe',
-              type=click.Choice(['a', 'b', 'e', 'n']),
+@click.option('--email_options', '-m', default='ae',
+              type=click.Choice(['a', 'b', 'e', 'n', 'ae', 'ab', 'be', 'abe']),
               help='Send Email when execution is, \n'
-              '[aborted | begins | ends | do not send email]')
+              '[a = aborted | b = begins | e = ends | n = do not send email]')
 @click.option('--email_id', '-M', default='nci.monitor@dea.ga.gov.au',
               help='Email Recipient List')
 @click.argument('product_name')
@@ -213,10 +214,10 @@ def stack(queue, project, nodes, walltime, name, email_options, email_id, produc
               help='Number of hours to request',
               type=click.IntRange(1, 48))
 @click.option('--name', help='Job name to use')
-@click.option('--email_options', '-m', default='abe',
-              type=click.Choice(['a', 'b', 'e', 'n']),
+@click.option('--email_options', '-m', default='ae',
+              type=click.Choice(['a', 'b', 'e', 'n', 'ae', 'ab', 'be', 'abe']),
               help='Send Email when execution is, \n'
-              '[aborted | begins | ends | do not send email]')
+              '[a = aborted | b = begins | e = ends | n = do not send email]')
 @click.option('--email_id', '-M', default='nci.monitor@dea.ga.gov.au',
               help='Email Recipient List')
 @click.argument('product_name')
