@@ -17,6 +17,36 @@ from datacube.ui import click as ui
 DISTRIBUTED_SCRIPT = digitalearthau.SCRIPT_DIR / 'run_distributed.sh'
 APP_NAME = 'dea-submit-ingest'
 
+# pylint: disable=invalid-name
+queue_options = click.option('--queue', '-q', default='normal',
+                             type=click.Choice(['normal', 'express']))
+
+# pylint: disable=invalid-name
+project_options = click.option('--project', '-P', default='v10')
+
+# pylint: disable=invalid-name
+node_options = click.option('--nodes', '-n', required=True,
+                            help='Number of nodes to request',
+                            type=click.IntRange(1, 100))
+
+# pylint: disable=invalid-name
+walltime_options = click.option('--walltime', '-t', default=10,
+                                help='Number of hours (range: 1-48hrs) to request',
+                                type=click.IntRange(1, 48))
+
+# pylint: disable=invalid-name
+name_option = click.option('--name', help='Job name to use')
+
+# pylint: disable=invalid-name
+mail_options = click.option('--email-options', '-m', default='abe',
+                            type=click.Choice(['a', 'b', 'e', 'n', 'ae', 'ab', 'be', 'abe']),
+                            help='Send Email when execution is, \n'
+                            '[a = aborted | b = begins | e = ends | n = do not send email]')
+
+# pylint: disable=invalid-name
+email_id_options = click.option('--email-id', '-M', default='nci.monitor@dea.ga.gov.au',
+                                help='Email Recipient List')
+
 
 @click.group()
 def cli():
@@ -33,24 +63,15 @@ def list_products():
 @cli.command('qsub')
 @ui.config_option
 @ui.verbose_option
-@click.option('--queue', '-q', default='normal',
-              type=click.Choice(['normal', 'express']))
-@click.option('--project', '-P', default='v10')
-@click.option('--nodes', '-n', required=True,
-              help='Number of nodes to request',
-              type=click.IntRange(1, 100))
-@click.option('--walltime', '-t', default=10,
-              help='Number of hours (range: 1-48hrs) to request',
-              type=click.IntRange(1, 48))
-@click.option('--name', help='Job name to use')
+@queue_options
+@project_options
+@node_options
+@walltime_options
+@name_option
 @click.option('--allow-product-changes', help='allow changes to product definition', is_flag=True)
-@click.option('--email_options', '-m', default='ae',
-              type=click.Choice(['a', 'b', 'e', 'n', 'ae', 'ab', 'be', 'abe']),
-              help='Send Email when execution is, \n'
-              '[a = aborted | b = begins | e = ends | n = do not send email]')
-@click.option('--email_id', '-M', default='nci.monitor@dea.ga.gov.au',
-              help='Email Recipient List')
-@click.option('--job_attributes', '-W', default='umask=33',
+@mail_options
+@email_id_options
+@click.option('--job-attributes', '-W', default='umask=33',
               help='Setting job attributes\n'
               '<attribute>=<value>')
 @click.option('--app-config', '-c', default='',
@@ -135,22 +156,13 @@ def do_qsub(queue, project, nodes, walltime, name, allow_product_changes, email_
 @cli.command()
 @ui.config_option
 @ui.verbose_option
-@click.option('--queue', '-q', default='normal',
-              type=click.Choice(['normal', 'express']))
-@click.option('--project', '-P', default='v10')
-@click.option('--nodes', '-n', required=True,
-              help='Number of nodes to request',
-              type=click.IntRange(1, 100))
-@click.option('--walltime', '-t', default=10,
-              help='Number of hours to request',
-              type=click.IntRange(1, 48))
-@click.option('--name', help='Job name to use')
-@click.option('--email_options', '-m', default='ae',
-              type=click.Choice(['a', 'b', 'e', 'n', 'ae', 'ab', 'be', 'abe']),
-              help='Send Email when execution is, \n'
-              '[a = aborted | b = begins | e = ends | n = do not send email]')
-@click.option('--email_id', '-M', default='nci.monitor@dea.ga.gov.au',
-              help='Email Recipient List')
+@queue_options
+@project_options
+@node_options
+@walltime_options
+@name_option
+@mail_options
+@email_id_options
 @click.argument('product_name')
 @click.argument('year')
 def stack(queue, project, nodes, walltime, name, email_options, email_id, product_name, year):
@@ -204,22 +216,13 @@ def stack(queue, project, nodes, walltime, name, email_options, email_id, produc
 @cli.command()
 @ui.config_option
 @ui.verbose_option
-@click.option('--queue', '-q', default='normal',
-              type=click.Choice(['normal', 'express']))
-@click.option('--project', '-P', default='v10')
-@click.option('--nodes', '-n', required=True,
-              help='Number of nodes to request',
-              type=click.IntRange(1, 100))
-@click.option('--walltime', '-t', default=10,
-              help='Number of hours to request',
-              type=click.IntRange(1, 48))
-@click.option('--name', help='Job name to use')
-@click.option('--email_options', '-m', default='ae',
-              type=click.Choice(['a', 'b', 'e', 'n', 'ae', 'ab', 'be', 'abe']),
-              help='Send Email when execution is, \n'
-              '[a = aborted | b = begins | e = ends | n = do not send email]')
-@click.option('--email_id', '-M', default='nci.monitor@dea.ga.gov.au',
-              help='Email Recipient List')
+@queue_options
+@project_options
+@node_options
+@walltime_options
+@name_option
+@mail_options
+@email_id_options
 @click.argument('product_name')
 @click.argument('year')
 def fix(queue, project, nodes, walltime, name, email_options, email_id, product_name, year):
