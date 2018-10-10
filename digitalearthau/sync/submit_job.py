@@ -149,6 +149,10 @@ class SyncSubmission(object):
             qsub_opts.extend([
                 '-M', notify_email
             ])
+        else:
+            qsub_opts.extend([
+                '-M', 'nci.monitor@dea.ga.gov.au'
+            ])
 
         command = [
             'qsub', '-V',
@@ -157,7 +161,7 @@ class SyncSubmission(object):
             '-l', 'walltime=20:00:00,mem=1GB,ncpus=4,jobfs=256MB,other=gdata',
             '-l', 'wd',
             '-N', 'sync-{}'.format(job_name),
-            '-m', 'a',
+            '-m', 'ae',
             *qsub_opts,
             '-e', str(error_file),
             '-o', str(output_file),
