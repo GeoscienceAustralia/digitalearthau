@@ -11,6 +11,7 @@ def test_dea_config(dea_index: Index):
 
     assert md_names == {
         'eo',
+        'gqa_eo',
         'landsat_l1_scene',
         'landsat_scene',
         'telemetry',

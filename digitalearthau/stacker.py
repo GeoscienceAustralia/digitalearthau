@@ -179,7 +179,7 @@ def _make_config_and_description(index: Index, task_desc_path: Path) -> Tuple[di
     config['output_type'] = config['output_type']  # TODO: Temporary until ODC code is updated
     config['app_config_file'] = str(app_config)
     config = stacker.make_stacker_config(index, config)
-    config['taskfile_version'] = make_tag(task_desc)
+    config['taskfile_utctime'] = make_tag(task_desc)
     config['version'] = digitalearthau.__version__ + ' ' + datacube.__version__
 
     return config, task_desc

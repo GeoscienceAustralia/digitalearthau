@@ -53,6 +53,7 @@ Publicly available data access and web services are currently in development.
    :caption: Data Guide
 
    data/data.rst
+   data/s3.rst
 
 
 .. toctree::
