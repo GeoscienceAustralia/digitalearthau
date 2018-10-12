@@ -86,6 +86,7 @@ def test_dea_config(dea_index: Index):
         'mangrove_extent_cover_albers',
         'wofs_summary',
         'wofs_filtered_summary',
+        'wofs_annual_summary',
     }
 
 
