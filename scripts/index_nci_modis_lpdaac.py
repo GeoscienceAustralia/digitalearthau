@@ -79,9 +79,17 @@ def cli(ctx, config):
 @click.argument('file_path')
 @click.pass_obj
 def show(index, file_path):
+    #FIXME get to a file from a date path
+    measurements = raster_to_measurements(file_path)
+    print_dict(measurements)
+    product_def = generate_lpdaac_defn(measurements)
+    print_dict(product_def)
 
-    variables = raster_to_measurements(file_path)
-    print_dict(variables)
+    print(index)
+    product = index.products.from_doc(product_def)
+    print(product)
+    indexed_product = index.products.add(product)
+    print(indexed_product)
 
 @cli.command()
 @click.argument('path')
@@ -201,15 +209,19 @@ def raster_to_variable_descriptions(file_path):
 def raster_to_measurements(file_path):
     measurements = []
 
-    img = rasterio.open(file_path, 'r')
-    for subdataset in img.subdatasets:
-        sub_img = rasterio.open(subdataset)
-        print("******************************")
-        print(subdataset)
-        for attr in dir(sub_img):
-            print("sub_img.%s = %r" % (attr, getattr(sub_img, attr)))
-
-    return 'la measurer'
+    with rasterio.open(file_path, 'r') as img:
+        for subdataset in img.subdatasets:
+            with rasterio.open(subdataset) as sub_img:
+                measure = {}
+                measure['dtype'] = str(sub_img.dtypes[0])
+                measure['nodata'] = float(sub_img.nodatavals[0])
+                measure['units'] = str(sub_img.units[0])
+                tmp = sub_img.descriptions[0].replace('250m 16 days ', '')
+                tmp = tmp.capitalize()
+                tmp = tmp.replace(" ", "_")
+                measure['name'] = str(tmp) # descriptions
+                measurements.append(measure)
+        return measurements
 
 
 
