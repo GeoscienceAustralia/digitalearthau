@@ -78,18 +78,8 @@ def cli(ctx, config):
 @cli.command()
 @click.argument('file_path')
 @click.pass_obj
-def show(index, file_path):
-    #FIXME get to a file from a date path
-    measurements = raster_to_measurements(file_path)
-    print_dict(measurements)
-    product_def = generate_lpdaac_defn(measurements)
-    print_dict(product_def)
-
-    print(index)
-    product = index.products.from_doc(product_def)
-    print(product)
-    indexed_product = index.products.add(product)
-    print(indexed_product)
+def show(index, path):
+    pass
 
 @cli.command()
 @click.argument('path')
@@ -115,13 +105,10 @@ def create_product_old(index, path):
 @click.argument('path')
 @click.pass_obj
 def create_product(index, path):
-    datasets = find_datasets(Path(path))
-    first_name = sorted(list(datasets))[0]
-    sample_dataset = datasets[first_name]
-
-    # display product def
-    variables = dataset_to_variable_descriptions(sample_dataset)
-    product_def = generate_product_defn(variables)
+    file_paths = find_lpdaac_file_paths(Path(path))
+    measurements = raster_to_measurements(file_paths[0])
+    print_dict(measurements)
+    product_def = generate_lpdaac_defn(measurements)
     print_dict(product_def)
 
     print(index)
@@ -156,6 +143,18 @@ def index_data(index, path):
 def print_dict(doc):
     print(json.dumps(doc, indent=4, sort_keys=True, cls=NumpySafeEncoder))
 
+def find_lpdaac_file_paths(path: Path):
+    """
+    Return a list of hdf file path objects.
+
+    :param path:
+    :return: A list of path objects.
+    """
+    file_paths = []
+    for afile in path.iterdir():
+        if afile.suffix == '.hdf' and afile.stem[:7] == 'MYD13Q1':
+            file_paths.append(afile)
+    return file_paths
 
 def find_datasets(path: Path):
     """
