@@ -223,7 +223,7 @@ def raster_to_measurements(file_path):
         return measurements
 
 
-
+2222
 def describe_variables(ncfile):
     """
     Each NetCDF file in this Ocean Colour set represents a single data variable.
@@ -294,8 +294,9 @@ def generate_dataset_doc(dataset_name, dataset):
     :param dataset: dictionary of varname: ncfile
     :return:
     """
-    sample_ncfile = dataset['owtd']
-    sample_ncfile_gdal = f'NETCDF:{sample_ncfile}:owtd'
+    print(dataset)
+    sample_ncfile = dataset['sst']
+    sample_ncfile_gdal = f'NETCDF:{sample_ncfile}:sst'
     creation_time = datetime.fromtimestamp(sample_ncfile.stat().st_mtime)
     geo_ref_points, spatial_ref = get_grid_spatial_projection(sample_ncfile_gdal)
 
