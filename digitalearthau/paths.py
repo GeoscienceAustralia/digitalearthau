@@ -25,6 +25,7 @@ BASE_DIRECTORIES = [
     '/g/data/fk4/datacube',
     '/g/data/rs0/datacube',
     '/g/data/v10/reprocess',
+    '/g/data/v10/archived',
     '/g/data/rs0/scenes',
     '/short/v10/scenes',
     '/g/data/v10/public/data',
