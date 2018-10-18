@@ -107,6 +107,7 @@ def create_product_old(index, path):
 @click.pass_obj
 def create_product(index, path):
     file_paths = find_lpdaac_file_paths(Path(path))
+    print(file_paths)
     measurements = raster_to_measurements(file_paths[0])
     print_dict(measurements)
     product_def = generate_lpdaac_defn(measurements)
@@ -227,7 +228,7 @@ def raster_to_measurements(file_path):
         return measurements
 
 
-2222
+
 def describe_variables(ncfile):
     """
     Each NetCDF file in this Ocean Colour set represents a single data variable.
@@ -291,13 +292,28 @@ def generate_lpdaac_defn(measurements):
         'measurements': measurements
     }
 
-
 def generate_dataset_doc(dataset_name, dataset):
     """
 
     :param dataset: dictionary of varname: ncfile
     :return:
     """
+    print(dataset)
+    sample_ncfile = dataset['sst']
+    sample_ncfile_gdal = f'NETCDF:{sample_ncfile}:sst'
+    creation_time = datetime.fromtimestamp(sample_ncfile.stat().st_mtime)
+    #geo_ref_points, spatial_ref = get_grid_spatial_projection(sample_ncfile_gdal)
+
+    #start_time, end_time = name_to_date_range(dataset_name)
+
+    unique_ds_uri = f'{sample_ncfile.as_uri()}#{creation_time}'
+
+    doc = {
+        'id': str(uuid.uuid5(uuid.NAMESPACE_URL, unique_ds_uri)),
+    }
+    return doc
+
+def generate_dataset_doc(dataset_name, dataset):
     print(dataset)
     sample_ncfile = dataset['sst']
     sample_ncfile_gdal = f'NETCDF:{sample_ncfile}:sst'
