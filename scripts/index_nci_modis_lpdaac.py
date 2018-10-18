@@ -76,10 +76,11 @@ def cli(ctx, config):
     ctx.obj = Datacube(config=config).index
 
 @cli.command()
-@click.argument('file_path')
+@click.argument('path')
 @click.pass_obj
 def show(index, path):
-    pass
+    file_paths = find_lpdaac_file_paths(Path(path))
+    raster_to_variable_descriptions(file_paths[0])
 
 @cli.command()
 @click.argument('path')
@@ -199,11 +200,14 @@ def dataset_to_variable_descriptions(dataset):
 
 
 def raster_to_variable_descriptions(file_path):
-    # variables = {}
-    img = rasterio.open(file_path, 'r')
-    for attr in dir(img):
-        print("img.%s = %r" % (attr, getattr(img, attr)))
-        #  subdatasets seem to have the measurement info
+    """ Function to print out the file format"""
+
+    with rasterio.open(file_path, 'r') as img:
+        for subdataset in img.subdatasets:
+            with rasterio.open(subdataset) as sub_img:
+                for attr in dir(sub_img):
+                    print("sub_img.%s = %r" % (attr, getattr(sub_img, attr)))
+
 
 def raster_to_measurements(file_path):
     measurements = []
