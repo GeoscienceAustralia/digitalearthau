@@ -320,8 +320,7 @@ def generate_lpdaac_doc(file_path):
     with rasterio.open(file_path, 'r') as img:
         asubdataset = img.subdatasets[0]
     geo_ref_points, spatial_ref = get_grid_spatial_projection(asubdataset)
-
-    start_time = end_time = 'the end is nigh'
+    start_time, end_time = modis_path_to_date_range(file_path)
 
     doc = {
         'id': str(uuid.uuid5(uuid.NAMESPACE_URL, unique_ds_uri)),
@@ -332,7 +331,13 @@ def generate_lpdaac_doc(file_path):
             'from_dt': str(start_time),
             'to_dt': str(end_time),
             'coord': to_lat_long_extent(geo_ref_points),
-        'file_path': str(file_path)
+        },
+        'format': {'name': 'hdf'},
+        'grid_spatial': {
+            'projection': {
+                'geo_ref_points': geo_ref_points,
+                'spatial_reference': spatial_ref,
+            }
         },
     }
     return doc
@@ -343,6 +348,7 @@ def generate_dataset_doc(dataset_name, dataset):
     sample_ncfile_gdal = f'NETCDF:{sample_ncfile}:sst'
     creation_time = datetime.fromtimestamp(sample_ncfile.stat().st_mtime)
     geo_ref_points, spatial_ref = get_grid_spatial_projection(sample_ncfile_gdal)
+
 
     start_time, end_time = name_to_date_range(dataset_name)
     # variables = dataset_to_variable_descriptions(dataset)
@@ -381,10 +387,12 @@ def generate_dataset_doc(dataset_name, dataset):
     return doc
 
 def modis_path_to_date_range(file_path):
-    name_frags = file_path.name #.split('.')
-    print(name_frags)
+    a_year_days = file_path.name.split('.')[1] # example 'A2017101'
+    year_days = a_year_days[1:]
+    # from https:...how-do-modis-products-naming-conventions-work
+    start_time = datetime.strptime(year_days, '%Y%j')
 
-    start_time = end_time = 'NOW!'
+    end_time = start_time + timedelta(days=16) - timedelta(microseconds=1)
     return start_time, end_time
 
 def name_to_date_range(name):
@@ -402,15 +410,15 @@ def to_lat_long_extent(geo_ref_points):
 def get_grid_spatial_projection(fname):
     with rasterio.open(fname, 'r') as img:
         left, bottom, right, top = img.bounds
-        # spatial_reference = str(str(getattr(img, 'crs_wkt', None) or img.crs.wkt))
-        spatial_reference = 'EPSG:4326'
+        # assuming http://spatialreference.org/ref/sr-org/6842/
+        spatial_reference = 'PROJCS["Sinusoidal",GEOGCS["GCS_Undefined",DATUM["D_Undefined",SPHEROID["User_Defined_Spheroid",6371007.181,0.0]],PRIMEM["Greenwich",0.0],UNIT["Degree",0.017453292519943295]],PROJECTION["Sinusoidal"],PARAMETER["False_Easting",0.0],PARAMETER["False_Northing",0.0],PARAMETER["Central_Meridian",0.0],UNIT["Meter",1.0]]'
         geo_ref_points = {
             'ul': {'x': left, 'y': top},
             'ur': {'x': right, 'y': top},
             'll': {'x': left, 'y': bottom},
             'lr': {'x': right, 'y': bottom},
         }
-        return geo_ref_points, spatial_reference
+        return geo_ref_points, str(spatial_reference)
 
 
 def add_dataset(doc, uri, index, sources_policy):
