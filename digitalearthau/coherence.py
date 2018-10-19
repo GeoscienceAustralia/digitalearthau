@@ -123,7 +123,7 @@ def main(expressions, check_locationless, archive_locationless, check_ancestors,
                           path=Path('bad_downstream_datasets.csv').absolute())
                 writer = csv.writer(csvfile)
                 writer.writerow(('Dataset_ID', 'Product_Type', 'Is_Active', 'Is_Archived', 'Format', 'Location'))
-    
+
                 for d in list(_bad_downstream_dataset):
                     writer.writerow((d.id, d.type, d.is_active, d.is_archived, d.format, d.local_uri))
 
