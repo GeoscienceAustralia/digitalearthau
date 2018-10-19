@@ -119,11 +119,25 @@ def create_product(index, path):
     indexed_product = index.products.add(product)
     print(indexed_product)
 
-
 @cli.command()
 @click.argument('path')
 @click.pass_obj
 def index_data(index, path):
+    file_paths = find_lpdaac_file_paths(Path(path))
+    print(file_paths)
+
+    resolver = Doc2Dataset(index)
+    for file_path in file_paths:
+        doc = generate_lpdaac_doc(file_path)
+        print_dict(doc)
+        #dataset, err = resolver(doc, path.as_uri())
+
+
+
+@cli.command()
+@click.argument('path')
+@click.pass_obj
+def index_data_old(index, path):
     path = Path(path)
     datasets = find_datasets(path)
 
@@ -292,24 +306,34 @@ def generate_lpdaac_defn(measurements):
         'measurements': measurements
     }
 
-def generate_dataset_doc(dataset_name, dataset):
-    """
+def generate_lpdaac_doc(file_path):
 
-    :param dataset: dictionary of varname: ncfile
-    :return:
-    """
-    print(dataset)
-    sample_ncfile = dataset['sst']
-    sample_ncfile_gdal = f'NETCDF:{sample_ncfile}:sst'
-    creation_time = datetime.fromtimestamp(sample_ncfile.stat().st_mtime)
+    #sample_ncfile = dataset['sst']
+    #sample_ncfile_gdal = f'NETCDF:{sample_ncfile}:sst'
+    #creation_time = datetime.fromtimestamp(sample_ncfile.stat().st_mtime)
     #geo_ref_points, spatial_ref = get_grid_spatial_projection(sample_ncfile_gdal)
 
     #start_time, end_time = name_to_date_range(dataset_name)
+    modification_time = file_path.stat().st_mtime
 
-    unique_ds_uri = f'{sample_ncfile.as_uri()}#{creation_time}'
+    unique_ds_uri = f'{file_path.as_uri()}#{modification_time}'
+    with rasterio.open(file_path, 'r') as img:
+        asubdataset = img.subdatasets[0]
+    geo_ref_points, spatial_ref = get_grid_spatial_projection(asubdataset)
+
+    start_time = end_time = 'the end is nigh'
 
     doc = {
         'id': str(uuid.uuid5(uuid.NAMESPACE_URL, unique_ds_uri)),
+        'product_type': 'modis_lpdaac_MYD13Q1',
+        'creation_dt': str(modification_time),
+        'platform': {'code': 'MODIS'},
+        'extent': {
+            'from_dt': str(start_time),
+            'to_dt': str(end_time),
+            'coord': to_lat_long_extent(geo_ref_points),
+        'file_path': str(file_path)
+        },
     }
     return doc
 
@@ -356,6 +380,12 @@ def generate_dataset_doc(dataset_name, dataset):
     }
     return doc
 
+def modis_path_to_date_range(file_path):
+    name_frags = file_path.name #.split('.')
+    print(name_frags)
+
+    start_time = end_time = 'NOW!'
+    return start_time, end_time
 
 def name_to_date_range(name):
     date = name[1:9]
