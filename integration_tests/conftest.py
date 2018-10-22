@@ -82,7 +82,9 @@ ON_DISK2_OFFSET = ('LS8_OLITIRS_OTH_P51_GALPGS01-032_114_080_20150924', 'ga-meta
 class DatasetForTests(NamedTuple):
     """
     A test dataset, including the file location and collection it should belong to.
+
     When your test starts the dataset will be on disk but not yet indexed. Call add_to_index() and others as needed.
+
     All properties are recorded here separately so tests can verify them independently.
     """
     # The test collection this should belong to
@@ -105,9 +107,11 @@ class DatasetForTests(NamedTuple):
     @property
     def copyable_path(self):
         """Get the path containing the whole dataset that can be copied on disk.
+
         The recorded self.path of datasets is the path to the metadata, but "packaged" datasets
         such as scenes have a folder hierarchy, and to copy them we want to copy the whole scene
         folder, not just the metadata file.
+
         (This will return a folder for a scene, and will be identical to self.path for typical NetCDFs)
         """
         package_path, _ = paths.get_dataset_paths(self.path)
@@ -285,4 +289,4 @@ def freeze_index(index: Index) -> Mapping[DatasetLite, Iterable[str]]:
             tuple(dataset.uris)
         )
         for dataset in index.datasets.search()
-)
+    )
