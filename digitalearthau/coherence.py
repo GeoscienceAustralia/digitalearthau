@@ -34,7 +34,7 @@ def cli():
     pass
 
 
-@cli.command('coherence')
+@cli.command()
 @click.option('--check-locationless/--no-check-locationless',
               is_flag=True,
               default=False,
@@ -117,7 +117,7 @@ def main(expressions, check_locationless, archive_locationless, check_ancestors,
                 _manage_downstream_ds(dc, dataset)
 
         if check_downstream_ds:
-            # Store the coherence log in a csv file
+            # Store the coherence result log in a csv file
             with open('bad_downstream_datasets.csv', 'w', newline='') as csvfile:
                 _LOG.info("Coherence log is stored in a CSV file",
                           path=Path('bad_downstream_datasets.csv').absolute())
