@@ -1,14 +1,29 @@
 import shutil
 from datetime import datetime, timedelta
-
-from click.testing import CliRunner, Result
+from pathlib import Path
+import itertools
+from click.testing import CliRunner
 
 from integration_tests.conftest import DatasetForTests
-from datacube.api.query import Query
 from digitalearthau import coherence
 
 # Default is to clean up older than three days ago.
 A_LONG_TIME_AGO = datetime.utcnow() - timedelta(days=4)
+
+PROJECT_ROOT = Path(__file__).parents[1]
+CONFIG_FILE_PATHS = [str(PROJECT_ROOT / 'digitalearthau/testing/testing-default.conf')]
+
+
+def assert_click_command(command, args):
+    exe_opts = list(itertools.chain(*(('--test-dc-config', f) for f in CONFIG_FILE_PATHS)))
+    exe_opts.extend(args)
+
+    result = CliRunner().invoke(
+        command,
+        args=exe_opts,
+        catch_exceptions=False
+    )
+    assert 0 == result.exit_code, "Error for %r. output: %r" % (exe_opts, result.output)
 
 
 def test_locationless(test_dataset: DatasetForTests,
@@ -37,19 +52,14 @@ def test_locationless(test_dataset: DatasetForTests,
     all_indexed_uris = set(test_dataset.collection.iter_index_uris())
     assert all_indexed_uris == {test_dataset.uri, other_dataset.uri}, "Both uri should remain."
 
-    query = Query(product='ls7_level1_scene', time=('2018-09-01', '2018-10-31'))
+    exe_opts = ['--check-locationless']
 
-    coherence_args = [
-        '--check-locationless',
-        query,
-    ]
+    prod = ["product=ls8_nbar_scene"]
+    timerange = ["time in 2018"]
+    exe_opts.extend(prod)
+    exe_opts.extend(timerange)
 
-    res: Result = CliRunner().invoke(
-        coherence.cli,
-        args=['dea-coherence', *coherence_args],
-        catch_exceptions=False)
-
-    assert res.exit_code
+    assert_click_command(coherence.main, exe_opts)
 
 
 def test_siblings(test_dataset: DatasetForTests,
@@ -66,7 +76,7 @@ def test_siblings(test_dataset: DatasetForTests,
     shutil.copytree(other_dataset.copyable_path, test_dataset.copyable_path)
 
     # Index the updated test datasets (siblings)
-    other_dataset.add_to_index()
+    test_dataset.add_location(str(other_dataset.copyable_path))
 
     assert other_dataset.path.exists(), "Dataset archived long time ago"
     assert test_dataset.path.exists(), "Too-recently-archived dataset"
@@ -74,22 +84,14 @@ def test_siblings(test_dataset: DatasetForTests,
     assert test_dataset.get_index_record() is not None
     assert other_dataset.get_index_record() is not None
 
-    all_indexed_uris = set(test_dataset.collection.iter_index_uris())
-    assert all_indexed_uris == {test_dataset.uri, other_dataset.uri}, "Both uri should remain."
+    exe_opts = ['--check-siblings']
 
-    query = Query(product='ls7_level1_scene', time=('2018-09-01', '2018-10-31'))
+    prod = ["product=ls8_nbar_scene"]
+    timerange = ["time in 2018"]
+    exe_opts.extend(prod)
+    exe_opts.extend(timerange)
 
-    coherence_args = [
-        '--check-siblings',
-        query,
-    ]
-
-    res: Result = CliRunner().invoke(
-        coherence.cli,
-        args=['dea-coherence', *coherence_args],
-        catch_exceptions=False)
-
-    assert res.exit_code
+    assert_click_command(coherence.main, exe_opts)
 
 
 def test_downstream_datasets(test_dataset: DatasetForTests,
@@ -100,11 +102,6 @@ def test_downstream_datasets(test_dataset: DatasetForTests,
     test_dataset.add_to_index()
     test_dataset.archive_location_in_index()
     other_dataset.add_to_index()
-    other_dataset.add_to_index()
-    other_dataset.add_to_index()
-
-    assert other_dataset.path.exists(), "Dataset archived long time ago"
-    assert test_dataset.path.exists(), "Too-recently-archived dataset"
 
     assert test_dataset.get_index_record() is not None
     assert other_dataset.get_index_record() is not None
@@ -112,16 +109,11 @@ def test_downstream_datasets(test_dataset: DatasetForTests,
     all_indexed_uris = set(test_dataset.collection.iter_index_uris())
     assert all_indexed_uris == {test_dataset.uri, other_dataset.uri}, "Both uri should remain."
 
-    query = Query(product='ls7_level1_scene', time=('2018-09-01', '2018-10-31'))
+    exe_opts = ['--check-downstream-ds']
 
-    coherence_args = [
-        '--check-downstream-ds',
-        query,
-    ]
+    prod = ["product=ls8_nbar_scene"]
+    timerange = ["time in 2018"]
+    exe_opts.extend(prod)
+    exe_opts.extend(timerange)
 
-    res: Result = CliRunner().invoke(
-        coherence.cli,
-        args=['dea-coherence', *coherence_args],
-        catch_exceptions=False)
-
-    assert res.exit_code
+    assert_click_command(coherence.main, exe_opts)

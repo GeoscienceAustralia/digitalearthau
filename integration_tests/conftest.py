@@ -166,7 +166,7 @@ def test_dataset(integration_test_data, dea_index) -> DatasetForTests:
     # Tests assume one dataset for the collection, so delete the second.
     shutil.rmtree(str(test_data.joinpath('LS8_OLITIRS_OTH_P51_GALPGS01-032_114_080_20150924')))
     ls8_collection = Collection(
-        name='ls8_scene_test',
+        name='ls8_nbar_scene',
         query={},
         file_patterns=[str(test_data.joinpath('LS8*/ga-metadata.yaml'))],
         unique=[],
