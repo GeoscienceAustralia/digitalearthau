@@ -23,7 +23,7 @@ def assert_click_command(command, args):
         args=exe_opts,
         catch_exceptions=False
     )
-    assert 0 == result.exit_code, "Error for %r. output: %r" % (exe_opts, result.output)
+    assert result.exit_code == 0, "Error for %r. output: %r" % (exe_opts, result.output)
 
 
 def test_locationless(test_dataset: DatasetForTests,
