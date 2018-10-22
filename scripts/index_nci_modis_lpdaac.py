@@ -63,6 +63,8 @@ import rasterio
 from datacube import Datacube
 from datacube.index.hl import Doc2Dataset
 from datacube.utils import changes
+from datacube.utils.geometry import CRS, box
+
 
 LOG = logging.getLogger(__name__)
 
@@ -109,6 +111,8 @@ def create_product(index, path):
     file_paths = find_lpdaac_file_paths(Path(path))
     print(file_paths)
     measurements = raster_to_measurements(file_paths[0])
+    for measure in measurements:
+        measure.pop('path')  # This is not needed here
     print_dict(measurements)
     product_def = generate_lpdaac_defn(measurements)
     print_dict(product_def)
@@ -130,9 +134,15 @@ def index_data(index, path):
     for file_path in file_paths:
         doc = generate_lpdaac_doc(file_path)
         print_dict(doc)
-        #dataset, err = resolver(doc, path.as_uri())
+        dataset, err = resolver(doc, file_path.as_uri())
 
-
+        if err is not None:
+            logging.error("%s", err)
+        try:
+            index.datasets.add(dataset)
+        except Exception as e:
+            logging.error("Couldn't index %s%s", file_path, name)
+            logging.exception("Exception", e)
 
 @cli.command()
 @click.argument('path')
@@ -238,6 +248,7 @@ def raster_to_measurements(file_path):
                 tmp = tmp.capitalize()
                 tmp = tmp.replace(" ", "_")
                 measure['name'] = str(tmp) # descriptions
+                measure['path'] = subdataset
                 measurements.append(measure)
         return measurements
 
@@ -319,9 +330,17 @@ def generate_lpdaac_doc(file_path):
     unique_ds_uri = f'{file_path.as_uri()}#{modification_time}'
     with rasterio.open(file_path, 'r') as img:
         asubdataset = img.subdatasets[0]
-    geo_ref_points, spatial_ref = get_grid_spatial_projection(asubdataset)
+    left, bottom, right, top, spatial_ref = get_grid_spatial_projection(asubdataset)
+    geo_ref_points = {
+                         'ul': {'x': left, 'y': top},
+                         'ur': {'x': right, 'y': top},
+                         'll': {'x': left, 'y': bottom},
+                         'lr': {'x': right, 'y': bottom},
+                     }
+
     start_time, end_time = modis_path_to_date_range(file_path)
 
+    measurements = raster_to_measurements(file_path)
     doc = {
         'id': str(uuid.uuid5(uuid.NAMESPACE_URL, unique_ds_uri)),
         'product_type': 'modis_lpdaac_MYD13Q1',
@@ -330,7 +349,8 @@ def generate_lpdaac_doc(file_path):
         'extent': {
             'from_dt': str(start_time),
             'to_dt': str(end_time),
-            'coord': to_lat_long_extent(geo_ref_points),
+            'coord': to_lat_long_extent(left, bottom, right, top,
+                                        spatial_ref),
         },
         'format': {'name': 'hdf'},
         'grid_spatial': {
@@ -339,6 +359,17 @@ def generate_lpdaac_doc(file_path):
                 'spatial_reference': spatial_ref,
             }
         },
+        'image': {
+            'bands': {
+                measure['name']: {
+                    'path': str(measure['path']),
+                    'layer': measure['name'],
+                } for measure in measurements
+            }
+        },
+    'version': 1,
+    'coverage': 'aust',
+    'lineage': {'source_datasets': {}}
     }
     return doc
 
@@ -347,8 +378,6 @@ def generate_dataset_doc(dataset_name, dataset):
     sample_ncfile = dataset['sst']
     sample_ncfile_gdal = f'NETCDF:{sample_ncfile}:sst'
     creation_time = datetime.fromtimestamp(sample_ncfile.stat().st_mtime)
-    geo_ref_points, spatial_ref = get_grid_spatial_projection(sample_ncfile_gdal)
-
 
     start_time, end_time = name_to_date_range(dataset_name)
     # variables = dataset_to_variable_descriptions(dataset)
@@ -363,7 +392,8 @@ def generate_dataset_doc(dataset_name, dataset):
         'extent': {
             'from_dt': str(start_time),
             'to_dt': str(end_time),
-            'coord': to_lat_long_extent(geo_ref_points),
+            'coord': to_lat_long_extent(left, bottom, right, top,
+                                        spatial_ref),
         },
         'format': {'name': 'NetCDF'},
         'grid_spatial': {
@@ -402,23 +432,26 @@ def name_to_date_range(name):
     return start_time, end_time
 
 
-def to_lat_long_extent(geo_ref_points):
-    return {corner: {'lat': points['y'], 'lon': points['x']}
-            for corner, points in geo_ref_points.items()}
+def to_lat_long_extent(left, bottom, right, top, spatial_reference, new_crs="EPSG:4326"):
 
+    crs = CRS(spatial_reference)
+    abox = box(left, bottom, right, top, crs)
+    projected = abox.to_crs(CRS(new_crs))
+    proj = projected.boundingbox
+
+    coord = {
+             'ul': {'lon': proj.left, 'lat': proj.top},
+             'ur': {'lon': proj.right, 'lat': proj.top},
+             'll': {'lon': proj.left, 'lat': proj.bottom},
+             'lr': {'lon': proj.right, 'lat': proj.bottom},
+    }
+    return coord
 
 def get_grid_spatial_projection(fname):
     with rasterio.open(fname, 'r') as img:
         left, bottom, right, top = img.bounds
-        # assuming http://spatialreference.org/ref/sr-org/6842/
-        spatial_reference = 'PROJCS["Sinusoidal",GEOGCS["GCS_Undefined",DATUM["D_Undefined",SPHEROID["User_Defined_Spheroid",6371007.181,0.0]],PRIMEM["Greenwich",0.0],UNIT["Degree",0.017453292519943295]],PROJECTION["Sinusoidal"],PARAMETER["False_Easting",0.0],PARAMETER["False_Northing",0.0],PARAMETER["Central_Meridian",0.0],UNIT["Meter",1.0]]'
-        geo_ref_points = {
-            'ul': {'x': left, 'y': top},
-            'ur': {'x': right, 'y': top},
-            'll': {'x': left, 'y': bottom},
-            'lr': {'x': right, 'y': bottom},
-        }
-        return geo_ref_points, str(spatial_reference)
+        spatial_reference = str(str(getattr(img, 'crs_wkt', None) or img.crs.wkt))
+        return left, bottom, right, top, spatial_reference
 
 
 def add_dataset(doc, uri, index, sources_policy):
