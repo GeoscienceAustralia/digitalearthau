@@ -28,7 +28,7 @@ PRODUCT_TYPE_LIST = ['ls5_satellite_telemetry_data', 'ls5_level1_scene', 'ls5_nb
                      'ls8_nbar_oli_albers', 'ls8_nbart_oli_albers', 'ls8_fc_albers',
                      'wofs_albers']
 
-# Ignore sibling check for the listed products
+# Ignore --check-sibling/--check-ancestors for the listed products
 IGNORE_SIBLINGS = ['ls5_nbar_albers', 'ls5_nbart_albers', 'ls5_pq_albers',
                    'ls7_nbar_albers', 'ls7_nbart_albers', 'ls7_pq_albers',
                    'ls8_nbar_albers', 'ls8_nbart_albers', 'ls8_pq_albers', 'dsm1sv10']
