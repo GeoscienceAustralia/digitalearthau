@@ -28,6 +28,9 @@ PRODUCT_TYPE_LIST = ['ls5_satellite_telemetry_data', 'ls5_level1_scene', 'ls5_nb
                      'ls8_nbar_oli_albers', 'ls8_nbart_oli_albers', 'ls8_fc_albers',
                      'wofs_albers']
 
+# Ignore sibling check for the listed products
+IGNORE_SIBLINGS = ['dsm1sv10']
+
 
 @click.group(help=__doc__)
 def cli():
@@ -177,7 +180,7 @@ def _check_ancestors(check_siblings: bool,
                     source_type=classifier,
                     source_dataset_id=str(source_dataset.id)
                 )
-            elif check_siblings or archive_siblings:
+            elif (str(source_dataset.type.name) not in IGNORE_SIBLINGS) and (check_siblings or archive_siblings):
                 # If a source dataset has other siblings they may be duplicates.
                 # (this only applies to source products that are 1:1 with
                 # descendants, not pass-to-scene or scene-to-tile conversions)
