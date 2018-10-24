@@ -102,9 +102,9 @@ def main(expressions, check_locationless, archive_locationless, check_ancestors,
                     if archive_locationless:
                         dc.index.datasets.archive([dataset.id])
                         _archive_count += 1
-                        _LOG.info("locationless." + str(dataset.type) + ".dataset.archived", dataset_id=str(dataset.id))
+                        _LOG.info("locationless." + str(dataset.type.name) + ".archived", dataset_id=str(dataset.id))
                     else:
-                        _LOG.info("locationless." + str(dataset.type) + ".dataset.dry_run", dataset_id=str(dataset.id))
+                        _LOG.info("locationless." + str(dataset.type.name) + ".dry_run", dataset_id=str(dataset.id))
 
             # If an ancestor is archived, it may have been replaced. This one may need
             # to be reprocessed too.
@@ -172,7 +172,7 @@ def _check_ancestors(check_siblings: bool,
         for classifier, source_dataset in dataset.sources.items():
             if source_dataset.is_archived:
                 _LOG.info(
-                    "ancestor." + str(dataset.type) + ".dataset.dry_run",
+                    "ancestor." + str(dataset.type.name) + ".dry_run",
                     dataset_id=str(dataset.id),
                     source_type=classifier,
                     source_dataset_id=str(source_dataset.id)
@@ -191,7 +191,7 @@ def _check_ancestors(check_siblings: bool,
                 if siblings:
                     _siblings_count += 1
                     sibling_ids = [str(d.id) for d in siblings]
-                    _LOG.info("dataset." + str(dataset.type) + ".siblings.dry_run",
+                    _LOG.info(str(dataset.type.name) + ".siblings.exists.dry_run",
                               dataset_id=str(dataset.id),
                               siblings=sibling_ids)
 
@@ -225,7 +225,7 @@ def _manage_downstream_ds(dc: Datacube,
 def _process_bad_derived_datasets(source_ds, dataset, derived_dataset):
     global _downstream_dataset_count, _downstream_summary_prod_count
 
-    _LOG.info("locationless." + str(source_ds.type) + ".dataset.dry_run (Dataset ID: %s)" % str(source_ds.id),
+    _LOG.info("locationless." + str(source_ds.type.name) + ".dry_run (Dataset ID: %s)" % str(source_ds.id),
               downstream_dataset_id=str(dataset.id),
               downstream_dataset_type=str(dataset.type.name),
               downstream_dataset_location=str(dataset.uris))
@@ -235,13 +235,13 @@ def _process_bad_derived_datasets(source_ds, dataset, derived_dataset):
         for d_datasets in dataset_list:
             # Exclude derived products such as summary products, FC_percentile products, etc.
             if d_datasets.type.name in PRODUCT_TYPE_LIST:
-                _LOG.info("downstream." + str(dataset.type) + ".dataset.dry_run (Dataset ID: %s)" % str(dataset.id),
+                _LOG.info("downstream." + str(dataset.type.name) + ".dry_run (Dataset ID: %s)" % str(dataset.id),
                           downstream_dataset_id=str(d_datasets.id),
                           downstream_dataset_type=str(d_datasets.type.name),
                           downstream_dataset_location=str(d_datasets.uris))
                 _downstream_dataset_count += 1
             else:
-                _LOG.info("derived." + str(dataset.type) + ".product.dry_run (Dataset ID: %s)" % str(dataset.id),
+                _LOG.info("derived." + str(dataset.type.name) + ".dry_run (Dataset ID: %s)" % str(dataset.id),
                           downstream_dataset_id=str(d_datasets.id),
                           dataset_type=str(d_datasets.type.name))
                 _downstream_summary_prod_count += 1
