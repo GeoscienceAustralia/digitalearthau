@@ -1,6 +1,7 @@
 import collections
 import click
 import csv
+from datetime import datetime as dt
 from pathlib import Path
 import structlog
 
@@ -12,7 +13,6 @@ from digitalearthau import uiutil
 _LOG = structlog.getLogger('dea-coherence')
 _dataset_count, _siblings_count, _locationless_count, _archive_count = 0, 0, 0, 0
 _downstream_dataset_count, _downstream_summary_prod_count = 0, 0
-_bad_downstream_dataset = collections.deque({})
 
 # Product list containing Telemetry, Level1, Level2, NBAR, PQ, PQ_Legacy, WOfS, FC products
 # Level1_Scene datasets are expected not to have any locations (in future)
@@ -32,6 +32,11 @@ PRODUCT_TYPE_LIST = ['ls5_satellite_telemetry_data', 'ls5_level1_scene', 'ls5_nb
 IGNORE_SIBLINGS = ['ls5_nbar_albers', 'ls5_nbart_albers', 'ls5_pq_albers',
                    'ls7_nbar_albers', 'ls7_nbart_albers', 'ls7_pq_albers',
                    'ls8_nbar_albers', 'ls8_nbart_albers', 'ls8_pq_albers', 'dsm1sv10']
+
+DATE_NOW = dt.now().strftime('%Y-%m-%d')
+TIME_NOW = dt.now().strftime('%H-%M-%S')
+
+DEFAULT_CSV_PATH = '/g/data/v10/work/coherence/{0}/erroneous_datasets_{1}.csv'.format(DATE_NOW, TIME_NOW)
 
 
 @click.group(help=__doc__)
@@ -93,6 +98,15 @@ def main(expressions, check_locationless, archive_locationless, check_ancestors,
     global _dataset_count, _siblings_count, _locationless_count, _archive_count
     global _downstream_dataset_count, _downstream_summary_prod_count
     uiutil.init_logging()
+
+    # Write the header to the CSV file
+    with open(DEFAULT_CSV_PATH, 'w', newline='') as csvfile:
+        _LOG.info("Coherence log is stored in a CSV file",
+                  path=Path(DEFAULT_CSV_PATH).absolute())
+        writer = csv.writer(csvfile)
+        writer.writerow(('Category', 'Dataset_ID', 'Type', 'Is_Active', 'Is_Archived',
+                         'Format', 'Location', 'sibling_ids'))
+
     with Datacube(config=test_dc_config) as dc:
         _LOG.info('query', query=expressions)
         for dataset in dc.index.datasets.search(**expressions):
@@ -111,6 +125,9 @@ def main(expressions, check_locationless, archive_locationless, check_ancestors,
                     else:
                         _LOG.info("locationless." + str(dataset.type.name) + ".dry_run", dataset_id=str(dataset.id))
 
+                    # Log derived product with locationless datasets, to the CSV file
+                    _log_to_csvfile('locationless_ds', dataset)
+
             # If an ancestor is archived, it may have been replaced. This one may need
             # to be reprocessed too.
             if check_ancestors or archive_siblings or check_siblings:
@@ -120,17 +137,6 @@ def main(expressions, check_locationless, archive_locationless, check_ancestors,
             # datasets and take appropriate action (archive downstream datasets)
             if check_downstream_ds:
                 _manage_downstream_ds(dc, dataset)
-
-        if check_downstream_ds:
-            # Store the coherence result log in a csv file
-            with open('bad_downstream_datasets.csv', 'w', newline='') as csvfile:
-                _LOG.info("Coherence log is stored in a CSV file",
-                          path=Path('bad_downstream_datasets.csv').absolute())
-                writer = csv.writer(csvfile)
-                writer.writerow(('Dataset_ID', 'Product_Type', 'Is_Active', 'Is_Archived', 'Format', 'Location'))
-
-                for d in list(_bad_downstream_dataset):
-                    writer.writerow((d.id, d.type, d.is_active, d.is_archived, d.format, d.uris))
 
         _LOG.info("coherence.finish",
                   datasets_count=_dataset_count,
@@ -207,6 +213,9 @@ def _check_ancestors(check_siblings: bool,
                     if archive_siblings:
                         _archive_count += _archive_duplicate_siblings(dc, sibling_ids + [str(dataset.id)])
 
+                    # Log datasets containing sibling to the csv file
+                    _log_to_csvfile('ds_with_siblings', dataset, sibling_ids)
+
 
 def _manage_downstream_ds(dc: Datacube,
                           dataset: Dataset):
@@ -223,8 +232,8 @@ def _manage_downstream_ds(dc: Datacube,
     for dataset_list in derived_dataset:
         for d in dataset_list:
             if d.uris is None:
-                # Append locationless source dataset to the list
-                _bad_downstream_dataset.append(dataset)
+                # Log locationless source dataset to the CSV file
+                _log_to_csvfile('locationless_ds', dataset)
 
                 # Fetch all downstream datasets and append to the list
                 _process_bad_derived_datasets(dataset, d, _fetch_derived_datasets(d, dc))
@@ -248,14 +257,17 @@ def _process_bad_derived_datasets(source_ds, dataset, derived_dataset):
                           downstream_dataset_type=str(d_datasets.type.name),
                           downstream_dataset_location=str(d_datasets.uris))
                 _downstream_dataset_count += 1
+
+                # Log downstream datasets linked to locationless source datasets, to the CSV file
+                _log_to_csvfile('downstream_ds_linked_to_locationless_source', dataset)
             else:
                 _LOG.info("derived." + str(dataset.type.name) + ".dry_run (Dataset ID: %s)" % str(dataset.id),
                           downstream_dataset_id=str(d_datasets.id),
                           dataset_type=str(d_datasets.type.name))
                 _downstream_summary_prod_count += 1
 
-            # Append all the downstream datasets derived from locationless source dataset to the list
-            _bad_downstream_dataset.append(d_datasets)
+                # Log downstream datasets linked to locationless source dataset, to the CSV file
+                _log_to_csvfile('derived_products_linked_to_locationless_source', d_datasets)
 
 
 def _fetch_derived_datasets(dataset, dc):
@@ -268,6 +280,13 @@ def _fetch_derived_datasets(dataset, dc):
         derived_dataset.append(derived)
 
     return derived_dataset
+
+
+def _log_to_csvfile(click_options, d, siblings=None):
+    # Store the coherence result log in a csv file
+    with open(DEFAULT_CSV_PATH, 'a', newline='') as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerow((click_options, d.id, d.type.name, d.is_active, d.is_archived, d.format, d.uris, siblings))
 
 
 if __name__ == '__main__':
