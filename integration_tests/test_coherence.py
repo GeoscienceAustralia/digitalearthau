@@ -26,8 +26,8 @@ def assert_click_command(command, args):
     assert result.exit_code == 0, "Error for %r. output: %r" % (exe_opts, result.output)
 
 
-def test_locationless(test_dataset: DatasetForTests,
-                      other_dataset: DatasetForTests):
+def test_check_locationless(test_dataset: DatasetForTests,
+                            other_dataset: DatasetForTests):
     """
     Test dea-coherence --check-locationless command option
     """
@@ -54,16 +54,14 @@ def test_locationless(test_dataset: DatasetForTests,
 
     exe_opts = ['--check-locationless']
 
-    prod = ["product=ls8_nbar_scene"]
     timerange = ["time in 2018"]
-    exe_opts.extend(prod)
     exe_opts.extend(timerange)
 
     assert_click_command(coherence.main, exe_opts)
 
 
-def test_siblings(test_dataset: DatasetForTests,
-                  other_dataset: DatasetForTests):
+def test_check_siblings(test_dataset: DatasetForTests,
+                        other_dataset: DatasetForTests):
     """
     Test dea-coherence --check-siblings command option
     """
@@ -86,16 +84,14 @@ def test_siblings(test_dataset: DatasetForTests,
 
     exe_opts = ['--check-siblings']
 
-    prod = ["product=ls8_nbar_scene"]
     timerange = ["time in 2018"]
-    exe_opts.extend(prod)
     exe_opts.extend(timerange)
 
     assert_click_command(coherence.main, exe_opts)
 
 
-def test_downstream_datasets(test_dataset: DatasetForTests,
-                             other_dataset: DatasetForTests):
+def test_check_downstream_datasets(test_dataset: DatasetForTests,
+                                   other_dataset: DatasetForTests):
     """
     Test dea-coherence --check-downstream-ds command option
     """
@@ -111,9 +107,91 @@ def test_downstream_datasets(test_dataset: DatasetForTests,
 
     exe_opts = ['--check-downstream-ds']
 
-    prod = ["product=ls8_nbar_scene"]
     timerange = ["time in 2018"]
-    exe_opts.extend(prod)
     exe_opts.extend(timerange)
 
     assert_click_command(coherence.main, exe_opts)
+
+
+def test_check_ancestors(test_dataset: DatasetForTests,
+                         other_dataset: DatasetForTests):
+    """
+    Test dea-coherence --check-ancestors command option
+    """
+    # Source dataset
+    test_dataset.add_to_index()
+    other_dataset.add_to_index()
+
+    # Archive datasets
+    test_dataset.archive_in_index()
+    other_dataset.archive_in_index()
+
+    assert other_dataset.path.exists(), "Dataset archived long time ago"
+    assert test_dataset.path.exists(), "Too-recently-archived dataset"
+
+    assert test_dataset.get_index_record() is not None
+    assert other_dataset.get_index_record() is not None
+
+    exe_opts = ['--check-ancestors']
+
+    timerange = ["time in 2018"]
+    exe_opts.extend(timerange)
+
+    assert_click_command(coherence.main, exe_opts)
+
+
+def test_archive_siblings(test_dataset: DatasetForTests,
+                          other_dataset: DatasetForTests):
+    """
+    Test dea-coherence --archive-siblings command option
+    """
+    # Source dataset
+    test_dataset.add_to_index()
+    other_dataset.add_to_index()
+
+    # Change the UUID for dataset on disk so that we have a duplicate siblings scenario
+    shutil.rmtree(test_dataset.copyable_path)
+    shutil.copytree(other_dataset.copyable_path, test_dataset.copyable_path)
+
+    # Index the updated test datasets (siblings)
+    test_dataset.add_location(str(other_dataset.copyable_path))
+
+    exe_opts = ['--archive-siblings']
+
+    timerange = ["time in 2018"]
+    exe_opts.extend(timerange)
+
+    assert_click_command(coherence.main, exe_opts)
+
+    assert other_dataset.path.exists(), "Dataset archived long time ago"
+    assert test_dataset.path.exists(), "Too-recently-archived dataset"
+
+    assert test_dataset.get_index_record() is not None
+    assert other_dataset.get_index_record() is not None
+
+
+def test_archive_locationless(test_dataset: DatasetForTests,
+                              other_dataset: DatasetForTests):
+    """
+    Test dea-coherence --archive-locationless command option
+    """
+    # Source dataset
+    test_dataset.add_to_index()
+    other_dataset.add_to_index()
+
+    # Archive location
+    test_dataset.archive_location_in_index()
+    other_dataset.archive_location_in_index()
+
+    exe_opts = ['--archive-locationless']
+
+    timerange = ["time in 2018"]
+    exe_opts.extend(timerange)
+
+    assert_click_command(coherence.main, exe_opts)
+
+    assert other_dataset.path.exists(), "Dataset archived long time ago"
+    assert test_dataset.path.exists(), "Too-recently-archived dataset"
+
+    assert test_dataset.get_index_record() is not None
+    assert other_dataset.get_index_record() is not None
