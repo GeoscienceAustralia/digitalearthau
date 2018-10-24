@@ -29,7 +29,9 @@ PRODUCT_TYPE_LIST = ['ls5_satellite_telemetry_data', 'ls5_level1_scene', 'ls5_nb
                      'wofs_albers']
 
 # Ignore sibling check for the listed products
-IGNORE_SIBLINGS = ['dsm1sv10']
+IGNORE_SIBLINGS = ['ls5_nbar_albers', 'ls5_nbart_albers', 'ls5_pq_albers',
+                   'ls7_nbar_albers', 'ls7_nbart_albers', 'ls7_pq_albers',
+                   'ls8_nbar_albers', 'ls8_nbart_albers', 'ls8_pq_albers', 'dsm1sv10']
 
 
 @click.group(help=__doc__)
@@ -180,7 +182,8 @@ def _check_ancestors(check_siblings: bool,
                     source_type=classifier,
                     source_dataset_id=str(source_dataset.id)
                 )
-            elif (str(source_dataset.type.name) not in IGNORE_SIBLINGS) and (check_siblings or archive_siblings):
+            elif (str(source_dataset.type.name) not in IGNORE_SIBLINGS) and \
+                 (check_siblings or archive_siblings):
                 # If a source dataset has other siblings they may be duplicates.
                 # (this only applies to source products that are 1:1 with
                 # descendants, not pass-to-scene or scene-to-tile conversions)
@@ -191,7 +194,9 @@ def _check_ancestors(check_siblings: bool,
                     s for s in siblings
                     if s != dataset and not s.is_archived and s.type == dataset.type
                 ]
-                if siblings:
+
+                # Do not process/check siblings for nbar/nbart/pq albers products
+                if siblings and (str(dataset.type.name) not in IGNORE_SIBLINGS):
                     _siblings_count += 1
                     sibling_ids = [str(d.id) for d in siblings]
                     _LOG.info(str(dataset.type.name) + ".siblings.exists.dry_run",
