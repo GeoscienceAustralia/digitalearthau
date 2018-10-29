@@ -2,6 +2,8 @@
 Products Available on Amazon S3
 ===============================
 
+Last update: 4th October 2018
+
 
 Sentinel 2 Near Real Time (Stable)
 ----------------------------------
