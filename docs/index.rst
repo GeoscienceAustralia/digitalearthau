@@ -36,6 +36,7 @@ Publicly available data access and web services are currently in development.
 
    connect/account.rst
    connect/install.rst
+   connect/get_help.rst
    connect/nci_basics.rst
    connect/jupyter.rst
    internal/other_modules.rst
