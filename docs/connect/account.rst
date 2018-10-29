@@ -29,9 +29,3 @@ basis. This does not need to be specific to DEA – all users with computing
 capabilities on Raijin are able to access DEA through the HPC system.
 
 This guide focuses on accessing and exploring DEA via the VDI environment.
-
-Getting help
-============
-
-`Join our Slack community <http://slack.opendatacube.org/>`_ if you need help
-setting up or using DEA.
