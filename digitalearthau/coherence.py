@@ -1,50 +1,34 @@
-import collections
 import click
+import collections
 import csv
-from datetime import datetime as dt
-from pathlib import Path
 import structlog
 
 from datacube import Datacube
 from datacube.model import Dataset
 from datacube.ui import click as ui
-from digitalearthau import uiutil
+from datetime import datetime as dt
+from digitalearthau import uiutil, collections
+from pathlib import Path
 
 _LOG = structlog.getLogger('dea-coherence')
-_dataset_count, _siblings_count, _locationless_count, _archive_count = 0, 0, 0, 0
-_downstream_dataset_count, _downstream_summary_prod_count = 0, 0
+_dataset_cnt, _ancestor_cnt, _locationless_cnt, _duplicates_cnt = 0, 0, 0, 0
+_downstream_dataset_cnt = 0
+_product_type_list = []
 
-# Product list containing Telemetry, Level1, Level2, NBAR, PQ, PQ_Legacy, WOfS, FC products
-# Level1_Scene datasets are expected not to have any locations (in future)
-PRODUCT_TYPE_LIST = ['ls5_satellite_telemetry_data', 'ls5_level1_scene', 'ls5_nbar_scene', 'ls5_nbart_scene',
-                     'ls5_pq_scene', 'ls5_pq_legacy_scene', 'ls5_nbar_albers', 'ls5_nbart_albers',
-                     'ls5_pq_albers', 'ls5_fc_albers',
-                     'ls7_satellite_telemetry_data', 'ls7_level1_scene', 'ls7_nbar_scene', 'ls7_nbart_scene',
-                     'ls7_pq_scene', 'ls7_pq_legacy_scene', 'ls7_nbar_albers', 'ls7_nbart_albers',
-                     'ls7_pq_albers', 'ls7_fc_albers',
-                     'ls8_satellite_telemetry_data', 'ls8_level1_scene', 'ls8_level1_oli_scene', 'ls8_nbar_scene',
-                     'ls8_nbart_scene', 'ls8_pq_scene', 'ls8_pq_legacy_scene', 'ls8_nbar_oli_scene',
-                     'ls8_nbart_oli_scene', 'ls8_pq_oli_scene', 'ls8_nbar_albers', 'ls8_nbart_albers', 'ls8_pq_albers',
-                     'ls8_nbar_oli_albers', 'ls8_nbart_oli_albers', 'ls8_fc_albers',
-                     'wofs_albers']
-
-# Ignore --check-sibling/--check-ancestors for the listed products
-IGNORE_SIBLINGS = ['ls5_nbar_albers', 'ls5_nbart_albers', 'ls5_pq_albers',
-                   'ls7_nbar_albers', 'ls7_nbart_albers', 'ls7_pq_albers',
-                   'ls8_nbar_albers', 'ls8_nbart_albers', 'ls8_pq_albers', 'dsm1sv10']
+# Product list containing Level2_Scenes, NBAR, PQ, PQ_Legacy, WOfS, FC products
+IGNORE_PRODUCT_TYPE_LIST = ['telemetry', 'ls8_level1_scene', 'ls7_level1_scene',
+                            'ls5_level1_scene', 'pq_count_summary',
+                            'pq_count_annual_summary']
 
 DATE_NOW = dt.now().strftime('%Y-%m-%d')
 TIME_NOW = dt.now().strftime('%H-%M-%S')
 
 DEFAULT_CSV_PATH = '/g/data/v10/work/coherence/{0}/erroneous_datasets_{1}.csv'.format(DATE_NOW, TIME_NOW)
+path = Path(DEFAULT_CSV_PATH)
+path.parent.mkdir(parents=True, exist_ok=True)
 
 
-@click.group(help=__doc__)
-def cli():
-    pass
-
-
-@cli.command()
+@click.command()
 @click.option('--check-locationless/--no-check-locationless',
               is_flag=True,
               default=False,
@@ -57,35 +41,32 @@ def cli():
               is_flag=True,
               default=False,
               help='Check if ancestor/source datasets are still active/valid')
-@click.option('--check-siblings',
+@click.option('--check-downstream',
               is_flag=True,
               default=False,
-              help='Check if ancestor datasets have other children of the same type (they may be duplicates)')
-@click.option('--check-downstream-ds',
+              help='Check if archived parent or locationless parent have children (downstream)')
+@click.option('--check-duplicates',
               is_flag=True,
               default=False,
-              help='Check if downstream datasets have their ancestor datasets archived')
-@click.option('--archive-siblings',
-              is_flag=True,
-              default=False,
-              help="Archive sibling datasets (forces --check-ancestors)")
+              help="Check for duplicate datasets")
 @click.option('--test-dc-config', '-C',
               default=None,
               help='Custom datacube config file (testing purpose only)')
 @ui.parsed_search_expressions
-def main(expressions, check_locationless, archive_locationless, check_ancestors, check_siblings, check_downstream_ds,
-         archive_siblings, test_dc_config):
+def main(expressions, check_locationless, archive_locationless, check_ancestors,
+         check_downstream, check_duplicates, test_dc_config):
     """
     Find problem datasets using the index.
 
     - Datasets with no active locations (can be archived with --archive-locationless)
     - Datasets whose ancestors have been archived. (perhaps they've been reprocessed?)
-    - Downstream datasets linked to locationless source datasets (datasets deleted from the disc and regenerated again
-      for reprocessing)
+    - Downstream datasets linked to locationless source datasets (datasets deleted from the disc and
+      regenerated again for reprocessing)
            ex. derived albers files whose source dataset/s have been archived by sync tool
                  LS7_ETM_NBART_P54_GANBART01-002_112_082_20180910 (Archived)
                    |----- LS7_ETM_NBART_3577_-14_-35_20180910020329500000_v1537611829.nc (Active)
                    |----- LS7_ETM_NBART_3577_-14_-36_20180910020329500000_v1537611829.nc (Active)
+    - Duplicate datasets that should not be in the database
 
     Intended to be used after running sync: when filesystem and index is consistent. Ideally
     you've synced the ancestor collections too.
@@ -95,8 +76,8 @@ def main(expressions, check_locationless, archive_locationless, check_ancestors,
     TODO: This could be merged into it as a post-processing step, although it's less safe than sync if
     TODO: the index is being updated concurrently by another
     """
-    global _dataset_count, _siblings_count, _locationless_count, _archive_count
-    global _downstream_dataset_count, _downstream_summary_prod_count
+    global _dataset_cnt, _ancestor_cnt, _locationless_cnt, _archive_locationless_cnt
+    global _downstream_dataset_cnt, _product_type_list
     uiutil.init_logging()
 
     # Write the header to the CSV file
@@ -104,189 +85,178 @@ def main(expressions, check_locationless, archive_locationless, check_ancestors,
         _LOG.info("Coherence log is stored in a CSV file",
                   path=Path(DEFAULT_CSV_PATH).absolute())
         writer = csv.writer(csvfile)
-        writer.writerow(('Category', 'Dataset_ID', 'Type', 'Is_Active', 'Is_Archived',
-                         'Format', 'Location', 'sibling_ids'))
+        writer.writerow(('Category', 'Dataset_Type', 'Dataset_ID', 'Is_Dataset_Archived',
+                         'Parent_Type', 'Parent_ID', 'Is_Parent_Archived',
+                         'Dataset_Location'))
 
     with Datacube(config=test_dc_config) as dc:
+        collections.init_nci_collections(dc.index)
+        _product_type_list = collections.registered_collection_names()
+
+        # collections.registered_collection_names is not fetching nbart_scenes. Hence add them to the list
+        _product_type_list.extend(['ls5_nbart_scene', 'ls7_nbart_scene', 'ls8_nbart_scene'])
+
         _LOG.info('query', query=expressions)
         for dataset in dc.index.datasets.search(**expressions):
-            _dataset_count += 1
+            _dataset_cnt += 1
             # Archive if it has no locations.
             # (the sync tool removes locations that don't exist anymore on disk,
             # but can't archive datasets as another path may be added later during the sync)
             if check_locationless or archive_locationless:
-                if dataset.uris is not None and len(dataset.uris) == 0:
-                    _locationless_count += 1
+                _product_type_list = [x for x in _product_type_list if x not in IGNORE_PRODUCT_TYPE_LIST]
+
+                # Level1 scenes are expected not to have location
+                if len(dataset.uris) == 0 and str(dataset.type.name) in _product_type_list:
+                    _locationless_cnt += 1
 
                     if archive_locationless:
                         dc.index.datasets.archive([dataset.id])
-                        _archive_count += 1
-                        _LOG.info("locationless." + str(dataset.type.name) + ".archived", dataset_id=str(dataset.id))
+                        _archive_locationless_cnt += 1
+                        _LOG.info(f"locationless.{dataset.type.name}.archived", dataset_id=str(dataset.id))
                     else:
-                        _LOG.info("locationless." + str(dataset.type.name) + ".dry_run", dataset_id=str(dataset.id))
+                        _LOG.info(f"locationless.{dataset.type.name}", dataset_id=str(dataset.id))
 
                     # Log derived product with locationless datasets, to the CSV file
-                    _log_to_csvfile('locationless_ds', dataset)
+                    _log_to_csvfile(f"locationless.{dataset.type.name}", dataset)
 
-            # If an ancestor is archived, it may have been replaced. This one may need
-            # to be reprocessed too.
-            if check_ancestors or archive_siblings or check_siblings:
-                _check_ancestors(check_siblings, archive_siblings, dc, dataset)
+            # Check for ancestors
+            if check_ancestors:
+                _check_ancestors(dc, dataset)
 
-            # If downstream/derived datasets are linked to source datasets with archived locations, identify those
-            # datasets and take appropriate action (archive downstream datasets)
-            if check_downstream_ds:
+            # Check for duplicate datasets that exists in the database
+            # TODO: For now, only list duplicate datasets.
+            if check_duplicates and str(dataset.type.name) in _product_type_list:
+                _check_duplicates(dc, dataset)
+
+            # If downstream/derived datasets are linked to archived parent or locationless parent, identify
+            # those datasets and take appropriate action (archive downstream datasets)
+            # TODO: For now, only list downstream datasets.
+            if check_downstream:
                 _manage_downstream_ds(dc, dataset)
 
         _LOG.info("coherence.finish",
-                  datasets_count=_dataset_count,
-                  locationless_count=_locationless_count,
-                  siblings_count=_siblings_count,
-                  archived_count=_archive_count,
-                  bad_downstream_dataset_count=_downstream_dataset_count,
-                  bad_downstream_summary_prod_count=_downstream_summary_prod_count)
+                  datasets_count=_dataset_cnt,
+                  archived_ancestor_count=_ancestor_cnt,
+                  locationless_count=_locationless_cnt,
+                  archived_locationless_cnt=_archive_locationless_cnt,
+                  duplicates_count=_duplicates_cnt,
+                  downstream_dataset_error_count=_downstream_dataset_cnt)
 
 
-def _archive_duplicate_siblings(dc, ids):
-    """Archive old versions of duplicate datasets.
-
-    When given a list of duplicate sibling datasets, keep the most recently
-    indexed one and delete all the older ones.
-
-    Return the number of archived duplicates.
-    """
-    # Look up the indexed time for each datset and store in a dict
-    id_to_index_time = {ds_id: dc.index.datasets.get(ds_id).indexed_time
-                        for ds_id in ids}
-
-    # Sort by indexed time, and split into [newest : older_duplicates]
-    newest_ds, *older_duplicates = collections.OrderedDict(sorted(id_to_index_time.items(),
-                                                                  key=lambda t: t[1],
-                                                                  reverse=True))
-
-    dc.index.datasets.archive(older_duplicates)
-
-    _LOG.info("dataset_id.archived", ids=older_duplicates)
-    _LOG.info("dataset_id.kept", id=newest_ds)
-
-    return len(older_duplicates)
-
-
-def _check_ancestors(check_siblings: bool,
-                     archive_siblings: bool,
-                     dc: Datacube,
+def _check_ancestors(dc: Datacube,
                      dataset: Dataset):
-    global _siblings_count, _archive_count
+    global _ancestor_cnt
 
     dataset = dc.index.datasets.get(dataset.id, include_sources=True)
     if dataset.sources:
         for classifier, source_dataset in dataset.sources.items():
             if source_dataset.is_archived:
                 _LOG.info(
-                    "ancestor." + str(dataset.type.name) + ".dry_run",
+                    f"ancestor.{source_dataset.type.name}.{dataset.type.name}",
                     dataset_id=str(dataset.id),
-                    source_type=classifier,
-                    source_dataset_id=str(source_dataset.id)
+                    archived_parent_type=str(source_dataset.type.name),
+                    archived_parent_id=str(source_dataset.id)
                 )
-            elif (str(source_dataset.type.name) not in IGNORE_SIBLINGS) and \
-                 (check_siblings or archive_siblings):
-                # If a source dataset has other siblings they may be duplicates.
-                # (this only applies to source products that are 1:1 with
-                # descendants, not pass-to-scene or scene-to-tile conversions)
-                siblings = dc.index.datasets.get_derived(source_dataset.id)
+                _ancestor_cnt += 1
 
-                # Only active siblings of the same type.
-                siblings = [
-                    s for s in siblings
-                    if s != dataset and not s.is_archived and s.type == dataset.type
-                ]
+                # Log ancestor datasets to the CSV file
+                _log_to_csvfile(f"ancestor.{source_dataset.type.name}.{dataset.type.name}",
+                                dataset,
+                                source_dataset)
 
-                # Do not process/check siblings for nbar/nbart/pq albers products
-                if siblings and (str(dataset.type.name) not in IGNORE_SIBLINGS):
-                    _siblings_count += 1
-                    sibling_ids = [str(d.id) for d in siblings]
-                    _LOG.info(str(dataset.type.name) + ".siblings.exists.dry_run",
-                              dataset_id=str(dataset.id),
-                              siblings=sibling_ids)
 
-                    # Choose the most recent sibling and archive others
-                    if archive_siblings:
-                        _archive_count += _archive_duplicate_siblings(dc, sibling_ids + [str(dataset.id)])
+def _get_dupes(index, product):
+    for group, dataset_ids in index.datasets.search_product_duplicates(product):
+        values = (product.name,) + (group,) + (dataset_ids,)
+        yield dict(zip(values))
 
-                    # Log datasets containing sibling to the csv file
-                    _log_to_csvfile('ds_with_siblings', dataset, sibling_ids)
+
+def _check_duplicates(dc: Datacube, dataset: Dataset):
+    global _product_type_list, _duplicates_cnt
+
+    duplicates = _get_dupes(dc.index, dataset.type)
+
+    if duplicates:
+        for d in duplicates:
+            _LOG.info(f"parent.{dataset.type.name}.duplicate.{d.type.name}",
+                      dataset_id=str(dataset.id),
+                      duplicate_id=d.id)
+        _duplicates_cnt += 1
 
 
 def _manage_downstream_ds(dc: Datacube,
                           dataset: Dataset):
     """
     Need to manage the following two scenarios, with locationless source datasets:
-       1) Identify and list all the downstream datasets (may include level2, NBAR, PQ, Albers, WOfS, FC) that are either
+       1) Identify and list all the downstream datasets (may include level2, NBAR, PQ, Albers, WOfS, FC)
+          that are either Active or Archived.
+       2) Identify and list all the downstream datasets (includes summary products) that are either
           Active or Archived.
-       2) Identify and list all the downstream datasets (includes summary products) that are either Active or Archived.
     """
+    global _product_type_list
 
     # Fetch all the derived datasets using the source dataset.
-    derived_dataset = _fetch_derived_datasets(dataset, dc)
+    derived_datasets = _fetch_derived_datasets(dataset, dc)
 
-    for dataset_list in derived_dataset:
-        for d in dataset_list:
-            if d.uris is None:
-                # Log locationless source dataset to the CSV file
-                _log_to_csvfile('locationless_ds', dataset)
-
-                # Fetch all downstream datasets and append to the list
-                _process_bad_derived_datasets(dataset, d, _fetch_derived_datasets(d, dc))
+    for d in derived_datasets:
+        # Find locationless datasets and they are not telemetry/level1 scenes.
+        if len(d.uris) == 0 and str(d.type.name) in _product_type_list:
+            # Fetch all downstream datasets associated with locationless parent
+            # and append to the list
+            _process_derived_datasets(dataset, d, _fetch_derived_datasets(d, dc))
 
 
-def _process_bad_derived_datasets(source_ds, dataset, derived_dataset):
-    global _downstream_dataset_count, _downstream_summary_prod_count
+def _process_derived_datasets(source_ds, dataset, derived_datasets):
+    global _downstream_dataset_cnt, _product_type_list
+    _downstream_dataset_cnt += 1
 
-    _LOG.info("locationless." + str(source_ds.type.name) + ".dry_run (Dataset ID: %s)" % str(source_ds.id),
+    # Log locationless parent or ancestor parent to the CSV file
+    if dataset.is_archived:
+        _parent = "archived"
+    else:
+        _parent = "locationless"
+
+    _LOG.info(f"{_parent}.{dataset.type.name}",
               downstream_dataset_id=str(dataset.id),
               downstream_dataset_type=str(dataset.type.name),
               downstream_dataset_location=str(dataset.uris))
-    _downstream_dataset_count += 1
 
-    for dataset_list in derived_dataset:
-        for d_datasets in dataset_list:
-            # Exclude derived products such as summary products, FC_percentile products, etc.
-            if d_datasets.type.name in PRODUCT_TYPE_LIST:
-                _LOG.info("downstream." + str(dataset.type.name) + ".dry_run (Dataset ID: %s)" % str(dataset.id),
-                          downstream_dataset_id=str(d_datasets.id),
-                          downstream_dataset_type=str(d_datasets.type.name),
-                          downstream_dataset_location=str(d_datasets.uris))
-                _downstream_dataset_count += 1
+    _log_to_csvfile(f"{_parent}.{dataset.type.name}", dataset, source_ds)
 
-                # Log downstream datasets linked to locationless source datasets, to the CSV file
-                _log_to_csvfile('downstream_ds_linked_to_locationless_source', dataset)
-            else:
-                _LOG.info("derived." + str(dataset.type.name) + ".dry_run (Dataset ID: %s)" % str(dataset.id),
-                          downstream_dataset_id=str(d_datasets.id),
-                          dataset_type=str(d_datasets.type.name))
-                _downstream_summary_prod_count += 1
+    for d_dataset in derived_datasets:
+        # Exclude derived products such as summary products, FC_percentile products, etc.
+        if d_dataset.type.name in _product_type_list:
+            _LOG.info(f"{_parent}.parent.{dataset.type.name}.derived.{d_dataset.type.name}",
+                      downstream_dataset_id=str(d_dataset.id),
+                      downstream_dataset_type=str(d_dataset.type.name),
+                      downstream_dataset_location=str(d_dataset.uris))
+            _downstream_dataset_cnt += 1
 
-                # Log downstream datasets linked to locationless source dataset, to the CSV file
-                _log_to_csvfile('derived_products_linked_to_locationless_source', d_datasets)
+            # Log downstream datasets linked to locationless source datasets, to the CSV file
+            _log_to_csvfile(
+                f"{_parent}.parent.{dataset.type.name}.derived.{d_dataset.type.name}",
+                d_dataset,
+                dataset)
 
 
 def _fetch_derived_datasets(dataset, dc):
     to_process = {dataset.id}
-    derived_dataset = collections.deque({})
+    derived_datasets = set()
 
     while to_process:
         derived = dc.index.datasets.get_derived(to_process.pop())
         to_process.update(d.id for d in derived)
-        derived_dataset.append(derived)
+        derived_datasets.update(derived)
 
-    return derived_dataset
+    return derived_datasets
 
 
-def _log_to_csvfile(click_options, d, siblings=None):
+def _log_to_csvfile(click_options, d, parent=None):
     # Store the coherence result log in a csv file
     with open(DEFAULT_CSV_PATH, 'a', newline='') as csvfile:
         writer = csv.writer(csvfile)
-        writer.writerow((click_options, d.id, d.type.name, d.is_active, d.is_archived, d.format, d.uris, siblings))
+        writer.writerow((click_options, d.type.name, d.id, d.is_archived,
+                         parent.type.name, parent.id, parent.is_archived, d.uris))
 
 
 if __name__ == '__main__':
