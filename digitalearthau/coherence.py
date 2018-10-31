@@ -24,8 +24,6 @@ DATE_NOW = dt.now().strftime('%Y-%m-%d')
 TIME_NOW = dt.now().strftime('%H-%M-%S')
 
 DEFAULT_CSV_PATH = '/g/data/v10/work/coherence/{0}/erroneous_datasets_{1}.csv'.format(DATE_NOW, TIME_NOW)
-path = Path(DEFAULT_CSV_PATH)
-path.parent.mkdir(parents=True, exist_ok=True)
 
 
 @click.command()
