@@ -24,6 +24,8 @@ DATE_NOW = dt.now().strftime('%Y-%m-%d')
 TIME_NOW = dt.now().strftime('%H-%M-%S')
 
 DEFAULT_CSV_PATH = '/g/data/v10/work/coherence/{0}/erroneous_datasets_{1}.csv'.format(DATE_NOW, TIME_NOW)
+path = Path(DEFAULT_CSV_PATH)
+path.parent.mkdir(parents=True, exist_ok=True)
 
 
 @click.command()
@@ -72,9 +74,6 @@ def main(expressions, check_locationless, archive_locationless, check_ancestors,
     global _dataset_cnt, _ancestor_cnt, _locationless_cnt, _archive_locationless_cnt
     global _downstream_dataset_cnt, _product_type_list
     uiutil.init_logging()
-
-    path = Path(DEFAULT_CSV_PATH)
-    path.parent.mkdir(parents=True, exist_ok=True)
 
     # Write the header to the CSV file
     with open(DEFAULT_CSV_PATH, 'w', newline='') as csvfile:
