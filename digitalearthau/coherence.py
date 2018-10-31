@@ -11,7 +11,7 @@ from digitalearthau import uiutil, collections
 from pathlib import Path
 
 _LOG = structlog.getLogger('dea-coherence')
-_dataset_cnt, _ancestor_cnt, _locationless_cnt, _duplicates_cnt = 0, 0, 0, 0
+_dataset_cnt, _ancestor_cnt, _locationless_cnt = 0, 0, 0
 _downstream_dataset_cnt = 0
 _product_type_list = []
 
@@ -24,8 +24,6 @@ DATE_NOW = dt.now().strftime('%Y-%m-%d')
 TIME_NOW = dt.now().strftime('%H-%M-%S')
 
 DEFAULT_CSV_PATH = '/g/data/v10/work/coherence/{0}/erroneous_datasets_{1}.csv'.format(DATE_NOW, TIME_NOW)
-path = Path(DEFAULT_CSV_PATH)
-path.parent.mkdir(parents=True, exist_ok=True)
 
 
 @click.command()
@@ -45,16 +43,12 @@ path.parent.mkdir(parents=True, exist_ok=True)
               is_flag=True,
               default=False,
               help='Check if archived parent or locationless parent have children (downstream)')
-@click.option('--check-duplicates',
-              is_flag=True,
-              default=False,
-              help="Check for duplicate datasets")
 @click.option('--test-dc-config', '-C',
               default=None,
               help='Custom datacube config file (testing purpose only)')
 @ui.parsed_search_expressions
 def main(expressions, check_locationless, archive_locationless, check_ancestors,
-         check_downstream, check_duplicates, test_dc_config):
+         check_downstream, test_dc_config):
     """
     Find problem datasets using the index.
 
@@ -66,7 +60,6 @@ def main(expressions, check_locationless, archive_locationless, check_ancestors,
                  LS7_ETM_NBART_P54_GANBART01-002_112_082_20180910 (Archived)
                    |----- LS7_ETM_NBART_3577_-14_-35_20180910020329500000_v1537611829.nc (Active)
                    |----- LS7_ETM_NBART_3577_-14_-36_20180910020329500000_v1537611829.nc (Active)
-    - Duplicate datasets that should not be in the database
 
     Intended to be used after running sync: when filesystem and index is consistent. Ideally
     you've synced the ancestor collections too.
@@ -79,6 +72,11 @@ def main(expressions, check_locationless, archive_locationless, check_ancestors,
     global _dataset_cnt, _ancestor_cnt, _locationless_cnt, _archive_locationless_cnt
     global _downstream_dataset_cnt, _product_type_list
     uiutil.init_logging()
+
+    path = Path(DEFAULT_CSV_PATH)
+
+    if not path.exists():
+        path.parent.mkdir(parents=True, exist_ok=True)
 
     # Write the header to the CSV file
     with open(DEFAULT_CSV_PATH, 'w', newline='') as csvfile:
@@ -123,11 +121,6 @@ def main(expressions, check_locationless, archive_locationless, check_ancestors,
             if check_ancestors:
                 _check_ancestors(dc, dataset)
 
-            # Check for duplicate datasets that exists in the database
-            # TODO: For now, only list duplicate datasets.
-            if check_duplicates and str(dataset.type.name) in _product_type_list:
-                _check_duplicates(dc, dataset)
-
             # If downstream/derived datasets are linked to archived parent or locationless parent, identify
             # those datasets and take appropriate action (archive downstream datasets)
             # TODO: For now, only list downstream datasets.
@@ -139,7 +132,6 @@ def main(expressions, check_locationless, archive_locationless, check_ancestors,
                   archived_ancestor_count=_ancestor_cnt,
                   locationless_count=_locationless_cnt,
                   archived_locationless_cnt=_archive_locationless_cnt,
-                  duplicates_count=_duplicates_cnt,
                   downstream_dataset_error_count=_downstream_dataset_cnt)
 
 
@@ -152,7 +144,7 @@ def _check_ancestors(dc: Datacube,
         for classifier, source_dataset in dataset.sources.items():
             if source_dataset.is_archived:
                 _LOG.info(
-                    f"ancestor.{source_dataset.type.name}.{dataset.type.name}",
+                    f"archived.parent.{source_dataset.type.name}.derived.{dataset.type.name}",
                     dataset_id=str(dataset.id),
                     archived_parent_type=str(source_dataset.type.name),
                     archived_parent_id=str(source_dataset.id)
@@ -160,28 +152,9 @@ def _check_ancestors(dc: Datacube,
                 _ancestor_cnt += 1
 
                 # Log ancestor datasets to the CSV file
-                _log_to_csvfile(f"ancestor.{source_dataset.type.name}.{dataset.type.name}",
+                _log_to_csvfile(f"archived.parent.{source_dataset.type.name}.derived.{dataset.type.name}",
                                 dataset,
                                 source_dataset)
-
-
-def _get_dupes(index, product):
-    for group, dataset_ids in index.datasets.search_product_duplicates(product):
-        values = (product.name,) + (group,) + (dataset_ids,)
-        yield dict(zip(values))
-
-
-def _check_duplicates(dc: Datacube, dataset: Dataset):
-    global _product_type_list, _duplicates_cnt
-
-    duplicates = _get_dupes(dc.index, dataset.type)
-
-    if duplicates:
-        for d in duplicates:
-            _LOG.info(f"parent.{dataset.type.name}.duplicate.{d.type.name}",
-                      dataset_id=str(dataset.id),
-                      duplicate_id=d.id)
-        _duplicates_cnt += 1
 
 
 def _manage_downstream_ds(dc: Datacube,

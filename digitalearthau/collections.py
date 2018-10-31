@@ -198,7 +198,7 @@ def init_nci_collections(index: Index):
             file_patterns=(
                 '/g/data/v10/repackaged/rawdata/0/[0-9][0-9][0-9][0-9]/[0-9][0-9]/LS*/ga-metadata.yaml',
             ),
-            unique=('time.lower.day', 'platform'),
+            unique=('time', 'platform'),
             index_=index,
             trust=Trust.DISK
         )
@@ -211,7 +211,7 @@ def init_nci_collections(index: Index):
             query,
             file_patterns=file_patterns,
             index_=index,
-            unique=('time.lower.day', 'sat_path.lower', 'sat_row.lower'),
+            unique=('time', 'sat_path', 'sat_row'),
             delete_archived_after_days=delete_archived_after_days,
             # Scenes default to trusting disk. They're atomically written to the destination,
             # and the jobs themselves wont index.
@@ -250,11 +250,39 @@ def init_nci_collections(index: Index):
     #           LS7_ETM_NBAR_P54_GANBAR01-002_089_078_20040816/ga-metadata.yaml
     # /g/data/rs0/scenes/nbar-scenes-tmp/ls7/2004/07/output/nbart/
     #           LS7_ETM_NBART_P54_GANBART01-002_114_078_20040731/ga-metadata.yaml
-    nbar_scene_offset = '[0-9][0-9][0-9][0-9]/[0-9][0-9]/output/nbar*/LS*/ga-metadata.yaml'
+    nbart_scene_offset = '[0-9][0-9][0-9][0-9]/[0-9][0-9]/output/nbart/LS*/ga-metadata.yaml'
+    _add(
+        scene_collection(
+            name='ls5_nbart_scene',
+            query={'product': 'ls5_nbart_scene'},
+            file_patterns=[
+                '/g/data/rs0/scenes/nbar-scenes-tmp/ls5/' + nbart_scene_offset,
+                '/short/v10/scenes/nbar-scenes-tmp/ls5/' + nbart_scene_offset,
+            ],
+        ),
+        scene_collection(
+            name='ls7_nbart_scene',
+            query={'product': 'ls7_nbart_scene'},
+            file_patterns=[
+                '/g/data/rs0/scenes/nbar-scenes-tmp/ls7/' + nbart_scene_offset,
+                '/short/v10/scenes/nbar-scenes-tmp/ls7/' + nbart_scene_offset,
+            ],
+        ),
+        scene_collection(
+            name='ls8_nbart_scene',
+            query={'product': 'ls8_nbart_scene'},
+            file_patterns=[
+                '/g/data/rs0/scenes/nbar-scenes-tmp/ls8/' + nbart_scene_offset,
+                '/short/v10/scenes/nbar-scenes-tmp/ls8/' + nbart_scene_offset,
+            ],
+        )
+    )
+
+    nbar_scene_offset = '[0-9][0-9][0-9][0-9]/[0-9][0-9]/output/nbar/LS*/ga-metadata.yaml'
     _add(
         scene_collection(
             name='ls5_nbar_scene',
-            query={'product': ['ls5_nbar_scene', 'ls5_nbart_scene']},
+            query={'product': 'ls5_nbar_scene'},
             file_patterns=[
                 '/g/data/rs0/scenes/nbar-scenes-tmp/ls5/' + nbar_scene_offset,
                 '/short/v10/scenes/nbar-scenes-tmp/ls5/' + nbar_scene_offset,
@@ -262,7 +290,7 @@ def init_nci_collections(index: Index):
         ),
         scene_collection(
             name='ls7_nbar_scene',
-            query={'product': ['ls7_nbar_scene', 'ls7_nbart_scene']},
+            query={'product': 'ls7_nbar_scene'},
             file_patterns=[
                 '/g/data/rs0/scenes/nbar-scenes-tmp/ls7/' + nbar_scene_offset,
                 '/short/v10/scenes/nbar-scenes-tmp/ls7/' + nbar_scene_offset,
@@ -270,7 +298,7 @@ def init_nci_collections(index: Index):
         ),
         scene_collection(
             name='ls8_nbar_scene',
-            query={'product': ['ls8_nbar_scene', 'ls8_nbart_scene']},
+            query={'product': 'ls8_nbar_scene'},
             file_patterns=[
                 '/g/data/rs0/scenes/nbar-scenes-tmp/ls8/' + nbar_scene_offset,
                 '/short/v10/scenes/nbar-scenes-tmp/ls8/' + nbar_scene_offset,
@@ -344,7 +372,7 @@ def init_nci_collections(index: Index):
                     'LS5_TM_{name}/*_*/LS5*{name}*.nc'.format(project=project,
                                                               name=name.upper()),
                 ),
-                unique=('time.lower.day', 'lat', 'lon'),
+                unique=('time', 'lat', 'lon'),
                 index_=index,
                 # Tiles default to trusting index over the disk: they were indexed at the end of the job,
                 # so unfinished tiles could be left on disk.
@@ -358,7 +386,7 @@ def init_nci_collections(index: Index):
                     '*_*/LS7*{name}*.nc'.format(project=project,
                                                 name=name.upper()),
                 ),
-                unique=('time.lower.day', 'lat', 'lon'),
+                unique=('time', 'lat', 'lon'),
                 index_=index,
                 # Tiles default to trusting index over the disk: they were indexed at the end of the job,
                 # so unfinished tiles could be left on disk.
@@ -372,7 +400,7 @@ def init_nci_collections(index: Index):
                     '*_*/LS8*{name}*.nc'.format(project=project,
                                                 name=name.upper()),
                 ),
-                unique=('time.lower.day', 'lat', 'lon'),
+                unique=('time', 'lat', 'lon'),
                 index_=index,
                 # Tiles default to trusting index over the disk: they were indexed at the end of the job,
                 # so unfinished tiles could be left on disk.
@@ -389,7 +417,7 @@ def init_nci_collections(index: Index):
                     '/g/data/{project}/datacube/002/FC/'
                     'LS5_TM_FC/*_*/LS5*FC*.nc'.format(project=project),
                 ),
-                unique=('time.lower.day', 'lat', 'lon'),
+                unique=('time', 'lat', 'lon'),
                 index_=index,
                 # Tiles default to trusting index over the disk: they were indexed at the end of the job,
                 # so unfinished tiles could be left on disk.
@@ -402,7 +430,7 @@ def init_nci_collections(index: Index):
                     '/g/data/{project}/datacube/002/FC/'
                     'LS7_ETM_FC/*_*/LS7*FC*.nc'.format(project=project),
                 ),
-                unique=('time.lower.day', 'lat', 'lon'),
+                unique=('time', 'lat', 'lon'),
                 index_=index,
                 # Tiles default to trusting index over the disk: they were indexed at the end of the job,
                 # so unfinished tiles could be left on disk.
@@ -415,7 +443,7 @@ def init_nci_collections(index: Index):
                     '/g/data/{project}/datacube/002/FC/'
                     'LS8_OLI_FC/*_*/LS8*FC*.nc'.format(project=project),
                 ),
-                unique=('time.lower.day', 'lat', 'lon'),
+                unique=('time', 'lat', 'lon'),
                 index_=index,
                 # Tiles default to trusting index over the disk: they were indexed at the end of the job,
                 # so unfinished tiles could be left on disk.
@@ -430,7 +458,7 @@ def init_nci_collections(index: Index):
             name=name,
             query={'product': name},
             file_patterns=['/g/data/fk4/datacube/002/WOfS/WOfS_25_2_1/netcdf/*_*/LS_WATER_3577_*.nc'],
-            unique=('time.lower.day', 'lat', 'lon'),
+            unique=('time', 'lat', 'lon'),
             # Tiles default to trusting index over the disk: they were indexed at the end of the job,
             # so unfinished tiles could be left on disk.
             trust=Trust.INDEX
@@ -455,7 +483,7 @@ def init_nci_collections(index: Index):
             query={'product': 'pq_count_summary'},
             file_patterns=['/g/data/fk4/datacube/002/stats/pq_count/history/LS_PQ_COUNT/*_*/LS_PQ_COUNT_3577_*.nc'],
             index_=index,
-            unique=('time.lower.day', 'lat', 'lon')
+            unique=('time', 'lat', 'lon')
         )
     )
     _add(
@@ -464,7 +492,7 @@ def init_nci_collections(index: Index):
             query={'product': 'pq_count_annual_summary'},
             index_=index,
             file_patterns=['/g/data/fk4/datacube/002/stats/pq_count/annual/LS_PQ_COUNT/*_*/LS_PQ_COUNT_3577_*.nc'],
-            unique=('time.lower.day', 'lat', 'lon')
+            unique=('time', 'lat', 'lon')
         )
     )
 
