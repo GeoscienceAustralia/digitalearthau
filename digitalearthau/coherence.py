@@ -11,7 +11,7 @@ from digitalearthau import uiutil, collections
 from pathlib import Path
 
 _LOG = structlog.getLogger('dea-coherence')
-_dataset_cnt, _ancestor_cnt, _locationless_cnt = 0, 0, 0
+_dataset_cnt, _ancestor_cnt, _locationless_cnt, _archive_locationless_cnt = 0, 0, 0, 0
 _downstream_dataset_cnt = 0
 _product_type_list = []
 
@@ -74,9 +74,7 @@ def main(expressions, check_locationless, archive_locationless, check_ancestors,
     uiutil.init_logging()
 
     path = Path(DEFAULT_CSV_PATH)
-
-    if not path.exists():
-        path.parent.mkdir(parents=True, exist_ok=True)
+    path.parent.mkdir(parents=True, exist_ok=True)
 
     # Write the header to the CSV file
     with open(DEFAULT_CSV_PATH, 'w', newline='') as csvfile:

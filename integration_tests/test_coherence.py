@@ -60,36 +60,6 @@ def test_check_locationless(test_dataset: DatasetForTests,
     assert_click_command(coherence.main, exe_opts)
 
 
-def test_check_siblings(test_dataset: DatasetForTests,
-                        other_dataset: DatasetForTests):
-    """
-    Test dea-coherence --check-siblings command option
-    """
-    # Source dataset
-    test_dataset.add_to_index()
-    other_dataset.add_to_index()
-
-    # Change the UUID for dataset on disk so that we have a duplicate siblings scenario
-    shutil.rmtree(test_dataset.copyable_path)
-    shutil.copytree(other_dataset.copyable_path, test_dataset.copyable_path)
-
-    # Index the updated test datasets (siblings)
-    test_dataset.add_location(str(other_dataset.copyable_path))
-
-    assert other_dataset.path.exists(), "Dataset archived long time ago"
-    assert test_dataset.path.exists(), "Too-recently-archived dataset"
-
-    assert test_dataset.get_index_record() is not None
-    assert other_dataset.get_index_record() is not None
-
-    exe_opts = ['--check-siblings']
-
-    timerange = ["time in 2018"]
-    exe_opts.extend(timerange)
-
-    assert_click_command(coherence.main, exe_opts)
-
-
 def test_check_downstream_datasets(test_dataset: DatasetForTests,
                                    other_dataset: DatasetForTests):
     """
@@ -105,7 +75,7 @@ def test_check_downstream_datasets(test_dataset: DatasetForTests,
     all_indexed_uris = set(test_dataset.collection.iter_index_uris())
     assert all_indexed_uris == {test_dataset.uri, other_dataset.uri}, "Both uri should remain."
 
-    exe_opts = ['--check-downstream-ds']
+    exe_opts = ['--check-downstream']
 
     timerange = ["time in 2018"]
     exe_opts.extend(timerange)
@@ -138,36 +108,6 @@ def test_check_ancestors(test_dataset: DatasetForTests,
     exe_opts.extend(timerange)
 
     assert_click_command(coherence.main, exe_opts)
-
-
-def test_archive_siblings(test_dataset: DatasetForTests,
-                          other_dataset: DatasetForTests):
-    """
-    Test dea-coherence --archive-siblings command option
-    """
-    # Source dataset
-    test_dataset.add_to_index()
-    other_dataset.add_to_index()
-
-    # Change the UUID for dataset on disk so that we have a duplicate siblings scenario
-    shutil.rmtree(test_dataset.copyable_path)
-    shutil.copytree(other_dataset.copyable_path, test_dataset.copyable_path)
-
-    # Index the updated test datasets (siblings)
-    test_dataset.add_location(str(other_dataset.copyable_path))
-
-    exe_opts = ['--archive-siblings']
-
-    timerange = ["time in 2018"]
-    exe_opts.extend(timerange)
-
-    assert_click_command(coherence.main, exe_opts)
-
-    assert other_dataset.path.exists(), "Dataset archived long time ago"
-    assert test_dataset.path.exists(), "Too-recently-archived dataset"
-
-    assert test_dataset.get_index_record() is not None
-    assert other_dataset.get_index_record() is not None
 
 
 def test_archive_locationless(test_dataset: DatasetForTests,
