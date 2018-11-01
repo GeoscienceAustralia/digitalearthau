@@ -1,29 +1,29 @@
-import click
 import collections
 import csv
+from datetime import datetime as dt
+from pathlib import Path
+
+import click
 import structlog
 
 from datacube import Datacube
 from datacube.model import Dataset
 from datacube.ui import click as ui
-from datetime import datetime as dt
 from digitalearthau import uiutil, collections, paths
-from pathlib import Path
 
 _LOG = structlog.getLogger('dea-coherence')
 _dataset_cnt, _ancestor_cnt, _locationless_cnt, _archive_locationless_cnt = 0, 0, 0, 0
 _downstream_dataset_cnt = 0
-_product_type_list = []
+_PRODUCT_TYPE_LIST = []
 
 # Product list containing Level2_Scenes, NBAR, PQ, PQ_Legacy, WOfS, FC products
-IGNORE_PRODUCT_TYPE_LIST = ['telemetry', 'ls8_level1_scene', 'ls7_level1_scene',
-                            'ls5_level1_scene', 'pq_count_summary',
-                            'pq_count_annual_summary']
+IGNORED_PRODUCTS_LIST = ['telemetry', 'ls8_level1_scene', 'ls7_level1_scene',
+                         'ls5_level1_scene', 'pq_count_summary',
+                         'pq_count_annual_summary']
 
-DATE_NOW = dt.now().strftime('%Y-%m-%d')
-TIME_NOW = dt.now().strftime('%H-%M-%S')
+NOW = dt.now()
 
-DEFAULT_CSV_FILE = paths.NCI_WORK_ROOT.joinpath(Path(f"coherence/{DATE_NOW}/erroneous_datasets_{TIME_NOW}.csv"))
+DEFAULT_CSV_FILE = paths.NCI_WORK_ROOT / f"coherence/{NOW:%Y-%m-%d}/erroneous_datasets_{NOW:%H-%M-%S}.csv"
 
 
 @click.command()
@@ -67,14 +67,13 @@ def main(expressions, check_locationless, archive_locationless, check_ancestors,
     (the sync tool cannot do these checks "live", as we don't know how many locations there are of a dataset
     until the entire folder has been synced, and ideally the ancestors synced too.)
     TODO: This could be merged into it as a post-processing step, although it's less safe than sync if
-    TODO: the index is being updated concurrently by another
+    TODO: the index is being updated concurrently by another process
     """
     global _dataset_cnt, _ancestor_cnt, _locationless_cnt, _archive_locationless_cnt
-    global _downstream_dataset_cnt, _product_type_list
+    global _downstream_dataset_cnt, _PRODUCT_TYPE_LIST
     uiutil.init_logging()
 
-    if not DEFAULT_CSV_FILE.parent.exists():
-        DEFAULT_CSV_FILE.parent.mkdir(parents=True, exist_ok=True)
+    DEFAULT_CSV_FILE.parent.mkdir(parents=True, exist_ok=True)
 
     # Write the header to the CSV file
     with open(DEFAULT_CSV_FILE, 'w', newline='') as csvfile:
@@ -87,7 +86,9 @@ def main(expressions, check_locationless, archive_locationless, check_ancestors,
 
     with Datacube(config=test_dc_config) as dc:
         collections.init_nci_collections(dc.index)
-        _product_type_list = collections.registered_collection_names()
+        _PRODUCT_TYPE_LIST = [product
+                              for product in collections.registered_collection_names()
+                              if product not in IGNORED_PRODUCTS_LIST]
 
         _LOG.info('query', query=expressions)
         for dataset in dc.index.datasets.search(**expressions):
@@ -96,10 +97,9 @@ def main(expressions, check_locationless, archive_locationless, check_ancestors,
             # (the sync tool removes locations that don't exist anymore on disk,
             # but can't archive datasets as another path may be added later during the sync)
             if check_locationless or archive_locationless:
-                _product_type_list = [x for x in _product_type_list if x not in IGNORE_PRODUCT_TYPE_LIST]
 
                 # Level1 scenes are expected not to have location
-                if len(dataset.uris) == 0 and str(dataset.type.name) in _product_type_list:
+                if len(dataset.uris) == 0 and dataset.type.name in _PRODUCT_TYPE_LIST:
                     _locationless_cnt += 1
 
                     if archive_locationless:
@@ -120,7 +120,7 @@ def main(expressions, check_locationless, archive_locationless, check_ancestors,
             # those datasets and take appropriate action (archive downstream datasets)
             # TODO: For now, only list downstream datasets.
             if check_downstream:
-                _manage_downstream_ds(dc, dataset)
+                _check_descendants(dc, dataset)
 
         _LOG.info("coherence.finish",
                   datasets_count=_dataset_cnt,
@@ -152,8 +152,8 @@ def _check_ancestors(dc: Datacube,
                                 source_dataset)
 
 
-def _manage_downstream_ds(dc: Datacube,
-                          dataset: Dataset):
+def _check_descendants(dc: Datacube,
+                       dataset: Dataset):
     """
     Need to manage the following two scenarios, with locationless source datasets:
        1) Identify and list all the downstream datasets (may include level2, NBAR, PQ, Albers, WOfS, FC)
@@ -161,20 +161,18 @@ def _manage_downstream_ds(dc: Datacube,
        2) Identify and list all the downstream datasets (includes summary products) that are either
           Active or Archived.
     """
-    global _product_type_list
-
     # Fetch all the derived datasets using the source dataset.
-    derived_datasets = _fetch_derived_datasets(dataset, dc)
+    derived_datasets = _fetch_derived_datasets(dc, dataset)
 
     for d in derived_datasets:
         # Find locationless datasets and they are not telemetry/level1 scenes.
-        if len(d.uris) == 0 and str(d.type.name) in _product_type_list:
+        if len(d.uris) == 0 and d.type.name in _PRODUCT_TYPE_LIST:
             # Fetch any downstream datasets associated with locationless parent
-            _process_derived_datasets(dataset, d, _fetch_derived_datasets(d, dc))
+            _process_derived_datasets(dataset, d, _fetch_derived_datasets(dc, d))
 
 
 def _process_derived_datasets(source_ds, dataset, derived_datasets):
-    global _downstream_dataset_cnt, _product_type_list
+    global _downstream_dataset_cnt
     _downstream_dataset_cnt += 1
 
     # Log locationless parent or ancestor parent to the CSV file
@@ -192,7 +190,7 @@ def _process_derived_datasets(source_ds, dataset, derived_datasets):
 
     for d_dataset in derived_datasets:
         # Exclude derived products such as summary products, FC_percentile products, etc.
-        if d_dataset.type.name in _product_type_list:
+        if d_dataset.type.name in _PRODUCT_TYPE_LIST:
             _LOG.info(f"{_parent}.parent.{dataset.type.name}.derived.{d_dataset.type.name}",
                       downstream_dataset_id=str(d_dataset.id),
                       downstream_dataset_type=str(d_dataset.type.name),
@@ -206,7 +204,7 @@ def _process_derived_datasets(source_ds, dataset, derived_datasets):
                 dataset)
 
 
-def _fetch_derived_datasets(dataset, dc):
+def _fetch_derived_datasets(dc, dataset):
     to_process = {dataset.id}
     derived_datasets = set()
 
@@ -218,12 +216,18 @@ def _fetch_derived_datasets(dataset, dc):
     return derived_datasets
 
 
-def _log_to_csvfile(click_options, d, parent=None):
+def _log_to_csvfile(category, dataset, parent=None):
     # Store the coherence result log in a csv file
     with open(DEFAULT_CSV_FILE, 'a', newline='') as csvfile:
         writer = csv.writer(csvfile)
-        writer.writerow((click_options, d.type.name, d.id, d.is_archived,
-                         parent.type.name, parent.id, parent.is_archived, d.uris))
+        writer.writerow((category,
+                         dataset.type.name,
+                         dataset.id,
+                         dataset.is_archived,
+                         parent.type.name,
+                         parent.id,
+                         parent.is_archived,
+                         dataset.uris))
 
 
 if __name__ == '__main__':
