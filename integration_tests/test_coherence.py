@@ -2,6 +2,8 @@ import shutil
 from datetime import datetime, timedelta
 from pathlib import Path
 import itertools
+
+import pytest
 from click.testing import CliRunner
 
 from integration_tests.conftest import DatasetForTests
@@ -12,6 +14,12 @@ A_LONG_TIME_AGO = datetime.utcnow() - timedelta(days=4)
 
 PROJECT_ROOT = Path(__file__).parents[1]
 CONFIG_FILE_PATHS = [str(PROJECT_ROOT / 'digitalearthau/testing/testing-default.conf')]
+
+
+@pytest.fixture
+def csvfile(tmpdir):
+    coherence.DEFAULT_CSV_FILE = Path(tmpdir).joinpath('test.csv')
+    return coherence.DEFAULT_CSV_FILE
 
 
 def assert_click_command(command, args):
@@ -27,7 +35,8 @@ def assert_click_command(command, args):
 
 
 def test_check_locationless(test_dataset: DatasetForTests,
-                            other_dataset: DatasetForTests):
+                            other_dataset: DatasetForTests,
+                            csvfile: str):
     """
     Test dea-coherence --check-locationless command option
     """
@@ -61,7 +70,8 @@ def test_check_locationless(test_dataset: DatasetForTests,
 
 
 def test_check_downstream_datasets(test_dataset: DatasetForTests,
-                                   other_dataset: DatasetForTests):
+                                   other_dataset: DatasetForTests,
+                                   csvfile: str):
     """
     Test dea-coherence --check-downstream-ds command option
     """
@@ -84,7 +94,8 @@ def test_check_downstream_datasets(test_dataset: DatasetForTests,
 
 
 def test_check_ancestors(test_dataset: DatasetForTests,
-                         other_dataset: DatasetForTests):
+                         other_dataset: DatasetForTests,
+                         csvfile: str):
     """
     Test dea-coherence --check-ancestors command option
     """
@@ -111,7 +122,8 @@ def test_check_ancestors(test_dataset: DatasetForTests,
 
 
 def test_archive_locationless(test_dataset: DatasetForTests,
-                              other_dataset: DatasetForTests):
+                              other_dataset: DatasetForTests,
+                              csvfile: str):
     """
     Test dea-coherence --archive-locationless command option
     """

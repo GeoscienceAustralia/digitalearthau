@@ -7,7 +7,7 @@ from datacube import Datacube
 from datacube.model import Dataset
 from datacube.ui import click as ui
 from datetime import datetime as dt
-from digitalearthau import uiutil, collections
+from digitalearthau import uiutil, collections, paths
 from pathlib import Path
 
 _LOG = structlog.getLogger('dea-coherence')
@@ -23,7 +23,7 @@ IGNORE_PRODUCT_TYPE_LIST = ['telemetry', 'ls8_level1_scene', 'ls7_level1_scene',
 DATE_NOW = dt.now().strftime('%Y-%m-%d')
 TIME_NOW = dt.now().strftime('%H-%M-%S')
 
-DEFAULT_CSV_PATH = '/g/data/v10/work/coherence/{0}/erroneous_datasets_{1}.csv'.format(DATE_NOW, TIME_NOW)
+DEFAULT_CSV_FILE = paths.NCI_WORK_ROOT.joinpath(Path(f"coherence/{DATE_NOW}/erroneous_datasets_{TIME_NOW}.csv"))
 
 
 @click.command()
@@ -73,10 +73,13 @@ def main(expressions, check_locationless, archive_locationless, check_ancestors,
     global _downstream_dataset_cnt, _product_type_list
     uiutil.init_logging()
 
+    if not DEFAULT_CSV_FILE.parent.exists():
+        DEFAULT_CSV_FILE.parent.mkdir(parents=True, exist_ok=True)
+
     # Write the header to the CSV file
-    with open(DEFAULT_CSV_PATH, 'w', newline='') as csvfile:
+    with open(DEFAULT_CSV_FILE, 'w', newline='') as csvfile:
         _LOG.info("Coherence log is stored in a CSV file",
-                  path=Path(DEFAULT_CSV_PATH).absolute())
+                  path=Path(DEFAULT_CSV_FILE).absolute())
         writer = csv.writer(csvfile)
         writer.writerow(('Category', 'Dataset_Type', 'Dataset_ID', 'Is_Dataset_Archived',
                          'Parent_Type', 'Parent_ID', 'Is_Parent_Archived',
@@ -169,8 +172,7 @@ def _manage_downstream_ds(dc: Datacube,
     for d in derived_datasets:
         # Find locationless datasets and they are not telemetry/level1 scenes.
         if len(d.uris) == 0 and str(d.type.name) in _product_type_list:
-            # Fetch all downstream datasets associated with locationless parent
-            # and append to the list
+            # Fetch any downstream datasets associated with locationless parent
             _process_derived_datasets(dataset, d, _fetch_derived_datasets(d, dc))
 
 
@@ -221,7 +223,7 @@ def _fetch_derived_datasets(dataset, dc):
 
 def _log_to_csvfile(click_options, d, parent=None):
     # Store the coherence result log in a csv file
-    with open(DEFAULT_CSV_PATH, 'a', newline='') as csvfile:
+    with open(DEFAULT_CSV_FILE, 'a', newline='') as csvfile:
         writer = csv.writer(csvfile)
         writer.writerow((click_options, d.type.name, d.id, d.is_archived,
                          parent.type.name, parent.id, parent.is_archived, d.uris))
