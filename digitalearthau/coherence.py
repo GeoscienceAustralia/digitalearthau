@@ -168,40 +168,35 @@ def _check_descendants(dc: Datacube,
         # Find locationless datasets and they are not telemetry/level1 scenes.
         if len(d.uris) == 0 and d.type.name in _PRODUCT_TYPE_LIST:
             # Fetch any downstream datasets associated with locationless parent
-            _process_derived_datasets(dataset, d, _fetch_derived_datasets(dc, d))
+            _record_defunct_descendant_dataset(dataset, d)
 
 
-def _process_derived_datasets(source_ds, dataset, derived_datasets):
+def _record_defunct_descendant_dataset(source_ds, dataset):
     global _downstream_dataset_cnt
     _downstream_dataset_cnt += 1
 
     # Log locationless parent or ancestor parent to the CSV file
     if dataset.is_archived:
-        _parent = "archived"
+        derived_ds_problem = "archived"
     else:
-        _parent = "locationless"
+        derived_ds_problem = "locationless"
 
-    _LOG.info(f"{_parent}.{dataset.type.name}",
+    _LOG.info(f"{derived_ds_problem}.{dataset.type.name}",
               downstream_dataset_id=str(dataset.id),
               downstream_dataset_type=str(dataset.type.name),
               downstream_dataset_location=str(dataset.uris))
 
-    _log_to_csvfile(f"{_parent}.{dataset.type.name}", dataset, source_ds)
+    _log_to_csvfile(f"{derived_ds_problem}.{dataset.type.name}", dataset, source_ds)
 
-    for d_dataset in derived_datasets:
-        # Exclude derived products such as summary products, FC_percentile products, etc.
-        if d_dataset.type.name in _PRODUCT_TYPE_LIST:
-            _LOG.info(f"{_parent}.parent.{dataset.type.name}.derived.{d_dataset.type.name}",
-                      downstream_dataset_id=str(d_dataset.id),
-                      downstream_dataset_type=str(d_dataset.type.name),
-                      downstream_dataset_location=str(d_dataset.uris))
-            _downstream_dataset_cnt += 1
+    _LOG.info(f"{derived_ds_problem}.parent.{dataset.type.name}.derived.{d_dataset.type.name}",
+              downstream_dataset_id=str(d_dataset.id),
+              downstream_dataset_type=str(d_dataset.type.name),
+              downstream_dataset_location=str(d_dataset.uris))
 
-            # Log downstream datasets linked to locationless source datasets, to the CSV file
-            _log_to_csvfile(
-                f"{_parent}.parent.{dataset.type.name}.derived.{d_dataset.type.name}",
-                d_dataset,
-                dataset)
+    # Log downstream datasets linked to locationless source datasets, to the CSV file
+    _log_to_csvfile(
+        f"{derived_ds_problem}.parent.{dataset.type.name}.derived.{d_dataset.type.name}",
+        dataset)
 
 
 def _fetch_derived_datasets(dc, dataset):
