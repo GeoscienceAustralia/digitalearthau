@@ -89,9 +89,6 @@ def main(expressions, check_locationless, archive_locationless, check_ancestors,
         collections.init_nci_collections(dc.index)
         _product_type_list = collections.registered_collection_names()
 
-        # collections.registered_collection_names is not fetching nbart_scenes. Hence add them to the list
-        _product_type_list.extend(['ls5_nbart_scene', 'ls7_nbart_scene', 'ls8_nbart_scene'])
-
         _LOG.info('query', query=expressions)
         for dataset in dc.index.datasets.search(**expressions):
             _dataset_cnt += 1
