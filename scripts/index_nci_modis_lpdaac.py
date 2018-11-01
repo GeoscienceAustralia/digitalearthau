@@ -81,8 +81,16 @@ def cli(ctx, config):
 @click.argument('path')
 @click.pass_obj
 def show(index, path):
+    #file_paths = find_lpdaac_file_paths(Path(path))
+    #raster_to_variable_descriptions(file_paths[0])
+
     file_paths = find_lpdaac_file_paths(Path(path))
-    raster_to_variable_descriptions(file_paths[0])
+    print(file_paths)
+
+    resolver = Doc2Dataset(index)
+    for file_path in file_paths:
+        doc = generate_lpdaac_doc(file_path)
+        print_dict(doc)
 
 @cli.command()
 @click.argument('path')
@@ -306,7 +314,7 @@ def generate_lpdaac_defn(measurements):
             'coverage': 'aust'
         },
         'storage': {
-            'crs': 'EPSG:4326',
+            'crs': 'SR-ORG:6842',
             'resolution': {
                 'latitude': -0.01,
                 'longitude': 0.01
@@ -339,8 +347,12 @@ def generate_lpdaac_doc(file_path):
                      }
 
     start_time, end_time = modis_path_to_date_range(file_path)
-
     measurements = raster_to_measurements(file_path)
+    the_format = 'HDF4_EOS:EOS_GRID'
+    for m in measurements:
+        m['fmt'], m['local_path'], m['layer'] = split_path(m['path'])
+        assert the_format == m['fmt']
+
     doc = {
         'id': str(uuid.uuid5(uuid.NAMESPACE_URL, unique_ds_uri)),
         'product_type': 'modis_lpdaac_MYD13Q1',
@@ -352,7 +364,7 @@ def generate_lpdaac_doc(file_path):
             'coord': to_lat_long_extent(left, bottom, right, top,
                                         spatial_ref),
         },
-        'format': {'name': 'hdf'},
+        'format': {'name': the_format},
         'grid_spatial': {
             'projection': {
                 'geo_ref_points': geo_ref_points,
@@ -362,8 +374,8 @@ def generate_lpdaac_doc(file_path):
         'image': {
             'bands': {
                 measure['name']: {
-                    'path': str(measure['path']),
-                    'layer': measure['name'],
+                    'path': str(measure['local_path']),
+                    'layer': measure['layer'],
                 } for measure in measurements
             }
         },
@@ -372,6 +384,14 @@ def generate_lpdaac_doc(file_path):
     'lineage': {'source_datasets': {}}
     }
     return doc
+
+def split_path(apath):
+    splitpath =  apath.split(':')
+    assert len(splitpath) > 3
+    fmt = ':'.join(splitpath[:2]) # 'HDF4_EOS:EOS_GRID'
+    local_path = splitpath[2]
+    layer = ':'.join(splitpath[3:])
+    return fmt, local_path, layer
 
 def generate_dataset_doc(dataset_name, dataset):
     print(dataset)
