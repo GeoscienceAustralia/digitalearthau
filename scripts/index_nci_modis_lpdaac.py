@@ -253,7 +253,6 @@ def raster_to_measurements(file_path):
                 measure['nodata'] = float(sub_img.nodatavals[0])
                 measure['units'] = str(sub_img.units[0])
                 tmp = sub_img.descriptions[0].replace('250m 16 days ', '')
-                tmp = tmp.capitalize()
                 tmp = tmp.replace(" ", "_")
                 measure['name'] = str(tmp) # descriptions
                 measure['path'] = subdataset
@@ -356,7 +355,7 @@ def generate_lpdaac_doc(file_path):
     doc = {
         'id': str(uuid.uuid5(uuid.NAMESPACE_URL, unique_ds_uri)),
         'product_type': 'modis_lpdaac_MYD13Q1',
-        'creation_dt': str(modification_time),
+        'creation_dt': str( datetime.fromtimestamp(modification_time)),
         'platform': {'code': 'MODIS'},
         'extent': {
             'from_dt': str(start_time),
@@ -458,18 +457,19 @@ def to_lat_long_extent(left, bottom, right, top, spatial_reference, new_crs="EPS
     abox = box(left, bottom, right, top, crs)
     projected = abox.to_crs(CRS(new_crs))
     proj = projected.boundingbox
-
+    proj_list = [proj.left, proj.bottom, proj.right, proj.top]
+    left, bottom, right, top = [round(i, 3) for i in proj_list]
     coord = {
-             'ul': {'lon': proj.left, 'lat': proj.top},
-             'ur': {'lon': proj.right, 'lat': proj.top},
-             'll': {'lon': proj.left, 'lat': proj.bottom},
-             'lr': {'lon': proj.right, 'lat': proj.bottom},
+             'ul': {'lon': left, 'lat': top},
+             'ur': {'lon': right, 'lat': top},
+             'll': {'lon': left, 'lat': bottom},
+             'lr': {'lon': right, 'lat': bottom},
     }
     return coord
 
 def get_grid_spatial_projection(fname):
     with rasterio.open(fname, 'r') as img:
-        left, bottom, right, top = img.bounds
+        left, bottom, right, top = [round(i, 3) for i in img.bounds]
         spatial_reference = str(str(getattr(img, 'crs_wkt', None) or img.crs.wkt))
         return left, bottom, right, top, spatial_reference
 
