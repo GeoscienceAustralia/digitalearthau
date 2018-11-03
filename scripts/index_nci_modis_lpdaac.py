@@ -31,21 +31,21 @@ and modification time of the underlying NetCDF Data.
     CREATE DATABASE modis_lpdaac WITH OWNER agdc_admin;
     GRANT TEMPORARY, CONNECT ON DATABASE modis_lpdaac to public;
 
-modis_oc.conf::
+modis_lpdaac.conf::
 
     [datacube]
     db_hostname: agdcdev-db.nci.org.au
     db_port: 6432
-    db_database: modis_oc
+    db_database: modis_lpdaac
 
 ::
 
-    datacube --config modis_oc.conf system init
+    datacube --config modis_lpdaac.conf system init
 
 ::
 
-    for i in /g/data2/u39/public/data/modis/oc-1d-aust.v201508.recent/2016/*; do
-        ./index_nci_modis_oc.py --config modis_oc.conf index_data $i
+    for i in /g/data2/u39/public/data/modis/lpdaac-tiles-c6/MYD13Q1.006/*; do
+        ./index_nci_modis_lpdaac.py --config modis_lpdacc.conf index_data $i
     done
 
 """
