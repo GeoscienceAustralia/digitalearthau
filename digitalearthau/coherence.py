@@ -12,9 +12,9 @@ from datacube.ui import click as ui
 from digitalearthau import uiutil, collections, paths
 
 _LOG = structlog.getLogger('dea-coherence')
-_dataset_cnt, _ancestor_cnt, _locationless_cnt, _archive_locationless_cnt = 0, 0, 0, 0
-_downstream_dataset_cnt = 0
-_PRODUCT_TYPE_LIST = []
+DATASET_CNT, ANCESTOR_CNT, LOCATIONLESS_CNT, ARCHIVED_LOCATIONLESS_CNT = 0, 0, 0, 0
+DOWNSTREAM_DS_CNT = 0
+PRODUCT_TYPE_LIST = []
 
 # Product list containing Level2_Scenes, NBAR, PQ, PQ_Legacy, WOfS, FC products
 IGNORED_PRODUCTS_LIST = ['telemetry', 'ls8_level1_scene', 'ls7_level1_scene',
@@ -69,8 +69,7 @@ def main(expressions, check_locationless, archive_locationless, check_ancestors,
     TODO: This could be merged into it as a post-processing step, although it's less safe than sync if
     TODO: the index is being updated concurrently by another process
     """
-    global _dataset_cnt, _ancestor_cnt, _locationless_cnt, _archive_locationless_cnt
-    global _downstream_dataset_cnt, _PRODUCT_TYPE_LIST
+    global DATASET_CNT, LOCATIONLESS_CNT, ARCHIVED_LOCATIONLESS_CNT
     uiutil.init_logging()
 
     DEFAULT_CSV_FILE.parent.mkdir(parents=True, exist_ok=True)
@@ -86,54 +85,59 @@ def main(expressions, check_locationless, archive_locationless, check_ancestors,
 
     with Datacube(config=test_dc_config) as dc:
         collections.init_nci_collections(dc.index)
-        _PRODUCT_TYPE_LIST = [product
-                              for product in collections.registered_collection_names()
-                              if product not in IGNORED_PRODUCTS_LIST]
+        PRODUCT_TYPE_LIST = [product
+                             for product in collections.registered_collection_names()
+                             if product not in IGNORED_PRODUCTS_LIST]
 
         _LOG.info('query', query=expressions)
         for dataset in dc.index.datasets.search(**expressions):
-            _dataset_cnt += 1
+            DATASET_CNT += 1
+
             # Archive if it has no locations.
             # (the sync tool removes locations that don't exist anymore on disk,
             # but can't archive datasets as another path may be added later during the sync)
-            if check_locationless or archive_locationless:
-
+            if check_locationless or archive_locationless or check_downstream:
                 # Level1 scenes are expected not to have location
-                if len(dataset.uris) == 0 and dataset.type.name in _PRODUCT_TYPE_LIST:
-                    _locationless_cnt += 1
+                if len(dataset.uris) == 0 and dataset.type.name in PRODUCT_TYPE_LIST:
+                    LOCATIONLESS_CNT += 1
 
                     if archive_locationless:
                         dc.index.datasets.archive([dataset.id])
-                        _archive_locationless_cnt += 1
-                        _LOG.info(f"locationless.{dataset.type.name}.archived", dataset_id=str(dataset.id))
+                        ARCHIVED_LOCATIONLESS_CNT += 1
+                        derived_ds_problem = "archived"
+                    elif dataset.is_archived:
+                        derived_ds_problem = "archived"
                     else:
-                        _LOG.info(f"locationless.{dataset.type.name}", dataset_id=str(dataset.id))
+                        derived_ds_problem = "locationless"
 
-                    # Log derived product with locationless datasets, to the CSV file
-                    _log_to_csvfile(f"locationless.{dataset.type.name}", dataset)
+                    # Log locationless parent or ancestor parent to the CSV file
+                    _LOG.info(f"{derived_ds_problem}.{dataset.type.name}",
+                              dataset_id=str(dataset.id),
+                              dataset_location=str(dataset.uris))
+
+                    _log_to_csvfile(f"{derived_ds_problem}.{dataset.type.name}", dataset)
+
+                    # If downstream/derived datasets are linked to archived parent or locationless parent,
+                    # identify those datasets and take appropriate action (archive downstream datasets)
+                    # TODO: For now, only list downstream datasets.
+                    if check_downstream:
+                        _record_defunct_descendant_dataset(dc, dataset)
 
             # Check for ancestors
             if check_ancestors:
                 _check_ancestors(dc, dataset)
 
-            # If downstream/derived datasets are linked to archived parent or locationless parent, identify
-            # those datasets and take appropriate action (archive downstream datasets)
-            # TODO: For now, only list downstream datasets.
-            if check_downstream:
-                _check_descendants(dc, dataset)
-
         _LOG.info("coherence.finish",
-                  datasets_count=_dataset_cnt,
-                  archived_ancestor_count=_ancestor_cnt,
-                  locationless_count=_locationless_cnt,
-                  archived_locationless_cnt=_archive_locationless_cnt,
-                  downstream_dataset_error_count=_downstream_dataset_cnt)
+                  datasets_count=DATASET_CNT,
+                  archived_ancestor_count=ANCESTOR_CNT,
+                  locationless_count=LOCATIONLESS_CNT,
+                  archived_locationless_count=ARCHIVED_LOCATIONLESS_CNT,
+                  downstream_dataset_error_count=DOWNSTREAM_DS_CNT)
 
 
 def _check_ancestors(dc: Datacube,
                      dataset: Dataset):
-    global _ancestor_cnt
-
+    global ANCESTOR_CNT
     dataset = dc.index.datasets.get(dataset.id, include_sources=True)
     if dataset.sources:
         for classifier, source_dataset in dataset.sources.items():
@@ -144,7 +148,7 @@ def _check_ancestors(dc: Datacube,
                     archived_parent_type=str(source_dataset.type.name),
                     archived_parent_id=str(source_dataset.id)
                 )
-                _ancestor_cnt += 1
+                ANCESTOR_CNT += 1
 
                 # Log ancestor datasets to the CSV file
                 _log_to_csvfile(f"archived.parent.{source_dataset.type.name}.derived.{dataset.type.name}",
@@ -152,51 +156,28 @@ def _check_ancestors(dc: Datacube,
                                 source_dataset)
 
 
-def _check_descendants(dc: Datacube,
-                       dataset: Dataset):
+def _record_defunct_descendant_dataset(datacube, dataset):
     """
-    Need to manage the following two scenarios, with locationless source datasets:
-       1) Identify and list all the downstream datasets (may include level2, NBAR, PQ, Albers, WOfS, FC)
-          that are either Active or Archived.
-       2) Identify and list all the downstream datasets (includes summary products) that are either
-          Active or Archived.
+       Identify and list all the downstream datasets (may include level2, NBAR, PQ, Albers, WOfS, FC)
+       that linked to active locationless parent or archived parent.
     """
-    # Fetch all the derived datasets using the source dataset.
-    derived_datasets = _fetch_derived_datasets(dc, dataset)
+    global DOWNSTREAM_DS_CNT
+    # Fetch all the derived datasets using the locationless parent or ancestor dataset.
+    fetch_descendant_datasets = _fetch_derived_datasets(datacube, dataset)
 
-    for d in derived_datasets:
-        # Find locationless datasets and they are not telemetry/level1 scenes.
-        if len(d.uris) == 0 and d.type.name in _PRODUCT_TYPE_LIST:
-            # Fetch any downstream datasets associated with locationless parent
-            _record_defunct_descendant_dataset(dataset, d)
+    for d_dataset in fetch_descendant_datasets:
+        _LOG.info(f"{derived_ds_problem}.parent.{dataset.type.name}.derived.{d_dataset.type.name}",
+                  descendant_ds_id=str(d_dataset.id),
+                  descendant_ds_type=str(d_dataset.type.name),
+                  descendant_ds_location=str(d_dataset.uris))
 
+        # Log downstream datasets linked to locationless source datasets, to the CSV file
+        _log_to_csvfile(
+            f"{derived_ds_problem}.parent.{dataset.type.name}.derived.{d_dataset.type.name}",
+            d_dataset,
+            dataset)
 
-def _record_defunct_descendant_dataset(source_ds, dataset):
-    global _downstream_dataset_cnt
-    _downstream_dataset_cnt += 1
-
-    # Log locationless parent or ancestor parent to the CSV file
-    if dataset.is_archived:
-        derived_ds_problem = "archived"
-    else:
-        derived_ds_problem = "locationless"
-
-    _LOG.info(f"{derived_ds_problem}.{dataset.type.name}",
-              downstream_dataset_id=str(dataset.id),
-              downstream_dataset_type=str(dataset.type.name),
-              downstream_dataset_location=str(dataset.uris))
-
-    _log_to_csvfile(f"{derived_ds_problem}.{dataset.type.name}", dataset, source_ds)
-
-    _LOG.info(f"{derived_ds_problem}.parent.{dataset.type.name}.derived.{d_dataset.type.name}",
-              downstream_dataset_id=str(d_dataset.id),
-              downstream_dataset_type=str(d_dataset.type.name),
-              downstream_dataset_location=str(d_dataset.uris))
-
-    # Log downstream datasets linked to locationless source datasets, to the CSV file
-    _log_to_csvfile(
-        f"{derived_ds_problem}.parent.{dataset.type.name}.derived.{d_dataset.type.name}",
-        dataset)
+        DOWNSTREAM_DS_CNT += 1
 
 
 def _fetch_derived_datasets(dc, dataset):
