@@ -38,11 +38,11 @@ DEFAULT_CSV_FILE = paths.NCI_WORK_ROOT / f"coherence/{NOW:%Y-%m-%d}/erroneous_da
 @click.option('--check-ancestors',
               is_flag=True,
               default=False,
-              help='Check if ancestor/source datasets are still active/valid')
+              help='Check if the dataset has an archived parent dataset')
 @click.option('--check-downstream',
               is_flag=True,
               default=False,
-              help='Check if archived parent or locationless parent have children (downstream)')
+              help='Check if an archived/locationless parent have children (forces --check-locationless)')
 @click.option('--test-dc-config', '-C',
               default=None,
               help='Custom datacube config file (testing purpose only)')
