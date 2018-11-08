@@ -264,7 +264,7 @@ def archive_dataset(dataset_id: uuid.UUID, collection: Collection, archived_dt: 
                 _api.DATASET.update().where(
                     _api.DATASET.c.id == dataset_id
                 ).where(
-                    _api.DATASET.c.archived is None
+                    _api.DATASET.c.archived == None
                 ).values(
                     archived=archived_dt
                 )
@@ -286,7 +286,7 @@ def archive_location(dataset_id: uuid.UUID, uri: str, collection: Collection, ar
                         _api.DATASET_LOCATION.c.dataset_ref == dataset_id,
                         _api.DATASET_LOCATION.c.uri_scheme == scheme,
                         _api.DATASET_LOCATION.c.uri_body == body,
-                        _api.DATASET_LOCATION.c.archived is None,
+                        _api.DATASET_LOCATION.c.archived == None,
                     )
                 ).values(
                     archived=archived_dt
