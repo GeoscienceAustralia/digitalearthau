@@ -147,6 +147,21 @@ class DatasetForTests(NamedTuple):
         """If this is indexed, return the full Dataset record"""
         return self.collection.index_.datasets.get(self.id_)
 
+    def remove_location_in_index(self) -> bool:
+        """Remove location from the index"""
+        return self.collection.index_.datasets.remove_location(self.id_, self.uri)
+
+    def get_index_loc_record(self) -> Optional[Dataset]:
+        """If this is indexed, return the dataset location"""
+        return self.collection.index_.datasets.get(self.uri)
+
+    def archive_parent_in_index(self, archived_dt: datetime = None):
+        archive_dataset(self.parent_id, self.collection, archived_dt=archived_dt)
+
+    def get_parent_index_record(self) -> Optional[Dataset]:
+        """If this is indexed, return the full Dataset record"""
+        return self.collection.index_.datasets.get(self.parent_id)
+
 
 # We want one fixture to return all of this data. Returning a tuple was getting unwieldy.
 class SimpleEnv(NamedTuple):
@@ -249,7 +264,7 @@ def archive_dataset(dataset_id: uuid.UUID, collection: Collection, archived_dt: 
                 _api.DATASET.update().where(
                     _api.DATASET.c.id == dataset_id
                 ).where(
-                    _api.DATASET.c.archived == None
+                    _api.DATASET.c.archived is None
                 ).values(
                     archived=archived_dt
                 )
@@ -271,7 +286,7 @@ def archive_location(dataset_id: uuid.UUID, uri: str, collection: Collection, ar
                         _api.DATASET_LOCATION.c.dataset_ref == dataset_id,
                         _api.DATASET_LOCATION.c.uri_scheme == scheme,
                         _api.DATASET_LOCATION.c.uri_body == body,
-                        _api.DATASET_LOCATION.c.archived == None,
+                        _api.DATASET_LOCATION.c.archived is None,
                     )
                 ).values(
                     archived=archived_dt

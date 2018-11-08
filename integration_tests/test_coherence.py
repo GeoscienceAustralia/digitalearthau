@@ -1,4 +1,3 @@
-import shutil
 from datetime import datetime, timedelta
 from pathlib import Path
 import itertools
@@ -42,28 +41,23 @@ def test_check_locationless(test_dataset: DatasetForTests,
     """
     # Newly archived
     test_dataset.add_to_index()
-    test_dataset.archive_location_in_index()
+    assert len(test_dataset.get_index_record().uris) != 0, "Valid location expected for test dataset"
+    test_dataset.remove_location_in_index()
 
     # Archived a while ago
     other_dataset.add_to_index()
-    other_dataset.archive_location_in_index(archived_dt=A_LONG_TIME_AGO)
-
-    # Change the UUID for dataset on disk so that we have a locationless scenario
-    shutil.rmtree(test_dataset.copyable_path)
-    shutil.copytree(other_dataset.copyable_path, test_dataset.copyable_path)
-
-    assert other_dataset.path.exists(), "Dataset archived long time ago"
-    assert test_dataset.path.exists(), "Too-recently-archived dataset"
+    assert len(other_dataset.get_index_record().uris) != 0, "Valid location expected for other dataset"
+    other_dataset.remove_location_in_index()
 
     assert test_dataset.get_index_record() is not None, "Test dataset should still be in the index"
     assert other_dataset.get_index_record() is not None, "Other dataset should still be in the index"
 
-    all_indexed_uris = set(test_dataset.collection.iter_index_uris())
-    assert all_indexed_uris == {test_dataset.uri, other_dataset.uri}, "Both uri should remain."
+    assert len(test_dataset.get_index_record().uris) == 0, "Test dataset location should none"
+    assert len(other_dataset.get_index_record().uris) == 0, "Other dataset location should none"
 
     exe_opts = ['--check-locationless']
 
-    timerange = ["time in 2018"]
+    timerange = ["2000 < time < 2020"]
     exe_opts.extend(timerange)
 
     assert_click_command(coherence.main, exe_opts)
@@ -103,15 +97,18 @@ def test_check_ancestors(test_dataset: DatasetForTests,
     test_dataset.add_to_index()
     other_dataset.add_to_index()
 
-    # Archive datasets
-    test_dataset.archive_in_index()
-    other_dataset.archive_in_index()
+    # Archive parent datasets
+    test_dataset.archive_parent_in_index()
+    other_dataset.archive_parent_in_index()
 
-    assert other_dataset.path.exists(), "Dataset archived long time ago"
-    assert test_dataset.path.exists(), "Too-recently-archived dataset"
+    assert other_dataset.path.exists(), "Other dataset path exists"
+    assert test_dataset.path.exists(), "Test dataset path exists"
 
     assert test_dataset.get_index_record() is not None
     assert other_dataset.get_index_record() is not None
+
+    assert len(test_dataset.get_parent_index_record().uris) == 0, "Test dataset parent location should none"
+    assert len(test_dataset.get_parent_index_record().uris) == 0, "Other dataset parent location should none"
 
     exe_opts = ['--check-ancestors']
 
@@ -132,8 +129,8 @@ def test_archive_locationless(test_dataset: DatasetForTests,
     other_dataset.add_to_index()
 
     # Archive location
-    test_dataset.archive_location_in_index()
-    other_dataset.archive_location_in_index()
+    test_dataset.remove_location_in_index()
+    other_dataset.remove_location_in_index()
 
     exe_opts = ['--archive-locationless']
 
@@ -142,8 +139,8 @@ def test_archive_locationless(test_dataset: DatasetForTests,
 
     assert_click_command(coherence.main, exe_opts)
 
-    assert other_dataset.path.exists(), "Dataset archived long time ago"
-    assert test_dataset.path.exists(), "Too-recently-archived dataset"
+    assert other_dataset.path.exists(), "Other dataset archived"
+    assert test_dataset.path.exists(), "Test dataset archived"
 
-    assert test_dataset.get_index_record() is not None
-    assert other_dataset.get_index_record() is not None
+    assert len(test_dataset.get_index_record().uris) == 0, "Test dataset location should none"
+    assert len(other_dataset.get_index_record().uris) == 0, "Other dataset location should none"
