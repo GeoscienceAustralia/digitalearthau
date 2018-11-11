@@ -96,11 +96,12 @@ def show(index, path):
 def create_product(index, path):
     file_paths = find_lpdaac_file_paths(Path(path))
     print(file_paths)
+    _, _, _, _, spatial_ref = get_grid_spatial_projection(file_paths[0])
     measurements = raster_to_measurements(file_paths[0])
     for measure in measurements:
         measure.pop('path')  # This is not needed here
     print_dict(measurements)
-    product_def = generate_lpdaac_defn(measurements)
+    product_def = generate_lpdaac_defn(measurements, spatial_ref)
     print_dict(product_def)
 
     print(index)
@@ -128,7 +129,7 @@ def index_data(index, path):
         try:
             index.datasets.add(dataset)
         except Exception as e:
-            logging.error("Couldn't index %s%s", file_path, name)
+            logging.error("Couldn't index %s", file_path)
             logging.exception("Exception", e)
 
 
@@ -168,7 +169,7 @@ def raster_to_measurements(file_path):
         return measurements
 
 
-def generate_lpdaac_defn(measurements):
+def generate_lpdaac_defn(measurements, spatial_ref):
     return {
         'name': 'modis_lpdaac_MYD13Q1',
         'metadata_type': 'eo',
@@ -179,7 +180,7 @@ def generate_lpdaac_defn(measurements):
             'coverage': 'aust'
         },
         'storage': {
-            'crs': 'SR-ORG:6842',
+            'crs': spatial_ref,
             'resolution': {
                 'latitude': -0.01,
                 'longitude': 0.01
@@ -195,9 +196,9 @@ def generate_lpdaac_doc(file_path):
     modification_time = file_path.stat().st_mtime
 
     unique_ds_uri = f'{file_path.as_uri()}#{modification_time}'
-    with rasterio.open(file_path, 'r') as img:
-        asubdataset = img.subdatasets[0]
-    left, bottom, right, top, spatial_ref = get_grid_spatial_projection(asubdataset)
+    #with rasterio.open(file_path, 'r') as img:
+    #    asubdataset = img.subdatasets[0]
+    left, bottom, right, top, spatial_ref = get_grid_spatial_projection(file_path)
     geo_ref_points = {
                          'ul': {'x': left, 'y': top},
                          'ur': {'x': right, 'y': top},
@@ -288,8 +289,10 @@ def to_lat_long_extent(left, bottom, right, top, spatial_reference, new_crs="EPS
     return coord
 
 
-def get_grid_spatial_projection(fname):
-    with rasterio.open(fname, 'r') as img:
+def get_grid_spatial_projection(file_path):
+    with rasterio.open(file_path, 'r') as img:
+        asubdataset = img.subdatasets[0]
+    with rasterio.open(asubdataset, 'r') as img:
         left, bottom, right, top = [round(i, 3) for i in img.bounds]
         spatial_reference = str(str(getattr(img, 'crs_wkt', None) or img.crs.wkt))
         return left, bottom, right, top, spatial_reference
