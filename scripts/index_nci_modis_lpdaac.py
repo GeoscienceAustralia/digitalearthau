@@ -84,7 +84,7 @@ def show(index, path):
     file_paths = find_lpdaac_file_paths(Path(path))
     print(file_paths)
 
-    resolver = Doc2Dataset(index)
+    _ = Doc2Dataset(index)
     for file_path in file_paths:
         doc = generate_lpdaac_doc(file_path)
         print_dict(doc)
@@ -152,6 +152,12 @@ def find_lpdaac_file_paths(path: Path):
 
 
 def raster_to_measurements(file_path):
+    """
+    Bundle up the measurement metadata from a hdf file.
+
+    :param file_path: A path object of a hdf file.
+    :return: A list of dictionaries with measure metadata.
+    """
     measurements = []
 
     with rasterio.open(file_path, 'r') as img:
@@ -262,13 +268,6 @@ def modis_path_to_date_range(file_path):
     start_time = datetime.strptime(year_days, '%Y%j')
 
     end_time = start_time + timedelta(days=16) - timedelta(microseconds=1)
-    return start_time, end_time
-
-
-def name_to_date_range(name):
-    date = name[1:9]
-    start_time = datetime.strptime(date, '%Y%m%d')
-    end_time = start_time + timedelta(days=1) - timedelta(microseconds=1)
     return start_time, end_time
 
 
