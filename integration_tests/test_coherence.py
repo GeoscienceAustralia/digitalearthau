@@ -108,8 +108,8 @@ def test_check_ancestors(ls8_pq_scene_test_dataset: DatasetForTests,
     assert ls8_pq_scene_test_dataset.get_index_record() is not None
     assert other_dataset.get_index_record() is not None
 
-    assert len(ls8_pq_scene_test_dataset.get_parent_index_record().uris) == 0, "Test dataset parent location should none"
-    assert len(ls8_pq_scene_test_dataset.get_parent_index_record().uris) == 0, "Other dataset parent location should none"
+    assert len(ls8_pq_scene_test_dataset.get_parent_index_record().uris) == 0, "Test_ds parent location is not none"
+    assert len(ls8_pq_scene_test_dataset.get_parent_index_record().uris) == 0, "Other_ds parent location should none"
 
     exe_opts = ['--check-ancestors']
 
