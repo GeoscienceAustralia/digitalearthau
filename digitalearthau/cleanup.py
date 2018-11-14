@@ -56,7 +56,7 @@ def archived(index: Index,
     total_trash_count = 0
 
     # TODO: Get defined collections for path?
-    work_path = paths.get_product_work_directory('all', task_type='clean')
+    work_path = paths.get_product_work_directory('archive', task_type='clean')
     uiutil.init_logging(work_path.joinpath('log.jsonl').open('a'))
     log = structlog.getLogger("cleanup-archived")
 

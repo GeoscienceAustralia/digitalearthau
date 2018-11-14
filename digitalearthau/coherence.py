@@ -90,6 +90,7 @@ def main(expressions, check_locationless, archive_locationless, check_ancestors,
                              if product not in IGNORED_PRODUCTS_LIST]
 
         _LOG.info('query', query=expressions)
+
         for dataset in dc.index.datasets.search(**expressions):
             DATASET_CNT += 1
 
@@ -121,7 +122,7 @@ def main(expressions, check_locationless, archive_locationless, check_ancestors,
                     # identify those datasets and take appropriate action (archive downstream datasets)
                     # TODO: For now, only list downstream datasets.
                     if check_downstream:
-                        _record_defunct_descendant_dataset(dc, dataset)
+                        _record_defunct_descendant_dataset(dc, dataset, derived_ds_problem)
 
             # Check for ancestors
             if check_ancestors:
@@ -156,7 +157,7 @@ def _check_ancestors(dc: Datacube,
                                 source_dataset)
 
 
-def _record_defunct_descendant_dataset(datacube, dataset):
+def _record_defunct_descendant_dataset(datacube, dataset, derived_ds_problem):
     """
        Identify and list all the downstream datasets (may include level2, NBAR, PQ, Albers, WOfS, FC)
        that linked to active locationless parent or archived parent.
@@ -196,15 +197,24 @@ def _log_to_csvfile(category, dataset, parent=None):
     # Store the coherence result log in a csv file
     with open(DEFAULT_CSV_FILE, 'a', newline='') as csvfile:
         writer = csv.writer(csvfile)
-        writer.writerow((category,
-                         dataset.type.name,
-                         dataset.id,
-                         dataset.is_archived,
-                         parent.type.name,
-                         parent.id,
-                         parent.is_archived,
-                         dataset.uris))
-
+        if parent:
+            writer.writerow((category,
+                             dataset.type.name,
+                             dataset.id,
+                             dataset.is_archived,
+                             parent.type.name,
+                             parent.id,
+                             parent.is_archived,
+                             dataset.uris))
+        else:
+            writer.writerow((category,
+                             dataset.type.name,
+                             dataset.id,
+                             dataset.is_archived,
+                             None,
+                             None,
+                             None,
+                             dataset.uris))
 
 if __name__ == '__main__':
     main()

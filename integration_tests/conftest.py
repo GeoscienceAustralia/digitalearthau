@@ -203,7 +203,10 @@ def test_dataset(integration_test_data, dea_index) -> DatasetForTests:
     register_base_directory(str(test_data))
 
     cache_path = test_data.joinpath('cache')
-    cache_path.mkdir()
+    try:
+        cache_path.mkdir()
+    except FileExistsError:
+        pass
 
     return DatasetForTests(
         collection=ls8_collection,
@@ -249,6 +252,38 @@ def other_dataset(integration_test_data: Path, test_dataset: DatasetForTests) ->
         id_=ds_id,
         base_path=integration_test_data,
         path_offset=('LS8_INDEXED_ALREADY', 'ga-metadata.yaml')
+    )
+
+
+@pytest.fixture
+def ls8_pq_scene_test_dataset(integration_test_data, dea_index) -> DatasetForTests:
+    """A dataset on disk, with corresponding collection"""
+    test_data = integration_test_data
+
+    ls8_collection = Collection(
+        name='ls8_scene_test',
+        query={},
+        file_patterns=[str(test_data.joinpath('LS8*/ga-metadata.yaml'))],
+        unique=[],
+        index_=dea_index
+    )
+    collections._add(ls8_collection)
+
+    # register this as a base directory so that datasets can be trashed within it.
+    register_base_directory(str(test_data))
+
+    cache_path = test_data.joinpath('cache')
+    try:
+        cache_path.mkdir()
+    except FileExistsError:
+        pass
+
+    return DatasetForTests(
+        collection=ls8_collection,
+        id_=uuid.UUID('d358afb6-9ddf-44a5-80ba-7d64a7fb09c4'),
+        base_path=test_data,
+        path_offset=('LS8_OLITIRS_PQ_P55_GAPQ01-032_090_069_20180227', 'ga-metadata.yaml'),
+        parent_id=uuid.UUID('f31b74fc-765e-4fe0-8af3-1404a4d4789b')
     )
 
 
