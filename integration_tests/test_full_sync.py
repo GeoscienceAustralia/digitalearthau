@@ -26,7 +26,8 @@ from integration_tests.conftest import DatasetForTests, freeze_index
 
 def test_new_and_old_on_disk(test_dataset: DatasetForTests,
                              integration_test_data: Path,
-                             other_dataset: DatasetForTests):
+                             other_dataset: DatasetForTests,
+                             ls8_pq_scene_test_dataset: DatasetForTests):
     old_indexed = DatasetLite(uuid.UUID('5294efa6-348d-11e7-a079-185e0f80a5c0'))
 
     # An indexed file not on disk, and disk file not in index.
@@ -42,7 +43,8 @@ def test_new_and_old_on_disk(test_dataset: DatasetForTests,
         collection=test_dataset.collection,
         expected_paths=[
             missing_dataset.uri,
-            test_dataset.uri
+            test_dataset.uri,
+            ls8_pq_scene_test_dataset.uri,
         ],
         expected_mismatches=[
             mm.LocationMissingOnDisk(old_indexed, missing_dataset.uri),
@@ -60,7 +62,8 @@ def test_new_and_old_on_disk(test_dataset: DatasetForTests,
 
 def test_replace_on_disk(test_dataset: DatasetForTests,
                          integration_test_data: Path,
-                         other_dataset: DatasetForTests):
+                         other_dataset: DatasetForTests,
+                         ls8_pq_scene_test_dataset: DatasetForTests):
     """
     File on disk has a different id to the one in the index (ie. it was quietly reprocessed)
     """
@@ -72,7 +75,8 @@ def test_replace_on_disk(test_dataset: DatasetForTests,
     _check_sync(
         collection=test_dataset.collection,
         expected_paths=[
-            test_dataset.uri
+            test_dataset.uri,
+            ls8_pq_scene_test_dataset.uri,
         ],
         expected_mismatches=[
             mm.LocationMissingOnDisk(test_dataset.dataset, test_dataset.uri),
@@ -90,7 +94,8 @@ def test_replace_on_disk(test_dataset: DatasetForTests,
 
 def test_move_on_disk(test_dataset: DatasetForTests,
                       integration_test_data: Path,
-                      other_dataset: DatasetForTests):
+                      other_dataset: DatasetForTests,
+                      ls8_pq_scene_test_dataset: DatasetForTests):
     """
     Indexed dataset was moved over the top of another indexed dataset
     """
@@ -104,6 +109,7 @@ def test_move_on_disk(test_dataset: DatasetForTests,
         expected_paths=[
             test_dataset.uri,
             other_dataset.path.as_uri(),
+            ls8_pq_scene_test_dataset.uri,
         ],
         expected_mismatches=[
             mm.LocationMissingOnDisk(test_dataset.dataset, test_dataset.uri),
@@ -121,7 +127,8 @@ def test_move_on_disk(test_dataset: DatasetForTests,
 
 
 def test_archived_on_disk(test_dataset: DatasetForTests,
-                          integration_test_data: Path):
+                          integration_test_data: Path,
+                          ls8_pq_scene_test_dataset: DatasetForTests):
     """
     A an already-archived dataset on disk. Should report it, but not touch the file (trash_archived is false)
     """
@@ -134,7 +141,8 @@ def test_archived_on_disk(test_dataset: DatasetForTests,
     _check_sync(
         collection=test_dataset.collection,
         expected_paths=[
-            test_dataset.uri
+            test_dataset.uri,
+            ls8_pq_scene_test_dataset.uri,
         ],
         expected_mismatches=[
             mm.ArchivedDatasetOnDisk(DatasetLite(test_dataset.dataset.id, archived_time), test_dataset.uri),
@@ -152,7 +160,8 @@ def test_archived_on_disk(test_dataset: DatasetForTests,
 
 
 def test_detect_corrupt_existing(test_dataset: DatasetForTests,
-                                 integration_test_data: Path):
+                                 integration_test_data: Path,
+                                 ls8_pq_scene_test_dataset: DatasetForTests):
     """If a dataset exists but cannot be read, report as corrupt"""
     path = uri_to_local_path(test_dataset.uri)
 
@@ -169,7 +178,7 @@ def test_detect_corrupt_existing(test_dataset: DatasetForTests,
 
     _check_sync(
         collection=test_dataset.collection,
-        expected_paths=[test_dataset.uri],
+        expected_paths=[test_dataset.uri, ls8_pq_scene_test_dataset.uri],
         expected_mismatches=[
             # We don't know if it's the same dataset
             mm.UnreadableDataset(None, test_dataset.uri)
@@ -184,7 +193,8 @@ def test_detect_corrupt_existing(test_dataset: DatasetForTests,
 
 
 def test_detect_corrupt_new(test_dataset: DatasetForTests,
-                            integration_test_data: Path):
+                            integration_test_data: Path,
+                            ls8_pq_scene_test_dataset: DatasetForTests):
     """If a dataset exists but cannot be read handle as corrupt"""
 
     path = uri_to_local_path(test_dataset.uri)
@@ -198,7 +208,7 @@ def test_detect_corrupt_new(test_dataset: DatasetForTests,
     # No dataset in index at the corrupt location, so it should be trashed.
     _check_sync(
         collection=test_dataset.collection,
-        expected_paths=[test_dataset.uri],
+        expected_paths=[test_dataset.uri, ls8_pq_scene_test_dataset.uri],
         expected_mismatches=[
             mm.UnreadableDataset(None, test_dataset.uri)
         ],
@@ -215,7 +225,8 @@ _TRASH_PREFIX = ('.trash', (datetime.utcnow().strftime('%Y-%m-%d')))
 # noinspection PyShadowingNames
 def test_remove_missing(test_dataset: DatasetForTests,
                         integration_test_data: Path,
-                        other_dataset: DatasetForTests):
+                        other_dataset: DatasetForTests,
+                        ls8_pq_scene_test_dataset: DatasetForTests):
     """An on-disk dataset that's not indexed should be trashed when trash_missing=True"""
     register_base_directory(integration_test_data)
     trashed_path = test_dataset.base_path.joinpath(*_TRASH_PREFIX, *test_dataset.path_offset)
@@ -232,6 +243,7 @@ def test_remove_missing(test_dataset: DatasetForTests,
         expected_paths=[
             test_dataset.uri,
             other_dataset.path.as_uri(),
+            ls8_pq_scene_test_dataset.uri,
         ],
         expected_mismatches=[
             mm.DatasetNotIndexed(test_dataset.dataset, test_dataset.uri)
@@ -262,7 +274,8 @@ def now_utc():
 def test_is_trashed(test_dataset: DatasetForTests,
                     integration_test_data: Path,
                     archived_dt,
-                    expect_to_be_trashed):
+                    expect_to_be_trashed,
+                    ls8_pq_scene_test_dataset: DatasetForTests):
     root = integration_test_data
 
     # Same test, but trash_archived=True, so it should be renamed to the.
@@ -280,7 +293,8 @@ def test_is_trashed(test_dataset: DatasetForTests,
     _check_sync(
         collection=test_dataset.collection,
         expected_paths=[
-            test_dataset.uri
+            test_dataset.uri,
+            ls8_pq_scene_test_dataset.uri,
         ],
         expected_mismatches=[
             mm.ArchivedDatasetOnDisk(archived_on_disk, test_dataset.uri),
@@ -350,7 +364,11 @@ def _check_mismatch_find(cache_path, expected_mismatches, collection: Collection
 
     for mismatch in scan.mismatches_for_collection(collection, cache_path):
         print(repr(mismatch))
-        mismatches.append(mismatch)
+
+        # Ignore pq_scene test data
+        if mismatch.dataset is None or \
+                str(mismatch.dataset.id) != 'd358afb6-9ddf-44a5-80ba-7d64a7fb09c4':
+            mismatches.append(mismatch)
 
     def mismatch_sort_key(m):
         dataset_id = None
