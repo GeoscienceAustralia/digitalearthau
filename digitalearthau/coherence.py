@@ -14,7 +14,6 @@ from digitalearthau import uiutil, collections, paths
 _LOG = structlog.getLogger('dea-coherence')
 DATASET_CNT, ANCESTOR_CNT, LOCATIONLESS_CNT, ARCHIVED_LOCATIONLESS_CNT = 0, 0, 0, 0
 DOWNSTREAM_DS_CNT = 0
-PRODUCT_TYPE_LIST = []
 
 # Product list containing Level2_Scenes, NBAR, PQ, PQ_Legacy, WOfS, FC products
 IGNORED_PRODUCTS_LIST = ['telemetry', 'ls8_level1_scene', 'ls7_level1_scene',
@@ -85,9 +84,9 @@ def main(expressions, check_locationless, archive_locationless, check_ancestors,
 
     with Datacube(config=test_dc_config) as dc:
         collections.init_nci_collections(dc.index)
-        PRODUCT_TYPE_LIST = [product
-                             for product in collections.registered_collection_names()
-                             if product not in IGNORED_PRODUCTS_LIST]
+        _product_type_list = [product
+                              for product in collections.registered_collection_names()
+                              if product not in IGNORED_PRODUCTS_LIST]
 
         _LOG.info('query', query=expressions)
 
@@ -99,7 +98,7 @@ def main(expressions, check_locationless, archive_locationless, check_ancestors,
             # but can't archive datasets as another path may be added later during the sync)
             if check_locationless or archive_locationless or check_downstream:
                 # Level1 scenes are expected not to have location
-                if len(dataset.uris) == 0 and dataset.type.name in PRODUCT_TYPE_LIST:
+                if len(dataset.uris) == 0 and dataset.type.name in _product_type_list:
                     LOCATIONLESS_CNT += 1
 
                     if archive_locationless:
@@ -215,6 +214,7 @@ def _log_to_csvfile(category, dataset, parent=None):
                              None,
                              None,
                              dataset.uris))
+
 
 if __name__ == '__main__':
     main()
