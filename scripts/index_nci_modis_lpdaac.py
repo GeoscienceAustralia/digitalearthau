@@ -277,8 +277,7 @@ def to_lat_long_extent(left, bottom, right, top, spatial_reference, new_crs="EPS
     abox = box(left, bottom, right, top, crs)
     projected = abox.to_crs(CRS(new_crs))
     proj = projected.boundingbox
-    proj_list = [proj.left, proj.bottom, proj.right, proj.top]
-    left, bottom, right, top = [round(i, 3) for i in proj_list]
+    left, bottom, right, top = proj.left, proj.bottom, proj.right, proj.top
     coord = {
              'ul': {'lon': left, 'lat': top},
              'ur': {'lon': right, 'lat': top},
@@ -292,7 +291,7 @@ def get_grid_metadata(file_path):
     with rasterio.open(file_path, 'r') as img:
         asubdataset = img.subdatasets[0]
     with rasterio.open(asubdataset, 'r') as img:
-        left, bottom, right, top = [round(i, 3) for i in img.bounds]
+        left, bottom, right, top = [i for i in img.bounds]
         spatial_reference = str(str(getattr(img, 'crs_wkt', None) or img.crs.wkt))
         res = img.res
         return left, bottom, right, top, spatial_reference, res
