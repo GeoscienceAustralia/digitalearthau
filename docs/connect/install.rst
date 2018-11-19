@@ -7,10 +7,13 @@ Installation and Software Setup
 Required Software
 =================
 
- * TurboVNC - https://sourceforge.net/projects/turbovnc/files/
- * Strudel - https://cvl.massive.org.au/launcher_files/stable/
+Install TurboVNC and Strudel according to the instructions at http://vdi.nci.org.au/help.
 
-For full details on installing the software, see http://vdi.nci.org.au/help.
+.. note::
+   The NCI instructions recommend specific versions of 
+   `TurboVNC <https://sourceforge.net/projects/turbovnc/files/>` and
+   `Strudel <https://cvl.massive.org.au/launcher_files/stable/>`. 
+   More recent versions may or may not be compatible with the VDI.
 
 .. note::
    Your institution may provide this software to be installed via an internal process.
@@ -40,6 +43,10 @@ To connect:
 * Username: Your NCI username (eg `abc123` or `ab1234`)
 * Click **Login**
 
+.. note::
+   If the drop-down site list in Strudel remains empty, it most likely means 
+   that the software is unable to retrieve the strudel.json URL, 
+   such as due to firewall or network proxy configuration.
 
 Setting up DEA
 ==============
