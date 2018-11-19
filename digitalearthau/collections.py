@@ -197,6 +197,7 @@ def init_nci_collections(index: Index):
             query={'metadata_type': 'telemetry'},
             file_patterns=(
                 '/g/data/v10/repackaged/rawdata/0/[0-9][0-9][0-9][0-9]/[0-9][0-9]/LS*/ga-metadata.yaml',
+                '/g/data/v10/archived/rawdata/0/[0-9][0-9][0-9][0-9]/[0-9][0-9]/LS*/ga-metadata.yaml',
             ),
             unique=('time.lower.day', 'platform'),
             index_=index,
