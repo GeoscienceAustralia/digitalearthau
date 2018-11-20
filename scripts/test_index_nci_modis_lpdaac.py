@@ -5,6 +5,7 @@ from datetime import datetime
 
 from index_nci_modis_lpdaac import *
 
+
 class Testlpdaac(unittest.TestCase):
 
     def test_modis_path_to_date_range(self):
@@ -13,7 +14,7 @@ class Testlpdaac(unittest.TestCase):
         file_path = Path(name)
         start_time, end_time = modis_path_to_date_range(file_path)
 
-        self.assertEqual(start_time, datetime(2017, 12, 11, 0, 0) )
+        self.assertEqual(start_time, datetime(2017, 12, 11, 0, 0))
         self.assertEqual(end_time, datetime(2017, 12, 26, 23, 59, 59, 999999))
 
     def test_split_path(self):
@@ -22,7 +23,6 @@ class Testlpdaac(unittest.TestCase):
         self.assertEqual(fmt, 'S:D')
         self.assertEqual(local_path, '/g/data/4.hdf')
         self.assertEqual(layer, 'VI:250m 16 days blue reflectance')
-
 
 
 # -------------------------------------------------------------

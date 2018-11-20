@@ -169,7 +169,7 @@ def raster_to_measurements(file_path):
                 measure['units'] = str(sub_img.units[0])
                 tmp = sub_img.descriptions[0].replace('250m 16 days ', '')
                 tmp = tmp.replace(" ", "_")
-                measure['name'] = str(tmp) # descriptions
+                measure['name'] = str(tmp)  # descriptions
                 measure['path'] = subdataset
                 measurements.append(measure)
         return measurements
@@ -202,15 +202,15 @@ def generate_lpdaac_doc(file_path):
     modification_time = file_path.stat().st_mtime
 
     unique_ds_uri = f'{file_path.as_uri()}#{modification_time}'
-    #with rasterio.open(file_path, 'r') as img:
+    # with rasterio.open(file_path, 'r') as img:
     #    asubdataset = img.subdatasets[0]
     left, bottom, right, top, spatial_ref, _ = get_grid_metadata(file_path)
     geo_ref_points = {
-                         'ul': {'x': left, 'y': top},
-                         'ur': {'x': right, 'y': top},
-                         'll': {'x': left, 'y': bottom},
-                         'lr': {'x': right, 'y': bottom},
-                     }
+        'ul': {'x': left, 'y': top},
+        'ur': {'x': right, 'y': top},
+        'll': {'x': left, 'y': bottom},
+        'lr': {'x': right, 'y': bottom},
+    }
 
     start_time, end_time = modis_path_to_date_range(file_path)
     measurements = raster_to_measurements(file_path)
@@ -222,7 +222,7 @@ def generate_lpdaac_doc(file_path):
     doc = {
         'id': str(uuid.uuid5(uuid.NAMESPACE_URL, unique_ds_uri)),
         'product_type': 'modis_lpdaac_MYD13Q1',
-        'creation_dt': str( datetime.fromtimestamp(modification_time)),
+        'creation_dt': str(datetime.fromtimestamp(modification_time)),
         'platform': {'code': 'MODIS'},
         'extent': {
             'from_dt': str(start_time),
@@ -245,24 +245,24 @@ def generate_lpdaac_doc(file_path):
                 } for measure in measurements
             }
         },
-    'version': 1,
-    'coverage': 'aust',
-    'lineage': {'source_datasets': {}}
+        'version': 1,
+        'coverage': 'aust',
+        'lineage': {'source_datasets': {}}
     }
     return doc
 
 
 def split_path(apath):
-    splitpath =  apath.split(':')
+    splitpath = apath.split(':')
     assert len(splitpath) > 3
-    fmt = ':'.join(splitpath[:2]) # 'HDF4_EOS:EOS_GRID'
+    fmt = ':'.join(splitpath[:2])  # 'HDF4_EOS:EOS_GRID'
     local_path = splitpath[2]
     layer = ':'.join(splitpath[3:])
     return fmt, local_path, layer
 
 
 def modis_path_to_date_range(file_path):
-    a_year_days = file_path.name.split('.')[1] # example 'A2017101'
+    a_year_days = file_path.name.split('.')[1]  # example 'A2017101'
     year_days = a_year_days[1:]
     # from https:...how-do-modis-products-naming-conventions-work
     start_time = datetime.strptime(year_days, '%Y%j')
@@ -279,10 +279,10 @@ def to_lat_long_extent(left, bottom, right, top, spatial_reference, new_crs="EPS
     proj = projected.boundingbox
     left, bottom, right, top = proj.left, proj.bottom, proj.right, proj.top
     coord = {
-             'ul': {'lon': left, 'lat': top},
-             'ur': {'lon': right, 'lat': top},
-             'll': {'lon': left, 'lat': bottom},
-             'lr': {'lon': right, 'lat': bottom},
+        'ul': {'lon': left, 'lat': top},
+        'ur': {'lon': right, 'lat': top},
+        'll': {'lon': left, 'lat': bottom},
+        'lr': {'lon': right, 'lat': bottom},
     }
     return coord
 
@@ -292,7 +292,8 @@ def get_grid_metadata(file_path):
         asubdataset = img.subdatasets[0]
     with rasterio.open(asubdataset, 'r') as img:
         left, bottom, right, top = [i for i in img.bounds]
-        spatial_reference = str(str(getattr(img, 'crs_wkt', None) or img.crs.wkt))
+        spatial_reference = str(
+            str(getattr(img, 'crs_wkt', None) or img.crs.wkt))
         res = img.res
         return left, bottom, right, top, spatial_reference, res
 

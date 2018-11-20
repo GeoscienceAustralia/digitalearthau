@@ -7,7 +7,6 @@ dc.list_products()
 dc.list_measurements()
 data = dc.load(product='modis_lpdaac_MYD13Q1',
                time=('2017-12-12', '2017-12-13'),
-                resolution=(5800, 5800),
+               resolution=(5800, 5800),
                measurements=('EVI',))
-print (data)
-
+print(data)
