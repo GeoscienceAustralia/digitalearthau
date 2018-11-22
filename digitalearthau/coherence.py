@@ -72,6 +72,8 @@ def main(expressions, check_locationless, archive_locationless, check_ancestors,
     global DATASET_CNT, LOCATIONLESS_CNT, ARCHIVED_LOCATIONLESS_CNT
     uiutil.init_logging()
 
+    check_locationless = check_locationless or archive_locationless or check_downstream
+
     collections.init_nci_collections(None)
     products_to_check = set(product
                             for product in collections.registered_collection_names()
@@ -86,8 +88,7 @@ def main(expressions, check_locationless, archive_locationless, check_ancestors,
             DATASET_CNT += 1
 
             # Some datasets are not expected to have a location and should be skipped (eg, level1, telemetry)
-            if (dataset.type.name in products_to_check) and (check_locationless or archive_locationless or
-                                                             check_downstream):
+            if (dataset.type.name in products_to_check) and check_locationless:
                 if len(dataset.uris) == 0:
                     LOCATIONLESS_CNT += 1
                     ds_state = "locationless"
