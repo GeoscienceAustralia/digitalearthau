@@ -41,7 +41,7 @@ DEFAULT_CSV_FILE = paths.NCI_WORK_ROOT / f"coherence/{NOW:%Y-%m-%d}/erroneous_da
 @click.option('--check-downstream',
               is_flag=True,
               default=False,
-              help='Check if an archived/locationless parent have children (forces --check-locationless)')
+              help='Check if an archived/locationless dataset has children (forces --check-locationless)')
 @click.option('--test-dc-config', '-C',
               default=None,
               help='Custom datacube config file (testing purpose only)')
@@ -84,9 +84,9 @@ def main(expressions, check_locationless, archive_locationless, check_ancestors,
 
     with Datacube(config=test_dc_config) as dc:
         collections.init_nci_collections(dc.index)
-        _product_type_list = [product
-                              for product in collections.registered_collection_names()
-                              if product not in IGNORED_PRODUCTS_LIST]
+        products = [product
+                    for product in collections.registered_collection_names()
+                    if product not in IGNORED_PRODUCTS_LIST]
 
         _LOG.info('query', query=expressions)
 
@@ -98,7 +98,7 @@ def main(expressions, check_locationless, archive_locationless, check_ancestors,
             # but can't archive datasets as another path may be added later during the sync)
             if check_locationless or archive_locationless or check_downstream:
                 # Level1 scenes are expected not to have location
-                if len(dataset.uris) == 0 and dataset.type.name in _product_type_list:
+                if len(dataset.uris) == 0 and dataset.type.name in products:
                     LOCATIONLESS_CNT += 1
 
                     if archive_locationless:
@@ -140,7 +140,7 @@ def _check_ancestors(dc: Datacube,
     global ANCESTOR_CNT
     dataset = dc.index.datasets.get(dataset.id, include_sources=True)
     if dataset.sources:
-        for classifier, source_dataset in dataset.sources.items():
+        for source_dataset in dataset.sources.values():
             if source_dataset.is_archived:
                 _LOG.info(
                     f"archived.parent.{source_dataset.type.name}.derived.{dataset.type.name}",
