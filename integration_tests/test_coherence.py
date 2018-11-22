@@ -17,8 +17,8 @@ CONFIG_FILE_PATHS = [str(PROJECT_ROOT / 'digitalearthau/testing/testing-default.
 
 @pytest.fixture
 def csvfile(tmpdir):
-    coherence.DEFAULT_CSV_FILE = Path(tmpdir).joinpath('test.csv')
-    return coherence.DEFAULT_CSV_FILE
+    coherence.CSV_OUTPUT_FILE = Path(tmpdir).joinpath('test.csv')
+    return coherence.CSV_OUTPUT_FILE
 
 
 def assert_click_command(command, args):
