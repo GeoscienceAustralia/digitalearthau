@@ -37,22 +37,6 @@ DEA_MD_TYPES = digitalearthau.CONFIG_DIR / 'metadata-types.yaml'
 DEA_PRODUCTS_DIR = digitalearthau.CONFIG_DIR / 'products'
 
 
-@pytest.fixture(scope="session", autouse=True)
-def configure_log_output(request):
-    structlog.configure(
-        processors=[
-            structlog.stdlib.add_log_level,
-            structlog.processors.TimeStamper(fmt="%Y-%m-%d %H:%M.%S"),
-            structlog.processors.StackInfoRenderer(),
-            structlog.processors.format_exc_info,
-            # Coloured output if to terminal.
-            CleanConsoleRenderer()
-        ],
-        context_class=dict,
-        cache_logger_on_first_use=True,
-    )
-
-
 def load_yaml_file(path):
     with path.open() as f:
         return list(yaml.load_all(f, Loader=SafeLoader))
@@ -67,7 +51,7 @@ def work_path(tmpdir):
     return paths.NCI_WORK_ROOT
 
 
-@pytest.fixture
+@pytest.fixture(autouse=True)
 def integration_test_data(tmpdir):
     temp_data_dir = Path(tmpdir) / 'integration_data'
     shutil.copytree(INTEGRATION_TEST_DATA, temp_data_dir)
@@ -183,7 +167,7 @@ def test_dataset(integration_test_data, dea_index) -> DatasetForTests:
     ls8_collection = Collection(
         name='ls8_scene_test',
         query={},
-        file_patterns=[str(test_data.joinpath('LS8*/ga-metadata.yaml'))],
+        file_patterns=[str(test_data.joinpath('LS8_OLITIRS_OTH_P51_GALPGS01*/ga-metadata.yaml'))],
         unique=[],
         index_=dea_index
     )
@@ -261,9 +245,9 @@ def ls8_pq_scene_test_dataset(integration_test_data, dea_index) -> DatasetForTes
     test_data = integration_test_data
 
     ls8_collection = Collection(
-        name='ls8_scene_test',
+        name='ls8_pq_scene_test',
         query={},
-        file_patterns=[str(test_data.joinpath('LS8*/ga-metadata.yaml'))],
+        file_patterns=[str(test_data.joinpath('LS8_OLITIRS_PQ_P55_GAPQ01-032_090_069_20180227/ga-metadata.yaml'))],
         unique=[],
         index_=dea_index
     )
