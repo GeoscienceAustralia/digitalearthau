@@ -4,7 +4,7 @@ import shutil
 import uuid
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Iterable, Mapping, Tuple
+from typing import Iterable, Mapping
 
 import pytest
 import structlog
