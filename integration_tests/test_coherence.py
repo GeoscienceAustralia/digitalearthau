@@ -1,6 +1,7 @@
 from pathlib import Path
 import itertools
 import pytest
+
 from click.testing import CliRunner
 
 from integration_tests.conftest import DatasetForTests
@@ -26,12 +27,12 @@ def assert_click_command(command, expected_value, args):
         catch_exceptions=False
     )
     assert result.exit_code == 0, "Error for %r. output: %r" % (exe_opts, result.output)
-    assert '"event":"coherence.finish"' in result.output
-    assert expected_value in result.output
+    assert b'coherence.finish' in result.output_bytes
+    assert expected_value in result.output_bytes
 
 
 def test_check_locationless(ls8_pq_scene_test_dataset: DatasetForTests,
-                            other_dataset: DatasetForTests,
+                            test_dataset: DatasetForTests,
                             csvfile: str):
     """
     Test dea-coherence --check-locationless command option
@@ -46,20 +47,20 @@ def test_check_locationless(ls8_pq_scene_test_dataset: DatasetForTests,
     ls8_pq_scene_test_dataset.remove_location_in_index()
 
     # Add second dataset to index
-    other_dataset.add_to_index()
+    test_dataset.add_to_index()
 
     # Check if the other dataset has valid location
-    assert len(other_dataset.get_index_record().uris) != 0, "Valid location expected for other dataset"
+    assert len(test_dataset.get_index_record().uris) != 0, "Valid location expected for other dataset"
 
     # Remove the location in the index
-    other_dataset.archive_location_in_index()
+    test_dataset.archive_location_in_index()
 
     # Ensure datasets still exists in the index and they do not have locations
     assert ls8_pq_scene_test_dataset.get_index_record() is not None, "Test dataset should still be in the index"
-    assert other_dataset.get_index_record() is not None, "Other dataset should still be in the index"
+    assert test_dataset.get_index_record() is not None, "Other dataset should still be in the index"
 
     assert len(ls8_pq_scene_test_dataset.get_index_record().uris) == 0, "Test dataset location should none"
-    assert len(other_dataset.get_index_record().uris) == 0, "Other dataset location should none"
+    assert len(test_dataset.get_index_record().uris) == 0, "Other dataset location should none"
 
     # Run Coherence with --check-locationless argument
     exe_opts = ['--check-locationless']
@@ -67,28 +68,28 @@ def test_check_locationless(ls8_pq_scene_test_dataset: DatasetForTests,
     timerange = ["2000-01-01 < time < 2018-12-31"]
     exe_opts.extend(timerange)
 
-    assert_click_command(coherence.main, '"locationless_count":2', exe_opts)
+    assert_click_command(coherence.main, b'locationless_count=2', exe_opts)
 
 
 def test_check_downstream_datasets(ls8_pq_scene_test_dataset: DatasetForTests,
-                                   other_dataset: DatasetForTests,
+                                   test_dataset: DatasetForTests,
                                    csvfile: str):
     """
     Test dea-coherence --check-downstream-ds command option
     """
     # Add pq and other test dataset to index
     ls8_pq_scene_test_dataset.add_to_index()
-    other_dataset.add_to_index()
+    test_dataset.add_to_index()
 
     # Archive parent dataset for pq scene
     ls8_pq_scene_test_dataset.archive_parent_in_index()
 
     # Ensure the datasets still exists in the index and they do have locations
     assert ls8_pq_scene_test_dataset.get_index_record() is not None
-    assert other_dataset.get_index_record() is not None
+    assert test_dataset.get_index_record() is not None
 
     all_indexed_uris = set(ls8_pq_scene_test_dataset.collection.iter_index_uris())
-    assert all_indexed_uris == {ls8_pq_scene_test_dataset.uri, other_dataset.uri}, "Both dataset uri's should remain."
+    assert all_indexed_uris == {ls8_pq_scene_test_dataset.uri, test_dataset.uri}, "Both dataset uri's should remain."
 
     # Run Coherence with --check-downstream argument
     exe_opts = ['--check-downstream']
@@ -96,29 +97,29 @@ def test_check_downstream_datasets(ls8_pq_scene_test_dataset: DatasetForTests,
     timerange = ["time in 2018"]
     exe_opts.extend(timerange)
 
-    assert_click_command(coherence.main, '"downstream_dataset_error_count":1', exe_opts)
+    assert_click_command(coherence.main, b'downstream_dataset_error_count=1', exe_opts)
 
 
 def test_check_ancestors(ls8_pq_scene_test_dataset: DatasetForTests,
-                         other_dataset: DatasetForTests,
+                         test_dataset: DatasetForTests,
                          csvfile: str):
     """
     Test dea-coherence --check-ancestors command option
     """
     # Add pq and other test dataset to index
     ls8_pq_scene_test_dataset.add_to_index()
-    other_dataset.add_to_index()
+    test_dataset.add_to_index()
 
     # Archive parent datasets
     ls8_pq_scene_test_dataset.archive_parent_in_index()
-    other_dataset.archive_parent_in_index()
+    test_dataset.archive_parent_in_index()
 
     # Ensure the datasets still exists in the index and they do have locations
-    assert other_dataset.path.exists(), "Other dataset path exists"
+    assert test_dataset.path.exists(), "Other dataset path exists"
     assert ls8_pq_scene_test_dataset.path.exists(), "Test dataset path exists"
 
     assert ls8_pq_scene_test_dataset.get_index_record() is not None
-    assert other_dataset.get_index_record() is not None
+    assert test_dataset.get_index_record() is not None
 
     # Ensure the parent dataset have no locations
     assert len(ls8_pq_scene_test_dataset.get_parent_index_record().uris) == 0, "Test_ds parent location is not none"
@@ -130,22 +131,22 @@ def test_check_ancestors(ls8_pq_scene_test_dataset: DatasetForTests,
     timerange = ["time in 2018"]
     exe_opts.extend(timerange)
 
-    assert_click_command(coherence.main, '"archived_ancestor_count":2', exe_opts)
+    assert_click_command(coherence.main, b'archived_ancestor_count=2', exe_opts)
 
 
 def test_archive_locationless(ls8_pq_scene_test_dataset: DatasetForTests,
-                              other_dataset: DatasetForTests,
+                              test_dataset: DatasetForTests,
                               csvfile: str):
     """
     Test dea-coherence --archive-locationless command option
     """
     # Add pq and other test dataset to index
     ls8_pq_scene_test_dataset.add_to_index()
-    other_dataset.add_to_index()
+    test_dataset.add_to_index()
 
     # Remove the location in the index
     ls8_pq_scene_test_dataset.remove_location_in_index()
-    other_dataset.remove_location_in_index()
+    test_dataset.remove_location_in_index()
 
     # Run Coherence to archive locationless datasets with --archive-locationless argument
     exe_opts = ['--archive-locationless']
@@ -153,4 +154,4 @@ def test_archive_locationless(ls8_pq_scene_test_dataset: DatasetForTests,
     timerange = ["time in 2018"]
     exe_opts.extend(timerange)
 
-    assert_click_command(coherence.main, '"archived_locationless_count":2', exe_opts)
+    assert_click_command(coherence.main, b'archived_locationless_count=2', exe_opts)

@@ -118,12 +118,12 @@ def main(expressions, check_locationless, archive_locationless, check_ancestors,
             if check_ancestors:
                 _record_archived_ancestors(dc, dataset)
 
-    _LOG.info("coherence.finish",
-              datasets_count=DATASET_CNT,
-              archived_ancestor_count=ANCESTOR_CNT,
-              locationless_count=LOCATIONLESS_CNT,
-              archived_locationless_count=ARCHIVED_LOCATIONLESS_CNT,
-              downstream_dataset_error_count=DOWNSTREAM_DS_CNT)
+    click.echo(f"{dt.now()}Z [info     ] coherence.finish, \
+    datasets_count={DATASET_CNT}, \
+    archived_ancestor_count={ANCESTOR_CNT}, \
+    locationless_count={LOCATIONLESS_CNT}, \
+    archived_locationless_count={ARCHIVED_LOCATIONLESS_CNT}, \
+    downstream_dataset_error_count={DOWNSTREAM_DS_CNT}")
 
 
 def _create_output_csv():
