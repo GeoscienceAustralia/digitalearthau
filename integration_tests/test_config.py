@@ -51,6 +51,7 @@ def test_dea_config(dea_index: Index):
         'ls7_pq_scene',
         'ls7_pq_legacy_scene',
         'ls7_satellite_telemetry_data',
+        'ls8_barest_earth_mosaic',
         'ls8_level1_oli_scene',
         'ls8_level1_scene',
         'ls8_nbar_albers',
