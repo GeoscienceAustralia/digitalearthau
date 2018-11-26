@@ -27,8 +27,8 @@ def assert_click_command(command, expected_value, args):
         catch_exceptions=False
     )
     assert result.exit_code == 0, "Error for %r. output: %r" % (exe_opts, result.output)
-    assert b'coherence.finish' in result.output_bytes
-    assert expected_value in result.output_bytes
+    assert 'coherence.finish' in result.output
+    assert expected_value in result.output
 
 
 def test_check_locationless(ls8_pq_scene_test_dataset: DatasetForTests,
@@ -68,7 +68,7 @@ def test_check_locationless(ls8_pq_scene_test_dataset: DatasetForTests,
     timerange = ["2000-01-01 < time < 2018-12-31"]
     exe_opts.extend(timerange)
 
-    assert_click_command(coherence.main, b'locationless_count=2', exe_opts)
+    assert_click_command(coherence.main, 'locationless_count=2', exe_opts)
 
 
 def test_check_downstream_datasets(ls8_pq_scene_test_dataset: DatasetForTests,
@@ -97,7 +97,7 @@ def test_check_downstream_datasets(ls8_pq_scene_test_dataset: DatasetForTests,
     timerange = ["time in 2018"]
     exe_opts.extend(timerange)
 
-    assert_click_command(coherence.main, b'downstream_dataset_error_count=1', exe_opts)
+    assert_click_command(coherence.main, 'downstream_dataset_error_count=1', exe_opts)
 
 
 def test_check_ancestors(ls8_pq_scene_test_dataset: DatasetForTests,
@@ -131,7 +131,7 @@ def test_check_ancestors(ls8_pq_scene_test_dataset: DatasetForTests,
     timerange = ["time in 2018"]
     exe_opts.extend(timerange)
 
-    assert_click_command(coherence.main, b'archived_ancestor_count=2', exe_opts)
+    assert_click_command(coherence.main, 'archived_ancestor_count=2', exe_opts)
 
 
 def test_archive_locationless(ls8_pq_scene_test_dataset: DatasetForTests,
@@ -154,4 +154,4 @@ def test_archive_locationless(ls8_pq_scene_test_dataset: DatasetForTests,
     timerange = ["time in 2018"]
     exe_opts.extend(timerange)
 
-    assert_click_command(coherence.main, b'archived_locationless_count=2', exe_opts)
+    assert_click_command(coherence.main, 'archived_locationless_count=2', exe_opts)
