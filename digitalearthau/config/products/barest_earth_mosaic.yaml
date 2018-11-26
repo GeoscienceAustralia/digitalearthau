@@ -1,0 +1,49 @@
+name: ls8_barest_earth_mosaic
+metadata_type: eo
+description: Landsat-8 Barest Earth pixel composite mosaic 25 metre, 25km tile, Australian Albers Equal Area projection (EPSG:3577)
+metadata:
+    format:
+        name: GeoTIFF
+    instrument:
+        name: OLI
+    platform:
+        code: LANDSAT_8
+    product_type: landsat8_barest_earth_mosaic
+measurements:
+    - dtype: int16
+      name: blue
+      nodata: -999
+      units: '1'
+    - dtype: int16
+      name: green
+      nodata: -999
+      units: '1'
+    - dtype: int16
+      name: red
+      nodata: -999
+      units: '1'
+    - dtype: int16
+      name: nir
+      nodata: -999
+      units: '1'
+    - dtype: int16
+      name: swir1
+      nodata: -999
+      units: '1'
+    - dtype: int16
+      name: swir2
+      nodata: -999
+      units: '1'
+storage:
+    crs: EPSG:3577
+    driver: GeoTIFF
+    dimension_order:
+        - time
+        - y
+        - x
+    resolution:
+        x: 25
+        y: -25
+    tile_size:
+        x: 100000.0
+        y: 100000.0
