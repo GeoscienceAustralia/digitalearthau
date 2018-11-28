@@ -93,6 +93,15 @@ deploy:
         repo: GeoscienceAustralia/digitalearthau
         python: "3.6"
 
+ -  provider: s3
+    bucket: "docs.dea.ga.gov.au"
+    region: "ap-southeast-2"
+    local_dir: docs/_build/html/
+    skip_cleanup: true
+    on: 
+        branch: develop
+        repo: GeoscienceAustralia/digitalearthau
+
  -  provider: pages
     skip-cleanup: true
     github-token: $GITHUB_TOKEN  # Set in the settings page of your repository, as a secure variable
