@@ -3,7 +3,7 @@ Bulk download products from Amazon S3
 =====================================
 
 
-Last update: 28th November 2018
+Last updated: 28th November 2018
 
 
 Secure File Transfer Protocol
@@ -33,8 +33,8 @@ Creating SSH Keys (Mac OSX)
 ----------------------------
 
 
-Open the Terminal app and type `ssh-keygen -P "" -f ~/.ssh/transfer-key` This will generate new SSH Keys.
-To copy the public key type `cat ~/.ssh/transfer-key.pub | pbcopy` 
+Open the Terminal app and type ``ssh-keygen -P "" -f ~/.ssh/transfer-key`` This will generate new SSH Keys.
+To copy the public key type ``cat ~/.ssh/transfer-key.pub | pbcopy``
 
 You can now paste this in the request an account email template.
 
@@ -46,7 +46,7 @@ Request an account
 To request an account you will need to email earth.observations@ga.gov.au
 please provide the following information.
 
-.. parsed-literal::
+.. code:: text
 
     Hi DEA,
 
@@ -56,6 +56,7 @@ please provide the following information.
     email:
     organisation:
     public key:
+
 
 .. note::
 
@@ -68,12 +69,12 @@ Connecting to the sftp server
 
 Our SFTP supports the following clients: 
 
-- WinSCP – A Windows-only graphical client.
-- Cyberduck – A Linux, Macintosh, and Microsoft Windows graphical client.
-- FileZilla. – A Linux, Macintosh, and Windows graphical client. 
-- OpenSSH – A Macintosh and Linux command line utility.
+- `WinSCP <https://winscp.net/eng/index.php>`_ – A Windows-only graphical client.
+- `Cyberduck <https://cyberduck.io>`_ – A Linux, Macintosh, and Microsoft Windows graphical client.
+- `FileZilla <https://filezilla-project.org>`_ – A Linux, Macintosh, and Windows graphical client.
+- `OpenSSH <https://www.openssh.com>`_ – A Macintosh and Linux command line utility.
 
-You can connect to our server using the url `sftp.dea.ga.gov.au` and port `22`.
+You can connect to our server using the url ``sftp.dea.ga.gov.au`` and port ``22``.
 
 Instructions for configuring each client are available here: 
 
