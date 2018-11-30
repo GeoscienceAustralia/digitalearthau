@@ -55,6 +55,7 @@ Publicly available data access and web services are currently in development.
 
    data/data.rst
    data/s3.rst
+   data/s3-sftp.rst
 
 
 .. toctree::
