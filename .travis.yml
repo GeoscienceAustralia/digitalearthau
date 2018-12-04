@@ -64,17 +64,19 @@ before_script:
 script:
     - ./check-code.sh integration_tests
 
+
+after_script:
+  - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
+
+after_success:
+    - codecov
+    - python setup.py sdist bdist_wheel
+
 # We only deploy docs from develop, so lets only build them there too
     - |
       if [ "$TRAVIS_BRANCH" = "develop" ]; then
           pushd docs && make fetchnotebooks html && popd
       fi
-
-after_script:
-  - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
-after_success:
-    - codecov
-    - python setup.py sdist bdist_wheel
 
 
 # On success, upload a package to an S3 Bucket. Used for continuous deployment.
