@@ -43,7 +43,7 @@ Request an account
 -------------------
 
 
-To request an account you will need to email earth.observations@ga.gov.au
+To request an account you will need to email earth.observation@ga.gov.au
 please provide the following information.
 
 .. code:: text
