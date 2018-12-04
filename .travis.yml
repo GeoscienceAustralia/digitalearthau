@@ -23,6 +23,7 @@ addons:
             - pandoc
             - shellcheck
             - libudunits2-dev
+            - cython3
     postgresql: "9.6"
     services:
         - postgresql
@@ -47,7 +48,7 @@ install:
     - export CPLUS_INCLUDE_PATH="/usr/include/gdal"
     - export C_INCLUDE_PATH="/usr/include/gdal"
 
-    - travis_retry pip install GDAL==1.10.0 codecov
+    - travis_retry pip install GDAL==1.10.0 codecov cython boto3
     - travis_retry pip install git+https://github.com/GeoscienceAustralia/eo-datasets.git
     - travis_retry pip install --extra-index-url https://packages.dea.gadevs.ga/ 'datacube>=0.0.dev0'
     - travis_retry pip install -e .[doc,test]
@@ -63,17 +64,19 @@ before_script:
 script:
     - ./check-code.sh integration_tests
 
-# We only deploy docs from develop, so lets only build them there too
-    - |
-      if [ "$TRAVIS_BRANCH" = "develop" ]; then
-          pushd docs && make fetchnotebooks html && popd
-      fi
 
 after_script:
   - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
+
 after_success:
     - codecov
     - python setup.py sdist bdist_wheel
+
+# We only deploy docs from develop, so lets only build them there too
+    - |
+      if [ "${TRAVIS_PULL_REQUEST_BRANCH:-$TRAVIS_BRANCH}" = "develop" ]; then
+          pushd docs && make fetchnotebooks html && popd
+      fi
 
 
 # On success, upload a package to an S3 Bucket. Used for continuous deployment.
