@@ -74,7 +74,7 @@ after_success:
 
 # We only deploy docs from develop, so lets only build them there too
     - |
-      if [ "$TRAVIS_BRANCH" = "develop" ]; then
+      if [ "${TRAVIS_PULL_REQUEST_BRANCH:-$TRAVIS_BRANCH}" = "develop" ]; then
           pushd docs && make fetchnotebooks html && popd
       fi
 
