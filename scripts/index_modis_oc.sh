@@ -6,6 +6,7 @@
 #
 # Before running this script do a create-product;
 # ./index_nci_modis_oc.py --config ../../../modis_oc.conf create-product [PATH]
+
 # e.g. [PATH]= /g/data2/u39/public/data/modis/oc-1d-aust.v201508.recent/2016/12
 
 for j in /g/data2/u39/public/data/modis/oc-1d-aust.v201508.recent/*; do
