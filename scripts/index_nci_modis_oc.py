@@ -100,25 +100,6 @@ def create_product(index, path):
 @cli.command()
 @click.argument('path')
 @click.pass_obj
-def stat_data(index, path):
-    path = Path(path)
-    datasets = find_datasets(path)
-
-    cnt = Counter()
-    resolver = Doc2Dataset(index)
-    for name, dataset in datasets.items():
-        doc = generate_dataset_doc(name, dataset)
-        cnt.update(list(doc['image']['bands']))
-        if 'owtd' in list(doc['image']['bands']):
-            print('** in **' + doc['image']['bands']['dt']['path'])
-        else:
-            print('** ou **' + doc['image']['bands']['dt']['path'])
-
-    print(cnt.items())
-
-@cli.command()
-@click.argument('path')
-@click.pass_obj
 def index_data(index, path):
     path = Path(path)
     datasets = find_datasets(path)
