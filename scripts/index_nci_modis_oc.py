@@ -63,6 +63,8 @@ import rasterio
 from datacube import Datacube
 from datacube.index.hl import Doc2Dataset
 from datacube.utils import changes
+from collections import Counter
+
 
 LOG = logging.getLogger(__name__)
 
@@ -94,6 +96,25 @@ def create_product(index, path):
     indexed_product = index.products.add(product)
     print(indexed_product)
 
+
+@cli.command()
+@click.argument('path')
+@click.pass_obj
+def stat_data(index, path):
+    path = Path(path)
+    datasets = find_datasets(path)
+
+    cnt = Counter()
+    resolver = Doc2Dataset(index)
+    for name, dataset in datasets.items():
+        doc = generate_dataset_doc(name, dataset)
+        cnt.update(list(doc['image']['bands']))
+        if 'owtd' in list(doc['image']['bands']):
+            print('** in **' + doc['image']['bands']['dt']['path'])
+        else:
+            print('** ou **' + doc['image']['bands']['dt']['path'])
+
+    print(cnt.items())
 
 @cli.command()
 @click.argument('path')
@@ -130,7 +151,7 @@ def find_datasets(path: Path):
 
     ``Ayyyymmdd.vv.aust.xxx.nc``, where
 
-    - 'A' denotes MODIS/Aqua
+    - 'A' denotes A for Aqua MODIS (T for Terra is another option)
     - 'yyyymmdd' is the GMT date of the mosaic
     - 'vv' is the SeaDAS processing version
     - 'aust' indicates a whole-of-Australia mosaic
@@ -138,7 +159,7 @@ def find_datasets(path: Path):
     - 'nc' suffix is for netCDF4 format data files.
 
     """
-    pattern = re.compile(r'(?P<sat>[AT])'
+    pattern = re.compile(r'(?P<sat>[A])'
                          r'(?P<date>\d{8})\.'
                          r'(?P<version>[A-Z_\d]+)'
                          r'.aust.'
