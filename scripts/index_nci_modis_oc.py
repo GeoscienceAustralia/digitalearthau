@@ -212,14 +212,8 @@ def generate_dataset_doc(dataset_name, dataset):
     :param dataset: dictionary of varname: ncfile
     :return:
     """
-    # print(dataset)
-    for meas in ('owtd', 'sst', 'l2_flags'):
-        if meas in dataset:
-            sample_ncfile = dataset[meas]
-            tag = meas
-            break
-
-    sample_ncfile_gdal = f'NETCDF:{sample_ncfile}:' + tag
+    sample_ncfile = dataset['owtd']
+    sample_ncfile_gdal = f'NETCDF:{sample_ncfile}:owtd'
     creation_time = datetime.fromtimestamp(sample_ncfile.stat().st_mtime)
     geo_ref_points, spatial_ref = get_grid_spatial_projection(sample_ncfile_gdal)
 

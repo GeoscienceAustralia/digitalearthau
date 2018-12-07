@@ -9,6 +9,6 @@
 # e.g. [PATH]= /g/data2/u39/public/data/modis/oc-1d-aust.v201508.recent/2016/12
 
 # one year at a time
-for i in /g/data2/u39/public/data/modis/oc-1d-aust.v201508.recent/2016/*; do
+for i in /g/data2/u39/public/data/modis/oc-1d-aust.v201508.recent/2017/*; do
     ./index_nci_modis_oc.py --config  "$1"  index-data "$i"
 done
