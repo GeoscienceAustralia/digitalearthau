@@ -132,7 +132,7 @@ def find_datasets(path: Path):
 
     ``Ayyyymmdd.vv.aust.xxx.nc``, where
 
-    - 'A' denotes A for Aqua MODIS (T for Terra is another option)
+    - 'A' denotes A for Aqua MODIS (T for Terra is unused option)
     - 'yyyymmdd' is the GMT date of the mosaic
     - 'vv' is the SeaDAS processing version
     - 'aust' indicates a whole-of-Australia mosaic
