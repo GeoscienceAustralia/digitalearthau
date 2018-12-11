@@ -70,3 +70,22 @@ def test_get_data_paths_sibling():
         metadata_path,
         data_path
     }
+
+
+def test_get_data_paths_s2_ard_package():
+    packaged_dataset = paths.write_files({
+        'ARD-METADATA.yaml': '',
+        'package': {
+            'file1.txt': ''
+        }
+    })
+
+    metadata_path = packaged_dataset.joinpath('ARD-METADATA.yaml')
+    assert paths.get_metadata_path(packaged_dataset) == metadata_path
+
+    base_path, all_files = paths.get_dataset_paths(metadata_path)
+    assert base_path == packaged_dataset
+    assert set(all_files) == {
+        metadata_path,
+        packaged_dataset.joinpath('package', 'file1.txt')
+    }

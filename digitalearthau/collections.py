@@ -177,6 +177,9 @@ def get_collections_in_path(p: Path) -> Iterable[Collection]:
     []
     >>> [c.name for c in get_collections_in_path(Path('/g/data/rs0/scenes/nbar-scenes-tmp/ls8/2015/01/output/nbar'))]
     ['ls8_nbar_scene']
+    >>> [c.name for c in get_collections_in_path(Path('/g/data/if87/datacube/002/S2_MSI_ARD/packaged/' + \
+        '2016-07-27/S2A_OPER_MSI_ARD_TL_SGS__20160727T054920_A005719_T53KRU_N02.04'))]
+    ['s2a_ard_granule']
     """
     for c in get_collections():
         for pat in c.file_patterns:
@@ -190,7 +193,6 @@ def get_collections_in_path(p: Path) -> Iterable[Collection]:
 
 def init_nci_collections(index: Index):
     # NCI collections. TODO: move these to config file?
-
     _add(
         Collection(
             name='telemetry',
@@ -213,6 +215,20 @@ def init_nci_collections(index: Index):
             file_patterns=file_patterns,
             index_=index,
             unique=('time', 'sat_path', 'sat_row'),
+            delete_archived_after_days=delete_archived_after_days,
+            # Scenes default to trusting disk. They're atomically written to the destination,
+            # and the jobs themselves wont index.
+            trust=Trust.DISK
+        )
+
+    def ard_granule_collection(name, query, file_patterns, delete_archived_after_days=None):
+        """Make a collection with common defaults for scene collections"""
+        return Collection(
+            name,
+            query,
+            file_patterns=file_patterns,
+            index_=index,
+            unique=('time', 'region_code', 'lat', 'lon'),
             delete_archived_after_days=delete_archived_after_days,
             # Scenes default to trusting disk. They're atomically written to the destination,
             # and the jobs themselves wont index.
@@ -501,3 +517,33 @@ def init_nci_collections(index: Index):
     assert get_collection('ls8_nbar_albers').file_patterns == (
         '/g/data/rs0/datacube/002/LS8_OLI_NBAR/*_*/LS8*NBAR*.nc',
     )
+
+    # S2A & S2B ARD products:
+    # /g/data/if87/datacube/002/S2_MSI_ARD/packaged/
+    s2a_ard_granule_offset = '[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]/S2A_*/ARD-METADATA.yaml'
+    s2b_ard_granule_offset = '[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]/S2B_*/ARD-METADATA.yaml'
+    s2_ard_basepath = '/g/data/if87/datacube/002/S2_MSI_ARD/packaged/'
+    _add(
+        ard_granule_collection(
+            name='s2a_ard_granule',
+            query={'product': 's2a_ard_granule'},
+            file_patterns=[
+                s2_ard_basepath + s2a_ard_granule_offset,
+            ],
+        ),
+        ard_granule_collection(
+            name='s2b_ard_granule',
+            query={'product': 's2b_ard_granule'},
+            file_patterns=[
+                s2_ard_basepath + s2b_ard_granule_offset,
+            ],
+        ),
+    )
+
+    assert s2_ard_basepath + s2a_ard_granule_offset in get_collection('s2a_ard_granule').file_patterns
+    assert s2_ard_basepath + s2b_ard_granule_offset in get_collection('s2b_ard_granule').file_patterns
+    s2a_path = '2018-01-25/S2A_OPER_MSI_ARD_TL_SGS__20180125T035411_A013541_T54HUG_N02.06/ARD-METADATA.yaml'
+    assert list(get_collections_in_path(s2_ard_basepath + s2a_path)) is not None
+
+    s2b_path = '2017-11-16/S2B_OPER_MSI_ARD_TL_MPS__20171116T154540_A003632_T52LEQ_N02.06/ARD-METADATA.yaml'
+    assert list(get_collections_in_path(Path(s2_ard_basepath + s2b_path))) is not None
