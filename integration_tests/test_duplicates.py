@@ -10,12 +10,12 @@ from digitalearthau.index import add_dataset
 
 import click.testing
 
-_EXPECTED_ALL_DUPLICATES = """product,time_lower_day,platform,count,dataset_refs
+_EXPECTED_ALL_DUPLICATES = """product,time,platform,count,dataset_refs
 ls8_level1_scene,2016-09-26T00:00:00+00:00,114,80,2,86150afc-b7d5-4938-a75e-3445007256d3\
  f882f9c0-a27f-11e7-a89f-185e0f80a5c0
 """
-_EXPECTED_SPECIFIC_DUPS = """product,time_lower_day,sat_path_lower,sat_row_lower,count,dataset_refs
-ls8_level1_scene,2016-09-26T00:00:00+00:00,114,80,2,86150afc-b7d5-4938-a75e-3445007256d3\
+_EXPECTED_SPECIFIC_DUPS = """product,time,sat_path,sat_row,count,dataset_refs
+ls8_level1_scene,2016-09-26T02:16:59+00:00,114,80,2,86150afc-b7d5-4938-a75e-3445007256d3\
  f882f9c0-a27f-11e7-a89f-185e0f80a5c0
 """
 ON_DISK1_ID = uuid.UUID('86150afc-b7d5-4938-a75e-3445007256d3')
@@ -54,12 +54,12 @@ def duplicate_ls8_l1_scene(dea_index: Index, integration_test_data: Path) -> uui
 def test_no_duplicates(global_integration_cli_args,
                        indexed_ls8_l1_scenes: Tuple[uuid.UUID, uuid.UUID]):
     res = _run_cmd(['ls8_level1_scene'], global_integration_cli_args)
-    assert res.output == 'product,time_lower_day,sat_path_lower,sat_row_lower,count,dataset_refs\n'
+    assert res.output == 'product,time,sat_path,sat_row,count,dataset_refs\n'
     assert res.exit_code == 0
 
     res = _run_cmd(['ls8_nbar_albers'], global_integration_cli_args)
     assert res.exit_code == 0
-    assert res.output == 'product,time_lower_day,lat,lon,count,dataset_refs\n'
+    assert res.output == 'product,time,lat,lon,count,dataset_refs\n'
 
     # Error returned, fake product
     res = _run_cmd(['ls8_fake_product'], global_integration_cli_args)

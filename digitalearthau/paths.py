@@ -114,9 +114,9 @@ def split_path_from_base(file_path):
     'ls7/2003/something.nc'
     >>> base, offset = split_path_from_base('/g/data/if87/datacube/002/S2_MSI_ARD/2018-11-30/something')
     >>> str(base)
-    '/g/data/if87/datacube/002'
+    '/g/data/if87/datacube'
     >>> offset
-    'S2_MSI_ARD/2018-11-30/something'
+    '002/S2_MSI_ARD/2018-11-30/something'
     >>> split_path_from_base('/short/unknown_location/something.nc')
     Traceback (most recent call last):
     ...

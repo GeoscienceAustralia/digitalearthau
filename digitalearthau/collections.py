@@ -179,7 +179,7 @@ def get_collections_in_path(p: Path) -> Iterable[Collection]:
     ['ls8_nbar_scene']
     >>> [c.name for c in get_collections_in_path(Path('/g/data/if87/datacube/002/S2_MSI_ARD/packaged/' + \
         '2016-07-27/S2A_OPER_MSI_ARD_TL_SGS__20160727T054920_A005719_T53KRU_N02.04'))]
-    ['s2a_ard_granule', 's2b_ard_granule']
+    ['s2a_ard_granule']
     """
     for c in get_collections():
         for pat in c.file_patterns:
@@ -542,11 +542,8 @@ def init_nci_collections(index: Index):
 
     assert s2_ard_basepath + s2a_ard_granule_offset in get_collection('s2a_ard_granule').file_patterns
     assert s2_ard_basepath + s2b_ard_granule_offset in get_collection('s2b_ard_granule').file_patterns
-    assert list(get_collections_in_path(
-        Path(s2_ard_basepath +
-             '2018-01-25/S2A_OPER_MSI_ARD_TL_SGS__20180125T035411_A013541_T54HUG_N02.06/ARD-METADATA.yaml'))) \
-        is not None
-    assert list(get_collections_in_path(
-        Path(s2_ard_basepath +
-             '2017-11-16/S2B_OPER_MSI_ARD_TL_MPS__20171116T154540_A003632_T52LEQ_N02.06/ARD-METADATA.yaml'))) \
-        is not None
+    s2a_path = '2018-01-25/S2A_OPER_MSI_ARD_TL_SGS__20180125T035411_A013541_T54HUG_N02.06/ARD-METADATA.yaml'
+    assert list(get_collections_in_path(s2_ard_basepath + s2a_path)) is not None
+
+    s2b_path = '2017-11-16/S2B_OPER_MSI_ARD_TL_MPS__20171116T154540_A003632_T52LEQ_N02.06/ARD-METADATA.yaml'
+    assert list(get_collections_in_path(Path(s2_ard_basepath + s2b_path))) is not None
