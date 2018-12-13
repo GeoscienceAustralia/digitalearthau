@@ -29,6 +29,7 @@ BASE_DIRECTORIES = [
     '/g/data/rs0/scenes',
     '/short/v10/scenes',
     '/g/data/v10/public/data',
+    '/g/data/if87/datacube',
 ]
 
 # Use a static variable so that trashed items in the same run will be in the same trash bin.
@@ -111,6 +112,11 @@ def split_path_from_base(file_path):
     '/g/data/fk4/datacube'
     >>> offset
     'ls7/2003/something.nc'
+    >>> base, offset = split_path_from_base('/g/data/if87/datacube/002/S2_MSI_ARD/2018-11-30/something')
+    >>> str(base)
+    '/g/data/if87/datacube'
+    >>> offset
+    '002/S2_MSI_ARD/2018-11-30/something'
     >>> split_path_from_base('/short/unknown_location/something.nc')
     Traceback (most recent call last):
     ...
@@ -236,6 +242,8 @@ def get_dataset_paths(metadata_path: Path) -> Tuple[Path, List[Path]]:
         return metadata_path, [metadata_path]
     if metadata_path.name == 'ga-metadata.yaml':
         return metadata_path.parent, list_file_paths(metadata_path.parent)
+    if metadata_path.name == 'ARD-METADATA.yaml':
+        return metadata_path.parent, list_file_paths(metadata_path.parent)
 
     sibling_suffix = '.ga-md.yaml'
     if metadata_path.name.endswith(sibling_suffix):
@@ -269,18 +277,26 @@ def get_metadata_path(dataset_path):
     if dataset_path.is_file() and (is_supported_document_type(dataset_path) or dataset_path.suffix == '.nc'):
         return dataset_path
 
-    # Otherwise there may be a sibling file with appended suffix '.agdc-md.yaml'.
+    # Otherwise there may be a sibling file with appended suffix '.ga-md.yaml'.
     expected_name = dataset_path.parent.joinpath('{}.ga-md'.format(dataset_path.name))
     found = _find_any_metadata_suffix(expected_name)
     if found:
         return found
 
-    # Otherwise if it's a directory, there may be an 'agdc-metadata.yaml' file describing all contained datasets.
+    # Otherwise if it's a directory
     if dataset_path.is_dir():
+        # There may be an 'ga-metadata.yaml' file describing all contained datasets
         expected_name = dataset_path.joinpath('ga-metadata')
         found = _find_any_metadata_suffix(expected_name)
+
+        # There may be an 'ARD-METADATA.yaml' file describing all contained datasets
+        expected_s2ard_name = dataset_path.joinpath('ARD-METADATA')
+        found_s2ard = _find_any_metadata_suffix(expected_s2ard_name)
+
         if found:
             return found
+        elif found_s2ard:
+            return found_s2ard
 
     raise ValueError('No metadata found for input %r' % dataset_path)
 
