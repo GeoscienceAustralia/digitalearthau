@@ -47,7 +47,7 @@ install:
     - popd
     - export CPLUS_INCLUDE_PATH="/usr/include/gdal"
     - export C_INCLUDE_PATH="/usr/include/gdal"
-    - travis_retry pip install  pytest
+    - travis_retry pip install --upgrade pytest
     - travis_retry pip install GDAL==1.10.0 codecov cython boto3
     - travis_retry pip install git+https://github.com/GeoscienceAustralia/eo-datasets.git
     - travis_retry pip install --extra-index-url https://packages.dea.gadevs.ga/ 'datacube>=0.0.dev0'
