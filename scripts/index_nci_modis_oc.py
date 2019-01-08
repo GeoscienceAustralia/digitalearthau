@@ -63,7 +63,6 @@ import rasterio
 from datacube import Datacube
 from datacube.index.hl import Doc2Dataset
 from datacube.utils import changes
-from collections import Counter
 
 
 LOG = logging.getLogger(__name__)
