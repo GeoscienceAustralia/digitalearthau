@@ -172,7 +172,8 @@ def describe_variables(ncfile):
     for constructing the Product and Dataset docs.
     """
     nco = netCDF4.Dataset(ncfile)
-    non_axis_variables = nco.get_variables_by_attributes(axis=lambda v: v is None)
+    non_axis_variables = nco.get_variables_by_attributes(
+        axis=lambda v: v is None)
     for vs in non_axis_variables:
         doc = {'name': vs.name,
                # 'description': vs.long_name,
@@ -214,7 +215,8 @@ def generate_dataset_doc(dataset_name, dataset):
     sample_ncfile = dataset['owtd']
     sample_ncfile_gdal = f'NETCDF:{sample_ncfile}:owtd'
     creation_time = datetime.fromtimestamp(sample_ncfile.stat().st_mtime)
-    geo_ref_points, spatial_ref = get_grid_spatial_projection(sample_ncfile_gdal)
+    geo_ref_points, spatial_ref = get_grid_spatial_projection(
+        sample_ncfile_gdal)
 
     start_time, end_time = name_to_date_range(dataset_name)
     # variables = dataset_to_variable_descriptions(dataset)
