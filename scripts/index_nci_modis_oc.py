@@ -64,6 +64,7 @@ from datacube import Datacube
 from datacube.index.hl import Doc2Dataset
 from datacube.utils import changes
 
+
 LOG = logging.getLogger(__name__)
 
 
@@ -131,7 +132,7 @@ def find_datasets(path: Path):
 
     ``Ayyyymmdd.vv.aust.xxx.nc``, where
 
-    - 'A' denotes MODIS/Aqua
+    - 'A' denotes A for Aqua MODIS (T for Terra is unused option)
     - 'yyyymmdd' is the GMT date of the mosaic
     - 'vv' is the SeaDAS processing version
     - 'aust' indicates a whole-of-Australia mosaic
@@ -139,7 +140,7 @@ def find_datasets(path: Path):
     - 'nc' suffix is for netCDF4 format data files.
 
     """
-    pattern = re.compile(r'(?P<sat>[AT])'
+    pattern = re.compile(r'(?P<sat>[A])'
                          r'(?P<date>\d{8})\.'
                          r'(?P<version>[A-Z_\d]+)'
                          r'.aust.'
@@ -172,7 +173,8 @@ def describe_variables(ncfile):
     for constructing the Product and Dataset docs.
     """
     nco = netCDF4.Dataset(ncfile)
-    non_axis_variables = nco.get_variables_by_attributes(axis=lambda v: v is None)
+    non_axis_variables = nco.get_variables_by_attributes(
+        axis=lambda v: v is None)
     for vs in non_axis_variables:
         doc = {'name': vs.name,
                # 'description': vs.long_name,
@@ -214,7 +216,8 @@ def generate_dataset_doc(dataset_name, dataset):
     sample_ncfile = dataset['owtd']
     sample_ncfile_gdal = f'NETCDF:{sample_ncfile}:owtd'
     creation_time = datetime.fromtimestamp(sample_ncfile.stat().st_mtime)
-    geo_ref_points, spatial_ref = get_grid_spatial_projection(sample_ncfile_gdal)
+    geo_ref_points, spatial_ref = get_grid_spatial_projection(
+        sample_ncfile_gdal)
 
     start_time, end_time = name_to_date_range(dataset_name)
     # variables = dataset_to_variable_descriptions(dataset)
