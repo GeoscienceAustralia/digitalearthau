@@ -111,11 +111,12 @@ def index_data(index, path):
 
         if err is not None:
             logging.error("%s", err)
-        try:
-            index.datasets.add(dataset)
-        except Exception as e:
-            logging.error("Couldn't index %s%s", path, name)
-            logging.exception("Exception", e)
+        else:
+            try:
+                index.datasets.add(dataset)
+            except Exception as e:
+                logging.error("Couldn't index %s%s", path, name)
+                logging.exception("Exception", e)
 
 
 def print_dict(doc):
