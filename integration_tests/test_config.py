@@ -88,6 +88,8 @@ def test_dea_config(dea_index: Index):
         'wofs_summary',
         'wofs_filtered_summary',
         'wofs_annual_summary',
+        'wofs_nov_mar_summary',
+        'wofs_apr_oct_summary',
     }
 
 
