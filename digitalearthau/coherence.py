@@ -48,20 +48,19 @@ CSV_OUTPUT_FILE = paths.NCI_WORK_ROOT / f"coherence/{NOW:%Y-%m-%d}/erroneous_dat
 def main(expressions, check_locationless, archive_locationless, check_ancestors,
          check_downstream, test_dc_config):
     """
-    Find problem datasets using the index.
-
+    \b
+    Find problems within ODC datacube datasets. The problems can be any of the following:
     - Datasets with no active locations (can be archived with --archive-locationless)
-    - Datasets whose ancestors have been archived. (perhaps they've been reprocessed?)
-    - Datasets whose ancestors are locationless
-    - Downstream datasets linked to locationless source datasets (datasets deleted from the disc and
+    - Archive datasets with no active locations
+    - Datasets with an archived parent
+    - Archived or locationless dataset has children (datasets deleted from the disc and
       regenerated again for reprocessing)
+    \f
 
-    ::
-
-       eg. derived albers files whose source dataset/s have been archived by sync tool
-             LS7_ETM_NBART_P54_GANBART01-002_112_082_20180910 (Archived)
-               |----- LS7_ETM_NBART_3577_-14_-35_20180910020329500000_v1537611829.nc (Active)
-               |----- LS7_ETM_NBART_3577_-14_-36_20180910020329500000_v1537611829.nc (Active)
+       Ex. Derived albers files whose source dataset/s have been archived by sync tool
+           LS7_ETM_NBART_P54_GANBART01-002_112_082_20180910 (Parent location: Archived)
+               |----- LS7_ETM_NBART_3577_-14_-35_20180910020329500000_v1537611829.nc (Derived child location: Active)
+               |----- LS7_ETM_NBART_3577_-14_-36_20180910020329500000_v1537611829.nc (Derived child location: Active)
 
     Intended to be used after running sync: when filesystem and index is consistent. Ideally
     you've synced the ancestor collections too.
