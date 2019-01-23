@@ -192,8 +192,7 @@ def _call_move(args, global_integration_cli_args) -> Result:
 
 
 def make_fake_netcdf_dataset(nc_name, yaml_doc):
-    from datacube.model import Variable
-    from datacube.storage.netcdf_writer import create_variable, netcdfy_data
+    from datacube.drivers.netcdf.writer import Variable, create_variable, netcdfy_data
     from netCDF4 import Dataset
     import numpy as np
     content = yaml_doc.read_text()
