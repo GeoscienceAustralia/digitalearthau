@@ -1,4 +1,4 @@
-name: dea_eo_v1
+name: eo_plus
 description: EO metadata for DEA products with GQA.
 dataset:
     id: ['id']
