@@ -37,6 +37,7 @@ setup(
         'pytest-runner'
     ],
     install_requires=[
+        'colorama',
         'click>=5.0',
         'datacube[celery]',
         'python-dateutil',
