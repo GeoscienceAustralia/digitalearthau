@@ -25,8 +25,8 @@ from .differences import ArchivedDatasetOnDisk, Mismatch, LocationMissingOnDisk,
 
 _LOG = structlog.get_logger()
 
-# 24 hours (roughly the same day)
-CACHE_TIMEOUT_SECS = 60 * 60 * 24
+# 23 hours (roughly the same day)
+CACHE_TIMEOUT_SECS = 60 * 60 * 23
 
 
 def cache_is_too_old(path):
