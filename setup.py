@@ -49,6 +49,7 @@ setup(
         'boltons',
         'lxml',
         'pydash',
+        'colorama', # required to work around a structlog issue
     ],
     tests_require=tests_require,
     extras_require=extras_require,
