@@ -1,59 +1,74 @@
----
 dist: trusty
 language: python
 python:
     - '3.6'
 sudo: true
 git:
-  # We need a deeper depth for 'git descibe' to ensure
+  # We need a deeper depth for 'git desc
   # we can reach the last tagged version. Defaults to only 50
   depth: 99999
 addons:
     apt:
+        sources:
+            - sourceline: ppa:nextgis/ppa
         packages:
             - gdal-bin
+            - gdal-data
+            - libgdal-dev
+            - libgdal-dev
+            - libgdal20
+            - libudunits2-0
             - gfortran
             - libatlas-base-dev
             - libatlas-dev
-            - libgdal1-dev
             - liblapack-dev
             - libproj-dev
             - libxml2-dev
             - libxslt-dev
             - pandoc
             - shellcheck
-            - libudunits2-dev
             - cython3
     postgresql: "9.6"
-    services:
-        - postgresql
+
+services:
+    - postgresql
 env:
   global:
     - CC_TEST_REPORTER_ID=7fabf748ee918a406d3cd9dfeace7d4f599a4d9c3c70c65e877e8448cc0d4a3b
 cache:
-    apt: true
     directories:
         - $HOME/.cache/pip
 
 before_install:
     - createdb dea_integration
 
-install:
+  # Download and Install PDS Tools
     - mkdir pdstools
     - pushd pdstools
     - travis_retry wget https://raw.githubusercontent.com/GeoscienceAustralia/pds-tools/988b0b6e8495f9224c384ec0ac4c720c054d022c/pdsinfo.c
     - clang -O pdsinfo.c -lm -o pdsinfo
     - export PATH="$(pwd):${PATH}"
     - popd
-    - export CPLUS_INCLUDE_PATH="/usr/include/gdal"
-    - export C_INCLUDE_PATH="/usr/include/gdal"
+
+  # Set paths for building python-gdal
+    - export CPLUS_INCLUDE_PATH=/usr/include/gdal
+    - export C_INCLUDE_PATH=/usr/include/gdal
+    - export GDAL_DATA="$(gdal-config --datadir)"
+    - pip install --upgrade pip
+    - pip install --progress-bar off coveralls codecov
+
+  # Install pygdal bindings compatible with dpkg based gdal libs
+    - pip install pygdal>="$(gdal-config --version)"
+
+install:
     - travis_retry pip install --upgrade pytest
-    - travis_retry pip install GDAL==1.10.0 codecov cython boto3
+    - travis_retry pip install codecov cython boto3
     - travis_retry pip install git+https://github.com/GeoscienceAustralia/eo-datasets.git
     - travis_retry pip install --extra-index-url https://packages.dea.gadevs.ga/ 'datacube>=0.0.dev0'
     - travis_retry pip install -e .[doc,test]
-before_script:
 
+before_script:
+# Download and install the Code Climate CLI tool
   - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
   - chmod +x ./cc-test-reporter
   - ./cc-test-reporter before-build
