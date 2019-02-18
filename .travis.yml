@@ -66,7 +66,7 @@ install:
   - travis_retry pip install --upgrade pytest
   - travis_retry pip install codecov cython boto3
   - travis_retry pip install git+https://github.com/GeoscienceAustralia/eo-datasets.git
-  - travis_retry pip install --extra-index-url https://packages.dea.gadevs.ga/ 'datacube==1.6.2+329.g82d016ff'
+  - travis_retry pip install --extra-index-url https://packages.dea.gadevs.ga/ 'datacube>=0.0.dev0'
   - travis_retry pip install -e .[doc,test]
 
 before_script:
