@@ -72,22 +72,22 @@ aster_lpdaac.conf::
 import json
 import logging
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 
 import click
 import numpy as np
 from osgeo import gdal, osr
-import rasterio
 
 from datacube import Datacube
 from datacube.index.hl import Doc2Dataset
+from datacube.utils.geometry import CRS, box
 
 
 LOG = logging.getLogger(__name__)
 
-PRODUCTS = {'aster_l1t_vnir': {'ImageData2', 'ImageData1', 'ImageData3N'},
-            'aster_l1t_tir': {'ImageData10', 'ImageData11', 'ImageData12', 'ImageData13', 'ImageData14'}}
+PRODUCTS = {'vnir': {'ImageData2', 'ImageData1', 'ImageData3N'},
+            'tir': {'ImageData10', 'ImageData11', 'ImageData12', 'ImageData13', 'ImageData14'}}
 
 
 @click.group(help=__doc__)
@@ -102,20 +102,6 @@ def cli(ctx, config):
 @cli.command()
 @click.argument('path')
 @click.option('--product', help='Which ASTER product? vnir, swir, or tir')
-def create_vrt(path, product):
-
-    file_paths = find_lpdaac_file_paths(Path(path))
-    print(file_paths)
-
-    for file_path in file_paths:
-        vrt = generate_vrt(file_path, product)
-        with open(vrt_file_path(file_path, product), 'w') as fd:
-            fd.write(vrt)
-
-
-@cli.command()
-@click.argument('path')
-@click.option('--product', help='Which ASTER product? vnir, swir, or tir')
 @click.pass_obj
 def show(index, path, product):
 
@@ -124,7 +110,7 @@ def show(index, path, product):
 
     _ = Doc2Dataset(index)
     for file_path in file_paths:
-        doc = generate_lpdaac_doc(file_path, product)
+        doc = generate_lpdaac_doc(file_path, PRODUCTS[product])
         print_dict(doc)
 
 
@@ -135,11 +121,11 @@ def show(index, path, product):
 def create_product(index, path, product):
     file_paths = find_lpdaac_file_paths(Path(path))
     print(file_paths)
-    measurements = raster_to_measurements(file_paths[0], product)
+    measurements = raster_to_measurements(file_paths[0], PRODUCTS[product])
     for measure in measurements:
         measure.pop('path')  # This is not needed here
     print_dict(measurements)
-    product_def = generate_lpdaac_defn(measurements, product)
+    product_def = generate_lpdaac_defn(measurements)
     print_dict(product_def)
 
     print(index)
@@ -159,11 +145,10 @@ def index_data(index, path, product):
 
     resolver = Doc2Dataset(index)
     for file_path in file_paths:
-        doc = generate_lpdaac_doc(file_path, product)
+        doc = generate_lpdaac_doc(file_path, PRODUCTS[product])
         print_dict(doc)
-        dataset, err = resolver(doc, vrt_file_path(file_path, product).as_uri())
+        dataset, err = resolver(doc, file_path.as_uri())
 
-        print(dataset)
         if err is not None:
             logging.error("%s", err)
         try:
@@ -171,10 +156,6 @@ def index_data(index, path, product):
         except Exception as e:
             logging.error("Couldn't index %s", file_path)
             logging.exception("Exception", e)
-
-
-def vrt_file_path(file_path, product):
-    return file_path.with_name(f'{file_path.stem}_{product}.vrt')
 
 
 def print_dict(doc):
@@ -190,43 +171,28 @@ def find_lpdaac_file_paths(path: Path):
     """
     file_paths = []
     for afile in path.iterdir():
-        if afile.suffix == '.hdf' and afile.stem[:7] == 'AST_L1T':
+        if afile.suffix == '.hdf' and afile.stem[:3] == 'ASTER_AU':
             file_paths.append(afile)
     return file_paths
 
 
-def raster_to_measurements(file_path, product):
-
+def raster_to_measurements(file_path, band_suffixes):
+    ds = gdal.Open(file_path, gdal.GA_ReadOnly)
+    sub_datasets = ds.GetSubDatasets()
     measurements = []
-    for index, band in enumerate(selected_bands(file_path, product)):
-        measure = dict(name=str(index + 1))
-        measure['path'] = vrt_file_path(file_path, product).name
-        print(measure['path'])
-        with rasterio.open(band) as band_:
-            measure['dtype'] = str(band_.dtypes[0])
-            measure['nodata'] = float(band_.nodatavals[0] or 0)
-            measure['units'] = str(band_.units[0])
-        measurements.append(measure)
+    for index, band in enumerate(sub_datasets):
+        # Check the last field of the band name: something like 'ImageDataXX'
+        if band[0].split(':')[-1] in band_suffixes:
+            measurements.append(band[0].split(':')[-1])
     return measurements
 
 
-def selected_bands(file_path, product):
-
-    band_suffixes = PRODUCTS[product]
-
-    ds = gdal.Open(str(file_path), gdal.GA_ReadOnly)
-    sub_datasets = ds.GetSubDatasets()
-    # Check the last field of the band name: something like 'ImageDataXX'
-
-    return tuple(band[0] for band in sub_datasets if band[0].split(':')[-1] in band_suffixes)
-
-
-def generate_lpdaac_defn(measurements, product):
+def generate_lpdaac_defn(measurements):
     return {
-        'name': product,
+        'name': 'ASTER_L1T',
         'metadata_type': 'eo',
         'metadata': {
-            'product_type': product,
+            'product_type': 'aster_lpdaac_l1t',
             'platform': {'code': 'ASTER'},
             'version': 1,
             'coverage': 'aust'
@@ -236,12 +202,13 @@ def generate_lpdaac_defn(measurements, product):
     }
 
 
-def generate_lpdaac_doc(file_path, product):
+def generate_lpdaac_doc(file_path, band_suffixes):
 
     modification_time = file_path.stat().st_mtime
 
     unique_ds_uri = f'{file_path.as_uri()}#{modification_time}'
-
+    # with rasterio.open(file_path, 'r') as img:
+    #    asubdataset = img.subdatasets[0]
     left, bottom, right, top = compute_extents(file_path)
     spatial_ref = infer_aster_srs(file_path)
     geo_ref_points = {
@@ -252,15 +219,17 @@ def generate_lpdaac_doc(file_path, product):
     }
 
     acquisition_time = get_acquisition_time(file_path)
-    measurements = raster_to_measurements(file_path, product)
-
-    the_format = 'VRT'
+    measurements = raster_to_measurements(file_path, band_suffixes)
+    the_format = 'HDF4_EOS:EOS_GRID'
+    for m in measurements:
+        m['fmt'], m['local_path'], m['layer'] = split_path(m['path'])
+        assert the_format == m['fmt']
 
     doc = {
         'id': str(uuid.uuid5(uuid.NAMESPACE_URL, unique_ds_uri)),
-        'product_type': product,
+        'product_type': 'modis_lpdaac_MYD13Q1',
         'creation_dt': str(datetime.fromtimestamp(modification_time)),
-        'platform': {'code': 'ASTER'},
+        'platform': {'code': 'MODIS'},
         'extent': {
             'from_dt': str(acquisition_time),
             'to_dt': str(acquisition_time),
@@ -275,10 +244,10 @@ def generate_lpdaac_doc(file_path, product):
         },
         'image': {
             'bands': {
-                measure['name']: {
-                    'path': measure['path'],
-                    'layer': str(index + 1)
-                } for index, measure in enumerate(measurements)
+                name: {
+                    'path': str(file_path.with_suffix('.vrt')),
+                    'layer': index + 1,
+                } for index, name in enumerate(measurements)
             }
         },
         'version': 1,
@@ -288,7 +257,42 @@ def generate_lpdaac_doc(file_path, product):
     return doc
 
 
-def infer_aster_srs(file_path: Path):
+def split_path(apath):
+    splitpath = apath.split(':')
+    assert len(splitpath) > 3
+    fmt = ':'.join(splitpath[:2])  # 'HDF4_EOS:EOS_GRID'
+    local_path = splitpath[2]
+    layer = ':'.join(splitpath[3:])
+    return fmt, local_path, layer
+
+
+def modis_path_to_date_range(file_path):
+    a_year_days = file_path.name.split('.')[1]  # example 'A2017101'
+    year_days = a_year_days[1:]
+    # from https:...how-do-modis-products-naming-conventions-work
+    start_time = datetime.strptime(year_days, '%Y%j')
+
+    end_time = start_time + timedelta(days=16) - timedelta(microseconds=1)
+    return start_time, end_time
+
+
+def to_lat_long_extent(left, bottom, right, top, spatial_reference, new_crs="EPSG:4326"):
+
+    crs = CRS(spatial_reference)
+    abox = box(left, bottom, right, top, crs)
+    projected = abox.to_crs(CRS(new_crs))
+    proj = projected.boundingbox
+    left, bottom, right, top = proj.left, proj.bottom, proj.right, proj.top
+    coord = {
+        'ul': {'lon': left, 'lat': top},
+        'ur': {'lon': right, 'lat': top},
+        'll': {'lon': left, 'lat': bottom},
+        'lr': {'lon': right, 'lat': bottom},
+    }
+    return coord
+
+
+def infer_aster_srs(file_path: str):
     """
     Compute SRS based on metadata (UTMZONENUMBER and NORTHBOUNDINGCOORDINATE) in the file and
     generic osr.SpatialReference data.
@@ -296,7 +300,7 @@ def infer_aster_srs(file_path: Path):
     https://git.earthdata.nasa.gov/projects/LPDUR/repos/aster-l1t/raw/ASTERL1T_hdf2tif.py?at=refs%2Fheads%2Fmaster
     """
 
-    ds = gdal.Open(str(file_path), gdal.GA_ReadOnly)
+    ds = gdal.Open(file_path, gdal.GA_ReadOnly)
     meta = ds.GetMetadata()
 
     # Define UL, LR, UTM zone
@@ -319,68 +323,71 @@ def infer_aster_srs(file_path: Path):
     return srs.ExportToWkt()
 
 
-def generate_vrt(file_path: Path, product):
+def generate_vrt(file_path: Path, band_suffixes):
     """
     Generate a VRT file for a given file
     The following tags did not show visual impact on raster bands when rendering:
         1. Top level GeoTransform
     """
 
-    bands = selected_bands(file_path, product)
-    x_size, y_size = get_raster_sizes(bands)
-    geo_transform = compute_geo_transform(file_path, bands)
+    vrt_file_name = file_path.with_suffix('.vrt')
+    x_size, y_size = get_raster_sizes(file_path, band_suffixes)
 
-    return """\
+    doc = """\
     <VRTDataset rasterXSize="{x}" rasterYSize="{y}">
-        <SRS>{srs}</SRS>
-        <GeoTransform>"{geo}"</GeoTransform>
+        <SRS>"{srs}"</SRS>
+        <GeoTransform>{geo}</GeoTransform>
         {raster_bands}
     </VRTDataset>
-    """.format(x=x_size, y=y_size, srs=infer_aster_srs(file_path),
-               geo=', '.join((str(v) for v in geo_transform)),
-               raster_bands=get_raster_bands_vrt(bands))
+    """.format(x=x_size, y=y_size, srs=infer_aster_srs(str(file_path)), geo='0, 1, 0, 0, 0, 1',
+               raster_bands=get_raster_bands_vrt(str(file_path), band_suffixes))
+
+    with open(str(vrt_file_name), 'w') as file:
+        file.write(doc)
 
 
-def get_raster_bands_vrt(bands):
+def get_raster_bands_vrt(file_path: str, band_suffixes):
     """
     Compute the <VRTRasterBand> tags for each band ang return them as a single string
-
-    :param bands: GDAL SubDatasets
     """
 
     raster_band_template = """\
-    <VRTRasterBand dataType="{dtype}" band={number}>
+    <VRTRasterBand dataType="{dtype}" band="{number}">
         <NoDataValue>{nodata}</NoDataValue>
         <ComplexSource>
-            <SourceFilename relativeToVRT="0">{band_name}</SourceFilename>
+            <SourceFilename relativeToVRT="1">{band_name}</SourceFilename>
         </ComplexSource>
     </VRTRasterBand>
     """
 
+    dt = gdal.Open(file_path, gdal.GA_ReadOnly)
+    sub_datasets = dt.GetSubDatasets()
     raster_bands = ''
-    for index, band in enumerate(bands):
-        sdt = gdal.Open(band, gdal.GA_ReadOnly)
-        data_type = gdal.GetDataTypeName(sdt.GetRasterBand(1).DataType)
-        raster_bands += raster_band_template.format(dtype=data_type, number=str(index + 1),
-                                                    nodata=0,
-                                                    band_name=band)
+    for index, band in enumerate(sub_datasets):
+        # Check the last field of the band name: something like 'ImageDataXX'
+        if band[0].split(':')[-1] in band_suffixes:
+            sdt = gdal.Open(band[0], gdal.GA_ReadOnly)
+            data_type = gdal.GetDataTypeName(sdt.GetRasterBand(1).DataType)
+            raster_bands += raster_band_template.format(dtype=data_type, number=index + 1,
+                                                        nodata=0, band_name=band[0])
     return raster_bands
 
 
-def get_raster_sizes(bands):
+def get_raster_sizes(file_path, band_suffixes):
     """
     Raster sizes of different bands are different. So compute the max of x axis
     and max of y axis
-
-    :param bands: GDAL SubDataset names
     """
-
+    dt = gdal.Open(str(file_path), gdal.GA_ReadOnly)
+    sub_datasets = dt.GetSubDatasets()
     x_size = []
     y_size = []
-    for band in bands:
-        sdt = gdal.Open(band, gdal.GA_ReadOnly)
-        x_size.append(sdt.RasterXSize)
-        y_size.append(sdt.RasterYSize)
+    for index, band in enumerate(sub_datasets):
+        # Check the last field of the band name: something like 'ImageDataXX'
+        if band[0].split(':')[-1] in band_suffixes:
+            sdt = gdal.Open(band[0], gdal.GA_ReadOnly)
+            x_size.append(sdt.RasterXSize)
+            y_size.append(sdt.RasterYSize)
     return max(x_size), max(y_size)
 
 
@@ -391,74 +398,6 @@ def get_acquisition_time(file_path):
     date_string = meta['CALENDARDATE']
     # ToDo: Probably more to do here for time of day
     return datetime(year=int(date_string[:4]), month=int(date_string[4:6]), day=int(date_string[6:8]))
-
-
-def compute_geo_transform(file_path, bands):
-    """
-    Compute the geo transform for the given bands. If the geo transform is not same
-    for all the given bands an assert error is raised.
-    """
-
-    # pylint: disable=round-builtin
-
-    dt = gdal.Open(str(file_path), gdal.GA_ReadOnly)
-    meta = dt.GetMetadata()
-
-    # Define UL, LR, UTM zone
-    ul = [np.float(x) for x in meta['UPPERLEFTM'].split(', ')]
-    lr = [np.float(x) for x in meta['LOWERRIGHTM'].split(', ')]
-    n_s = np.float(meta['NORTHBOUNDINGCOORDINATE'])
-
-    # Define extent and provide offset for UTM South zones
-    if n_s < 0:
-        ul_y = ul[0] + 10000000
-        ul_x = ul[1]
-
-        lr_y = lr[0] + 10000000
-        lr_x = lr[1]
-
-    # Define extent for UTM North zones
-    else:
-        ul_y = ul[0]
-        ul_x = ul[1]
-
-        lr_y = lr[0]
-        lr_x = lr[1]
-
-    # We want all the bands to be consistent in terms of data type,
-    # raster number of columns and rows
-    band_info = dict()
-    band_info['ncol'] = set()
-    band_info['nrow'] = set()
-    band_info['data_type'] = set()
-    for band in bands:
-        band_ds = gdal.Open(band, gdal.GA_ReadOnly)
-        data_type = gdal.GetDataTypeName(band_ds.GetRasterBand(1).DataType)
-        if data_type == 'Byte':
-            band_data = band_ds.ReadAsArray().astype(np.byte)
-        elif data_type == 'UInt16':
-            band_data = band_ds.ReadAsArray().astype(np.uint16)
-        else:
-            raise ValueError('Unexpected band type')
-
-        # Query raster dimensions
-        ncol, nrow = band_data.shape
-
-        band_info['data_type'].add(data_type)
-        band_info['ncol'].add(ncol)
-        band_info['nrow'].add(nrow)
-
-    assert len(band_info['data_type']) == 1 and len(band_info['ncol']) == 1 and len(band_info['nrow']) == 1
-
-    # Compute resolutions
-    y_res = -1 * round((max(ul_y, lr_y) - min(ul_y, lr_y)) / band_info['ncol'].pop())
-    x_res = round((max(ul_x, lr_x) - min(ul_x, lr_x)) / band_info['nrow'].pop())
-
-    # Define UL x and y coordinates based on spatial resolution
-    ul_yy = ul_y - (y_res / 2)
-    ul_xx = ul_x - (x_res / 2)
-
-    return ul_xx, x_res, 0., ul_yy, 0., y_res
 
 
 def compute_extents(file_path):
