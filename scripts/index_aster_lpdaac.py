@@ -344,6 +344,7 @@ def generate_vrt(file_path: Path):
     """
 
     vrt_file_name = file_path.with_suffix('.vrt')
+    x_size, y_size = get_raster_sizes(file_path)
 
     doc = """\
     <VRTDataset rasterXSize="{x}" rasterYSize="{y}">
@@ -351,7 +352,7 @@ def generate_vrt(file_path: Path):
         <GeoTransform>{geo}</GeoTransform>
         {raster_bands}
     </VRTDataset>
-    """.format(x=512, y=512, srs=infer_aster_srs(str(file_path)), geo='0, 1, 0, 0, 0, 1',
+    """.format(x=x_size, y=y_size, srs=infer_aster_srs(str(file_path)), geo='0, 1, 0, 0, 0, 1',
                raster_bands=get_raster_bands_vrt(str(file_path)))
 
     with open(str(vrt_file_name), 'w') as file:
@@ -381,6 +382,18 @@ def get_raster_bands_vrt(file_path: str):
         raster_bands += raster_band_template.format(dtype=data_type, number=index + 1,
                                                     nodata=0, band_name=band[0])
     return raster_bands
+
+
+def get_raster_sizes(file_path):
+    dt = gdal.Open(str(file_path))
+    sub_datasets = dt.GetSubDatasets()
+    x_size = []
+    y_size = []
+    for index, band in enumerate(sub_datasets):
+        sdt = gdal.Open(band[0], gdal.GA_ReadOnly)
+        x_size.append(sdt.RasterXSize)
+        y_size.append(sdt.RasterYSize)
+    return max(x_size), max(y_size)
 
 
 class NumpySafeEncoder(json.JSONEncoder):
