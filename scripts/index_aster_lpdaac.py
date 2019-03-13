@@ -116,26 +116,25 @@ def show(index, path, product):
         print_dict(doc)
 
 
-# @cli.command()
-# @click.argument('path')
-# @click.option('--product', help='Which ASTER product? vnir, swir, or tir')
-# @click.pass_obj
-# def create_product(index, path, product):
-#     file_paths = find_lpdaac_file_paths(Path(path))
-#     print(file_paths)
-#     _, _, _, _, spatial_ref, res = get_grid_metadata(file_paths[0]) # ToDo
-#     measurements = raster_to_measurements(file_paths[0], PRODUCTS[product])
-#     for measure in measurements:
-#         measure.pop('path')  # This is not needed here
-#     print_dict(measurements)
-#     product_def = generate_lpdaac_defn(measurements, spatial_ref, res)
-#     print_dict(product_def)
-#
-#     print(index)
-#     product = index.products.from_doc(product_def)
-#     print(product)
-#     indexed_product = index.products.add(product)
-#     print(indexed_product)
+@cli.command()
+@click.argument('path')
+@click.option('--product', help='Which ASTER product? vnir, swir, or tir')
+@click.pass_obj
+def create_product(index, path, product):
+    file_paths = find_lpdaac_file_paths(Path(path))
+    print(file_paths)
+    measurements = raster_to_measurements(file_paths[0], PRODUCTS[product])
+    for measure in measurements:
+        measure.pop('path')  # This is not needed here
+    print_dict(measurements)
+    product_def = generate_lpdaac_defn(measurements)
+    print_dict(product_def)
+
+    print(index)
+    product = index.products.from_doc(product_def)
+    print(product)
+    indexed_product = index.products.add(product)
+    print(indexed_product)
 
 
 @cli.command()
@@ -190,7 +189,7 @@ def raster_to_measurements(file_path, band_suffixes):
     return measurements
 
 
-def generate_lpdaac_defn(measurements, spatial_ref, res):
+def generate_lpdaac_defn(measurements):
     return {
         'name': 'ASTER_L1T',
         'metadata_type': 'eo',
