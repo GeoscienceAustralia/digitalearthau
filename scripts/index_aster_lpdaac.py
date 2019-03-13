@@ -74,11 +74,9 @@ import logging
 import uuid
 from datetime import datetime, timedelta
 from pathlib import Path
-from collections import OrderedDict
 
 import click
 import numpy as np
-import rasterio
 from osgeo import gdal, osr
 
 from datacube import Datacube
