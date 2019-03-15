@@ -222,7 +222,7 @@ def selected_bands(file_path, product):
 
 def generate_lpdaac_defn(measurements, product):
     return {
-        'name': 'ASTER_L1T',
+        'name': product,
         'metadata_type': 'eo',
         'metadata': {
             'product_type': product,
