@@ -33,7 +33,7 @@ def example_nc_dataset(integration_test_data, dea_index):
     assert dataset_file.parent.exists()
     assert not dataset_file.exists()
 
-    make_fake_netcdf_dataset(dataset_file, template)
+    make_fake_netcdf_dataset(dataset_file, template.read_text())
 
     assert dataset_file.exists()
 
@@ -55,14 +55,16 @@ def example_nc_dataset(integration_test_data, dea_index):
     )
 
 
-def test_netcdf_creation(integration_test_data):
-    template = integration_test_data / 'example_nbar_dataset.yaml'
-    dataset_file = integration_test_data.joinpath('test.nc')
+def test_netcdf_creation(destination_path):
+    dataset_file = destination_path.joinpath('test.nc')
 
     assert dataset_file.parent.exists()
     assert not dataset_file.exists()
 
-    make_fake_netcdf_dataset(dataset_file, template)
+    make_fake_netcdf_dataset(dataset_file, '''
+    some text
+    with lines
+    ''')
 
     assert dataset_file.exists()
 
@@ -207,7 +209,7 @@ def _call_move(args, global_integration_cli_args) -> Result:
     return res
 
 
-def make_fake_netcdf_dataset(nc_name, yaml_doc):
+def make_fake_netcdf_dataset(nc_name, doc_text):
     from datacube.drivers.netcdf.writer import (
         Variable,
         create_variable,
@@ -219,8 +221,7 @@ def make_fake_netcdf_dataset(nc_name, yaml_doc):
     import numpy as np
 
     t = np.asarray([parse_time('2001-01-29 07:06:05.432')], dtype=np.datetime64)
-    content = yaml_doc.read_text()
-    npdata = np.asarray([content], dtype='S')
+    npdata = np.asarray([doc_text], dtype='S')
 
     with create_netcdf(nc_name) as nco:
         create_coordinate(nco, 'time', t, 'seconds since 1970-01-01 00:00:00')
