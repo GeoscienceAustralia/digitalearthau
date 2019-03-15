@@ -208,13 +208,24 @@ def _call_move(args, global_integration_cli_args) -> Result:
 
 
 def make_fake_netcdf_dataset(nc_name, yaml_doc):
-    from datacube.drivers.netcdf.writer import Variable, create_variable, netcdfy_data, create_netcdf
+    from datacube.drivers.netcdf.writer import (
+        Variable,
+        create_variable,
+        create_coordinate,
+        netcdfy_data,
+        create_netcdf
+    )
+    from datacube.utils.dates import parse_time
     import numpy as np
+
+    t = np.asarray([parse_time('2001-01-29 07:06:05.432')], dtype=np.datetime64)
     content = yaml_doc.read_text()
     npdata = np.asarray([content], dtype='S')
 
     with create_netcdf(nc_name) as nco:
-        var = Variable(npdata.dtype, None, ('time',), None)
-        nco.createDimension('time', size=1)
-        nc_dataset = create_variable(nco, 'dataset', var)
+        create_coordinate(nco, 'time', t, 'seconds since 1970-01-01 00:00:00')
+
+        nc_dataset = create_variable(nco, 'dataset',
+                                     Variable(npdata.dtype, None, ('time',), None))
         nc_dataset[:] = netcdfy_data(npdata)
+        assert 'dataset_nchar' in nco.dimensions
