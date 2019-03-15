@@ -72,7 +72,7 @@ aster_lpdaac.conf::
 import json
 import logging
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
 
 import click
@@ -82,13 +82,12 @@ import rasterio
 
 from datacube import Datacube
 from datacube.index.hl import Doc2Dataset
-from datacube.utils.geometry import CRS, box
 
 
 LOG = logging.getLogger(__name__)
 
-PRODUCTS = {'vnir': {'ImageData2', 'ImageData1', 'ImageData3N'},
-            'tir': {'ImageData10', 'ImageData11', 'ImageData12', 'ImageData13', 'ImageData14'}}
+PRODUCTS = {'aster_l1t_vnir': {'ImageData2', 'ImageData1', 'ImageData3N'},
+            'aster_l1t_tir': {'ImageData10', 'ImageData11', 'ImageData12', 'ImageData13', 'ImageData14'}}
 
 
 @click.group(help=__doc__)
@@ -109,8 +108,8 @@ def create_vrt(path, product):
     print(file_paths)
 
     for file_path in file_paths:
-        vrt = generate_vrt(file_path, PRODUCTS[product])
-        with open(file_path.with_name(f'{file_path.stem}_{product}.vrt'), 'w') as fd:
+        vrt = generate_vrt(file_path, product)
+        with open(vrt_file_path(file_path, product), 'w') as fd:
             fd.write(vrt)
 
 
@@ -125,7 +124,7 @@ def show(index, path, product):
 
     _ = Doc2Dataset(index)
     for file_path in file_paths:
-        doc = generate_lpdaac_doc(file_path, PRODUCTS[product])
+        doc = generate_lpdaac_doc(file_path, product)
         print_dict(doc)
 
 
@@ -136,18 +135,18 @@ def show(index, path, product):
 def create_product(index, path, product):
     file_paths = find_lpdaac_file_paths(Path(path))
     print(file_paths)
-    measurements = raster_to_measurements(file_paths[0], PRODUCTS[product])
+    measurements = raster_to_measurements(file_paths[0], product)
     for measure in measurements:
         measure.pop('path')  # This is not needed here
     print_dict(measurements)
-    product_def = generate_lpdaac_defn(measurements)
+    product_def = generate_lpdaac_defn(measurements, product)
     print_dict(product_def)
 
     print(index)
     product = index.products.from_doc(product_def)
     print(product)
-    # indexed_product = index.products.add(product)
-    # print(indexed_product)
+    indexed_product = index.products.add(product)
+    print(indexed_product)
 
 
 @cli.command()
@@ -160,9 +159,9 @@ def index_data(index, path, product):
 
     resolver = Doc2Dataset(index)
     for file_path in file_paths:
-        doc = generate_lpdaac_doc(file_path, PRODUCTS[product])
+        doc = generate_lpdaac_doc(file_path, product)
         print_dict(doc)
-        dataset, err = resolver(doc, file_path.as_uri())
+        dataset, err = resolver(doc, vrt_file_path(file_path, product).as_uri())
 
         if err is not None:
             logging.error("%s", err)
@@ -171,6 +170,10 @@ def index_data(index, path, product):
         except Exception as e:
             logging.error("Couldn't index %s", file_path)
             logging.exception("Exception", e)
+
+
+def vrt_file_path(file_path, product):
+    return file_path.with_name(f'{file_path.stem}_{product}.vrt')
 
 
 def print_dict(doc):
@@ -191,12 +194,12 @@ def find_lpdaac_file_paths(path: Path):
     return file_paths
 
 
-def raster_to_measurements(file_path, band_suffixes):
+def raster_to_measurements(file_path, product):
 
     measurements = []
-    for index, band in enumerate(selected_bands(file_path, band_suffixes)):
+    for index, band in enumerate(selected_bands(file_path, product)):
         measure = dict(name=band[0].split(':')[-1])
-        measure['path'] = str(file_path.with_suffix('.vrt'))
+        measure['path'] = str(vrt_file_path(file_path, product))
 
         with rasterio.open(band[0]) as band_:
             measure['dtype'] = str(band_.dtypes[0])
@@ -206,7 +209,9 @@ def raster_to_measurements(file_path, band_suffixes):
     return measurements
 
 
-def selected_bands(file_path, band_suffixes):
+def selected_bands(file_path, product):
+
+    band_suffixes = PRODUCTS[product]
 
     ds = gdal.Open(str(file_path), gdal.GA_ReadOnly)
     sub_datasets = ds.GetSubDatasets()
@@ -215,12 +220,12 @@ def selected_bands(file_path, band_suffixes):
     return tuple(band for band in sub_datasets if band[0].split(':')[-1] in band_suffixes)
 
 
-def generate_lpdaac_defn(measurements):
+def generate_lpdaac_defn(measurements, product):
     return {
-        'name': 'ASTER_L1T',
+        'name': product,
         'metadata_type': 'eo',
         'metadata': {
-            'product_type': 'aster_lpdaac_l1t',
+            'product_type': product,
             'platform': {'code': 'ASTER'},
             'version': 1,
             'coverage': 'aust'
@@ -230,7 +235,7 @@ def generate_lpdaac_defn(measurements):
     }
 
 
-def generate_lpdaac_doc(file_path, band_suffixes):
+def generate_lpdaac_doc(file_path, product):
 
     modification_time = file_path.stat().st_mtime
 
@@ -246,14 +251,14 @@ def generate_lpdaac_doc(file_path, band_suffixes):
     }
 
     acquisition_time = get_acquisition_time(file_path)
-    measurements = raster_to_measurements(file_path, band_suffixes)
+    measurements = raster_to_measurements(file_path, product)
     the_format = 'HDF4_EOS:EOS_GRID'
 
     doc = {
         'id': str(uuid.uuid5(uuid.NAMESPACE_URL, unique_ds_uri)),
-        'product_type': 'modis_lpdaac_MYD13Q1',
+        'product_type': product,
         'creation_dt': str(datetime.fromtimestamp(modification_time)),
-        'platform': {'code': 'MODIS'},
+        'platform': {'code': 'ASTER'},
         'extent': {
             'from_dt': str(acquisition_time),
             'to_dt': str(acquisition_time),
@@ -312,14 +317,14 @@ def infer_aster_srs(file_path: Path):
     return srs.ExportToWkt()
 
 
-def generate_vrt(file_path: Path, band_suffixes):
+def generate_vrt(file_path: Path, product):
     """
     Generate a VRT file for a given file
     The following tags did not show visual impact on raster bands when rendering:
         1. Top level GeoTransform
     """
 
-    bands = selected_bands(file_path, band_suffixes)
+    bands = selected_bands(file_path, product)
     x_size, y_size = get_raster_sizes(bands)
 
     return """\
