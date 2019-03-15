@@ -29,6 +29,10 @@ def example_nc_dataset(integration_test_data, dea_index):
 
     dataset_file = integration_test_data.joinpath(*path_offset)
     dataset_file.parent.mkdir(parents=True)
+
+    assert dataset_file.parent.exists()
+    assert not dataset_file.exists()
+
     make_fake_netcdf_dataset(dataset_file, template)
 
     assert dataset_file.exists()
@@ -49,6 +53,18 @@ def example_nc_dataset(integration_test_data, dea_index):
         path_offset=path_offset,
         parent_id=uuid.uuid4()
     )
+
+
+def test_netcdf_creation(integration_test_data):
+    template = integration_test_data / 'example_nbar_dataset.yaml'
+    dataset_file = integration_test_data.joinpath('test.nc')
+
+    assert dataset_file.parent.exists()
+    assert not dataset_file.exists()
+
+    make_fake_netcdf_dataset(dataset_file, template)
+
+    assert dataset_file.exists()
 
 
 def test_move(global_integration_cli_args,
@@ -192,16 +208,13 @@ def _call_move(args, global_integration_cli_args) -> Result:
 
 
 def make_fake_netcdf_dataset(nc_name, yaml_doc):
-    from datacube.drivers.netcdf.writer import Variable, create_variable, netcdfy_data
-    from netCDF4 import Dataset
+    from datacube.drivers.netcdf.writer import Variable, create_variable, netcdfy_data, create_netcdf
     import numpy as np
     content = yaml_doc.read_text()
-    npdata = np.array([content], dtype=bytes)
+    npdata = np.asarray([content], dtype='S')
 
-    with Dataset(nc_name, 'w') as nco:
+    with create_netcdf(nc_name) as nco:
         var = Variable(npdata.dtype, None, ('time',), None)
         nco.createDimension('time', size=1)
-        create_variable(nco, 'dataset', var)
-        nco['dataset'][:] = netcdfy_data(npdata)
-
-    # from datacube.utils import read_documents
+        nc_dataset = create_variable(nco, 'dataset', var)
+        nc_dataset[:] = netcdfy_data(npdata)
