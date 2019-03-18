@@ -160,9 +160,10 @@ def index_data(index, path, product):
     resolver = Doc2Dataset(index)
     for file_path in file_paths:
         doc = generate_lpdaac_doc(file_path, product)
-        print_dict(doc)
+        # print_dict(doc)
         dataset, err = resolver(doc, vrt_file_path(file_path, product).as_uri())
-
+        # dataset, err = resolver(doc, str(file_path.parent.as_uri()))
+        print(dataset)
         if err is not None:
             logging.error("%s", err)
         try:
@@ -198,10 +199,12 @@ def raster_to_measurements(file_path, product):
 
     measurements = []
     for index, band in enumerate(selected_bands(file_path, product)):
-        measure = dict(name=band[0].split(':')[-1])
-        measure['path'] = str(vrt_file_path(file_path, product))
-
-        with rasterio.open(band[0]) as band_:
+        # measure = dict(name=band.split(':')[-1])
+        measure = dict(name=str(index + 1))
+        measure['path'] = vrt_file_path(file_path, product).name
+        # measure['path'] = file_path.name
+        print(measure['path'])
+        with rasterio.open(band) as band_:
             measure['dtype'] = str(band_.dtypes[0])
             measure['nodata'] = float(band_.nodatavals[0] or 0)
             measure['units'] = str(band_.units[0])
@@ -217,7 +220,7 @@ def selected_bands(file_path, product):
     sub_datasets = ds.GetSubDatasets()
     # Check the last field of the band name: something like 'ImageDataXX'
 
-    return tuple(band for band in sub_datasets if band[0].split(':')[-1] in band_suffixes)
+    return tuple(band[0] for band in sub_datasets if band[0].split(':')[-1] in band_suffixes)
 
 
 def generate_lpdaac_defn(measurements, product):
@@ -252,7 +255,8 @@ def generate_lpdaac_doc(file_path, product):
 
     acquisition_time = get_acquisition_time(file_path)
     measurements = raster_to_measurements(file_path, product)
-    the_format = 'HDF4_EOS:EOS_GRID'
+
+    the_format = 'VRT'
 
     doc = {
         'id': str(uuid.uuid5(uuid.NAMESPACE_URL, unique_ds_uri)),
@@ -275,7 +279,8 @@ def generate_lpdaac_doc(file_path, product):
             'bands': {
                 measure['name']: {
                     'path': measure['path'],
-                    'layer': index + 1,
+                    'layer': str(index + 1)
+                    # 'layer': 'VNIR_Swath:ImageData1'
                 } for index, measure in enumerate(measurements)
             }
         },
@@ -325,12 +330,13 @@ def generate_vrt(file_path: Path, product):
     """
 
     bands = selected_bands(file_path, product)
+    print(bands)
     x_size, y_size = get_raster_sizes(bands)
 
     return """\
     <VRTDataset rasterXSize="{x}" rasterYSize="{y}">
         <SRS>{srs}</SRS>
-        <GeoTransform>{geo}</GeoTransform>
+        <GeoTransform>"{geo}"</GeoTransform>
         {raster_bands}
     </VRTDataset>
     """.format(x=x_size, y=y_size, srs=infer_aster_srs(file_path), geo='0, 1, 0, 0, 0, 1',
@@ -345,20 +351,21 @@ def get_raster_bands_vrt(bands):
     """
 
     raster_band_template = """\
-    <VRTRasterBand dataType="{dtype}" band="{number}">
+    <VRTRasterBand dataType="{dtype}" band={number}>
         <NoDataValue>{nodata}</NoDataValue>
         <ComplexSource>
-            <SourceFilename relativeToVRT="1">{band_name}</SourceFilename>
+            <SourceFilename relativeToVRT="0">{band_name}</SourceFilename>
         </ComplexSource>
     </VRTRasterBand>
     """
 
     raster_bands = ''
     for index, band in enumerate(bands):
-        sdt = gdal.Open(band[0], gdal.GA_ReadOnly)
+        sdt = gdal.Open(band, gdal.GA_ReadOnly)
         data_type = gdal.GetDataTypeName(sdt.GetRasterBand(1).DataType)
-        raster_bands += raster_band_template.format(dtype=data_type, number=index + 1,
-                                                    nodata=0, band_name=band[0])
+        raster_bands += raster_band_template.format(dtype=data_type, number=str(index + 1),
+                                                    nodata=0,
+                                                    band_name=band)
     return raster_bands
 
 
@@ -367,13 +374,13 @@ def get_raster_sizes(bands):
     Raster sizes of different bands are different. So compute the max of x axis
     and max of y axis
 
-    :param bands: GDAL SubDatasets
+    :param bands: GDAL SubDataset names
     """
 
     x_size = []
     y_size = []
     for band in bands:
-        sdt = gdal.Open(band[0], gdal.GA_ReadOnly)
+        sdt = gdal.Open(band, gdal.GA_ReadOnly)
         x_size.append(sdt.RasterXSize)
         y_size.append(sdt.RasterYSize)
     return max(x_size), max(y_size)
