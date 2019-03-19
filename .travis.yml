@@ -115,6 +115,7 @@ deploy:
       repo: GeoscienceAustralia/digitalearthau
       python: "3.6"
 
+# Deploy the documentation to S3
   - provider: s3
     bucket: "docs.dea.ga.gov.au"
     region: "ap-southeast-2"
@@ -124,6 +125,7 @@ deploy:
       branch: develop
       repo: GeoscienceAustralia/digitalearthau
 
+# Deploy the documentation to github pages (legacy)
   - provider: pages
     skip-cleanup: true
     github-token: $GITHUB_TOKEN  # Set in the settings page of your repository, as a secure variable
@@ -134,6 +136,11 @@ deploy:
     on:
       branch: develop
       repo: GeoscienceAustralia/digitalearthau
+
+after_deploy:
+# Invalidate the AWS CloudFront distribution for docs.dea.ga.gov.au. Otherwise we keep serving old documentation.
+  - pip install awscli
+  - test $TRAVIS_BRANCH = "develop" && aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DISTRIBUTION_ID --paths "/*"
 
 notifications:
   slack:
