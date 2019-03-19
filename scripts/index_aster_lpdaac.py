@@ -399,6 +399,8 @@ def compute_geo_transform(file_path, bands):
     for all the given bands an assert error is raised.
     """
 
+    # pylint: disable=round-builtin
+
     dt = gdal.Open(str(file_path), gdal.GA_ReadOnly)
     meta = dt.GetMetadata()
 
