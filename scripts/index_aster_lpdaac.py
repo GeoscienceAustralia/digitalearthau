@@ -160,9 +160,9 @@ def index_data(index, path, product):
     resolver = Doc2Dataset(index)
     for file_path in file_paths:
         doc = generate_lpdaac_doc(file_path, product)
-        # print_dict(doc)
+        print_dict(doc)
         dataset, err = resolver(doc, vrt_file_path(file_path, product).as_uri())
-        # dataset, err = resolver(doc, str(file_path.parent.as_uri()))
+
         print(dataset)
         if err is not None:
             logging.error("%s", err)
@@ -199,10 +199,8 @@ def raster_to_measurements(file_path, product):
 
     measurements = []
     for index, band in enumerate(selected_bands(file_path, product)):
-        # measure = dict(name=band.split(':')[-1])
         measure = dict(name=str(index + 1))
         measure['path'] = vrt_file_path(file_path, product).name
-        # measure['path'] = file_path.name
         print(measure['path'])
         with rasterio.open(band) as band_:
             measure['dtype'] = str(band_.dtypes[0])
@@ -280,7 +278,6 @@ def generate_lpdaac_doc(file_path, product):
                 measure['name']: {
                     'path': measure['path'],
                     'layer': str(index + 1)
-                    # 'layer': 'VNIR_Swath:ImageData1'
                 } for index, measure in enumerate(measurements)
             }
         },
@@ -330,8 +327,8 @@ def generate_vrt(file_path: Path, product):
     """
 
     bands = selected_bands(file_path, product)
-    print(bands)
     x_size, y_size = get_raster_sizes(bands)
+    geo_transform = compute_geo_transform(file_path, bands)
 
     return """\
     <VRTDataset rasterXSize="{x}" rasterYSize="{y}">
@@ -339,7 +336,8 @@ def generate_vrt(file_path: Path, product):
         <GeoTransform>"{geo}"</GeoTransform>
         {raster_bands}
     </VRTDataset>
-    """.format(x=x_size, y=y_size, srs=infer_aster_srs(file_path), geo='0, 1, 0, 0, 0, 1',
+    """.format(x=x_size, y=y_size, srs=infer_aster_srs(file_path),
+               geo=', '.join((str(v) for v in geo_transform)),
                raster_bands=get_raster_bands_vrt(bands))
 
 
@@ -393,6 +391,72 @@ def get_acquisition_time(file_path):
     date_string = meta['CALENDARDATE']
     # ToDo: Probably more to do here for time of day
     return datetime(year=int(date_string[:4]), month=int(date_string[4:6]), day=int(date_string[6:8]))
+
+
+def compute_geo_transform(file_path, bands):
+    """
+    Compute the geo transform for the given bands. If the geo transform is not same
+    for all the given bands an assert error is raised.
+    """
+
+    dt = gdal.Open(str(file_path), gdal.GA_ReadOnly)
+    meta = dt.GetMetadata()
+
+    # Define UL, LR, UTM zone
+    ul = [np.float(x) for x in meta['UPPERLEFTM'].split(', ')]
+    lr = [np.float(x) for x in meta['LOWERRIGHTM'].split(', ')]
+    n_s = np.float(meta['NORTHBOUNDINGCOORDINATE'])
+
+    # Define extent and provide offset for UTM South zones
+    if n_s < 0:
+        ul_y = ul[0] + 10000000
+        ul_x = ul[1]
+
+        lr_y = lr[0] + 10000000
+        lr_x = lr[1]
+
+    # Define extent for UTM North zones
+    else:
+        ul_y = ul[0]
+        ul_x = ul[1]
+
+        lr_y = lr[0]
+        lr_x = lr[1]
+
+    # We want all the bands to be consistent in terms of data type,
+    # raster number of columns and rows
+    band_info = dict()
+    band_info['ncol'] = set()
+    band_info['nrow'] = set()
+    band_info['data_type'] = set()
+    for band in bands:
+        band_ds = gdal.Open(band, gdal.GA_ReadOnly)
+        data_type = gdal.GetDataTypeName(band_ds.GetRasterBand(1).DataType)
+        if data_type == 'Byte':
+            band_data = band_ds.ReadAsArray().astype(np.byte)
+        elif data_type == 'UInt16':
+            band_data = band_ds.ReadAsArray().astype(np.uint16)
+        else:
+            raise ValueError('Unexpected band type')
+
+        # Query raster dimensions
+        ncol, nrow = band_data.shape
+
+        band_info['data_type'].add(data_type)
+        band_info['ncol'].add(ncol)
+        band_info['nrow'].add(nrow)
+
+    assert len(band_info['data_type']) == 1 and len(band_info['ncol']) == 1 and len(band_info['nrow']) == 1
+
+    # Compute resolutions
+    y_res = -1 * round((max(ul_y, lr_y) - min(ul_y, lr_y)) / band_info['ncol'].pop())
+    x_res = round((max(ul_x, lr_x) - min(ul_x, lr_x)) / band_info['nrow'].pop())
+
+    # Define UL x and y coordinates based on spatial resolution
+    ul_yy = ul_y - (y_res / 2)
+    ul_xx = ul_x - (x_res / 2)
+
+    return ul_xx, x_res, 0., ul_yy, 0., y_res
 
 
 def compute_extents(file_path):
