@@ -2,9 +2,17 @@
 
 .. _changelog:
 
-===============================
- DEA NCI Environment Changelog
-===============================
+===========
+ Changelog
+===========
+
+2019-03-12
+==========
+
+Users are now required to join all projects containing data they wish to use. Before this change
+all the DEA data was public to NCI users without any further steps.
+
+See :ref:`data_access` for more details.
 
 2018-02-28
 ==========

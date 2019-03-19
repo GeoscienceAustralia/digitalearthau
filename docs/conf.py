@@ -112,6 +112,7 @@ try:
         'logo_only': True,
         'analytics_id': 'UA-113800428-1',
         'display_version': False,
+        'canonical_url': 'https://docs.dea.ga.gov.au/',
     }
 except ImportError:
     html_theme = 'alabaster'
