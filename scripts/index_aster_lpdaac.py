@@ -107,6 +107,7 @@ import logging
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
+import functools
 
 import click
 import numpy as np
@@ -156,7 +157,7 @@ def create_vrt(path, product):
     for file_path in file_paths:
         bands = selected_bands(file_path, product)
         if bands:
-            vrt = generate_vrt(file_path, bands, product)
+            vrt = generate_vrt(file_path, bands)
             with open(vrt_file_path(file_path, product), 'w') as fd:
                 fd.write(vrt)
         else:
@@ -177,7 +178,7 @@ def show(index, path, product):
         bands = selected_bands(file_path, product)
 
         if bands:
-            doc = generate_lpdaac_doc(file_path, bands, product)
+            doc = generate_lpdaac_doc(file_path, product)
             print_dict(doc)
         else:
             logging.error("File does not have bands of this product: %s", file_path)
@@ -193,16 +194,14 @@ def create_product(index, path, product):
 
     # Find a file which has the specified bands of this product
     file_path = None
-    bands = None
     for file_path_ in file_paths:
         bands_ = selected_bands(file_path_, product)
         if len(bands_) == len(PRODUCTS[product]):
             file_path = file_path_
-            bands = bands_
             break
 
     if file_path:
-        measurements = raster_to_measurements(file_path, bands, product)
+        measurements = raster_to_measurements(file_path, product)
         for measure in measurements:
             measure.pop('path')  # This is not needed here
         print_dict(measurements)
@@ -235,7 +234,7 @@ def index_data(index, path, product):
 
             if vrt_path.exists():
 
-                doc = generate_lpdaac_doc(file_path, bands, product)
+                doc = generate_lpdaac_doc(file_path, product)
                 print_dict(doc)
                 dataset, err = resolver(doc, vrt_path.as_uri())
 
@@ -275,7 +274,9 @@ def find_lpdaac_file_paths(path: Path):
     return file_paths
 
 
-def raster_to_measurements(file_path, bands, product):
+def raster_to_measurements(file_path, product):
+
+    bands = selected_bands(file_path, product)
 
     measurements = []
     for index, band in enumerate(bands):
@@ -291,6 +292,7 @@ def raster_to_measurements(file_path, bands, product):
     return measurements
 
 
+@functools.lru_cache(maxsize=None)
 def selected_bands(file_path, product):
 
     band_suffixes = PRODUCTS[product]
@@ -303,6 +305,9 @@ def selected_bands(file_path, product):
 
 
 def generate_lpdaac_defn(measurements, product):
+    """
+    Generate the product def for the product.
+    """
     return {
         'name': product,
         'metadata_type': 'eo',
@@ -317,9 +322,7 @@ def generate_lpdaac_defn(measurements, product):
     }
 
 
-def generate_lpdaac_doc(file_path, bands, product):
-
-    assert bands
+def generate_lpdaac_doc(file_path, product):
 
     modification_time = file_path.stat().st_mtime
 
@@ -335,7 +338,7 @@ def generate_lpdaac_doc(file_path, bands, product):
     }
 
     acquisition_time = get_acquisition_time(file_path)
-    measurements = raster_to_measurements(file_path, bands, product)
+    measurements = raster_to_measurements(file_path, product)
 
     the_format = 'VRT'
 
@@ -403,7 +406,7 @@ def infer_aster_srs(file_path: Path):
     return srs.ExportToWkt()
 
 
-def generate_vrt(file_path: Path, bands, product):
+def generate_vrt(file_path: Path, bands):
     """
     Generate a VRT file for a given file
     The following tags did not show visual impact on raster bands when rendering:
