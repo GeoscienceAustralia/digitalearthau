@@ -24,7 +24,7 @@ setup(
     license='Apache License 2.0',
 
     packages=find_packages(
-        exclude=('tests', 'tests.*',
+        exclude=('scripts_tests', 'scripts_tests.*',
                  'integration_tests', 'integration_tests.*')
     ),
     package_data={
