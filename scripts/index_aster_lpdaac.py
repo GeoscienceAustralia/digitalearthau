@@ -108,6 +108,7 @@ import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 import functools
+import yaml
 
 import click
 import numpy as np
@@ -246,6 +247,10 @@ def index_data(index, path, product):
                 except Exception as e:
                     logging.error("Couldn't index %s", file_path)
                     logging.exception("Exception", e)
+                else:
+                    with open(yaml_file_path(file_path, product), 'w') as yaml_file:
+                        yaml.safe_dump(doc, yaml_file)
+
             else:
                 logging.error("VRT file not found: %s", vrt_path)
         else:
@@ -254,6 +259,10 @@ def index_data(index, path, product):
 
 def vrt_file_path(file_path, product):
     return file_path.with_name(f'{file_path.stem}_{product}.vrt')
+
+
+def yaml_file_path(file_path, product):
+    return file_path.with_name(f'{file_path.stem}_{product}.yaml')
 
 
 def print_dict(doc):
