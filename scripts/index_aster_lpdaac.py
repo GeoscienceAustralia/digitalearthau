@@ -301,7 +301,13 @@ def selected_bands(file_path, product):
     sub_datasets = ds.GetSubDatasets()
     # Check the last field of the band name: something like 'ImageDataXX'
 
-    return tuple(band[0] for band in sub_datasets if band[0].split(':')[-1] in band_suffixes)
+    available_bands_of_product = [band[0] for band in sub_datasets if band[0].split(':')[-1] in band_suffixes]
+
+    assert len(available_bands_of_product) == len(band_suffixes)
+
+    available_bands_of_product.sort(key=lambda x: x.split(':')[-1])
+
+    return available_bands_of_product
 
 
 def generate_lpdaac_defn(measurements, product):
