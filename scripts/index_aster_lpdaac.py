@@ -102,28 +102,29 @@ aster_lpdaac.conf::
     done
 
 """
+import functools
 import json
 import logging
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
-import functools
-import yaml
 
 import click
 import numpy as np
-from osgeo import gdal, osr
 import rasterio
+import yaml
+from osgeo import gdal, osr
 
 from datacube import Datacube
 from datacube.index.hl import Doc2Dataset
 
-
 LOG = logging.getLogger(__name__)
 
-PRODUCTS = {'aster_l1t_vnir': {'ImageData2', 'ImageData1', 'ImageData3N'},
-            'aster_l1t_swir': {'ImageData4', 'ImageData5', 'ImageData6', 'ImageData7', 'ImageData8', 'ImageData9'},
-            'aster_l1t_tir': {'ImageData10', 'ImageData11', 'ImageData12', 'ImageData13', 'ImageData14'}}
+PRODUCTS = {
+    'aster_l1t_vnir': {'ImageData2', 'ImageData1', 'ImageData3N'},
+    'aster_l1t_swir': {'ImageData4', 'ImageData5', 'ImageData6', 'ImageData7', 'ImageData8', 'ImageData9'},
+    'aster_l1t_tir': {'ImageData10', 'ImageData11', 'ImageData12', 'ImageData13', 'ImageData14'}
+}
 
 EXTRA_METADATA_PREFIXES = {
     'aster_l1t_vnir': {'include_only': {'ASTER', 'CORRECT', 'EAST', 'FLY', 'GAIN', 'INPUT', 'LOWER', 'MAP',
@@ -151,7 +152,6 @@ def cli(ctx, config):
 @click.argument('path')
 @click.option('--product', help='Which ASTER product? vnir, swir, or tir')
 def create_vrt(path, product):
-
     file_paths = find_lpdaac_file_paths(Path(path))
     print(file_paths)
 
@@ -170,7 +170,6 @@ def create_vrt(path, product):
 @click.option('--product', help='Which ASTER product? vnir, swir, or tir')
 @click.pass_obj
 def show(index, path, product):
-
     file_paths = find_lpdaac_file_paths(Path(path))
     print(file_paths)
 
@@ -190,14 +189,16 @@ def show(index, path, product):
 @click.option('--product', help='Which ASTER product? vnir, swir, or tir')
 @click.pass_obj
 def create_product(index, path, product):
-
     file_paths = find_lpdaac_file_paths(Path(path))
 
     # Find a file which has the specified bands of this product
     file_path = None
     for file_path_ in file_paths:
-        bands_ = selected_bands(file_path_, product)
-        if len(bands_) == len(PRODUCTS[product]):
+        try:
+            _ = selected_bands(file_path_, product)
+        except AssertionError:
+            pass
+        else:
             file_path = file_path_
             break
 
@@ -284,7 +285,6 @@ def find_lpdaac_file_paths(path: Path):
 
 
 def raster_to_measurements(file_path, product):
-
     bands = selected_bands(file_path, product)
 
     measurements = []
@@ -303,7 +303,6 @@ def raster_to_measurements(file_path, product):
 
 @functools.lru_cache(maxsize=None)
 def selected_bands(file_path, product):
-
     band_suffixes = PRODUCTS[product]
 
     ds = gdal.Open(str(file_path), gdal.GA_ReadOnly)
@@ -338,7 +337,6 @@ def generate_lpdaac_defn(measurements, product):
 
 
 def generate_lpdaac_doc(file_path, product):
-
     modification_time = file_path.stat().st_mtime
 
     unique_ds_uri = f'{file_path.as_uri()}#{modification_time}#{product}'
@@ -488,7 +486,6 @@ def get_raster_sizes(bands):
 
 
 def get_acquisition_time(file_path):
-
     dt = gdal.Open(str(file_path), gdal.GA_ReadOnly)
     meta = dt.GetMetadata()
     date_string = meta['CALENDARDATE']
