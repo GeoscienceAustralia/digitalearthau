@@ -104,7 +104,8 @@ def test_dataset_indexing(module_dea_index, aster_file):
             product_def = generate_lpdaac_defn(measurements, product)
             product_ = module_dea_index.products.from_doc(product_def)
             indexed_product = module_dea_index.products.add(product_)
-            print(indexed_product)
+
+            assert indexed_product
 
             doc = generate_lpdaac_doc(file_path, product)
             resolver = Doc2Dataset(module_dea_index)
