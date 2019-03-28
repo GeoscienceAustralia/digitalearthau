@@ -2,9 +2,16 @@ import tempfile
 import shutil
 from pathlib import Path
 import pytest
+from datacube.index.hl import Doc2Dataset
 
 from scripts.index_aster_lpdaac import generate_lpdaac_defn, generate_lpdaac_doc, generate_vrt, selected_bands
-from scripts.index_aster_lpdaac import raster_to_measurements
+from scripts.index_aster_lpdaac import raster_to_measurements, vrt_file_path
+
+from digitalearthau.testing import factories
+from digitalearthau.testing.plugin import local_config, integration_config_paths, INTEGRATION_DEFAULT_CONFIG_PATH
+module_db = factories.db_fixture("local_config", scope="module")
+module_index = factories.index_fixture("module_db", scope="module")
+module_dea_index = factories.dea_index_fixture("module_index", scope="module")
 
 SCRIPTS_TEST_DATA = Path(__file__).parent / 'data'
 
@@ -81,3 +88,29 @@ def test_dataset_doc(aster_file):
             doc = generate_lpdaac_doc(file_path, product)
             assert doc['grid_spatial']['projection']['spatial_reference']
             assert len(doc['image']['bands']) == len(PRODUCTS[product])
+
+
+def test_dataset_indexing(module_dea_index, aster_file):
+    """
+    Test datacube indexing for each product for the given file
+    """
+
+    with aster_file as file_path:
+        for product in PRODUCTS:
+            vrt_path = vrt_file_path(file_path, product)
+            measurements = raster_to_measurements(file_path, product)
+            for measure in measurements:
+                measure.pop('path')  # This is not needed here
+            product_def = generate_lpdaac_defn(measurements, product)
+            product_ = module_dea_index.products.from_doc(product_def)
+            indexed_product = module_dea_index.products.add(product_)
+
+            assert indexed_product
+
+            doc = generate_lpdaac_doc(file_path, product)
+            resolver = Doc2Dataset(module_dea_index)
+            dataset, err = resolver(doc, vrt_path.as_uri())
+            print('the dataset to be indexed: ', dataset)
+            module_dea_index.datasets.add(dataset)
+
+
