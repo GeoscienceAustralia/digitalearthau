@@ -196,8 +196,11 @@ def create_product(index, path, product):
     # Find a file which has the specified bands of this product
     file_path = None
     for file_path_ in file_paths:
-        bands_ = selected_bands(file_path_, product)
-        if len(bands_) == len(PRODUCTS[product]):
+        try:
+            _ = selected_bands(file_path_, product)
+        except AssertionError:
+            pass
+        else:
             file_path = file_path_
             break
 
