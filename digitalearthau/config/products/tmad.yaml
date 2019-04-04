@@ -1,0 +1,109 @@
+name: ls8_nbart_tmad_annual
+description: Surface Reflectance Triple Median Absolute Deviation 25 metre, 100km tile, Australian Albers Equal Area projection (EPSG:3577)
+metadata_type: eo
+metadata:
+  product_type: surface_reflectance_triple_mad
+  platform:
+    code: LANDSAT_8
+  statistics:
+    period: '1y'
+  instrument:
+    name: OLI
+storage:
+  driver: NetCDF CF
+  crs: EPSG:3577
+  tile_size:
+    x: 100000.0
+    y: 100000.0
+  resolution:
+    x: 25
+    y: -25
+  dimension_order: [time, y, x]
+# possibly fix the dtype
+measurements:
+  - name: sdev
+    dtype: float32
+    nodata: .nan
+    units: '1'
+  - name: edev
+    dtype: float32
+    nodata: .nan
+    units: '1'
+  - name: bcdev
+    dtype: float32
+    nodata: .nan
+    units: '1'
+---
+
+name: ls7_nbart_tmad_annual
+description: Surface Reflectance Triple Median Absolute Deviation 25 metre, 100km tile, Australian Albers Equal Area projection (EPSG:3577)
+metadata_type: eo
+metadata:
+  product_type: surface_reflectance_triple_mad
+  platform:
+    code: LANDSAT_7
+  statistics:
+    period: '1y'
+  instrument:
+    name: ETM
+storage:
+  driver: NetCDF CF
+  crs: EPSG:3577
+  tile_size:
+    x: 100000.0
+    y: 100000.0
+  resolution:
+    x: 25
+    y: -25
+  dimension_order: [time, y, x]
+# possibly fix the dtype
+measurements:
+  - name: sdev
+    dtype: float32
+    nodata: .nan
+    units: '1'
+  - name: edev
+    dtype: float32
+    nodata: .nan
+    units: '1'
+  - name: bcdev
+    dtype: float32
+    nodata: .nan
+    units: '1'
+---
+
+name: ls5_nbart_tmad_annual
+description: Surface Reflectance Triple Median Absolute Deviation 25 metre, 100km tile, Australian Albers Equal Area projection (EPSG:3577)
+metadata_type: eo
+metadata:
+  product_type: surface_reflectance_triple_mad
+  platform:
+    code: LANDSAT_5
+  statistics:
+    period: '1y'
+  instrument:
+    name: TM
+storage:
+  driver: NetCDF CF
+  crs: EPSG:3577
+  tile_size:
+    x: 100000.0
+    y: 100000.0
+  resolution:
+    x: 25
+    y: -25
+  dimension_order: [time, y, x]
+# possibly fix the dtype
+measurements:
+  - name: sdev
+    dtype: float32
+    nodata: .nan
+    units: '1'
+  - name: edev
+    dtype: float32
+    nodata: .nan
+    units: '1'
+  - name: bcdev
+    dtype: float32
+    nodata: .nan
+    units: '1'
