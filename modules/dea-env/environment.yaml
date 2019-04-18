@@ -101,6 +101,7 @@ dependencies:
   - meinheld
   - modernize
   - mypy
+  - nbdime
   - opencv-python
   - perf
   - pudb

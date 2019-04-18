@@ -28,4 +28,8 @@ finalise_commands:
 - jupyter labextension install --no-build @jupyterlab/geojson-extension
 - jupyter labextension install --no-build @jupyter-widgets/jupyterlab-manager
 - jupyter labextension install --no-build jupyter-leaflet
+- jupyter labextension install --no-build nbdime-jupyterlab
+- jupyter nbextension install --py nbdime --system
+- jupyter nbextension enable --py nbdime --system
+- jupyter serverextension enable --py nbdime --system
 - jupyter lab build
