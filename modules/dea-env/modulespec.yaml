@@ -26,5 +26,6 @@ finalise_commands:
 - jupyter labextension install --no-build jupyterlab_bokeh
 - jupyter labextension install --no-build @jupyterlab/github
 - jupyter labextension install --no-build @jupyterlab/geojson-extension
+- jupyter labextension install --no-build @jupyter-widgets/jupyterlab-manager
 - jupyter labextension install --no-build jupyter-leaflet
 - jupyter lab build
