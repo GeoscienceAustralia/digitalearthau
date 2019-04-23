@@ -1,14 +1,14 @@
-import tempfile
 import shutil
+import tempfile
 from pathlib import Path
-import pytest
-from datacube.index.hl import Doc2Dataset
 
+import pytest
+
+from datacube.index.hl import Doc2Dataset
+from digitalearthau.testing import factories
 from scripts.index_aster_lpdaac import generate_lpdaac_defn, generate_lpdaac_doc, generate_vrt, selected_bands
 from scripts.index_aster_lpdaac import raster_to_measurements, vrt_file_path
 
-from digitalearthau.testing import factories
-from digitalearthau.testing.plugin import local_config, integration_config_paths, INTEGRATION_DEFAULT_CONFIG_PATH
 module_db = factories.db_fixture("local_config", scope="module")
 module_index = factories.index_fixture("module_db", scope="module")
 module_dea_index = factories.dea_index_fixture("module_index", scope="module")
@@ -39,17 +39,16 @@ def test_product_defs(aster_file):
     """
     Test product definition
     """
-    with aster_file as file_path:
-        for product in PRODUCTS:
-            measurements = raster_to_measurements(file_path, product)
-            for measure in measurements:
-                measure.pop('path')  # This is not needed here
-            product_def = generate_lpdaac_defn(measurements, product)
+    for product in PRODUCTS:
+        measurements = raster_to_measurements(aster_file, product)
+        for measure in measurements:
+            measure.pop('path')  # This is not needed here
+        product_def = generate_lpdaac_defn(measurements, product)
 
-            assert product_def['metadata']['product_type'] == product
-            # Check all expected band names ['1', '2', '3']
-            assert all([a == b for a, b in zip(['1', '2', '3'],
-                                               [m['name'] for m in product_def['measurements']])])
+        assert product_def['metadata']['product_type'] == product
+        # Check all expected band names ['1', '2', '3']
+        assert all([a == b for a, b in zip(['1', '2', '3'],
+                                           [m['name'] for m in product_def['measurements']])])
 
 
 def test_vrt_generation(aster_file):
@@ -59,35 +58,33 @@ def test_vrt_generation(aster_file):
     import xml.etree.ElementTree as ET
     import xmlschema
 
-    with aster_file as file_path:
-        for product in PRODUCTS:
-            bands = selected_bands(file_path, product)
-            vrt = generate_vrt(file_path, bands)
+    for product in PRODUCTS:
+        bands = selected_bands(aster_file, product)
+        vrt = generate_vrt(aster_file, bands)
 
-            # Is it valid VRT schema
-            xsd = xmlschema.XMLSchema(f'{SCRIPTS_TEST_DATA.name}/aster/vrt_schema.xsd')
-            xsd.validate(vrt)
+        # Is it valid VRT schema
+        xsd = xmlschema.XMLSchema(f'{SCRIPTS_TEST_DATA.name}/aster/vrt_schema.xsd')
+        xsd.validate(vrt)
 
-            tree = ET.fromstring(vrt)
+        tree = ET.fromstring(vrt)
 
-            assert len(tree.findall('VRTRasterBand')) == len(PRODUCTS[product])
-            sources = tree.findall('SourceFilename')
-            for source in sources:
-                parts = source.text.split(':')
-                # We want the source path name to be absolute
-                assert file_path == Path(parts[2])
-                assert parts[4] in PRODUCTS[product]
+        assert len(tree.findall('VRTRasterBand')) == len(PRODUCTS[product])
+        sources = tree.findall('SourceFilename')
+        for source in sources:
+            parts = source.text.split(':')
+            # We want the source path name to be absolute
+            assert aster_file == Path(parts[2])
+            assert parts[4] in PRODUCTS[product]
 
 
 def test_dataset_doc(aster_file):
     """
     Test dataset doc corresponding to the given file.
     """
-    with aster_file as file_path:
-        for product in PRODUCTS:
-            doc = generate_lpdaac_doc(file_path, product)
-            assert doc['grid_spatial']['projection']['spatial_reference']
-            assert len(doc['image']['bands']) == len(PRODUCTS[product])
+    for product in PRODUCTS:
+        doc = generate_lpdaac_doc(aster_file, product)
+        assert doc['grid_spatial']['projection']['spatial_reference']
+        assert len(doc['image']['bands']) == len(PRODUCTS[product])
 
 
 def test_dataset_indexing(module_dea_index, aster_file):
@@ -95,22 +92,19 @@ def test_dataset_indexing(module_dea_index, aster_file):
     Test datacube indexing for each product for the given file
     """
 
-    with aster_file as file_path:
-        for product in PRODUCTS:
-            vrt_path = vrt_file_path(file_path, product)
-            measurements = raster_to_measurements(file_path, product)
-            for measure in measurements:
-                measure.pop('path')  # This is not needed here
-            product_def = generate_lpdaac_defn(measurements, product)
-            product_ = module_dea_index.products.from_doc(product_def)
-            indexed_product = module_dea_index.products.add(product_)
+    for product in PRODUCTS:
+        vrt_path = vrt_file_path(aster_file, product)
+        measurements = raster_to_measurements(aster_file, product)
+        for measure in measurements:
+            measure.pop('path')  # This is not needed here
+        product_def = generate_lpdaac_defn(measurements, product)
+        product_ = module_dea_index.products.from_doc(product_def)
+        indexed_product = module_dea_index.products.add(product_)
 
-            assert indexed_product
+        assert indexed_product
 
-            doc = generate_lpdaac_doc(file_path, product)
-            resolver = Doc2Dataset(module_dea_index)
-            dataset, err = resolver(doc, vrt_path.as_uri())
-            print('the dataset to be indexed: ', dataset)
-            module_dea_index.datasets.add(dataset)
-
-
+        doc = generate_lpdaac_doc(aster_file, product)
+        resolver = Doc2Dataset(module_dea_index)
+        dataset, err = resolver(doc, vrt_path.as_uri())
+        print('the dataset to be indexed: ', dataset)
+        module_dea_index.datasets.add(dataset)
