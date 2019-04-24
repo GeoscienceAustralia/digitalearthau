@@ -1,5 +1,4 @@
-import shutil
-import tempfile
+import lzma
 from pathlib import Path
 
 import pytest
@@ -24,15 +23,21 @@ EXTRA_METADATA_PREFIXES = {
 }
 
 
+def uncompress_xz(in_file, dest_file):
+    with lzma.open(in_file, 'rb') as fin, open(dest_file, 'wb') as fout:
+        fout.write(fin.read())
+
+
 @pytest.fixture
-def aster_file():
-    tempdir = tempfile.TemporaryDirectory()
-    shutil.copy2(SCRIPTS_TEST_DATA / 'aster' / '2017.12.10' / 'AST_L1T_00312102017022934_20171211115854_25347.hdf',
-                 Path(tempdir.name))
+def aster_file(tmp_path):
+    # shutil.copy2(SCRIPTS_TEST_DATA / 'aster' / '2017.12.10' / 'AST_L1T_00312102017022934_20171211115854_25347.hdf',
+    # shutil.copy2(SCRIPTS_TEST_DATA / 'aster' / '2017.12.10' / 'shrunk.hdf.xz',
+    #              tmp_path)
+    dest_file = tmp_path / 'AST_L1T_00312102017022934_20171211115854_25347.hdf'
+    uncompress_xz(SCRIPTS_TEST_DATA / 'aster' / '2017.12.10' / 'shrunk.hdf.xz',
+                  dest_file)
 
-    yield Path(tempdir.name) / 'AST_L1T_00312102017022934_20171211115854_25347.hdf'
-
-    tempdir.cleanup()
+    yield dest_file
 
 
 def test_product_defs(aster_file):
