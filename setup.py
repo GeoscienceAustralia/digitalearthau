@@ -68,6 +68,7 @@ setup(
             'dea-stacker = digitalearthau.stacker:cli',
             'dea-system = digitalearthau.system:cli',
             'dea-test-env = digitalearthau.test_env:cli',
-        ]
+        ],
+        'pytest11': ['digitalearthau = digitalearthau.testing.plugin']
     },
 )
