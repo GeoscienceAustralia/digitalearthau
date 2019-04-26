@@ -30,9 +30,6 @@ def uncompress_xz(in_file, dest_file):
 
 @pytest.fixture
 def aster_file(tmp_path):
-    # shutil.copy2(SCRIPTS_TEST_DATA / 'aster' / '2017.12.10' / 'AST_L1T_00312102017022934_20171211115854_25347.hdf',
-    # shutil.copy2(SCRIPTS_TEST_DATA / 'aster' / '2017.12.10' / 'shrunk.hdf.xz',
-    #              tmp_path)
     dest_file = tmp_path / 'AST_L1T_00312102017022934_20171211115854_25347.hdf'
     uncompress_xz(SCRIPTS_TEST_DATA / 'aster' / '2017.12.10' / 'shrunk.hdf.xz',
                   dest_file)
@@ -68,7 +65,7 @@ def test_vrt_generation(aster_file):
         vrt = generate_vrt(aster_file, bands)
 
         # Is it valid VRT schema
-        xsd = xmlschema.XMLSchema(f'{SCRIPTS_TEST_DATA.name}/aster/vrt_schema.xsd')
+        xsd = xmlschema.XMLSchema(str(SCRIPTS_TEST_DATA / 'aster/vrt_schema.xsd'))
         xsd.validate(vrt)
 
         tree = ET.fromstring(vrt)
