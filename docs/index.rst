@@ -22,6 +22,8 @@ accounts on National Computational Infrastructure (NCI).
 
 Publicly available data access and web services are currently in development.
 
+If you notice an error in this documentation, things that could be explained more clearly, or things that are missing, please let us know by creating an Issue in the `dea-notebooks Github repository <https://github.com/GeoscienceAustralia/dea-notebooks/issues>`_, and list what you would like to see changed.
+
 .. toctree::
    :maxdepth: 1
    :caption: Overview
