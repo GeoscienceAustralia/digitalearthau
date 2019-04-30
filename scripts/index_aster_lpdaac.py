@@ -1,7 +1,14 @@
 #!/usr/bin/env python
+# language=rst
 """
+ASTER L1T Indexing
+==================
+
 This program allows indexing the Australia region ASTER (Advanced Spaceborne Thermal
 Emission and Reflection Radiometer)  L1T data stored on the NCI into an ODC Database.
+
+Background
+----------
 
 ASTER data consists of visible and near infrared (VNIR) frequencies
 with three bands at 15-meter resolution, short-wave infrared (SWIR)
@@ -17,35 +24,76 @@ projection.
 (Please see: https://lpdaac.usgs.gov/sites/default/files/public/elearning/ASTER_L1T_Tutorial.html)
 
 Further, depending on whether the following modes are enabled, dataset may present
-different bands:
-  ASTEROBSERVATIONMODE.1=VNIR1, ON/OFF
-  ASTEROBSERVATIONMODE.2=VNIR2, ON/OFF
-  ASTEROBSERVATIONMODE.3=SWIR, ON/OFF
-  ASTEROBSERVATIONMODE.4=TIR, ON/OFF
+different bands.
+
+::
+
+    ASTEROBSERVATIONMODE.1=VNIR1, ON/OFF
+    ASTEROBSERVATIONMODE.2=VNIR2, ON/OFF
+    ASTEROBSERVATIONMODE.3=SWIR, ON/OFF
+    ASTEROBSERVATIONMODE.4=TIR, ON/OFF
 
 Regarding `SWIR` bands please note the following advice from
 https://asterweb.jpl.nasa.gov/swir-alert.asp
 
 ::
+
     ASTER SWIR detectors are no longer functioning due to anomalously high SWIR detector
     temperatures. ASTER SWIR data acquired since April 2008 are not useable, and
     show saturation of values and severe striping. All attempts to bring the SWIR bands
     back to life have failed, and no further action is envisioned. -- January 12, 2009
+
+Usage
+-----
+
+This script has three modes, all of which need a directory of ASTER_L1T HDF data files.
+
+    1. Create the product definition in an ODC database
+    2. Generate VRT files with GDAL usable geospatial information
+    3. Index Datasets into an ODC Database
+
+The input data is stored in sets of hdf files in `/g/data/v10/ASTER_AU/`.
+
+
+
 ::
 
-It runs in two modes, one to create the product definition in the database,
- and the second to record
-dataset details. Both modes need to be pointed at a directory of ASTER_L1T data
-stored in hdf format.
+    ./index_nci_aster_lpdaac.py create-product --product aster_l1t_vnir /g/data/v10/ASTER_AU/2018.01.01
+    ./index_nci_aster_lpdaac.py create-vrt     --product aster_l1t_vnir /g/data/v10/ASTER_AU/2018.01.01
+    ./index_nci_aster_lpdaac.py index-data     --product aster_l1t_vnir /g/data/v10/ASTER_AU/2018.01.01
 
-The data is stored in sets of hdf files
-in `/g/data/v10/ASTER_AU/`.
+::
 
-The script  can be run with `create-product`, `create-vrt`
-or `index-data` parameter mode, and an output directory of hdf files.
- It reads the hdf files to create the Product/VRT/Dataset
-definitions, and write the datasets directly into an ODC database.
-It doesn't write out intermediate YAML files.
+    for i in /g/data/v10/ASTER_AU/*; do
+        ./index_nci_aster_lpdaac.py --config aster_lpdacc.conf index-data
+                                    --product aster_l1t_vnir $i
+    done
+
+Test Database Creation Steps
+----------------------------
+
+::
+
+    psql -h agdcdev-db.nci.org.au
+    CREATE DATABASE aster_lpdaac WITH OWNER agdc_admin;
+    GRANT TEMPORARY, CONNECT ON DATABASE aster_lpdaac to public;
+
+Example ODC Configuration: ``aster_lpdaac.conf``
+
+::
+
+    [datacube]
+    db_hostname: agdcdev-db.nci.org.au
+    db_port: 6432
+    db_database: aster_lpdaac
+
+::
+
+    datacube --config aster_lpdaac.conf system init
+
+
+Implementation Details
+----------------------
 
 The ODC Index datasets points to to the corresponding VRT files in order to access
 raster measurement data. The VRT file in turn points to the original `.hdf` file
@@ -65,41 +113,6 @@ based on the file path and modification time of the underlying HDF file Data
 as well as product name. Use following commands to create a product definition
 and add it to datacube, create a corresponding VRT file, and create a
 dataset definition and add it to datacube.
-
-
-::
-
-    ./index_nci_aster_lpdaac.py create-product
-                        --product aster_l1t_vnir /g/data/v10/ASTER_AU/2018.01.01
-    ./index_nci_aster_lpdaac.py create-vrt
-                        --product aster_l1t_vnir /g/data/v10/ASTER_AU/2018.01.01
-    ./index_nci_aster_lpdaac.py index-data
-                        --product aster_l1t_vnir /g/data/v10/ASTER_AU/2018.01.01
-
-
-::
-
-    psql -h agdcdev-db.nci.org.au
-    CREATE DATABASE aster_lpdaac WITH OWNER agdc_admin;
-    GRANT TEMPORARY, CONNECT ON DATABASE aster_lpdaac to public;
-
-aster_lpdaac.conf::
-
-    [datacube]
-    db_hostname: agdcdev-db.nci.org.au
-    db_port: 6432
-    db_database: aster_lpdaac
-
-::
-
-    datacube --config aster_lpdaac.conf system init
-
-::
-
-    for i in /g/data/v10/ASTER_AU/*; do
-        ./index_nci_aster_lpdaac.py --config aster_lpdacc.conf index-data
-                                    --product aster_l1t_vnir $i
-    done
 
 """
 import functools
