@@ -37,7 +37,7 @@ setup(
         'pytest-runner'
     ],
     install_requires=[
-        'colorama',
+        'colorama', # required to work around a structlog issue
         'click>=5.0',
         'datacube[celery]',
         'python-dateutil',
@@ -49,7 +49,6 @@ setup(
         'boltons',
         'lxml',
         'pydash',
-        'colorama', # required to work around a structlog issue
     ],
     tests_require=tests_require,
     extras_require=extras_require,
@@ -69,6 +68,7 @@ setup(
             'dea-system = digitalearthau.system:cli',
             'dea-test-env = digitalearthau.test_env:cli',
         ],
+        # This might be a bad idea, it pulls in all of datacube whenever pytest is run
         'pytest11': ['digitalearthau = digitalearthau.testing.plugin']
     },
 )
