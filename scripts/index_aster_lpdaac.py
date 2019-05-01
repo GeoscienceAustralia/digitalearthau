@@ -110,10 +110,10 @@ names and corresponding bands (with band names as identified in the original
 
 It attempts to create stable UUIDs for the generated Datasets,
 based on the file path and modification time of the underlying HDF file Data
-as well as product name. Use following commands to create a product definition
-and add it to datacube, create a corresponding VRT file, and create a
-dataset definition and add it to datacube.
+as well as product name.
 
+The VRT file for each product and dataset YAML file for each product is written
+onto the same directory that contains the original `.hdf` file.
 """
 import functools
 import json
@@ -134,19 +134,16 @@ from datacube.index.hl import Doc2Dataset
 LOG = logging.getLogger(__name__)
 
 PRODUCTS = {
-    'aster_l1t_vnir': {'ImageData2', 'ImageData1', 'ImageData3N'},
-    'aster_l1t_swir': {'ImageData4', 'ImageData5', 'ImageData6', 'ImageData7', 'ImageData8', 'ImageData9'},
-    'aster_l1t_tir': {'ImageData10', 'ImageData11', 'ImageData12', 'ImageData13', 'ImageData14'}
-}
-
-EXTRA_METADATA_PREFIXES = {
-    'aster_l1t_vnir': {'include_only': {'ASTER', 'CORRECT', 'EAST', 'FLY', 'GAIN', 'INPUT', 'LOWER', 'MAP',
+    'aster_l1t_vnir': {'bands': {'ImageData2', 'ImageData1', 'ImageData3N'},
+                       'include_only': {'ASTER', 'CORRECT', 'EAST', 'FLY', 'GAIN', 'INPUT', 'LOWER', 'MAP',
                                         'NORTH', 'NUMBERGCP', 'ORBIT', 'POINT', 'QAPERCENT', 'RECURRENT', 'SCENE',
                                         'SIZE', 'SOLAR', 'SOUTH', 'UPPER', 'UTMZONENUMBER', 'WEST'}},
-    'aster_l1t_swir': {'include_only': {'ASTER', 'CORRECT', 'EAST', 'FLY', 'GAIN', 'INPUT', 'LOWER', 'MAP',
+    'aster_l1t_swir': {'bands': {'ImageData4', 'ImageData5', 'ImageData6', 'ImageData7', 'ImageData8', 'ImageData9'},
+                       'include_only': {'ASTER', 'CORRECT', 'EAST', 'FLY', 'GAIN', 'INPUT', 'LOWER', 'MAP',
                                         'NORTH', 'NUMBERGCP', 'ORBIT', 'POINT', 'QAPERCENT', 'RECURRENT', 'SCENE',
                                         'SIZE', 'SOLAR', 'SOUTH', 'UPPER', 'UTMZONENUMBER', 'WEST'}},
-    'aster_l1t_tir': {'exclude': {'BAND', 'CALENDAR', 'COARSE', 'FUTURE', 'GEO', 'HDF', 'IDENT', 'IMAGE',
+    'aster_l1t_tir': {'bands': {'ImageData10', 'ImageData11', 'ImageData12', 'ImageData13', 'ImageData14'},
+                      'exclude': {'BAND', 'CALENDAR', 'COARSE', 'FUTURE', 'GEO', 'HDF', 'IDENT', 'IMAGE',
                                   'PGE', 'PROCESSED', 'PROCESSING', 'RADIO', 'RECEIVING', 'REPROCESSING', 'SOURCE',
                                   'TIME', 'UTMZONECODE'}}
 }
@@ -166,9 +163,9 @@ def cli(ctx, config):
 @click.option('--product', help='Which ASTER product? vnir, swir, or tir')
 def create_vrt(path, product):
     file_paths = find_lpdaac_file_paths(Path(path))
-    print(file_paths)
 
     for file_path in file_paths:
+        print(file_path)
         bands = selected_bands(file_path, product)
         if bands:
             vrt = generate_vrt(file_path, bands)
@@ -184,10 +181,9 @@ def create_vrt(path, product):
 @click.pass_obj
 def show(index, path, product):
     file_paths = find_lpdaac_file_paths(Path(path))
-    print(file_paths)
 
-    _ = Doc2Dataset(index)
     for file_path in file_paths:
+        print(file_path)
         bands = selected_bands(file_path, product)
 
         if bands:
@@ -238,10 +234,10 @@ def create_product(index, path, product):
 @click.pass_obj
 def index_data(index, path, product):
     file_paths = find_lpdaac_file_paths(Path(path))
-    print(file_paths)
 
     resolver = Doc2Dataset(index)
     for file_path in file_paths:
+        print(file_path)
 
         bands = selected_bands(file_path, product)
         if bands:
@@ -288,13 +284,11 @@ def find_lpdaac_file_paths(path: Path):
     Return a list of hdf file path objects.
 
     :param path:
-    :return: A list of path objects.
+    :return: A generator of path objects.
     """
-    file_paths = []
     for afile in path.iterdir():
         if afile.suffix == '.hdf' and afile.stem[:7] == 'AST_L1T':
-            file_paths.append(afile)
-    return file_paths
+            yield afile
 
 
 def raster_to_measurements(file_path, product):
@@ -316,7 +310,7 @@ def raster_to_measurements(file_path, product):
 
 @functools.lru_cache(maxsize=None)
 def selected_bands(file_path, product):
-    band_suffixes = PRODUCTS[product]
+    band_suffixes = PRODUCTS[product]['bands']
 
     ds = gdal.Open(str(file_path), gdal.GA_ReadOnly)
     sub_datasets = ds.GetSubDatasets()
@@ -615,17 +609,17 @@ def compute_extents(file_path):
 def filter_metadata(file_path, product):
     """
     Filter the metadata dictionary based on what is to include or exclude defined by
-    the global EXTRA_METADATA_PREFIXES
+    the global PRODUCTS
     """
 
     dt = gdal.Open(str(file_path), gdal.GA_ReadOnly)
     meta = dt.GetMetadata()
     items = set()
-    if EXTRA_METADATA_PREFIXES[product].get('include_only'):
-        for prefix in EXTRA_METADATA_PREFIXES[product]['include_only']:
+    if PRODUCTS[product].get('include_only'):
+        for prefix in PRODUCTS[product]['include_only']:
             items.update({meta_item for meta_item in meta if meta_item.startswith(prefix)})
-    elif EXTRA_METADATA_PREFIXES[product].get('exclude'):
-        for prefix in EXTRA_METADATA_PREFIXES[product]['exclude']:
+    elif PRODUCTS[product].get('exclude'):
+        for prefix in PRODUCTS[product]['exclude']:
             items.update({meta_item for meta_item in meta})
             items.difference({meta_item for meta_item in meta if meta_item.startswith(prefix)})
     return {item: meta[item] for item in items}
