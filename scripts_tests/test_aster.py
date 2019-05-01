@@ -7,6 +7,8 @@ from datacube.index.hl import Doc2Dataset
 from scripts.index_aster_lpdaac import generate_lpdaac_defn, generate_lpdaac_doc, generate_vrt, selected_bands
 from scripts.index_aster_lpdaac import raster_to_measurements, vrt_file_path
 
+pytest_plugins = "digitalearthau.testing.plugin"
+
 SCRIPTS_TEST_DATA = Path(__file__).parent / 'data'
 
 PRODUCTS = {'aster_l1t_vnir': {'ImageData2', 'ImageData1', 'ImageData3N'},

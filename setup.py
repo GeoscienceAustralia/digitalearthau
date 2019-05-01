@@ -69,6 +69,6 @@ setup(
             'dea-test-env = digitalearthau.test_env:cli',
         ],
         # This might be a bad idea, it pulls in all of datacube whenever pytest is run
-        'pytest11': ['digitalearthau = digitalearthau.testing.plugin']
+        #'pytest11': ['digitalearthau = digitalearthau.testing.plugin']
     },
 )
