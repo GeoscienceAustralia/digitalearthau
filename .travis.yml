@@ -64,6 +64,8 @@ before_install:
   # Install pygdal bindings compatible with dpkg based gdal libs
   - pip install pygdal>="$(gdal-config --version)"
 
+  - pip install --progress-bar off --requirement requirements-test.txt
+
 install:
   - travis_retry pip install --upgrade pytest
   - travis_retry pip install codecov cython boto3
