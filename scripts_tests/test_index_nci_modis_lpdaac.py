@@ -1,7 +1,7 @@
 from pathlib import Path
 from datetime import datetime
 
-from index_nci_modis_lpdaac import *
+from scripts.index_nci_modis_lpdaac import *
 
 
 def test_modis_path_to_date_range():

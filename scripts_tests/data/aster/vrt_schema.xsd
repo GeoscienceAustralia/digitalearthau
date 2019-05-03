@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+  <xs:element name="VRTDataset">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="SRS"/>
+        <xs:element ref="GeoTransform"/>
+        <xs:element ref="VRTRasterBand" maxOccurs="unbounded" minOccurs="1"/>
+      </xs:sequence>
+      <xs:attribute name="rasterXSize" use="required" type="xs:integer"/>
+      <xs:attribute name="rasterYSize" use="required" type="xs:integer"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="SRS" type="xs:string"/>
+  <xs:element name="GeoTransform" type="xs:string"/>
+  <xs:element name="VRTRasterBand">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="NoDataValue"/>
+        <xs:element ref="ComplexSource"/>
+      </xs:sequence>
+      <xs:attribute name="band" use="required" type="xs:integer"/>
+      <xs:attribute name="dataType" use="required" type="xs:NCName"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="NoDataValue" type="xs:integer"/>
+  <xs:element name="ComplexSource">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="SourceFilename"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="SourceFilename">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="relativeToVRT" use="required" type="xs:integer"/>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

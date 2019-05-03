@@ -1,14 +1,11 @@
 import itertools
-
 import os
-import pytest
 from pathlib import Path
 from typing import Iterable
 
-import datacube
-import digitalearthau
-import digitalearthau.system
+import pytest
 from datacube.config import LocalConfig
+
 from . import factories
 
 # These are unavoidable in pytests due to fixtures
@@ -26,6 +23,8 @@ INTEGRATION_DEFAULT_CONFIG_PATH = Path(__file__).parent.joinpath('testing-defaul
 
 def pytest_report_header(config):
     if config.getoption('verbose') > 0:
+        import datacube
+        import digitalearthau
         return (
             f"digitaleathau {digitalearthau.__version__}, "
             f"opendatacube {datacube.__version__}"

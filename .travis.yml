@@ -64,6 +64,9 @@ before_install:
   # Install pygdal bindings compatible with dpkg based gdal libs
   - pip install pygdal>="$(gdal-config --version)"
 
+  - pip install --progress-bar off --requirement requirements-test.txt
+  - pip install git+https://github.com/mapbox/rasterio.git@master
+
 install:
   - travis_retry pip install --upgrade pytest
   - travis_retry pip install codecov cython boto3
