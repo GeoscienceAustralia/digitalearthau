@@ -65,6 +65,7 @@ before_install:
   - pip install pygdal>="$(gdal-config --version)"
 
   - pip install --progress-bar off --requirement requirements-test.txt
+  - pip install git+https://github.com/mapbox/rasterio.git@master
 
 install:
   - travis_retry pip install --upgrade pytest

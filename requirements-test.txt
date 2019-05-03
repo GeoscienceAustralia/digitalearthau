@@ -1,3 +1,2 @@
 colorama
 xmlschema
-rasterio==1.0.22
