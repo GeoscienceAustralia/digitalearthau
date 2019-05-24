@@ -28,7 +28,7 @@ CSV_OUTPUT_FILE = paths.NCI_WORK_ROOT / f"coherence/{NOW:%Y-%m-%d}/erroneous_dat
 @click.option('--check-locationless/--no-check-locationless',
               is_flag=True,
               default=False,
-              help='Check any datasets without locations')
+              help='Check any datasets without locations for registered collections only')
 @click.option('--archive-locationless',
               is_flag=True,
               default=False,
@@ -77,7 +77,6 @@ def main(expressions, check_locationless, archive_locationless, check_ancestors,
     products_to_check = set(product
                             for product in collections.registered_collection_names()
                             if product not in IGNORED_PRODUCTS_LIST)
-
     _create_output_csv()
 
     with Datacube(config=test_dc_config) as dc:
