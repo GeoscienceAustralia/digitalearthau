@@ -29,7 +29,11 @@ def example_nc_dataset(integration_test_data, dea_index):
 
     dataset_file = integration_test_data.joinpath(*path_offset)
     dataset_file.parent.mkdir(parents=True)
-    make_fake_netcdf_dataset(dataset_file, template)
+
+    assert dataset_file.parent.exists()
+    assert not dataset_file.exists()
+
+    make_fake_netcdf_dataset(dataset_file, template.read_text())
 
     assert dataset_file.exists()
 
@@ -49,6 +53,20 @@ def example_nc_dataset(integration_test_data, dea_index):
         path_offset=path_offset,
         parent_id=uuid.uuid4()
     )
+
+
+def test_netcdf_creation(destination_path):
+    dataset_file = destination_path.joinpath('test.nc')
+
+    assert dataset_file.parent.exists()
+    assert not dataset_file.exists()
+
+    make_fake_netcdf_dataset(dataset_file, '''
+    some text
+    with lines
+    ''')
+
+    assert dataset_file.exists()
 
 
 def test_move(global_integration_cli_args,
@@ -191,17 +209,24 @@ def _call_move(args, global_integration_cli_args) -> Result:
     return res
 
 
-def make_fake_netcdf_dataset(nc_name, yaml_doc):
-    from datacube.drivers.netcdf.writer import Variable, create_variable, netcdfy_data
-    from netCDF4 import Dataset
+def make_fake_netcdf_dataset(nc_name, doc_text):
+    from datacube.drivers.netcdf.writer import (
+        Variable,
+        create_variable,
+        create_coordinate,
+        netcdfy_data,
+        create_netcdf
+    )
+    from datacube.utils.dates import parse_time
     import numpy as np
-    content = yaml_doc.read_text()
-    npdata = np.array([content], dtype=bytes)
 
-    with Dataset(nc_name, 'w') as nco:
-        var = Variable(npdata.dtype, None, ('time',), None)
-        nco.createDimension('time', size=1)
-        create_variable(nco, 'dataset', var)
-        nco['dataset'][:] = netcdfy_data(npdata)
+    t = np.asarray([parse_time('2001-01-29 07:06:05.432')], dtype=np.datetime64)
+    npdata = np.asarray([doc_text], dtype='S')
 
-    # from datacube.utils import read_documents
+    with create_netcdf(nc_name) as nco:
+        create_coordinate(nco, 'time', t, 'seconds since 1970-01-01 00:00:00')
+
+        nc_dataset = create_variable(nco, 'dataset',
+                                     Variable(npdata.dtype, None, ('time',), None))
+        nc_dataset[:] = netcdfy_data(npdata)
+        assert 'dataset_nchar' in nco.dimensions

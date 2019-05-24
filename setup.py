@@ -37,6 +37,7 @@ setup(
         'pytest-runner'
     ],
     install_requires=[
+        'colorama',
         'click>=5.0',
         'datacube[celery]',
         'python-dateutil',
@@ -48,6 +49,7 @@ setup(
         'boltons',
         'lxml',
         'pydash',
+        'colorama', # required to work around a structlog issue
     ],
     tests_require=tests_require,
     extras_require=extras_require,
