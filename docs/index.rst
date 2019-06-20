@@ -17,12 +17,18 @@ Digital Earth Australia is an analysis platform for satellite imagery and other 
 
 For more information on the project, see http://www.ga.gov.au/dea
 
-Digital Earth Australia is currently in a private beta for Australian government and academic users eligible for
-accounts on National Computational Infrastructure (NCI).
+Digital Earth Australia is currently in beta for users with
+accounts on the National Computational Infrastructure (NCI).
 
-Publicly available data access and web services are currently in development.
+Data can be viewed on `NationalMap <https://nationalmap.gov.au/>`_,
+or accessed directly at https://data.dea.ga.gov.au (see :ref:`s3`).
 
-If you notice an error in this documentation, things that could be explained more clearly, or things that are missing, please let us know by creating an Issue in the `dea-notebooks Github repository <https://github.com/GeoscienceAustralia/dea-notebooks/issues>`_, and list what you would like to see changed.
+Our OGC Web Service supporting WMS, WCS and some WPS functionality is `<https://ows.services.dea.ga.gov.au/>`_.
+
+If you notice an error in this documentation, things that could be explained more clearly, or things that are missing,
+please let us know by creating an Issue in the
+`dea-notebooks Github repository <https://github.com/GeoscienceAustralia/dea-notebooks/issues>`_,
+and list what you would like to see changed.
 
 .. toctree::
    :maxdepth: 1
