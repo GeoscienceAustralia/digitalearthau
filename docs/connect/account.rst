@@ -13,6 +13,13 @@ You can sign up with your government or academic institutional email address her
 
 https://my.nci.org.au/mancini/signup/
 
+Commercial entities wanting to participate in project partnerships or training with DEA should contact
+earth.observation@ga.gov.au.
+
+NCI can also provision compute and storage resources to commercial entities under contract for those looking to
+leverage DEA resources. It is suggested that commercial entities contact DEA in the first instance through
+earth.observation@ga.gov.au to help determine requirements.
+
 Virtual Desktop Analysis
 ------------------------
 

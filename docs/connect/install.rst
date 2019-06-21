@@ -11,8 +11,8 @@ Install TurboVNC and Strudel according to the instructions at http://vdi.nci.org
 
 .. note::
    The NCI instructions recommend specific versions of 
-   `TurboVNC <https://sourceforge.net/projects/turbovnc/files/>` and
-   `Strudel <https://cvl.massive.org.au/launcher_files/stable/>`. 
+   `TurboVNC <https://sourceforge.net/projects/turbovnc/files/>`_ and
+   `Strudel <https://cvl.massive.org.au/launcher_files/stable/>`_.
    More recent versions may or may not be compatible with the VDI.
 
 .. note::
