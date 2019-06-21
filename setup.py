@@ -37,19 +37,17 @@ setup(
         'pytest-runner'
     ],
     install_requires=[
-        'colorama',
+        'colorama',  # Needed for structlog's CLI output.
         'click>=5.0',
         'datacube[celery]',
         'python-dateutil',
         'gdal',
         'eodatasets',
-        # dev module is used automatically when run interactively.
-        'structlog[dev]',
+        'structlog',
         'DAWG',
         'boltons',
         'lxml',
         'pydash',
-        'colorama', # required to work around a structlog issue
     ],
     tests_require=tests_require,
     extras_require=extras_require,

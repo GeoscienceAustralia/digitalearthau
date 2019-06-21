@@ -1,4 +1,6 @@
 
+.. _s3:
+
 Products Available on Amazon S3
 ===============================
 

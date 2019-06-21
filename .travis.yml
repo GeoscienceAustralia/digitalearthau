@@ -15,7 +15,6 @@ addons:
       - gdal-bin
       - gdal-data
       - libgdal-dev
-      - libgdal-dev
       - libgdal20
       - libudunits2-0
       - libudunits2-dev
@@ -62,7 +61,9 @@ before_install:
   - pip install NetCDF4==1.4.1
 
   # Install pygdal bindings compatible with dpkg based gdal libs
-  - pip install pygdal>="$(gdal-config --version)"
+  - gdal-config --version
+  - which gdal-config
+  - pip install gdal=="$(gdal-config --version)"'.*'
 
 install:
   - travis_retry pip install --upgrade pytest
