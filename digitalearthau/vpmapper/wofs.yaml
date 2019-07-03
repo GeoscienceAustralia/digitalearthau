@@ -1,0 +1,8 @@
+
+
+wofs_spec:
+  transform: wofs.virtualproduct.WOFL
+  input:
+    juxtapose:
+      - product: dsm_1s
+      - product: ls8_ard
