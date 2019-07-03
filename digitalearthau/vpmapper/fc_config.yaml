@@ -8,7 +8,7 @@ task_generation:
 
 
 virtual_product_specification:
-  transform: fc.new.virtualproduct.FakeFractionalCover
+  transform: digitalearthau.vpmapper.virtualproduct.FakeFractionalCover
 
   regression_coefficients:
     blue:

@@ -11,7 +11,6 @@ from collections import namedtuple
 
 import click
 import yaml
-from pathlib import Path
 
 import datacube
 from datacube.model.utils import make_dataset
