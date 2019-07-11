@@ -62,7 +62,7 @@ def dask_compute_stream(client: Client,
             task = client.get({key: (lump_proc, data_key),
                                data_key: x},
                               key,
-                              priority=priority-i,
+                              priority=priority - i,
                               sync=False)
             q.put(task)  # maybe blocking
 
