@@ -6,6 +6,8 @@ TODO:
 
 """
 
+# pylint: disable=map-builtin-not-iterating
+
 import sys
 from collections import namedtuple
 
@@ -34,20 +36,20 @@ class D4:
         self.vproduct = construct(**config['virtual_product_specification'])
 
         # Connect to the ODC Index
-        dc = datacube.Datacube()
+        self.dc = datacube.Datacube()
         self.input_product_name = self.config['task_generation']['input_product']
-        self.input_product = dc.index.products.get_by_name(self.input_product_name)
-        self.output_product = dc.index.products.get_by_name(config['task_generation']['output_product'])
+        self.input_product = self.dc.index.products.get_by_name(self.input_product_name)
+        self.output_product = self.dc.index.products.get_by_name(config['task_generation']['output_product'])
 
     def generate_tasks(self):
         # Find which datasets needs to be processed
-        datasets = dc.index.datasets.search(limit=3, product=self.config['task_generation']['input_product'])
+        datasets = self.dc.index.datasets.search(limit=3, product=self.config['task_generation']['input_product'])
         # datasets = datasets_that_need_to_be_processed(dc.index, config['task_generation']['input_product'],
         #                                               output_product_name)
 
         # Divide into a sequence of tasks
         bags = (
-            VirtualDatasetBag([dataset], None, {input_product_name: self.input_product})
+            VirtualDatasetBag([dataset], None, {self.input_product_name: self.input_product})
             for dataset in datasets
         )
 

@@ -1,3 +1,4 @@
+# pylint: disable=dict-values-not-iterating
 import os.path
 from pathlib import Path
 from typing import Iterable, Union
@@ -28,6 +29,8 @@ def calc_uris(file_path, variable_params):
         uri = file_path.absolute().as_uri()
         if file_path.exists():
             raise FileExistsError('Output file already exists', str(file_path))
+
+    return uri, band_uris
 
 
 def all_files_exist(filenames: Iterable):
