@@ -1,4 +1,0 @@
-wofs_spec:
-  transform: wofs.virtualproduct.WOFL
-  input:
-      - product: ls8_ard

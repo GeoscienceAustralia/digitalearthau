@@ -1,0 +1,8 @@
+virtual_product_specification:
+  transform: wofs.virtualproduct.WOFL
+  input:
+      - product: ls8_ard
+
+file_output:
+  location: '/local/u46/dra547/sandpit/odc_testing/LS8_OLI_FC/'
+  file_path_template: '{region_code}/LS8_OLI_FC_3577_{start_time}_v{version}.tif'

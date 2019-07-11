@@ -1,7 +1,7 @@
 # pylint: disable=dict-values-not-iterating
 import os.path
 from pathlib import Path
-from typing import Iterable, Union
+from typing import Iterable, Union, Tuple, Mapping
 
 import xarray
 import yaml
@@ -12,7 +12,7 @@ from datacube.helpers import write_geotiff
 from datacube.model import Dataset
 
 
-def calc_uris(file_path, variable_params):
+def calc_uris(file_path, variable_params) -> Tuple[str, Mapping]:
     base, ext = os.path.splitext(file_path)
 
     if ext == '.tif':
@@ -33,7 +33,7 @@ def calc_uris(file_path, variable_params):
     return uri, band_uris
 
 
-def all_files_exist(filenames: Iterable):
+def all_files_exist(filenames: Iterable) -> bool:
     """
     Return True if all files in a list exist.
 
@@ -44,7 +44,7 @@ def all_files_exist(filenames: Iterable):
     return all(isthere)
 
 
-def tif_filenames(filename: Union[Path, str], bands: list, sep='_'):
+def tif_filenames(filename: Union[Path, str], bands: list, sep='_') -> Tuple[dict, dict, Path]:
     """
     Turn one file name into several file names, one per band.
     This turns a .tif filename into two dictionaries of filenames,
