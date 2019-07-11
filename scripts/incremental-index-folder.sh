@@ -44,4 +44,3 @@ echo "Indexing..."
 < "${index_queue_file}" time parallel -j 3 -m datacube -vv dataset add --auto-match
 
 echo "Done"
-

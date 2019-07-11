@@ -17,5 +17,3 @@ time psql -h 130.56.244.227 -p 6432 datacube -c "\\copy (
               GROUP BY 1, 3
         ) as dataset_locations where array_length(locations, 1) > 1
     ) to stdout with csv"
-
-

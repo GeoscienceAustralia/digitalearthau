@@ -33,4 +33,3 @@ if [ ! -e "${locations_file}" ]; then
 fi
 
 echo "Done. Written to ${locations_file}"
-

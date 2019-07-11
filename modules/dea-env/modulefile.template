@@ -32,4 +32,3 @@ setenv GDAL_DATA ${module_path}/share/gdal
 # while still meaning that a new module release will have a clean user environment.
 setenv PYTHONUSERBASE ~/.digitalearthau/${module_version}/local
 prepend-path PATH ~/.digitalearthau/${module_version}/local/bin
-

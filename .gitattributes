@@ -11,4 +11,3 @@ digitalearthau/_version.py export-subst
 *.hdr binary
 *.bin binary
 *.tif binary
-

@@ -70,4 +70,3 @@ Examples:
             # Who do we trust in a sync if there's a mismatch?
             trust=Trust.disk,
      )
-

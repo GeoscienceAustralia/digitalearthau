@@ -65,4 +65,3 @@ Glossary
       definitions in the Data Cube.
 
       For more information on the YAML standard see http://yaml.org/.
-

@@ -1,7 +1,7 @@
-Sphinx
-nbsphinx
-sphinx_rtd_theme
 IPython
 jupyter_sphinx
-recommonmark
+nbsphinx
 pandoc<2.0.0
+recommonmark
+Sphinx
+sphinx_rtd_theme

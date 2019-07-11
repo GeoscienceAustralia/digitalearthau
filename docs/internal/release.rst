@@ -66,4 +66,3 @@ DEA Module
 
 The DEA module contains the Open Data Cube library, along with all other Geoscience Specific code. It is built against a
 specific Python envionment module (ie. frozen to specific versions of each of our dependencies)
-

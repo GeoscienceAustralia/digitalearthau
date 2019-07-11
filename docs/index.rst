@@ -82,4 +82,3 @@ and list what you would like to see changed.
   :caption: Indexes
 
   genindex
-
