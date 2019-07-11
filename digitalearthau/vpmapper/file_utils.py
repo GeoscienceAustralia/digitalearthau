@@ -1,12 +1,14 @@
 import os.path
+from pathlib import Path
+from typing import Iterable, Union
+
 import xarray
 import yaml
 from boltons import fileutils
 from pandas import to_datetime
-from pathlib import Path
-from typing import Iterable, Union
 
 from datacube.helpers import write_geotiff
+from datacube.model import Dataset
 
 
 def calc_uris(file_path, variable_params):
