@@ -1,5 +1,3 @@
-
-
 wofs_spec:
   transform: wofs.virtualproduct.WOFL
   input:
