@@ -11,8 +11,8 @@ def cli():
     pass
 
 
-@cli()
-@click.option('environment')
+@cli.command()
+@click.option('--environment')
 @click.argument('config_file')
 def run_many(config_file, environment=None):
     # Load Configuration file
@@ -23,10 +23,10 @@ def run_many(config_file, environment=None):
     d4.execute_with_dask(tasks)
 
 
-@cli()
+@cli.command()
+@click.option('--environment')
 @click.argument('config_file')
 @click.argument('input_dataset')
-@click.option('environment')
 def run_one(config_file, input_dataset, environment=None):
     d4 = D4(config_file=config_file, dc_env=environment)
 
