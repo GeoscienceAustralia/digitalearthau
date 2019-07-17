@@ -1,8 +1,13 @@
+
+task_generation:
+  input_product: ga_ls8c_ard_3
+
 virtual_product_specification:
   transform: wofs.virtualproduct.WOFL
   input:
-      - product: ls8_ard
+      - product: ga_ls8c_ard_3
+        measurements: ['nbart_blue', 'nbart_green', 'nbart_red', 'nbart_nir', 'nbart_swir_1', 'nbart_swir_2', 'fmask']
 
 file_output:
-  location: '/local/u46/dra547/sandpit/odc_testing/LS8_OLI_FC/'
-  file_path_template: '{region_code}/LS8_OLI_FC_3577_{start_time}_v{version}.tif'
+  location: '/local/u46/dra547/sandpit/odc_testing/LS8_WOFS/'
+  file_path_template: '{region_code}/LS8_WOFS_{start_time}_v{version}.tif'

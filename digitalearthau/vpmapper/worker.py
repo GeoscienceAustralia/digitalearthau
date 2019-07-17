@@ -30,7 +30,7 @@ Task = namedtuple('Task',
 
 
 class D4:
-    def __init__(self, *, config=None, config_file=None):
+    def __init__(self, *, config=None, config_file=None, dc_env=None):
         if config is not None:
             self.config = config
         else:
@@ -38,14 +38,14 @@ class D4:
         self.vproduct = construct(**config['virtual_product_specification'])
 
         # Connect to the ODC Index
-        self.dc = datacube.Datacube()
+        self.dc = datacube.Datacube(env=dc_env)
         self.input_product_name = self.config['task_generation']['input_product']
         self.input_product = self.dc.index.products.get_by_name(self.input_product_name)
         self.output_product = self.dc.index.products.get_by_name(config['task_generation']['output_product'])
 
-    def generate_tasks(self) -> Sequence[Task]:
+    def generate_tasks(self, limit=3) -> Sequence[Task]:
         # Find which datasets needs to be processed
-        datasets = self.dc.index.datasets.search(limit=3, product=self.config['task_generation']['input_product'])
+        datasets = self.dc.index.datasets.search(limit=limit, product=self.config['task_generation']['input_product'])
 
         tasks = (self.generate_task(ds) for ds in datasets)
 
