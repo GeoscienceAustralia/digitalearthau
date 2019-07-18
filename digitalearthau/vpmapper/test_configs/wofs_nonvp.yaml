@@ -1,0 +1,8 @@
+specification:
+  transform: wofs.virtualproduct.WOfSClassifier
+  product: ga_ls8c_ard_3
+  measurements: ['nbart_blue', 'nbart_green', 'nbart_red', 'nbart_nir', 'nbart_swir_1', 'nbart_swir_2', 'fmask']
+
+file_output:
+  location: '/local/u46/dra547/sandpit/odc_testing/LS8_WOFS/'
+  file_path_template: '{region_code}/LS8_WOFS_{start_time}_v{version}.tif'
