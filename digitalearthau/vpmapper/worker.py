@@ -91,7 +91,7 @@ class D4:
         # compute base filename
         variable_params = {band: None
                            for band in vproduct.output_measurements(task.box.product_definitions)}
-        base_filename = _get_filename(task.file_output, sources=input_dataset.item()[0])
+        base_filename = _get_filename(task.file_output, input_dataset=input_dataset.item()[0])
 
         # generate dataset metadata
         uri, band_uris = calc_uris(base_filename, variable_params)

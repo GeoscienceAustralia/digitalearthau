@@ -9,7 +9,6 @@ from boltons import fileutils
 from pandas import to_datetime
 
 from datacube.helpers import write_geotiff
-from datacube.model import Dataset
 
 
 def calc_uris(file_path, variable_params) -> Tuple[str, Mapping]:
@@ -73,7 +72,7 @@ def tif_filenames(filename: Union[Path, str], bands: list, sep='_') -> Tuple[dic
 
 
 def dataset_to_geotif_yaml(dataset: xarray.Dataset,
-                           odc_dataset: Dataset,
+                           odc_dataset_metadata: Mapping,
                            filename: Union[Path, str],
                            variable_params=None):
     """
@@ -96,26 +95,29 @@ def dataset_to_geotif_yaml(dataset: xarray.Dataset,
 
     # Write out the yaml file
     with fileutils.atomic_save(str(yml)) as stream:
-        yaml.safe_dump(odc_dataset.metadata_doc, stream, encoding='utf8')
+        yaml.safe_dump(odc_dataset_metadata, stream, encoding='utf8')
 
     # Iterate over the bands
     for key, bandfile in abs_paths.items():
         slim_dataset = dataset[[key]]  # create a one band dataset
         attrs = slim_dataset[key].attrs.copy()  # To get nodata in
-        del attrs['crs']  # It's  format is poor
-        del attrs['units']  # It's  format is poor
+
+        # Delete CRS and units if they exist. They don't work when writing to disk.
+        attrs.pop('crs', None)
+        attrs.pop('units', None)
+
         slim_dataset[key] = dataset.data_vars[key].astype('int16', copy=True)
         write_geotiff(bandfile, slim_dataset.isel(time=0), profile_override=attrs)
 
 
-def _get_filename(config, sources):
-    region_code = getattr(sources.metadata, 'region_code', None)
+def _get_filename(config, input_dataset):
+    region_code = getattr(input_dataset.metadata, 'region_code', None)
 
     # data collection upgrade format
-    start_time = to_datetime(sources.time.begin).strftime('%Y%m%d%H%M%S%f')
-    end_time = to_datetime(sources.time.end).strftime('%Y%m%d%H%M%S%f')
-    epoch_start = to_datetime(sources.time.begin)
-    epoch_end = to_datetime(sources.time.begin)
+    start_time = to_datetime(input_dataset.time.begin).strftime('%Y%m%d%H%M%S%f')
+    end_time = to_datetime(input_dataset.time.end).strftime('%Y%m%d%H%M%S%f')
+    epoch_start = to_datetime(input_dataset.time.begin)
+    epoch_end = to_datetime(input_dataset.time.begin)
 
     tile_index = None
 
