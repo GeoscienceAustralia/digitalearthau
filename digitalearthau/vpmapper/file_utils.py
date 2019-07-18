@@ -71,10 +71,9 @@ def tif_filenames(filename: Union[Path, str], bands: list, sep='_') -> Tuple[dic
     return abs_paths, rel_files, yml
 
 
-def dataset_to_geotif_yaml(dataset: xarray.Dataset,
-                           odc_dataset_metadata: Mapping,
-                           filename: Union[Path, str],
-                           variable_params=None):
+def dataset_to_geotif(dataset: xarray.Dataset,
+                      filename: Union[Path, str],
+                      variable_params=None):
     """
     Write the dataset out as a set of geotifs with metadata in a yaml file.
     There will be one geotiff file per band.
@@ -92,10 +91,6 @@ def dataset_to_geotif_yaml(dataset: xarray.Dataset,
     abs_paths, _, yml = tif_filenames(filename, bands)
 
     Path(filename).parent.mkdir(parents=True, exist_ok=True)
-
-    # Write out the yaml file
-    with fileutils.atomic_save(str(yml)) as stream:
-        yaml.safe_dump(odc_dataset_metadata, stream, encoding='utf8')
 
     # Iterate over the bands
     for key, bandfile in abs_paths.items():

@@ -20,7 +20,7 @@ from datacube.model.utils import make_dataset
 from datacube.virtual import construct
 from datacube.virtual.impl import VirtualDatasetBag, VirtualDatasetBox
 from ._dask import dask_compute_stream
-from .file_utils import dataset_to_geotif_yaml, calc_uris, _get_filename
+from .file_utils import dataset_to_geotif, calc_uris, _get_filename
 
 
 class Task(NamedTuple):
@@ -105,7 +105,7 @@ class D4:
                                    )
 
         # write data to disk
-        dataset_to_geotif_yaml(
+        dataset_to_geotif(
             dataset=output_data,
             odc_dataset=odc_dataset,
             filename=base_filename,
