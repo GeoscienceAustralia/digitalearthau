@@ -1,9 +1,14 @@
-task_generation:
-  input_product: ls8_nbart_albers
-  output_product: ls8_fc_albers
+specification:
+  transform: digitalearthau.vpmapper.virtualproduct.FractionalCover
 
-virtual_product_specification:
-  transform: digitalearthau.vpmapper.virtualproduct.FakeFractionalCover
+  product: ga_ls8c_ard_3
+  measurements: ['nbart_green', 'nbart_red', 'nbart_nir', 'nbart_swir_1', 'nbart_swir_2']
+  measurement_renames:
+    nbart_green: green
+    nbart_red: red
+    nbart_nir: nir
+    nbart_swir_1: swir1
+    nbart_swir_2: swir2
 
   regression_coefficients:
     blue:
@@ -25,12 +30,14 @@ virtual_product_specification:
       - -0.00327
       - 1.02551
   input:
-        product: ls8_nbart_albers
-        measurements: [green, red, nir, swir1, swir2]
+    product: ls8_nbart_albers
+    measurements: [green, red, nir, swir1, swir2]
+
+metadata:
+  product_family: fractional_cover
+  producer: ga.gov.au
+  dataset_version: 2.0.0
 
 file_output:
-  location: '/local/u46/dra547/sandpit/odc_testing/LS8_OLI_FC/'
-  file_path_template: '{region_code}/LS8_OLI_FC_3577_{start_time}_v{version}.tif'
+  location: '/local/u46/dra547/sandpit/odc_testing/'
 
-dataset_doc_template:
-  product_type: fractional_cover

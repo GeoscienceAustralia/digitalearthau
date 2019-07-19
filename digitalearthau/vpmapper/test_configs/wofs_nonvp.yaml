@@ -6,5 +6,4 @@ specification:
     oa_fmask: fmask
 
 file_output:
-  location: '/local/u46/dra547/sandpit/odc_testing/LS8_WOFS/'
-  file_path_template: '{region_code}/LS8_WOFS_{start_time}_v{version}.tif'
+  location: '/local/u46/dra547/sandpit/odc_testing/'

@@ -23,7 +23,6 @@ from eodatasets3.assemble import DatasetAssembler
 from eodatasets3.model import DatasetDoc, ProductDoc
 from eodatasets3.properties import StacPropertyView
 from ._dask import dask_compute_stream
-from .file_utils import _get_filename
 
 _LOG = structlog.get_logger()
 
@@ -34,6 +33,7 @@ class NonVPTask(NamedTuple):
     renames: Mapping[str, str]
     transform: str
     destination_path: Path
+    metadata: Mapping[str, str]
 
 
 class Dataset2Dataset:
@@ -61,7 +61,8 @@ class Dataset2Dataset:
                          measurements=self.config['specification']['measurements'],
                          renames=self.config['specification']['measurement_renames'],
                          transform=self.config['specification']['transform'],
-                         destination_path=Path(self.config['file_output']['location']))
+                         destination_path=Path(self.config['file_output']['location']),
+                         metadata=self.config['metadata'])
 
 
 def execute_with_dask(tasks: Iterable[NonVPTask]):
@@ -86,11 +87,7 @@ def execute_with_dask(tasks: Iterable[NonVPTask]):
 def execute_task(task: NonVPTask):
     log = _LOG.bind(task=task)
     transform = _import_transform(task.transform)
-
-    # compute base filename
-    # variable_params = {name: measurement
-    #                    for name, measurement in transform.measurements({}).items()}
-    # base_filename = _get_filename(task.destination_path, input_dataset=task.dataset)
+    transform = transform()
 
     # Load and process data
     data = native_load(task.dataset, measurements=task.measurements, dask_chunks={'x': 1000, 'y': 1000})
@@ -98,23 +95,35 @@ def execute_task(task: NonVPTask):
 
     log.info('data loaded')
 
-    output_data = transform.compute(data).squeeze('time')
+    output_data = transform.compute(data)
+    if 'time' in output_data.dims:
+        output_data = output_data.squeeze('time')
 
     log.info('processed transform', output_data=output_data)
 
     output_data = output_data.compute()
 
+    dtypes = set(str(v.dtype) for v in output_data.data_vars.values())
+    if 'int8' in dtypes:
+        output_data = output_data.astype('uint8', copy=False)
+
     from datetime import datetime
     source_doc = convert_old_odc_dataset_to_new(task.dataset)
 
     with DatasetAssembler(task.destination_path, naming_conventions="dea") as p:
-        p.add_source_dataset(source_doc)
+        p.add_source_dataset(source_doc, auto_inherit_properties=True)
 
-        p.producer = 'ga.gov.au'
-        p.product_family = 'wofs'
-        p.dataset_version = "3.0.0"
+        for k, v in task.metadata.items():
+            setattr(p, k, v)
+        p.properties['dea:dataset_maturity'] = 'interim'
 
-        p.processed = datetime.now()  # TODO, dates should have timezones
+        p.processed = datetime.now()
+
+        p.note_software_version(
+            'd4worker_nonvp',
+            "https://github.com/GeoscienceAustralia/digitalearthau",
+            "0.1.0"
+        )
 
         p.write_measurements_odc_xarray(output_data)
         dataset_id, metadata_path = p.done()
@@ -124,9 +133,7 @@ def execute_task(task: NonVPTask):
 
 def convert_old_odc_dataset_to_new(ds: Dataset) -> DatasetDoc:
     product = ProductDoc(name=ds.type.name)
-    properties = StacPropertyView()
-    properties['odc:product_family'] = 'ard'
-    properties['dea:dataset_maturity'] = 'interim'
+    properties = StacPropertyView(ds.metadata_doc['properties'])
     return DatasetDoc(
         id=ds.id,
         product=product,
@@ -134,34 +141,9 @@ def convert_old_odc_dataset_to_new(ds: Dataset) -> DatasetDoc:
         properties=properties
 
     )
-    # geometry=,
-    # properties=None,
-    # accessories=None,
-    # measurements=None,
-    # lineage=None )
-
-    # generate dataset metadata
-    # uri, band_uris = calc_uris(base_filename, variable_params)
-    # odc_dataset = make_dataset(product=task.output_product,
-    #                            sources=input_dataset.item(),
-    #                            extent=task.box.geobox.extent,
-    #                            center_time=input_dataset.time.item(),
-    #                            uri=uri,
-    #                            band_uris=band_uris,
-    #                            app_info=task.virtual_product_def,
-    #                            )
-    # odc_dataset = {}
-
-    # write data to disk
-    # dataset_to_geotif(
-    #     dataset=output_data,
-    #     odc_dataset_metadata=odc_dataset,
-    #     filename=base_filename,
-    #     variable_params=variable_params,
-    # )
 
 
 def _import_transform(transform_name: str) -> Transformation:
     module_name, class_name = transform_name.rsplit('.', maxsplit=1)
     module = importlib.import_module(name=module_name)
-    return getattr(module, class_name)()
+    return getattr(module, class_name)

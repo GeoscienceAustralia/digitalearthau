@@ -6,25 +6,25 @@ from datacube.virtual import Transformation, Measurement
 
 FC_MEASUREMENTS = [
     {
-        'name': 'PV',
+        'name': 'pv',
         'dtype': 'int8',
         'nodata': -1,
         'units': 'percent'
     },
     {
-        'name': 'NPV',
+        'name': 'npv',
         'dtype': 'int8',
         'nodata': -1,
         'units': 'percent'
     },
     {
-        'name': 'BS',
+        'name': 'bs',
         'dtype': 'int8',
         'nodata': -1,
         'units': 'percent'
     },
     {
-        'name': 'UE',
+        'name': 'ue',
         'dtype': 'int8',
         'nodata': -1,
         'units': ''
@@ -38,16 +38,16 @@ class FractionalCover(Transformation):
     """
 
     def __init__(self, regression_coefficients=None):
+        if regression_coefficients is None:
+            regression_coefficients = {band: [0, 1]
+                for band in ['green', 'red', 'nir', 'swir1', 'swir2']
+            }
         self.regression_coefficients = regression_coefficients
-        self.output_measurements = {m['name']: Measurement(**m) for m in FC_MEASUREMENTS}
 
     def measurements(self, input_measurements):
-        return self.output_measurements
+        return {m['name']: Measurement(**m) for m in FC_MEASUREMENTS}
 
     def compute(self, data):
-        pass
-
-    def compute_multidim(self, data):
         from fc.fractional_cover import fractional_cover
         # Typically creates a list of dictionaries looking like [{time: 1234}, {time: 1235}, ...]
         sel = [dict(p)
@@ -55,8 +55,9 @@ class FractionalCover(Transformation):
                                   for v, c in data.coords.items()
                                   if v not in data.geobox.dims])]
         fc = []
+        measurements = [Measurement(**m) for m in FC_MEASUREMENTS]
         for s in sel:
-            fc.append(fractional_cover(data.sel(**s), self.output_measurements, self.regression_coefficients))
+            fc.append(fractional_cover(data.sel(**s), measurements, self.regression_coefficients))
         return xr.concat(fc, dim='time')
 
     def algorithm_metadata(self):
@@ -82,8 +83,8 @@ class FakeFractionalCover(Transformation):
         return self.output_measurements
 
     def compute(self, data):
-        return xr.Dataset({'BS': data.red,
-                           'PV': data.green,
-                           'NPV': data.nir,
-                           'UE': data.swir1},
+        return xr.Dataset({'bs': data.red,
+                           'pv': data.green,
+                           'npv': data.nir,
+                           'ue': data.swir1},
                           attrs=data.attrs)
