@@ -40,8 +40,8 @@ class FractionalCover(Transformation):
     def __init__(self, regression_coefficients=None):
         if regression_coefficients is None:
             regression_coefficients = {band: [0, 1]
-                for band in ['green', 'red', 'nir', 'swir1', 'swir2']
-            }
+                                       for band in ['green', 'red', 'nir', 'swir1', 'swir2']
+                                       }
         self.regression_coefficients = regression_coefficients
 
     def measurements(self, input_measurements):
@@ -58,7 +58,9 @@ class FractionalCover(Transformation):
         measurements = [Measurement(**m) for m in FC_MEASUREMENTS]
         for s in sel:
             fc.append(fractional_cover(data.sel(**s), measurements, self.regression_coefficients))
-        return xr.concat(fc, dim='time')
+        fc = xr.concat(fc, dim='time')
+        fc.attrs['crs'] = data.attrs['crs']
+        return fc
 
     def algorithm_metadata(self):
         from fc import __version__

@@ -6,9 +6,10 @@ TODO:
 
 """
 
-# pylint: disable=map-builtin-not-iterating
 import importlib
 import sys
+# pylint: disable=map-builtin-not-iterating
+from datetime import datetime
 from pathlib import Path
 from typing import Sequence, NamedTuple, Iterable, Mapping
 
@@ -102,13 +103,20 @@ def execute_task(task: NonVPTask):
     log.info('processed transform', output_data=output_data)
 
     output_data = output_data.compute()
+    crs = data.attrs['crs']
+
+    del data
 
     dtypes = set(str(v.dtype) for v in output_data.data_vars.values())
     if 'int8' in dtypes:
         output_data = output_data.astype('uint8', copy=False)
 
-    from datetime import datetime
+    if 'crs' not in output_data.attrs:
+        output_data.attrs['crs'] = crs
     source_doc = convert_old_odc_dataset_to_new(task.dataset)
+
+    # Ensure output path exists
+    task.destination_path.mkdir(parents=True, exist_ok=True)
 
     with DatasetAssembler(task.destination_path, naming_conventions="dea") as p:
         p.add_source_dataset(source_doc, auto_inherit_properties=True)
@@ -117,7 +125,7 @@ def execute_task(task: NonVPTask):
             setattr(p, k, v)
         p.properties['dea:dataset_maturity'] = 'interim'
 
-        p.processed = datetime.now()
+        p.processed = datetime.utcnow()
 
         p.note_software_version(
             'd4worker_nonvp',
@@ -125,7 +133,10 @@ def execute_task(task: NonVPTask):
             "0.1.0"
         )
 
-        p.write_measurements_odc_xarray(output_data)
+        p.write_measurements_odc_xarray(
+            output_data,
+            nodata=255
+        )
         dataset_id, metadata_path = p.done()
 
     return dataset_id, metadata_path
