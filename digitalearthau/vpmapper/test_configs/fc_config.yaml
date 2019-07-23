@@ -1,5 +1,5 @@
 specification:
-  transform: digitalearthau.vpmapper.virtualproduct.FractionalCover
+  transform: fc.virtualproduct.FractionalCover
 
   product: ga_ls8c_ard_3
   measurements: ['nbart_green', 'nbart_red', 'nbart_nir', 'nbart_swir_1', 'nbart_swir_2']
@@ -40,3 +40,5 @@ metadata:
 
 file_output:
   location: '/local/u46/dra547/sandpit/odc_testing/'
+  dtype: # single value, or value per band
+  nodata: # single value, or value per band
