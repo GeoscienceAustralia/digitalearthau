@@ -32,11 +32,21 @@ cattr.register_structure_hook(np.dtype, np.dtype)
 
 @attr.s(auto_attribs=True)
 class OutputSettings:
-    location: str = attr.ib(converter=Path)
-    dtype: np.dtype = attr.ib(converter=np.dtype)
-    nodata: str  # type depends on dtype
-    preview_image: Optional[List[str]]
-    metadata: Mapping[str, str]
+    location: str
+    dtype: np.dtype
+    nodata: int  # type depends on dtype
+    preview_image: Optional[List[str]] = None
+    metadata: Optional[Mapping[str, str]] = None
+    properties: Optional[Mapping[str, str]] = None
+
+
+@attr.s(auto_attribs=True)
+class Specification:
+    product: str
+    measurements: Sequence[str]
+    measurement_renames: Mapping[str, str]
+    transform: str
+    transform_args: Any
 
 
 @attr.s(auto_attribs=True)
@@ -46,12 +56,12 @@ class ProcessingSettings:
 
 @attr.s(auto_attribs=True)
 class D2DSettings:
-    measurements: Sequence[str]
-    measurement_renames: Mapping[str, str]
-    transform: str
-    transform_args: Any
+    specification: Specification
     output: OutputSettings
     processing: ProcessingSettings
+
+
+cattr.structure(yaml.safe_load(Path('test_configs/fc_config.yaml').read_bytes()), D2DSettings)
 
 
 @attr.s(auto_attribs=True)
@@ -65,16 +75,15 @@ class Dataset2Dataset:
         if config is not None:
             self.config = config
         else:
-            self.config = config = yaml.safe_load(Path(config_file).read_bytes())
+            self.config = cattr.structure(yaml.safe_load(Path(config_file).read_bytes()), D2DSettings)
 
         # Connect to the ODC Index
         self.dc = datacube.Datacube(env=dc_env)
-        self.input_product_name = self.config['specification']['product']
-        self.input_product = self.dc.index.products.get_by_name(self.input_product_name)
+        self.input_product = self.dc.index.products.get_by_name(self.config.specification.product)
 
     def generate_tasks(self, limit=None) -> Iterable[D2DTask]:
         # Find which datasets needs to be processed
-        datasets = self.dc.index.datasets.search(limit=limit, product=self.input_product_name)
+        datasets = self.dc.index.datasets.search(limit=limit, product=self.config.specification.product)
 
         tasks = (self.generate_task(ds) for ds in datasets)
 
@@ -82,11 +91,7 @@ class Dataset2Dataset:
 
     def generate_task(self, dataset) -> D2DTask:
         return D2DTask(dataset=dataset,
-                       measurements=self.config['specification']['measurements'],
-                       renames=self.config['specification']['measurement_renames'],
-                       transform=self.config['specification']['transform'],
-                       destination_path=Path(self.config['output']['location']),
-                       metadata=self.config['metadata'])
+                       settings=self.config)
 
 
 def execute_with_dask(tasks: Iterable[D2DTask]):
@@ -110,12 +115,13 @@ def execute_with_dask(tasks: Iterable[D2DTask]):
 
 def execute_task(task: D2DTask):
     log = _LOG.bind(task=task)
-    transform = _import_transform(task.transform)
+    transform = _import_transform(task.settings.specification.transform)
     transform = transform()
 
     # Load and process data
-    data = native_load(task.dataset, measurements=task.measurements, dask_chunks={'x': 1000, 'y': 1000})
-    data = data.rename(task.renames)
+    data = native_load(task.dataset, measurements=task.settings.specification.measurements,
+                       dask_chunks=task.settings.processing.dask_chunks)
+    data = data.rename(task.settings.specification.measurement_renames)
 
     log.info('data loaded')
 
@@ -139,16 +145,21 @@ def execute_task(task: D2DTask):
     source_doc = _convert_old_odc_dataset_to_new(task.dataset)
 
     # Ensure output path exists
-    task.output.location.mkdir(parents=True, exist_ok=True)
+    output_location = Path(task.settings.output.location)
+    output_location.mkdir(parents=True, exist_ok=True)
 
-    with DatasetAssembler(task.output.location, naming_conventions="dea") as p:
+    with DatasetAssembler(output_location, naming_conventions="dea") as p:
         p.add_source_dataset(source_doc, auto_inherit_properties=True)
 
-        for k, v in task.metadata.items():
+        for k, v in task.settings.output.metadata.items():
             setattr(p, k, v)
-        p.properties['dea:dataset_maturity'] = 'interim'
+        for k, v in task.settings.output.properties.items():
+            p.properties[k] = v
 
         p.processed = datetime.utcnow()
+
+        if task.settings.output.preview_image is not None:
+            p.write_thumbnail(*task.settings.output.preview_image)
 
         p.note_software_version(
             'd2dtransformer',
@@ -158,7 +169,7 @@ def execute_task(task: D2DTask):
 
         p.write_measurements_odc_xarray(
             output_data,
-            nodata=255
+            nodata=task.settings.output.nodata
         )
         dataset_id, metadata_path = p.done()
 

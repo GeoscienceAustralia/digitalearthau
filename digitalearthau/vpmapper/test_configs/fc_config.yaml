@@ -1,6 +1,4 @@
 specification:
-  transform: fc.virtualproduct.FractionalCover
-
   product: ga_ls8c_ard_3
   measurements: ['nbart_green', 'nbart_red', 'nbart_nir', 'nbart_swir_1', 'nbart_swir_2']
   measurement_renames:
@@ -10,28 +8,27 @@ specification:
     nbart_swir_1: swir1
     nbart_swir_2: swir2
 
-  regression_coefficients:
-    blue:
-      - 0.00041
-      - 0.97470
-    green:
-      - 0.00289
-      - 0.99779
-    red:
-      - 0.00274
-      - 1.00446
-    nir:
-      - 0.00004
-      - 0.98906
-    swir1:
-      - 0.00256
-      - 0.99467
-    swir2:
-      - -0.00327
-      - 1.02551
-  input:
-    product: ls8_nbart_albers
-    measurements: [green, red, nir, swir1, swir2]
+  transform: fc.virtualproduct.FractionalCover
+  transform_args:
+    regression_coefficients:
+      blue:
+        - 0.00041
+        - 0.97470
+      green:
+        - 0.00289
+        - 0.99779
+      red:
+        - 0.00274
+        - 1.00446
+      nir:
+        - 0.00004
+        - 0.98906
+      swir1:
+        - 0.00256
+        - 0.99467
+      swir2:
+        - -0.00327
+        - 1.02551
 
 
 output:
@@ -44,14 +41,10 @@ output:
     product_family: fractional_cover
     producer: ga.gov.au
     dataset_version: 2.0.0
-    properties:
-      dea:dataset_maturity: interim
+  properties:
+    dea:dataset_maturity: interim
 
 processing:
   dask_chunks:
     x: 1000
     y: 1000
-  dask_client:
-    n_workers:
-    threads_per_worker:
-    scheduler:
