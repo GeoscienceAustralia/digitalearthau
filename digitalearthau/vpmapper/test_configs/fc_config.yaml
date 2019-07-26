@@ -33,19 +33,21 @@ specification:
     product: ls8_nbart_albers
     measurements: [green, red, nir, swir1, swir2]
 
-metadata:
-  product_family: fractional_cover
-  producer: ga.gov.au
-  dataset_version: 2.0.0
-  properties:
-    dea:dataset_maturity: interim
 
-file_output:
-  location: '/local/u46/dra547/sandpit/odc_testing/'
-  dtype: # single value, or value per band
-  nodata: # single value, or value per band
+output:
+  location: '/g/data/u46/users/dra547/data/c3-testing/'
+  dtype: uint8 # single value, or value per band
+  nodata: 255 # single value, or value per band
+  preview_image: [pv, npv, bs]
 
-extra_parameters:
+  metadata:
+    product_family: fractional_cover
+    producer: ga.gov.au
+    dataset_version: 2.0.0
+    properties:
+      dea:dataset_maturity: interim
+
+processing:
   dask_chunks:
     x: 1000
     y: 1000
@@ -53,18 +55,3 @@ extra_parameters:
     n_workers:
     threads_per_worker:
     scheduler:
-  output_measurements:
-    bs:
-      dtype: uint8
-      nodata: 255
-    pv:
-      dtype: uint8
-      nodata: 255
-    npv:
-      dtype: uint8
-      nodata: 255
-    ue:
-      dtype: uint8
-      nodata: 255
-  product_generation:
-    preview_image: [pv, npv, bs]

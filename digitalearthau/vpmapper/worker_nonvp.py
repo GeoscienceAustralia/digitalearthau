@@ -1,8 +1,5 @@
 """
 
-TODO:
-- [ ] Logging
-- [ ] Error Handling
 
 """
 
@@ -11,8 +8,11 @@ import sys
 # pylint: disable=map-builtin-not-iterating
 from datetime import datetime
 from pathlib import Path
-from typing import Sequence, NamedTuple, Iterable, Mapping, Type
+from typing import Sequence, Iterable, Mapping, Type, Optional, List, Any
 
+import attr
+import cattr
+import numpy as np
 import structlog
 import yaml
 
@@ -27,14 +27,37 @@ from ._dask import dask_compute_stream
 
 _LOG = structlog.get_logger()
 
+cattr.register_structure_hook(np.dtype, np.dtype)
 
-class D2DTask(NamedTuple):
-    dataset: Dataset
-    measurements: Sequence[str]
-    renames: Mapping[str, str]
-    transform: str
-    destination_path: Path
+
+@attr.s(auto_attribs=True)
+class OutputSettings:
+    location: str = attr.ib(converter=Path)
+    dtype: np.dtype = attr.ib(converter=np.dtype)
+    nodata: str  # type depends on dtype
+    preview_image: Optional[List[str]]
     metadata: Mapping[str, str]
+
+
+@attr.s(auto_attribs=True)
+class ProcessingSettings:
+    dask_chunks: Mapping[str, int]
+
+
+@attr.s(auto_attribs=True)
+class D2DSettings:
+    measurements: Sequence[str]
+    measurement_renames: Mapping[str, str]
+    transform: str
+    transform_args: Any
+    output: OutputSettings
+    processing: ProcessingSettings
+
+
+@attr.s(auto_attribs=True)
+class D2DTask:
+    dataset: Dataset
+    settings: D2DSettings
 
 
 class Dataset2Dataset:
@@ -62,7 +85,7 @@ class Dataset2Dataset:
                        measurements=self.config['specification']['measurements'],
                        renames=self.config['specification']['measurement_renames'],
                        transform=self.config['specification']['transform'],
-                       destination_path=Path(self.config['file_output']['location']),
+                       destination_path=Path(self.config['output']['location']),
                        metadata=self.config['metadata'])
 
 
@@ -113,12 +136,12 @@ def execute_task(task: D2DTask):
 
     if 'crs' not in output_data.attrs:
         output_data.attrs['crs'] = crs
-    source_doc = convert_old_odc_dataset_to_new(task.dataset)
+    source_doc = _convert_old_odc_dataset_to_new(task.dataset)
 
     # Ensure output path exists
-    task.destination_path.mkdir(parents=True, exist_ok=True)
+    task.output.location.mkdir(parents=True, exist_ok=True)
 
-    with DatasetAssembler(task.destination_path, naming_conventions="dea") as p:
+    with DatasetAssembler(task.output.location, naming_conventions="dea") as p:
         p.add_source_dataset(source_doc, auto_inherit_properties=True)
 
         for k, v in task.metadata.items():
@@ -142,7 +165,7 @@ def execute_task(task: D2DTask):
     return dataset_id, metadata_path
 
 
-def convert_old_odc_dataset_to_new(ds: Dataset) -> DatasetDoc:
+def _convert_old_odc_dataset_to_new(ds: Dataset) -> DatasetDoc:
     product = ProductDoc(name=ds.type.name)
     properties = StacPropertyView(ds.metadata_doc['properties'])
     return DatasetDoc(

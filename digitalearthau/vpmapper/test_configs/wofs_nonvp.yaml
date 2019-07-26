@@ -5,5 +5,12 @@ specification:
   measurement_renames:
     oa_fmask: fmask
 
-file_output:
-  location: '/local/u46/dra547/sandpit/odc_testing/'
+output:
+  location: '/g/data/u46/users/dra547/data/c3-testing/'
+
+metadata:
+  product_family: wofs
+  producer: ga.gov.au
+  dataset_version: 2.0.0
+  properties:
+    dea:dataset_maturity: interim
