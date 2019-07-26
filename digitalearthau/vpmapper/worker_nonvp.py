@@ -61,9 +61,6 @@ class D2DSettings:
     processing: ProcessingSettings
 
 
-cattr.structure(yaml.safe_load(Path('test_configs/fc_config.yaml').read_bytes()), D2DSettings)
-
-
 @attr.s(auto_attribs=True)
 class D2DTask:
     dataset: Dataset
