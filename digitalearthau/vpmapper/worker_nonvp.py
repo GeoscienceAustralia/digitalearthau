@@ -189,5 +189,5 @@ def _import_transform(transform_name: str) -> Type[Transformation]:
     module_name, class_name = transform_name.rsplit('.', maxsplit=1)
     module = importlib.import_module(name=module_name)
     imported_class = getattr(module, class_name)
-    assert isinstance(imported_class, Transformation)
+    assert issubclass(imported_class, Transformation)
     return imported_class
