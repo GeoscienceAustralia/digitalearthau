@@ -1,0 +1,25 @@
+name: ga_ls8c_fractional_cover_2
+description: Landsat 8 Fractional Cover
+metadata_type: eo3
+
+metadata:
+  product:
+    name: ga_ls8c_fractional_cover_2
+
+measurements:
+- name: bs
+  dtype: int8
+  nodata: 255
+  units: '1'
+- name: pv
+  dtype: int8
+  nodata: 255
+  units: '1'
+- name: npv
+  dtype: int8
+  nodata: 255
+  units: '1'
+- name: ue
+  dtype: int8
+  nodata: 255
+  units: '1'

@@ -11,7 +11,7 @@ import sys
 # pylint: disable=map-builtin-not-iterating
 from datetime import datetime
 from pathlib import Path
-from typing import Sequence, NamedTuple, Iterable, Mapping
+from typing import Sequence, NamedTuple, Iterable, Mapping, Type
 
 import structlog
 import yaml
@@ -28,7 +28,7 @@ from ._dask import dask_compute_stream
 _LOG = structlog.get_logger()
 
 
-class NonVPTask(NamedTuple):
+class D2DTask(NamedTuple):
     dataset: Dataset
     measurements: Sequence[str]
     renames: Mapping[str, str]
@@ -49,7 +49,7 @@ class Dataset2Dataset:
         self.input_product_name = self.config['specification']['product']
         self.input_product = self.dc.index.products.get_by_name(self.input_product_name)
 
-    def generate_tasks(self, limit=3) -> Iterable[NonVPTask]:
+    def generate_tasks(self, limit=None) -> Iterable[D2DTask]:
         # Find which datasets needs to be processed
         datasets = self.dc.index.datasets.search(limit=limit, product=self.input_product_name)
 
@@ -57,16 +57,16 @@ class Dataset2Dataset:
 
         return tasks
 
-    def generate_task(self, dataset) -> NonVPTask:
-        return NonVPTask(dataset=dataset,
-                         measurements=self.config['specification']['measurements'],
-                         renames=self.config['specification']['measurement_renames'],
-                         transform=self.config['specification']['transform'],
-                         destination_path=Path(self.config['file_output']['location']),
-                         metadata=self.config['metadata'])
+    def generate_task(self, dataset) -> D2DTask:
+        return D2DTask(dataset=dataset,
+                       measurements=self.config['specification']['measurements'],
+                       renames=self.config['specification']['measurement_renames'],
+                       transform=self.config['specification']['transform'],
+                       destination_path=Path(self.config['file_output']['location']),
+                       metadata=self.config['metadata'])
 
 
-def execute_with_dask(tasks: Iterable[NonVPTask]):
+def execute_with_dask(tasks: Iterable[D2DTask]):
     # Execute the tasks across the dask cluster
     from dask.distributed import Client
     client = Client()
@@ -85,7 +85,7 @@ def execute_with_dask(tasks: Iterable[NonVPTask]):
     _LOG.info('completed')
 
 
-def execute_task(task: NonVPTask):
+def execute_task(task: D2DTask):
     log = _LOG.bind(task=task)
     transform = _import_transform(task.transform)
     transform = transform()
@@ -100,7 +100,7 @@ def execute_task(task: NonVPTask):
     if 'time' in output_data.dims:
         output_data = output_data.squeeze('time')
 
-    log.info('processed transform', output_data=output_data)
+    log.info('prepared lazy transformation', output_data=output_data)
 
     output_data = output_data.compute()
     crs = data.attrs['crs']
@@ -128,7 +128,7 @@ def execute_task(task: NonVPTask):
         p.processed = datetime.utcnow()
 
         p.note_software_version(
-            'd4worker_nonvp',
+            'd2dtransformer',
             "https://github.com/GeoscienceAustralia/digitalearthau",
             "0.1.0"
         )
@@ -154,7 +154,9 @@ def convert_old_odc_dataset_to_new(ds: Dataset) -> DatasetDoc:
     )
 
 
-def _import_transform(transform_name: str) -> Transformation:
+def _import_transform(transform_name: str) -> Type[Transformation]:
     module_name, class_name = transform_name.rsplit('.', maxsplit=1)
     module = importlib.import_module(name=module_name)
-    return getattr(module, class_name)
+    imported_class = getattr(module, class_name)
+    assert isinstance(imported_class, Transformation)
+    return imported_class

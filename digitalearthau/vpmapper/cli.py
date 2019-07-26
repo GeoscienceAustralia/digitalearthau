@@ -12,13 +12,16 @@ def cli():
 
 
 @cli.command()
-@click.option('--environment')
+@click.option('--environment',
+              help='Name of the datacube environment to connect to.')
+@click.option('--limit', type=int,
+              help='For testing, specify a small number of tasks to run.')
 @click.argument('config_file')
-def run_many(config_file, environment=None):
+def run_many(config_file, environment=None, limit=None):
     # Load Configuration file
     d4 = Dataset2Dataset(config_file=config_file, dc_env=environment)
 
-    tasks = d4.generate_tasks()
+    tasks = d4.generate_tasks(limit=limit)
 
     execute_with_dask(tasks)
 
