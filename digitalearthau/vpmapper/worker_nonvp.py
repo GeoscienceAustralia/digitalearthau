@@ -155,9 +155,6 @@ def execute_task(task: D2DTask):
 
         p.processed = datetime.utcnow()
 
-        if task.settings.output.preview_image is not None:
-            p.write_thumbnail(*task.settings.output.preview_image)
-
         p.note_software_version(
             'd2dtransformer',
             "https://github.com/GeoscienceAustralia/digitalearthau",
@@ -168,6 +165,10 @@ def execute_task(task: D2DTask):
             output_data,
             nodata=task.settings.output.nodata
         )
+
+        if task.settings.output.preview_image is not None:
+            p.write_thumbnail(*task.settings.output.preview_image)
+
         dataset_id, metadata_path = p.done()
 
     return dataset_id, metadata_path
