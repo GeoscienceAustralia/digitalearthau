@@ -45,7 +45,7 @@ metadata:
   statistics:
     period: '1y'
   instrument:
-    name: ETM
+    name: ETM+
 storage:
   driver: NetCDF CF
   crs: EPSG:3577
