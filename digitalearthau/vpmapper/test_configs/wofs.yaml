@@ -1,0 +1,26 @@
+specification:
+  product: ga_ls8c_ard_3
+  measurements: ['nbart_blue', 'nbart_green', 'nbart_red', 'nbart_nir', 'nbart_swir_1', 'nbart_swir_2', 'oa_fmask']
+  measurement_renames:
+    oa_fmask: fmask
+
+  transform: wofs.virtualproduct.WOfSClassifier
+  transform_args:
+    dsm_path: /g/data2/v10/eoancillarydata/elevation/dsm1sv1_0_Clean_tiff/dsm1sv1_0_Clean.tiff
+
+output:
+  location: '/g/data/u46/users/dra547/data/c3-testing/'
+  nodata: 1
+  dtype: int16
+
+  metadata:
+    product_family: wofs
+    producer: ga.gov.au
+    dataset_version: 2.0.0
+  properties:
+    dea:dataset_maturity: interim
+
+processing:
+  dask_chunks:
+    x: 1000
+    y: 1000

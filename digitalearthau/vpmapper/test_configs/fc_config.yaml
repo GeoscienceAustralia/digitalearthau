@@ -30,18 +30,17 @@ specification:
         - -0.00327
         - 1.02551
 
-
 output:
   location: '/g/data/u46/users/dra547/data/c3-testing/'
-  dtype: uint8 # single value, or value per band
-  nodata: 255 # single value, or value per band
+  dtype: uint8 # single value for all bands
+  nodata: 255 # single value for all bands
   preview_image: [pv, npv, bs]
 
-  metadata:
+  metadata: # metadata are settings available on DatasetAssembler
     product_family: fractional_cover
     producer: ga.gov.au
     dataset_version: 2.0.0
-  properties:
+  properties: # Properties can be anything and everything
     dea:dataset_maturity: interim
 
 processing:

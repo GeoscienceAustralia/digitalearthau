@@ -44,9 +44,9 @@ class OutputSettings:
 class Specification:
     product: str
     measurements: Sequence[str]
-    measurement_renames: Mapping[str, str]
     transform: str
-    transform_args: Any
+    measurement_renames: Optional[Mapping[str, str]] = None
+    transform_args: Any = None
 
 
 @attr.s(auto_attribs=True)
@@ -113,7 +113,7 @@ def execute_with_dask(tasks: Iterable[D2DTask]):
 def execute_task(task: D2DTask):
     log = _LOG.bind(task=task)
     transform = _import_transform(task.settings.specification.transform)
-    transform = transform()
+    transform = transform(**task.settings.specification.transform_args)
 
     # Load and process data
     data = native_load(task.dataset, measurements=task.settings.specification.measurements,
@@ -132,9 +132,11 @@ def execute_task(task: D2DTask):
     crs = data.attrs['crs']
 
     del data
+    log.info('loaded and transformed')
 
     dtypes = set(str(v.dtype) for v in output_data.data_vars.values())
     if 'int8' in dtypes:
+        log.info('Found dtype=int8 in output data, converting to uint8 for geotiffs')
         output_data = output_data.astype('uint8', copy=False)
 
     if 'crs' not in output_data.attrs:
