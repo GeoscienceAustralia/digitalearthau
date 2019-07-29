@@ -91,6 +91,9 @@ def test_dea_config(dea_index: Index):
         'wofs_annual_summary',
         'wofs_nov_mar_summary',
         'wofs_apr_oct_summary',
+        'ls5_nbart_tmad_annual',
+        'ls7_nbart_tmad_annual',
+        'ls8_nbart_tmad_annual',
     }
 
 
