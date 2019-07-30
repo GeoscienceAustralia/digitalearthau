@@ -78,9 +78,10 @@ class Dataset2Dataset:
         self.dc = datacube.Datacube(env=dc_env)
         self.input_product = self.dc.index.products.get_by_name(self.config.specification.product)
 
-    def generate_tasks(self, limit=None) -> Iterable[D2DTask]:
+    def generate_tasks(self, query, limit=None) -> Iterable[D2DTask]:
         # Find which datasets needs to be processed
-        datasets = self.dc.index.datasets.search(limit=limit, product=self.config.specification.product)
+        datasets = self.dc.index.datasets.search(limit=limit, product=self.config.specification.product,
+                                                 **query)
 
         tasks = (self.generate_task(ds) for ds in datasets)
 

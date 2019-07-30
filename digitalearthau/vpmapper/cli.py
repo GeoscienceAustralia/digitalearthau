@@ -3,7 +3,8 @@ from pathlib import Path
 import click
 
 from datacube import Datacube
-from digitalearthau.vpmapper.worker_nonvp import Dataset2Dataset, execute_with_dask, execute_task
+from datacube.ui import click as ui
+from digitalearthau.vpmapper.worker import Dataset2Dataset, execute_with_dask, execute_task
 
 
 @click.group()
@@ -17,11 +18,12 @@ def cli():
 @click.option('--limit', type=int,
               help='For testing, specify a small number of tasks to run.')
 @click.argument('config_file')
-def run_many(config_file, environment=None, limit=None):
+@ui.parsed_search_expressions
+def run_many(config_file, expressions, environment=None, limit=None):
     # Load Configuration file
     d4 = Dataset2Dataset(config_file=config_file, dc_env=environment)
 
-    tasks = d4.generate_tasks(limit=limit)
+    tasks = d4.generate_tasks(expressions, limit=limit)
 
     execute_with_dask(tasks)
 
