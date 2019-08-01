@@ -151,6 +151,7 @@ def execute_task(task: D2DTask):
     with DatasetAssembler(output_location, naming_conventions="dea") as p:
         p.add_source_dataset(source_doc, auto_inherit_properties=True)
 
+        # Copy in metadata and properties
         for k, v in task.settings.output.metadata.items():
             setattr(p, k, v)
         for k, v in task.settings.output.properties.items():
