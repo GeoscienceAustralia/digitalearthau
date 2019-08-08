@@ -1,5 +1,5 @@
 name: usgs_ls7e_level1_1
-description: Landsat 7 Level1
+description: Landsat 7 ETM+ Level 1, USGS Collection 1
 metadata_type: eo3
 
 metadata:
