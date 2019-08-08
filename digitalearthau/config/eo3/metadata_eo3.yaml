@@ -1,3 +1,4 @@
+---
 name: eo3
 description: EO for Collection 3
 dataset:
@@ -6,21 +7,24 @@ dataset:
   grid_spatial: [grid_spatial, projection]
   measurements: [measurements]
   creation_dt: [properties, odc:processing_datetime]
-  label: [properties, odc:label]     # not populated currently
+  label: [label]
   format: [properties, odc:file_format]    # note add to ARD metadata, only L1 currently
 
   search_fields:
     platform:
       description: Platform code
       offset: [properties, eo:platform]
+      indexed: false
 
     instrument:
       description: Instrument name
       offset: [properties, eo:instrument]
+      indexed: false
 
     product_family:
       description: Product family code
       offset: [properties, odc:product_family]
+      indexed: false
 
     region_code:
       description: >
@@ -91,7 +95,7 @@ dataset:
 
     # semi-auto generated below
     eo_gsd:
-      description: 'TODO: <eo:gsd>'
+      description: Ground sample distance, meters
       indexed: false
       offset:
         - properties
