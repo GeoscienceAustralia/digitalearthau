@@ -1,5 +1,5 @@
 ---
-name: eo3_landsat_ard
+name: eo3_landsat_l1
 description: EO3 for Level 1 Landsat, GA Collection 3
 dataset:
   id: [id]  # needs to be fixed

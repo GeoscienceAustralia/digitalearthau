@@ -14,6 +14,9 @@ DEA_MD_TYPES = digitalearthau.CONFIG_DIR / 'metadata-types.yaml'
 DEA_PRODUCTS_DIR = digitalearthau.CONFIG_DIR / 'products'
 DEA_INGESTION_DIR = digitalearthau.CONFIG_DIR / 'ingestion'
 
+DEA_EO3_TYPES = list((digitalearthau.CONFIG_DIR / 'eo3').rglob('metadata_*.yaml'))
+DEA_EO3_PRODUCTS_DIR = digitalearthau.CONFIG_DIR / 'eo3' / 'products'
+
 
 def print_header(msg):
     click.secho(msg, bold=True)
@@ -26,6 +29,8 @@ def print_(msg):
 def init_dea(
         index: Index,
         with_permissions: bool,
+        with_eo1: bool = True,
+        with_eo3: bool = True,
         log_header=print_header,
         log=print_
 ):
@@ -48,31 +53,44 @@ def init_dea(
         rebuild_views=True,
     )
 
-    log_header('Checking DEA metadata types')
-    # Add DEA metadata types, products.
-    for _, md_type_def in read_documents(DEA_MD_TYPES):
-        md = index.metadata_types.add(index.metadata_types.from_doc(md_type_def))
-        log(f"{md.name}")
+    if with_eo1:
+        log_header('Checking DEA eo1 metadata types')
+        # Add DEA metadata types, products.
+        for _, md_type_def in read_documents(DEA_MD_TYPES):
+            md = index.metadata_types.add(index.metadata_types.from_doc(md_type_def))
+            log(f"{md.name}")
 
-    log_header('Checking DEA products')
-    for _, product_def in read_documents(*DEA_PRODUCTS_DIR.glob('*.yaml')):
-        product = index.products.add_document(product_def)
-        log(f"{product.name}")
+        log_header('Checking DEA products')
+        for _, product_def in read_documents(*DEA_PRODUCTS_DIR.glob('*.yaml')):
+            product = index.products.add_document(product_def)
+            log(f"{product.name}")
 
-    log_header('Checking DEA ingested definitions')
+        log_header('Checking DEA ingested definitions')
 
-    for path in DEA_INGESTION_DIR.glob('*.yaml'):
-        ingest_config = ingest.load_config_from_file(path)
+        for path in DEA_INGESTION_DIR.glob('*.yaml'):
+            ingest_config = ingest.load_config_from_file(path)
 
-        driver_name = ingest_config['storage']['driver']
-        driver = storage_writer_by_name(driver_name)
-        if driver is None:
-            raise ValueError("No driver found for {}".format(driver_name))
+            driver_name = ingest_config['storage']['driver']
+            driver = storage_writer_by_name(driver_name)
+            if driver is None:
+                raise ValueError("No driver found for {}".format(driver_name))
 
-        source_type, output_type = ingest.ensure_output_type(
-            index, ingest_config, driver.format, allow_product_changes=True
-        )
-        log(f"{output_type.name:<20}\t\t← {source_type.name}")
+            source_type, output_type = ingest.ensure_output_type(
+                index, ingest_config, driver.format, allow_product_changes=True
+            )
+            log(f"{output_type.name:<20}\t\t← {source_type.name}")
+
+    if with_eo3:
+        log_header('Checking DEA eo3 metadata types')
+        # Add DEA metadata types, products.
+        for _, md_type_def in read_documents(*DEA_EO3_TYPES):
+            md = index.metadata_types.add(index.metadata_types.from_doc(md_type_def))
+            log(f"{md.name}")
+
+        log_header('Checking DEA eo3 products')
+        for _, product_def in read_documents(*DEA_EO3_PRODUCTS_DIR.rglob('*.yaml')):
+            product = index.products.add_document(product_def)
+            log(f"{product.name}")
 
 
 @click.group('system')

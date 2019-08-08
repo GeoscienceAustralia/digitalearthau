@@ -7,18 +7,23 @@ def test_dea_config(dea_index: Index):
     """
     Check that all the product definitions are valid enough to be added, and that they are added.
     """
-    md_names = set(md.name for md in dea_index.metadata_types.get_all())
+    md_names = sorted(md.name for md in dea_index.metadata_types.get_all())
     # Sanity check that it doesn't return duplicates
-    assert len(list(dea_index.metadata_types.get_all())) == len(md_names)
+    # assert len(list(dea_index.metadata_types.get_all())) == len(md_names)
 
-    assert md_names == {
+    expected_mds = sorted([
         'eo',
         'eo_plus',
         'gqa_eo',
         'landsat_l1_scene',
         'landsat_scene',
         'telemetry',
-    }
+        'eo3',
+        'eo3_landsat_ard',
+        'eo3_landsat_l1',
+    ])
+
+    assert md_names == expected_mds
 
     products_names = set(product.name for product in dea_index.products.get_all())
     # Sanity check that it doesn't return duplicates
@@ -96,6 +101,14 @@ def test_dea_config(dea_index: Index):
         'ls5_nbart_tmad_annual',
         'ls7_nbart_tmad_annual',
         'ls8_nbart_tmad_annual',
+
+        # EO3
+        'usgs_ls5t_level1_1',
+        'usgs_ls7e_level1_1',
+        'usgs_ls8c_level1_1',
+        'ga_ls5t_ard_3',
+        'ga_ls7e_ard_3',
+        'ga_ls8c_ard_3',
     }
 
 
