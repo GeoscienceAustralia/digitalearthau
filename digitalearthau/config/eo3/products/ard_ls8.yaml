@@ -7,6 +7,7 @@ metadata:
     name: ga_ls8c_ard_3
 
 measurements:
+  # NBAR
   - name: nbar_coastal_aerosol
     aliases:
       - nbar_band01
@@ -56,55 +57,65 @@ measurements:
     nodata: -999
     units: '1'
 
+    # NBART
   - name: nbart_coastal_aerosol
     aliases:
       - nbart_band01
+      - coastal_aerosol
     dtype: int16
     nodata: -999
     units: '1'
   - name: nbart_blue
     aliases:
       - nbart_band02
+      - blue
     dtype: int16
     nodata: -999
     units: '1'
   - name: nbart_green
     aliases:
       - nbart_band03
+      - green
     dtype: int16
     nodata: -999
     units: '1'
   - name: nbart_red
     aliases:
       - nbart_band04
+      - red
     dtype: int16
     nodata: -999
     units: '1'
   - name: nbart_nir
     aliases:
       - nbart_band05
+      - nir
     dtype: int16
     nodata: -999
     units: '1'
   - name: nbart_swir_1
     aliases:
       - nbart_band06
+      - swir_1
     dtype: int16
     nodata: -999
     units: '1'
   - name: nbart_swir_2
     aliases:
       - nbart_band07
+      - swir_2
     dtype: int16
     nodata: -999
     units: '1'
   - name: nbart_panchromatic
     aliases:
       - nbart_band08
+      - panchromatic
     dtype: int16
     nodata: -999
     units: '1'
 
+    # Observation Attributes
   - name: oa_fmask
     aliases:
       - fmask
