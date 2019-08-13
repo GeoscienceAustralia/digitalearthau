@@ -10,11 +10,11 @@ from datacube.ui.click import pass_index, global_cli_options
 from datacube.utils import read_documents
 from datacube.drivers import storage_writer_by_name
 
-DEA_MD_TYPES = digitalearthau.CONFIG_DIR / 'metadata-types.yaml'
+DEA_MD_TYPES = digitalearthau.CONFIG_DIR / 'metadata-types.odc-type.yaml'
 DEA_PRODUCTS_DIR = digitalearthau.CONFIG_DIR / 'products'
 DEA_INGESTION_DIR = digitalearthau.CONFIG_DIR / 'ingestion'
 
-DEA_EO3_TYPES = list((digitalearthau.CONFIG_DIR / 'eo3').rglob('metadata_*.yaml'))
+DEA_EO3_TYPES = list((digitalearthau.CONFIG_DIR / 'eo3').rglob('*.odc-type.yaml'))
 DEA_EO3_PRODUCTS_DIR = digitalearthau.CONFIG_DIR / 'eo3' / 'products'
 
 
