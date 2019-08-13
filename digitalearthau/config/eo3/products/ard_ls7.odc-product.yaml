@@ -85,6 +85,8 @@ measurements:
     aliases:
       - nbart_band05
       - swir_1
+      # Requested for backwards compatibility with previous collection
+      - swir1
     dtype: int16
     nodata: -999
     units: '1'
@@ -92,6 +94,8 @@ measurements:
     aliases:
       - nbart_band07
       - swir_2
+      # Requested for backwards compatibility with previous collection
+      - swir2
     dtype: int16
     nodata: -999
     units: '1'
