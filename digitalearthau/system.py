@@ -61,7 +61,7 @@ def init_dea(
             log(f"{md.name}")
 
         log_header('Checking DEA products')
-        for _, product_def in read_documents(*DEA_PRODUCTS_DIR.glob('*.yaml')):
+        for _, product_def in read_documents(*DEA_PRODUCTS_DIR.glob('*.odc-product.yaml')):
             product = index.products.add_document(product_def)
             log(f"{product.name}")
 
@@ -88,7 +88,7 @@ def init_dea(
             log(f"{md.name}")
 
         log_header('Checking DEA eo3 products')
-        for _, product_def in read_documents(*DEA_EO3_PRODUCTS_DIR.rglob('*.yaml')):
+        for _, product_def in read_documents(*DEA_EO3_PRODUCTS_DIR.rglob('*.odc-product.yaml')):
             product = index.products.add_document(product_def)
             log(f"{product.name}")
 
