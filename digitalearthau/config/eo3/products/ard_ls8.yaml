@@ -164,7 +164,7 @@ measurements:
     units: '1'
   - name: oa_combined_terrain_shadow
     dtype: uint8
-    nodata: -999
+    nodata: 255
     units: '1'
   - name: oa_exiting_angle
     dtype: float32
