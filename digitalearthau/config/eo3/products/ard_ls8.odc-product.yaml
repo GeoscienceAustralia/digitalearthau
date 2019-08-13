@@ -135,6 +135,8 @@ measurements:
           '4': snow
           '5': water
   - name: oa_nbar_contiguity
+    aliases:
+      - nbar_contiguity
     dtype: uint8
     nodata: 255
     units: '1'
@@ -145,6 +147,8 @@ measurements:
           '1': true
           '0': false
   - name: oa_nbart_contiguity
+    aliases:
+      - nbart_contiguity
     dtype: uint8
     nodata: 255
     units: '1'
@@ -155,50 +159,74 @@ measurements:
           '1': true
           '0': false
   - name: oa_azimuthal_exiting
+    aliases:
+      - azimuthal_exiting
     dtype: float32
     nodata: .nan
     units: '1'
   - name: oa_azimuthal_incident
+    aliases:
+      - azimuthal_incident
     dtype: float32
     nodata: .nan
     units: '1'
   - name: oa_combined_terrain_shadow
+    aliases:
+      - combined_terrain_shadow
     dtype: uint8
     nodata: 255
     units: '1'
   - name: oa_exiting_angle
+    aliases:
+      - exiting_angle
     dtype: float32
     nodata: .nan
     units: '1'
   - name: oa_incident_angle
+    aliases:
+      - incident_angle
     dtype: float32
     nodata: .nan
     units: '1'
   - name: oa_relative_azimuth
+    aliases:
+      - relative_azimuth
     dtype: float32
     nodata: .nan
     units: '1'
   - name: oa_relative_slope
+    aliases:
+      - relative_slope
     dtype: float32
     nodata: .nan
     units: '1'
   - name: oa_satellite_azimuth
+    aliases:
+      - satellite_azimuth
     dtype: float32
     nodata: .nan
     units: '1'
   - name: oa_satellite_view
+    aliases:
+      - satellite_view
     dtype: float32
     nodata: .nan
     units: '1'
   - name: oa_solar_azimuth
+    aliases:
+      - solar_azimuth
     dtype: float32
     nodata: .nan
     units: '1'
   - name: oa_solar_zenith
+    aliases:
+      - solar_zenith
     dtype: float32
     nodata: .nan
     units: '1'
   - name: oa_time_delta
+    aliases:
+      - time_delta
     dtype: float32
     nodata: .nan
     units: '1'
