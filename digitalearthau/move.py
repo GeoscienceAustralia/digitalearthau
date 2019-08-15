@@ -12,15 +12,15 @@ from typing import Iterable
 import click
 import structlog
 from boltons import fileutils
-from eodatasets import verify
+from eodatasets3 import verify
 
 from datacube.index import Index
 from datacube.model import Dataset
 from datacube.ui import click as ui
+from digitalearthau import paths as path_utils
 from digitalearthau.collections import init_nci_collections, get_collections_in_path
 from digitalearthau.paths import is_base_directory, BASE_DIRECTORIES, get_dataset_paths, split_path_from_base
 from digitalearthau.uiutil import init_logging
-from digitalearthau import paths as path_utils
 
 _LOG = structlog.get_logger()
 

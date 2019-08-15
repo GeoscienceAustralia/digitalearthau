@@ -2,6 +2,5 @@ Sphinx
 nbsphinx
 sphinx_rtd_theme
 IPython
-jupyter_sphinx
 recommonmark
 pandoc<2.0.0

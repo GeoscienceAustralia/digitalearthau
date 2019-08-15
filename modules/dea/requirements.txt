@@ -1,5 +1,4 @@
 git+https://github.com/opendatacube/datacube-core.git@develop#egg=datacube
-git+https://github.com/GeoscienceAustralia/eo-datasets.git@develop#egg=eodatasets
 git+https://github.com/GeoscienceAustralia/digitalearthau.git@develop#egg=digitalearthau
 git+https://github.com/GeoscienceAustralia/datacube-stats.git@master#egg=datacube-stats
 git+https://github.com/GeoscienceAustralia/fc.git@master#egg=fc
