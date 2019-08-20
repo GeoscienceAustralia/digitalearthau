@@ -1,0 +1,28 @@
+name: s2_tsmask
+description: |
+  Time series cloud and cloud shadow detection for Sentinel-2A and Sentinel-2B surface reflectance data.
+
+  TSmask classify a pixel as one of the following four categories: clear, no observation, shadow and cloud
+measurements:
+    - name: classification
+      dtype: uint8
+      flags_definition:
+        TSmask:
+            bits: [0, 1, 2, 3, 4, 5, 6, 7]
+            description: TSmask
+            values:
+                '0': Clear
+                '1': No observation
+                '2': Cloud shadow
+                '3': Cloud
+      nodata: 1
+      units: '1'
+metadata:
+    format:
+        name: GeoTIFF
+    instrument:
+        name: MSI
+    platform:
+        code: SENTINEL_2A,SENTINEL_2B
+    product_type: S2_MSI_TSmask
+metadata_type: eo

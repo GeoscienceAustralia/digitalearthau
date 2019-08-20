@@ -1,0 +1,73 @@
+global_attributes:
+  title: Sentinel-2 cloud and cloud shadow mask
+  description: |
+    Time series cloud and cloud shadow detection for Sentinel-2A and Sentinel-2B surface reflectance data,
+
+    TSmask classifies a pixel as one of the following four categories: clear, no observation, shadow and cloud
+  summary: |
+    Remote sensing images play more and more important roles in a lot of applications. Such applications and
+    other remote sensing activities depends on noise free remote sensing data. Beside sensor abnormality, clouds
+    and clouds shadow pose significant challenges to obtaining desire results. Detecting cloud and cloud shadow
+    pixels and removing them from inputs for remote sensing data is essential for all remote sensing data
+    modelling algorithms.
+
+    TSmask is a time series cloud and cloud shadow detection algorithm for Sentinel-2 surface reflectance data.
+    TSmask models time series of surface reflectance derived indices and calculates time series abnormality
+    coefficients for pixels in the time series. TSmask does not rely on predefined training data to generate
+    complex models with many rule sets, which often work well for data similar to the training data while return
+    poor results for data contrasting to the training data. Instead, TSmask identifies cloud and cloud shadows
+    by detecting local abnormalities in temporal and spatial contexts from abnormality coefficients.
+
+    This product (TSmask) classifies a Sentinel-2 pixel into one of four distinctive categories:
+
+    Clear ---> 0
+
+    No observation ---> 1
+
+    Cloud shadow ---> 2
+
+    Cloud ---> 3
+  institution: Commonwealth of Australia (Geoscience Australia)
+  keywords_vocabulary: GCMD
+  keywords: AU/GA,ESA,SURFACE REFLECTANCE,MSI,SENTINEL-2,TIME SERIES,EARTH SCIENCE
+  platform: Sentinel 2A/2B
+  instrument: MSI
+  publisher_email: earth.observation@ga.gov.au
+  publisher_name: Director of Operations, National Earth and Marine Observations, Geoscience Australia
+  publisher_url: http://www.ga.gov.au
+  license: CC BY Attribution 4.0 International License
+  product_version: 1
+  product_suite: Temporal cloud and cloud shadow mask
+  source: Time series cloud and cloud shadow detection
+  acknowledgment: >-
+    Sentinel-2 data is provided by the European Space Agency (ESA) through download from Copernicus
+    Australasia Regional Data Hub.
+
+  references: |
+    - Hagolle, O., Huc, M., Pascual, D. V., & Dedieu, G. (2010). A multi-temporal method for cloud detection,
+      applied to FORMOSAT-2, VENµS, LANDSAT and SENTINEL-2 images. Remote Sensing of Environment, 114(8), 1747-1755.
+      doi: https://doi.org/10.1016/j.rse.2010.03.002
+
+    - Qi, J., Chehbouni, A., Huete, A. R., Kerr, Y. H., & Sorooshian, S. (1994). A modified soil adjusted vegetation
+      index. Remote Sensing of Environment, 48(2), 119-126.
+      doi: https://doi.org/10.1016/0034-4257(94)90134-1
+
+    - Qiu, S., Zhu, Z., & He, B. (2019). Fmask 4.0: Improved cloud and cloud shadow detection in Landsats 4-8 and
+      Sentinel-2 imagery. Remote Sensing of Environment, 231, 111205.
+      doi: https://doi.org/10.1016/j.rse.2019.05.024
+
+    - Xu, H. (2006). Modification of normalised difference water index (NDWI) to enhance open water features in
+      remotely sensed imagery. International Journal of Remote Sensing, 27(14), 3025-3033.
+      doi: 10.1080/01431160600589179
+
+    - Zhu, Z., Wang, S., & Woodcock, C. E. (2015). Improvement and expansion of the Fmask algorithm: cloud, cloud
+      shadow, and snow detection for Landsats 4-7, 8, and Sentinel 2 images. Remote Sensing of Environment,
+      159(Supplement C), 269-277.
+      doi: https://doi.org/10.1016/j.rse.2014.12.014
+
+    - Zhu, Z., & Woodcock, C. E. (2012). Object-based cloud and cloud shadow detection in Landsat imagery.
+      Remote Sensing of Environment, 118, 83-94.
+      doi: https://doi.org/10.1016/j.rse.2011.10.028
+
+  coverage_content_type: modelResult
+  cdm_data_type: Grid
