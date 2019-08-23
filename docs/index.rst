@@ -47,6 +47,7 @@ and list what you would like to see changed.
    connect/get_help.rst
    connect/nci_basics.rst
    connect/jupyter.rst
+   connect/sandbox.rst
    internal/other_modules.rst
 
 
@@ -82,4 +83,3 @@ and list what you would like to see changed.
   :caption: Indexes
 
   genindex
-
