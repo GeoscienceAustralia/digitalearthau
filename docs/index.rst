@@ -41,15 +41,13 @@ and list what you would like to see changed.
 .. toctree::
    :maxdepth: 1
    :caption: Connect
+   :glob:
 
-   connect/account.rst
-   connect/install.rst
-   connect/get_help.rst
-   connect/nci_basics.rst
-   connect/jupyter.rst
+   connect/NCI/README.rst
    connect/sandbox.rst
+   connect/jupyter.rst
+   connect/get_help.rst
    internal/other_modules.rst
-
 
 .. toctree::
    :caption: User Guide
