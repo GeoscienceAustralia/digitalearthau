@@ -38,7 +38,7 @@ default, the Launcher is displayed, which allows you to open new files.
 To open an existing Jupyter notebook, double-click through the folders to find a
 notebook you're interested in, then double-click the notebook to
 open it in the main work area. Notebooks are indicated by the ``.ipynb`` file
-extension.
+extension. The JupyterLab interface also supports plain text and Markdown files.
 
 To learn more about JupyterLab, visit the `JupyterLab Documentation`_.
 

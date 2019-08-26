@@ -40,14 +40,12 @@ and list what you would like to see changed.
 
 .. toctree::
    :maxdepth: 1
-   :caption: Connect
-   :glob:
+   :caption: Setup
 
-   connect/NCI/README.rst
-   connect/sandbox.rst
-   connect/jupyter.rst
-   connect/get_help.rst
-   internal/other_modules.rst
+   setup/README.rst
+   setup/sandbox.rst
+   setup/NCI/README.rst
+   setup/jupyter.rst
 
 .. toctree::
    :caption: User Guide
@@ -75,6 +73,7 @@ and list what you would like to see changed.
    internal/modules.rst
    internal/collection_management.rst
    internal/requirements_met.ipynb
+   internal/other_modules.rst
 
 
 .. toctree::
