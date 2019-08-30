@@ -25,7 +25,6 @@ addons:
       - libproj-dev
       - libxml2-dev
       - libxslt-dev
-      - pandoc
       - shellcheck
       - cython3
   postgresql: "9.6"
@@ -83,20 +82,12 @@ before_script:
 script:
   - ./check-code.sh integration_tests
 
-
 after_script:
   - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
 
 after_success:
   - codecov
   - python setup.py sdist bdist_wheel
-
-  # We only deploy docs from develop, so lets only build them there too
-  - |
-    if [ "${TRAVIS_PULL_REQUEST_BRANCH:-$TRAVIS_BRANCH}" = "develop" ]; then
-        pushd docs && make fetchnotebooks html && popd
-    fi
-
 
 # On success, upload a package to an S3 Bucket. Used for continuous deployment.
 deploy:
@@ -114,26 +105,6 @@ deploy:
       condition: $TRAVIS_BRANCH = "develop" || ! -z "${TRAVIS_TAG}"  # develop branch or tags
       repo: GeoscienceAustralia/digitalearthau
       python: "3.6"
-
-  - provider: s3
-    bucket: "docs.dea.ga.gov.au"
-    region: "ap-southeast-2"
-    local_dir: docs/_build/html/
-    skip_cleanup: true
-    on:
-      branch: develop
-      repo: GeoscienceAustralia/digitalearthau
-
-  - provider: pages
-    skip-cleanup: true
-    github-token: $GITHUB_TOKEN  # Set in the settings page of your repository, as a secure variable
-    local-dir: docs/_build/html/
-    keep-history: true
-    committer-from-gh: true
-    verbose: true
-    on:
-      branch: develop
-      repo: GeoscienceAustralia/digitalearthau
 
 notifications:
   slack:
