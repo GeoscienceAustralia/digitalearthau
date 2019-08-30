@@ -1,6 +1,0 @@
-Sphinx
-nbsphinx
-sphinx_rtd_theme
-IPython
-recommonmark
-pandoc<2.0.0
