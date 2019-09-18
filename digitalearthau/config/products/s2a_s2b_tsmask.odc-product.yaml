@@ -15,7 +15,7 @@ measurements:
                 '1': Clear
                 '2': Cloud
                 '3': Cloud shadow
-      nodata: 1
+      nodata: 0
       units: '1'
 metadata:
     format:
