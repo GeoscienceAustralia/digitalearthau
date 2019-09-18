@@ -101,6 +101,7 @@ def test_dea_config(dea_index: Index):
         'ls5_nbart_tmad_annual',
         'ls7_nbart_tmad_annual',
         'ls8_nbart_tmad_annual',
+        's2_tsmask',
 
         # EO3
         'usgs_ls5t_level1_1',
