@@ -2,7 +2,7 @@ name: s2_tsmask
 description: |
   Time series cloud and cloud shadow detection for Sentinel-2A and Sentinel-2B surface reflectance data.
 
-  TSmask classifies a pixel as one of the following four categories: clear, no observation, shadow and cloud.
+  TSmask classifies a pixel as one of the following four categories: no observation, clear, cloud, and cloud shadow.
 measurements:
     - name: classification
       dtype: uint8
@@ -11,10 +11,10 @@ measurements:
             bits: [0, 1, 2, 3, 4, 5, 6, 7]
             description: TSmask classification
             values:
-                '0': Clear
-                '1': No observation
-                '2': Cloud shadow
-                '3': Cloud
+                '0': No observation
+                '1': Clear
+                '2': Cloud
+                '3': Cloud shadow
       nodata: 1
       units: '1'
 metadata:
