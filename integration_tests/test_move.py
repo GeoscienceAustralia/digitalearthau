@@ -5,6 +5,16 @@ from pathlib import Path
 import pytest
 from click.testing import CliRunner, Result
 
+from datacube.drivers.netcdf.writer import (
+    Variable,
+    create_variable,
+    create_coordinate,
+    netcdfy_data,
+    create_netcdf
+)
+from datacube.utils.dates import parse_time
+import numpy as np
+
 from digitalearthau import move, paths, collections
 from digitalearthau.collections import Collection
 from integration_tests.conftest import DatasetForTests, freeze_index
@@ -210,16 +220,6 @@ def _call_move(args, global_integration_cli_args) -> Result:
 
 
 def make_fake_netcdf_dataset(nc_name, doc_text):
-    from datacube.drivers.netcdf.writer import (
-        Variable,
-        create_variable,
-        create_coordinate,
-        netcdfy_data,
-        create_netcdf
-    )
-    from datacube.utils.dates import parse_time
-    import numpy as np
-
     t = np.asarray([parse_time('2001-01-29 07:06:05.432')], dtype=np.datetime64)
     npdata = np.asarray([doc_text], dtype='S')
 
