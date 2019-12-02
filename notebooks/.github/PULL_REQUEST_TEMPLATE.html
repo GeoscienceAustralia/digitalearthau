@@ -1,0 +1,322 @@
+
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Proposed changes &mdash; Digital Earth Australia 1.0.0 documentation</title>
+  
+
+  
+  
+    <link rel="shortcut icon" href="../../_static/dea-favicon.ico"/>
+  
+  
+  
+    <link rel="canonical" href="https://docs.dea.ga.gov.au/notebooks/.github/PULL_REQUEST_TEMPLATE.html"/>
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+        <script type="text/javascript" src="https://unpkg.com/@jupyter-widgets/html-manager@^0.18.0/dist/embed-amd.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html">
+          
+
+          
+            
+            <img src="../../_static/dea-logo-inline.svg" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Overview</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../about/intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../about/glossary.html">Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../about/changelog.html">Changelog</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Connect</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../connect/account.html">NCI Account Registration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../connect/install.html">Installation and Software Setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../connect/get_help.html">Getting help</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../connect/nci_basics.html">Command Line Usage (Advanced)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../connect/jupyter.html">Jupyter Notebooks Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../internal/other_modules.html">Other Modules</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../01_Getting_started/README.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../02_DEA_datasets/README.html">DEA Datasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../03_Integrating_external_data/README.html">Integrating External Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../04_Index_calculation/README.html">Index Calculation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../05_Temporal_analysis/README.html">Temporal Analyses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../06_Composite_generation/README.html">Composite Generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../07_Image_classification/README.html">Image Classification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../08_Outputting_data/README.html">Outputting data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../09_Workflows/README.html">Workflows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../10_Scripts/README.html">Scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../DEA_sandbox/README.html">Digital Earth Australia Sandbox Notebooks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Supplementary_data/README.html">Supplementary Data</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Data Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../data/data.html">Surface Reflectance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../data/s3.html">Products Available on Amazon S3</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../data/s3-sftp.html">Bulk download products from Amazon S3</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Developer Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../internal/new_product.html">Creating a New Product</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../internal/git_best_practice.html">Git Best Practice</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../internal/release.html">DEA Release Process</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../internal/modules.html">DEA Modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../internal/collection_management.html">Collection Management</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../internal/requirements_met.html">DEA Code Functionality Examples</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Indexes</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../genindex.html">Tags Index</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Digital Earth Australia</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+      <li>Proposed changes</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../../_sources/notebooks/.github/PULL_REQUEST_TEMPLATE.md.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<p><em>Note: checklist below only relevant if committing to the <a class="reference external" href="https://github.com/GeoscienceAustralia/dea-notebooks/tree/develop"><code class="docutils literal notranslate"><span class="pre">develop</span></code></a> branch:</em></p>
+<div class="section" id="proposed-changes">
+<h1>Proposed changes<a class="headerlink" href="#proposed-changes" title="Permalink to this headline">¶</a></h1>
+<p>Include a brief description of the changes being proposed, and why they are necessary.</p>
+</div>
+<div class="section" id="closes-issues-optional">
+<h1>Closes issues (optional)<a class="headerlink" href="#closes-issues-optional" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><p>Closes Issue #000</p></li>
+<li><p>Closes Issue #000</p></li>
+</ul>
+</div>
+<div class="section" id="checklist-replace-with-x-to-check-off">
+<h1>Checklist (replace <code class="docutils literal notranslate"><span class="pre">[</span> <span class="pre">]</span></code> with <code class="docutils literal notranslate"><span class="pre">[x]</span></code> to check off)<a class="headerlink" href="#checklist-replace-with-x-to-check-off" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><p>[ ] Notebook created using the <a class="reference external" href="https://github.com/GeoscienceAustralia/dea-notebooks/tree/develop">DEA-notebooks template</a></p></li>
+<li><p>[ ] Remove any unused Python packages from <code class="docutils literal notranslate"><span class="pre">Load</span> <span class="pre">packages</span></code></p></li>
+<li><p>[ ] Remove any unused/empty code cells</p></li>
+<li><p>[ ] Remove any guidance cells (e.g. <code class="docutils literal notranslate"><span class="pre">General</span> <span class="pre">advice</span></code>)</p></li>
+<li><p>[ ] Ensure that all code cells follow the <a class="reference external" href="https://www.python.org/dev/peps/pep-0008/">PEP8 standard</a> for code. The <code class="docutils literal notranslate"><span class="pre">jupyterlab_code_formatter</span></code> tool can be used to format code cells to a consistent style: select each code cell, then click <code class="docutils literal notranslate"><span class="pre">Edit</span></code> and then one of the <code class="docutils literal notranslate"><span class="pre">Apply</span> <span class="pre">X</span> <span class="pre">Formatter</span></code> options (<code class="docutils literal notranslate"><span class="pre">YAPF</span></code> or <code class="docutils literal notranslate"><span class="pre">Black</span></code> are recommended).</p></li>
+<li><p>[ ] Include relevant tags in the final notebook cell (refer to the <a class="reference external" href="https://docs.dea.ga.gov.au/genindex.html">DEA Tags Index</a>, and re-use tags if possible)</p></li>
+<li><p>[ ] Clear all outputs, run notebook from start to finish, and save the notebook in the state where all cells have been sequentially evaluated</p></li>
+<li><p>[ ] Test notebook on both the <code class="docutils literal notranslate"><span class="pre">NCI</span></code> and <code class="docutils literal notranslate"><span class="pre">DEA</span> <span class="pre">Sandbox</span></code> (flag if not working as part of PR and ask for help to solve if needed)</p></li>
+<li><p>[ ] If applicable, update the <code class="docutils literal notranslate"><span class="pre">Notebook</span> <span class="pre">currently</span> <span class="pre">compatible</span> <span class="pre">with</span> <span class="pre">the</span> <span class="pre">NCI|DEA</span> <span class="pre">Sandbox</span> <span class="pre">environment</span> <span class="pre">only</span></code> line below the notebook title to reflect the environments the notebook is compatible with</p></li>
+</ul>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017-2018, Geoscience Australia
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+    <!-- Theme Analytics -->
+    <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-113800428-1', 'auto');
+    ga('send', 'pageview');
+    </script>
+
+    
+  
+
+
+<!-- Theme Analytics -->
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-113800428-1"></script>
+<script>
+ window.dataLayer = window.dataLayer || [];
+ function gtag(){dataLayer.push(arguments);}
+ gtag('js', new Date());
+ 
+ gtag('config', 'UA-113800428-1');
+</script>
+
+    
+  
+
+
+</body>
+</html>
