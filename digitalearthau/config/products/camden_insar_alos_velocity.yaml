@@ -1,0 +1,21 @@
+name: camden_insar_alos_velocity
+description: Camden InSAR ALOS Velocity
+metadata_type: eo3
+
+metadata:
+    product:
+        name: camden_insar_alos_velocity
+
+measurements:
+    - name: 'ew'
+      aliases:
+      - eastwest
+      dtype: float32
+      nodata: -9999
+      units: 'mm/year'
+    - name: 'ud'
+      aliases:
+      - updown
+      dtype: float32
+      nodata: -9999
+      units: 'mm/year'
