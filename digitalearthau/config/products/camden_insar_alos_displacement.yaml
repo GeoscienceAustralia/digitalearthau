@@ -1,0 +1,21 @@
+name: camden_insar_alos_displacement
+description: Camden InSAR ALOS Displacement
+metadata_type: eo3
+
+metadata:
+    product:
+        name: camden_insar_alos_displacement
+
+measurements:
+    - name: 'ew'
+      aliases:
+      - eastwest
+      dtype: float32
+      nodata: -9999
+      units: 'mm'
+    - name: 'ud'
+      aliases:
+      - updown
+      dtype: float32
+      nodata: -9999
+      units: 'mm'
