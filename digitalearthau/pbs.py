@@ -61,7 +61,7 @@ def current_job_task_id() -> Optional[uuid.UUID]:
     Get a stable UUID for the current PBS job, or nothing if we don't appear to be in one.
 
     >>> import mock
-    >>> with mock.patch.dict(os.environ, {'PBS_JOBID': '87654321.r-man2'}):
+    >>> with mock.patch.dict(os.environ, {'PBS_JOBID': '87654321.gadi-pbs'}):
     ...     current_job_task_id()
     UUID('9f682e52-6c9e-5ed1-a32f-1cb32f35e476')
     """
@@ -76,15 +76,15 @@ def current_job_task_id() -> Optional[uuid.UUID]:
 
 def task_id_for_pbs_job(pbs_job_id: str) -> uuid.UUID:
     """
-    Get a stable UUID for the the given PBS job id. Expects the whole job name ("8894425.r-man2"), not just the number).
+    Get a stable UUID for the the given PBS job id. Expects the whole job name ("8894425.gadi-pbs"), not just the number).
 
-    >>> task_id_for_pbs_job('7818401.r-man2')
+    >>> task_id_for_pbs_job('7818401.gadi-pbs')
     UUID('f3f5ab5c-ada9-5507-b00b-ad856743bb76')
     """
     # Sanity check
-    if ".r-man" not in pbs_job_id:
+    if ".gadi-pbs" not in pbs_job_id:
         raise RuntimeError(
-            "%r doesn't look like an NCI pbs job name. Expecting the full name, eg '8894425.r-man2'" % pbs_job_id
+            "%r doesn't look like an NCI pbs job name. Expecting the full name, eg '8894425.gadi-pbs'" % pbs_job_id
         )
     task_id = uuid.uuid5(NCI_PBS_UUID_NAMESPACE, pbs_job_id.strip())
     return task_id

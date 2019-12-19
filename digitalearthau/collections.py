@@ -221,6 +221,33 @@ def init_nci_collections(index: Index):
             trust=Trust.DISK
         )
 
+    def be_ls_collection(name, query, file_patterns, delete_archived_after_days=None):
+        """Make a collection with common defaults for scene collections"""
+        return Collection(
+            name,
+            query,
+            file_patterns=file_patterns,
+            index_=index,
+            unique=('time', 'region_code', 'x', 'y'),
+            delete_archived_after_days=delete_archived_after_days,
+            # Scenes default to trusting disk. They're atomically written to the destination,
+            # and the jobs themselves wont index.
+            trust=Trust.DISK
+        )
+
+    def s2_level1c_granule_collection(name, query, file_patterns, delete_archived_after_days=None):
+        return Collection(
+            name,
+            query,
+            file_patterns=file_patterns,
+            index_=index,
+            unique=('time', 'platform'),
+            delete_archived_after_days=delete_archived_after_days,
+            # Scenes default to trusting disk. They're atomically written to the destination,
+            # and the jobs themselves wont index.
+            trust=Trust.DISK
+        )
+
     def ard_granule_collection(name, query, file_patterns, delete_archived_after_days=None):
         """Make a collection with common defaults for scene collections"""
         return Collection(
@@ -274,7 +301,7 @@ def init_nci_collections(index: Index):
             query={'product': 'ls5_nbart_scene'},
             file_patterns=[
                 '/g/data/rs0/scenes/nbar-scenes-tmp/ls5/' + nbart_scene_offset,
-                '/short/v10/scenes/nbar-scenes-tmp/ls5/' + nbart_scene_offset,
+                '/scratch/v10/scenes/nbar-scenes-tmp/ls5/' + nbart_scene_offset,
             ],
         ),
         scene_collection(
@@ -282,7 +309,7 @@ def init_nci_collections(index: Index):
             query={'product': 'ls7_nbart_scene'},
             file_patterns=[
                 '/g/data/rs0/scenes/nbar-scenes-tmp/ls7/' + nbart_scene_offset,
-                '/short/v10/scenes/nbar-scenes-tmp/ls7/' + nbart_scene_offset,
+                '/scratch/v10/scenes/nbar-scenes-tmp/ls7/' + nbart_scene_offset,
             ],
         ),
         scene_collection(
@@ -290,7 +317,7 @@ def init_nci_collections(index: Index):
             query={'product': 'ls8_nbart_scene'},
             file_patterns=[
                 '/g/data/rs0/scenes/nbar-scenes-tmp/ls8/' + nbart_scene_offset,
-                '/short/v10/scenes/nbar-scenes-tmp/ls8/' + nbart_scene_offset,
+                '/scratch/v10/scenes/nbar-scenes-tmp/ls8/' + nbart_scene_offset,
             ],
         )
     )
@@ -302,7 +329,7 @@ def init_nci_collections(index: Index):
             query={'product': 'ls5_nbar_scene'},
             file_patterns=[
                 '/g/data/rs0/scenes/nbar-scenes-tmp/ls5/' + nbar_scene_offset,
-                '/short/v10/scenes/nbar-scenes-tmp/ls5/' + nbar_scene_offset,
+                '/scratch/v10/scenes/nbar-scenes-tmp/ls5/' + nbar_scene_offset,
             ],
         ),
         scene_collection(
@@ -310,7 +337,7 @@ def init_nci_collections(index: Index):
             query={'product': 'ls7_nbar_scene'},
             file_patterns=[
                 '/g/data/rs0/scenes/nbar-scenes-tmp/ls7/' + nbar_scene_offset,
-                '/short/v10/scenes/nbar-scenes-tmp/ls7/' + nbar_scene_offset,
+                '/scratch/v10/scenes/nbar-scenes-tmp/ls7/' + nbar_scene_offset,
             ],
         ),
         scene_collection(
@@ -318,7 +345,7 @@ def init_nci_collections(index: Index):
             query={'product': 'ls8_nbar_scene'},
             file_patterns=[
                 '/g/data/rs0/scenes/nbar-scenes-tmp/ls8/' + nbar_scene_offset,
-                '/short/v10/scenes/nbar-scenes-tmp/ls8/' + nbar_scene_offset,
+                '/scratch/v10/scenes/nbar-scenes-tmp/ls8/' + nbar_scene_offset,
             ],
         )
     )
@@ -547,3 +574,46 @@ def init_nci_collections(index: Index):
 
     s2b_path = '2017-11-16/S2B_OPER_MSI_ARD_TL_MPS__20171116T154540_A003632_T52LEQ_N02.06/ARD-METADATA.yaml'
     assert list(get_collections_in_path(Path(s2_ard_basepath + s2b_path))) is not None
+
+    # S2A & S2B level1c products:
+    # /g/data/v10/AGDCv2/datacube-ingestion/indexed-products/cophub/s2/s2_l1c_yamls/
+    s2a_level1c_offset = '*/*.yaml'
+    s2_level1c_granule_basepath = '/g/data/v10/AGDCv2/datacube-ingestion/indexed-products/cophub/s2/s2_l1c_yamls/'
+    _add(
+        s2_level1c_granule_collection(
+            name='s2a_level1c_granule',
+            query={'product': 's2a_level1c_granule'},
+            file_patterns=[
+                s2_level1c_granule_basepath + s2a_level1c_offset,
+            ],
+        ),
+        s2_level1c_granule_collection(
+            name='s2b_level1c_granule',
+            query={'product': 's2b_level1c_granule'},
+            file_patterns=[
+                s2_level1c_granule_basepath + s2a_level1c_offset,
+            ],
+        ),
+    )
+
+    assert s2_level1c_granule_basepath + s2a_level1c_offset in get_collection('s2a_level1c_granule').file_patterns
+    assert s2_level1c_granule_basepath + s2a_level1c_offset in get_collection('s2b_level1c_granule').file_patterns
+    s2a_path = '20S090E-25S095E/S2A_MSIL1C_20170812T035411_N0205_R018_T46JET_20170812T035410.zip.yaml'
+    assert list(get_collections_in_path(s2_level1c_granule_basepath + s2a_path)) is not None
+
+    s2b_path = '00N160E-05S165E/S2B_MSIL1C_20171112T234729_N0206_R130_T57MXR_20171113T010409.zip.yaml'
+    assert list(get_collections_in_path(Path(s2_level1c_granule_basepath + s2b_path))) is not None
+
+    be_path = '/g/data/v10/work/cog_conversion/landsat_barest_earth/2019-05-16_13-20-15/cache/x_3/y_-13/'
+    _add(
+        be_ls_collection(
+            name='landsat_barest_earth',
+            query={'product': 'landsat_barest_earth'},
+            file_patterns=[
+                be_path + 'be-landsat-30years_3_-13.yaml',
+            ],
+        ),
+    )
+
+    yaml_path = be_path + 'be-landsat-30years_3_-13.yaml'
+    assert list(get_collections_in_path(yaml_path)) is not None
