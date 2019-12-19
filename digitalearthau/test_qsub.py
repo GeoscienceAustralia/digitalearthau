@@ -35,14 +35,14 @@ def test_norm_qsub_params():
     p = qsub.parse_comma_args('nodes=1,mem=small,walltime=10s')
     p = qsub.norm_qsub_params(p)
 
-    assert p['ncpus'] == 16
+    assert p['ncpus'] == 48
     assert p['walltime'] == '0:00:10'
     assert p['mem'] == '31744MB'
 
     p = qsub.parse_comma_args('nodes=1,mem=small,walltime=10m,extra_qsub_args=-M test@email.com.au -m ae')
     p = qsub.norm_qsub_params(p)
 
-    assert p['ncpus'] == 16
+    assert p['ncpus'] == 48
     assert p['walltime'] == '0:10:00'
     assert p['mem'] == '31744MB'
     assert p['extra_qsub_args'] == ['-M', 'test@email.com.au', '-m', 'ae']
@@ -90,7 +90,7 @@ _EXPECTED_SUCCESS = [
         input_datasets=(UUID('60bc52f1-7a70-43f2-bc8d-2bd138eb2aba'),),
         output_datasets=None,
         job_parameters={},
-        # All parent_ids are calculated from the below "@mock.patch.dict(os.environ, {'PBS_JOBID': '87654321.r-man2'})"
+        # All parent_ids are calculated from the below "@mock.patch.dict(os.environ, {'PBS_JOBID': '87654321.gadi-pbs'})"
         parent_id=UUID('9f682e52-6c9e-5ed1-a32f-1cb32f35e476')),
     TaskEvent(
         timestamp=datetime(2017, 10, 5, 22, 11, 45, 717952, tzinfo=tz.tzutc()),
@@ -213,7 +213,7 @@ _EXPECTED_FAILURE = [
     (_SUCCESS_CELERY_EVENTS, _EXPECTED_SUCCESS),
     (_FAIL_CELERY_EVENTS, _EXPECTED_FAILURE),
 ])
-@mock.patch.dict(os.environ, {'PBS_JOBID': '87654321.r-man2'})
+@mock.patch.dict(os.environ, {'PBS_JOBID': '87654321.gadi-pbs'})
 def test_celery_success_to_task(input_json: str, expected_events: List[TaskEvent]):
     state: celery_state.State = cr.app.events.State()
 

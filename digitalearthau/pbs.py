@@ -63,7 +63,7 @@ def current_job_task_id() -> Optional[uuid.UUID]:
     >>> import mock
     >>> with mock.patch.dict(os.environ, {'PBS_JOBID': '87654321.gadi-pbs'}):
     ...     current_job_task_id()
-    UUID('9f682e52-6c9e-5ed1-a32f-1cb32f35e476')
+    UUID('6c5e209a-6d56-5460-9a30-20e264492d5c')
     """
     pbs_job_id = current_pbs_job_id()
     if pbs_job_id is None:
@@ -79,7 +79,7 @@ def task_id_for_pbs_job(pbs_job_id: str) -> uuid.UUID:
     Get a stable UUID for the the given PBS job id. Expects the whole job name ("8894425.gadi-pbs"), not just the number).
 
     >>> task_id_for_pbs_job('7818401.gadi-pbs')
-    UUID('f3f5ab5c-ada9-5507-b00b-ad856743bb76')
+    UUID('47d97d2d-9aeb-5e07-8072-ebcf9424fc97')
     """
     # Sanity check
     if ".gadi-pbs" not in pbs_job_id:

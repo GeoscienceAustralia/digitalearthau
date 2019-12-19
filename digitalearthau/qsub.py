@@ -317,9 +317,9 @@ def norm_qsub_params(p):
     ...    'name': 'staggering-fc-run',
     ... }))
     {'extra_qsub_args': [],
-     'mem': '126976MB',
+     'mem': '389120MB',
      'name': 'staggering-fc-run',
-     'ncpus': 64,
+     'ncpus': 192,
      'noask': True,
      'project': 'v10',
      'queue': 'normal',
