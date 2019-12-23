@@ -25,7 +25,7 @@ measurements:
       dtype: float32
       nodata: -9999
       units: 'mm/year'
-    - name: 'udstd'
+    - name: 'upstd'
       aliases:
       - updownstandarddev
       dtype: float32
