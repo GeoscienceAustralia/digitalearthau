@@ -37,14 +37,14 @@ def test_norm_qsub_params():
 
     assert p['ncpus'] == 48
     assert p['walltime'] == '0:00:10'
-    assert p['mem'] == '31744MB'
+    assert p['mem'] == '97280MB'
 
     p = qsub.parse_comma_args('nodes=1,mem=small,walltime=10m,extra_qsub_args=-M test@email.com.au -m ae')
     p = qsub.norm_qsub_params(p)
 
     assert p['ncpus'] == 48
     assert p['walltime'] == '0:10:00'
-    assert p['mem'] == '31744MB'
+    assert p['mem'] == '97280MB'
     assert p['extra_qsub_args'] == ['-M', 'test@email.com.au', '-m', 'ae']
 
     p = qsub.parse_comma_args('ncpus=1, mem=medium, walltime=3h')
@@ -91,7 +91,7 @@ _EXPECTED_SUCCESS = [
         output_datasets=None,
         job_parameters={},
         # All parent_ids are calculated from the below "@mock.patch.dict(os.environ, {'PBS_JOBID': '87654321.gadi-pbs'})"
-        parent_id=UUID('9f682e52-6c9e-5ed1-a32f-1cb32f35e476')),
+        parent_id=UUID('6c5e209a-6d56-5460-9a30-20e264492d5c')),
     TaskEvent(
         timestamp=datetime(2017, 10, 5, 22, 11, 45, 717952, tzinfo=tz.tzutc()),
         event='task.active',
@@ -108,7 +108,7 @@ _EXPECTED_SUCCESS = [
         input_datasets=(UUID('60bc52f1-7a70-43f2-bc8d-2bd138eb2aba'),),
         output_datasets=None,
         job_parameters={},
-        parent_id=UUID('9f682e52-6c9e-5ed1-a32f-1cb32f35e476')
+        parent_id=UUID('6c5e209a-6d56-5460-9a30-20e264492d5c')
     ),
     TaskEvent(
         timestamp=datetime(2017, 10, 5, 22, 12, 55, 890416, tzinfo=tz.tzutc()),
@@ -126,7 +126,7 @@ _EXPECTED_SUCCESS = [
         input_datasets=(UUID('60bc52f1-7a70-43f2-bc8d-2bd138eb2aba'),),
         output_datasets=None,
         job_parameters={},
-        parent_id=UUID('9f682e52-6c9e-5ed1-a32f-1cb32f35e476')
+        parent_id=UUID('6c5e209a-6d56-5460-9a30-20e264492d5c')
     )
 ]
 
@@ -155,7 +155,7 @@ _EXPECTED_FAILURE = [
         input_datasets=(UUID('591fce1d-5268-44e8-a8b0-e38e6cfbb749'),),
         output_datasets=None,
         job_parameters={},
-        parent_id=UUID('9f682e52-6c9e-5ed1-a32f-1cb32f35e476')
+        parent_id=UUID('6c5e209a-6d56-5460-9a30-20e264492d5c')
     ),
     TaskEvent(
         timestamp=datetime(2017, 10, 5, 5, 52, 55, 338191, tzinfo=tz.tzutc()),
@@ -173,7 +173,7 @@ _EXPECTED_FAILURE = [
         input_datasets=(UUID('591fce1d-5268-44e8-a8b0-e38e6cfbb749'),),
         output_datasets=None,
         job_parameters={},
-        parent_id=UUID('9f682e52-6c9e-5ed1-a32f-1cb32f35e476')
+        parent_id=UUID('6c5e209a-6d56-5460-9a30-20e264492d5c')
     ),
     TaskEvent(
         timestamp=datetime(2017, 10, 5, 5, 52, 55, 348709, tzinfo=tz.tzutc()),
@@ -204,7 +204,7 @@ _EXPECTED_FAILURE = [
         input_datasets=(UUID('591fce1d-5268-44e8-a8b0-e38e6cfbb749'),),
         output_datasets=None,
         job_parameters={},
-        parent_id=UUID('9f682e52-6c9e-5ed1-a32f-1cb32f35e476')
+        parent_id=UUID('6c5e209a-6d56-5460-9a30-20e264492d5c')
     )
 ]
 

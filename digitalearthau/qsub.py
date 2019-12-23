@@ -330,7 +330,7 @@ def norm_qsub_params(p):
      'wd': True}
     >>> # Default params
     >>> norm_qsub_params({})
-    {'ncpus': 48, 'mem': '31744MB', 'walltime': None, 'extra_qsub_args': []}
+    {'ncpus': 48, 'mem': '97280MB', 'walltime': None, 'extra_qsub_args': []}
     >>> # TODO error on unknown args? It seems to explicitly pass through (PASS_THRU_KEYS) some, but not all valid keys?
     >>> # No error currently:
     >>> # norm_qsub_params({'ubermensch': 'understood'})
