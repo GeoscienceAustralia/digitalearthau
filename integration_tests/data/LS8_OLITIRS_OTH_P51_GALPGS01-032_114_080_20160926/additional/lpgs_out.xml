@@ -3,7 +3,7 @@
 	<Message>Processing was successful</Message>
 	<LandsatProcessingRequest id="LS8-20160926" version="2">
 		<Input format="MD" satellite="LANDSAT8" sensor="OLI_TIRS">
-			<WorkingFolder cleanBefore="TRUE" cleanAfter="TRUE">/jobfs/local/9456756.gadi-pbs/lpgs-work8PT8e5/dee471ed-5aa5-46f5-96b5-1e1ea91ffee4/lpgs-work/pm</WorkingFolder>
+			<WorkingFolder cleanBefore="TRUE" cleanAfter="TRUE">/jobfs/local/9456756.r-man2/lpgs-work8PT8e5/dee471ed-5aa5-46f5-96b5-1e1ea91ffee4/lpgs-work/pm</WorkingFolder>
 			<InputPath linkInput="TRUE">/g/data/v10/repackaged/rawdata/0/2016/09/LS8_OLI-TIRS_STD-MDF_P00_LC81140740812016270LGN00_114_074-081_20160926T021444Z20160926T031053_1/product</InputPath>
 		</Input>
 	</LandsatProcessingRequest>
