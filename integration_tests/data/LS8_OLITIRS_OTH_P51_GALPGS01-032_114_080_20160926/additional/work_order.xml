@@ -2,7 +2,7 @@
 <LandsatProcessingRequest id="LS8-20160926" version="2">
     <Input format="MD" satellite="Landsat8" sensor="OLI_TIRS">
     <WorkingFolder cleanAfter="yes"
-                   cleanBefore="yes">/jobfs/local/9456756.gadi-pbs/lpgs-work8PT8e5/dee471ed-5aa5-46f5-96b5-1e1ea91ffee4/lpgs-work/pm</WorkingFolder>
+                   cleanBefore="yes">/jobfs/local/9456756.r-man2/lpgs-work8PT8e5/dee471ed-5aa5-46f5-96b5-1e1ea91ffee4/lpgs-work/pm</WorkingFolder>
     <InputPath linkInput="yes">/g/data/v10/repackaged/rawdata/0/2016/09/LS8_OLI-TIRS_STD-MDF_P00_LC81140740812016270LGN00_114_074-081_20160926T021444Z20160926T031053_1/product</InputPath>
     <Segment></Segment>
     </Input>
@@ -63,6 +63,6 @@
                 useDownloader="false">/g/data/v10/eoancillarydata/sensor-specific/LANDSAT8/BiasParameterFile/2016/09</BPFOliFile>
         <TirsSsmPositionFile
                 useDownloader="false">/g/data/v10/eoancillarydata/sensor-specific/LANDSAT8/TIRS-SSM/20161013.l8_tirs_estimated_ssm_position.txt</TirsSsmPositionFile>
-        <OutputPath additionalMetadata="false">/jobfs/local/9456756.gadi-pbs/lpgs-work8PT8e5/dee471ed-5aa5-46f5-96b5-1e1ea91ffee4/scenes</OutputPath>
+        <OutputPath additionalMetadata="false">/jobfs/local/9456756.r-man2/lpgs-work8PT8e5/dee471ed-5aa5-46f5-96b5-1e1ea91ffee4/scenes</OutputPath>
     </L1Processing>
 </LandsatProcessingRequest>
