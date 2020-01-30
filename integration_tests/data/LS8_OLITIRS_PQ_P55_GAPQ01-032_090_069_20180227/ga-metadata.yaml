@@ -1,0 +1,963 @@
+id: d358afb6-9ddf-44a5-80ba-7d64a7fb09c4
+ga_label: LS8_OLITIRS_PQ_P55_GAPQ01-032_090_069_20180227
+ga_level: P55
+product_type: pqa
+creation_dt: 2018-03-08 19:58:48
+size_bytes: 645407
+checksum_path: package.sha1
+platform:
+    code: LANDSAT_8
+instrument:
+    name: OLI_TIRS
+format:
+    name: GeoTIFF
+acquisition:
+    groundstation:
+        code: LGN
+        label: Landsat Ground Network
+        eods_domain_code: '032'
+extent:
+    coord:
+        ul:
+            lat: -12.070571
+            lon: 154.383562
+        ur:
+            lat: -12.056076
+            lon: 156.159805
+        ll:
+            lat: -12.725779
+            lon: 154.387023
+        lr:
+            lat: -12.710472
+            lon: 156.167696
+    from_dt: 2018-02-27 23:43:47
+    center_dt: 2018-02-27 23:43:55.039245
+    to_dt: 2018-02-27 23:43:55
+grid_spatial:
+    projection:
+        geo_ref_points:
+            ul:
+                x: 650587.5
+                y: 8665262.5
+            ur:
+                x: 844062.5
+                y: 8665262.5
+            ll:
+                x: 650587.5
+                y: 8592787.5
+            lr:
+                x: 844062.5
+                y: 8592787.5
+        datum: GDA94
+        ellipsoid: GRS80
+        map_projection: UTM
+        orientation: NORTH_UP
+        resampling_option: CUBIC_CONVOLUTION
+        zone: -56
+        valid_data:
+            coordinates:
+            - - - 659175.0
+                - 8664700.0
+              - - 659125.6402201076
+                - 8664630.621487668
+              - - 659050.6072855822
+                - 8664305.476813246
+              - - 652550.5953234955
+                - 8635355.423261445
+              - - 652375.4854831077
+                - 8634554.902903378
+              - - 652418.9366093741
+                - 8634450.746437496
+              - - 833494.4991063378
+                - 8593600.612704765
+              - - 834394.5767385545
+                - 8593400.595323496
+              - - 834499.3939002635
+                - 8593419.528470969
+              - - 841149.4046765047
+                - 8623094.576738555
+              - - 841349.4046765047
+                - 8623994.576738555
+              - - 841331.0633906259
+                - 8624149.253562504
+              - - 665555.4232614455
+                - 8663474.404676504
+              - - 664429.6472917026
+                - 8663724.564256143
+              - - 659175.0
+                - 8664700.0
+            type: Polygon
+browse:
+    full:
+        path: browse.fr.jpg
+        file_type: image/jpg
+        cell_size: 25.0
+        shape:
+            x: 7740
+            y: 2900
+        red_band: pqa
+        green_band: pqa
+        blue_band: pqa
+    medium:
+        path: browse.jpg
+        file_type: image/jpg
+        cell_size: 188.96484375
+        shape:
+            x: 1024
+            y: 384
+        red_band: pqa
+        green_band: pqa
+        blue_band: pqa
+image:
+    satellite_ref_point_start:
+        x: 90
+        y: 69
+    bands:
+        pqa:
+            path: product/LS8_OLITIRS_PQ_P55_GAPQ01-032_090_069_20180227.tif
+            number: pqa
+lineage:
+    algorithm:
+        name: pqa
+        version: 4.2.5
+        doi: http://dx.doi.org/10.1109/IGARSS.2013.6723746
+    machine:
+        hostname: r2888
+        runtime_id: 1b112262-2306-11e8-8df9-a0000220fe80
+        software_versions:
+            eodatasets:
+                repo_url: https://github.com/GeoscienceAustralia/eo-datasets.git
+                version: '0.8'
+            gaip:
+                repo_url: https://github.com/GeoscienceAustralia/ga-neo-landsat-processor.git
+                version: 4.2.5
+        uname: 'Linux r2888 3.10.0-693.17.1.el6.x86_64 #1 SMP Fri Feb 9 03:25:58 UTC
+            2018 x86_64'
+    ancillary:
+        land_sea_mask:
+            type: land_sea_mask
+            name: Rasterised Land/Sea Mask
+            uri: /g/data/v10/eoancillarydata/Land_Sea_Rasters/WORLDzone56.tif
+            access_dt: 2018-03-08 19:57:45
+            modification_dt: 2013-11-04 01:30:18
+            file_owner: Joshua Sixsmith
+    source_datasets:
+        level1:
+            id: f31b74fc-765e-4fe0-8af3-1404a4d4789b
+            ga_label: LS8_OLITIRS_OTH_P41_GALPGS01-032_090_069_20180227
+            product_type: level1
+            product_level: L1GT
+            creation_dt: 2018-03-05 13:11:35
+            size_bytes: 194730120
+            checksum_path: package.sha1
+            platform:
+                code: LANDSAT_8
+            instrument:
+                name: OLI_TIRS
+            format:
+                name: GeoTIFF
+            usgs:
+                scene_id: LC80900692018058LGN00
+            acquisition:
+                groundstation:
+                    code: LGN
+                    label: Landsat Ground Network
+                    eods_domain_code: '032'
+            extent:
+                coord:
+                    ul:
+                        lat: -12.070571
+                        lon: 154.383562
+                    ur:
+                        lat: -12.056076
+                        lon: 156.159805
+                    ll:
+                        lat: -12.725779
+                        lon: 154.387023
+                    lr:
+                        lat: -12.710472
+                        lon: 156.167696
+                from_dt: 2018-02-27 23:43:47
+                center_dt: 2018-02-27 23:43:55.039245
+                to_dt: 2018-02-27 23:43:55
+            grid_spatial:
+                projection:
+                    geo_ref_points:
+                        ul:
+                            x: 650587.5
+                            y: 8665262.5
+                        ur:
+                            x: 844062.5
+                            y: 8665262.5
+                        ll:
+                            x: 650587.5
+                            y: 8592787.5
+                        lr:
+                            x: 844062.5
+                            y: 8592787.5
+                    datum: GDA94
+                    ellipsoid: GRS80
+                    map_projection: UTM
+                    orientation: NORTH_UP
+                    resampling_option: CUBIC_CONVOLUTION
+                    zone: -56
+            gqa:
+                error_message: No reference or backup reference imagery available.
+                final_gcp_count: 0
+                ref_date: null
+                ref_source: null
+                ref_source_path: null
+                residual:
+                    abs:
+                        x: .nan
+                        xy: .nan
+                        y: .nan
+                    abs_iterative_mean:
+                        x: .nan
+                        xy: .nan
+                        y: .nan
+                    cep90: .nan
+                    iterative_mean:
+                        x: .nan
+                        xy: .nan
+                        y: .nan
+                    iterative_stddev:
+                        x: .nan
+                        xy: .nan
+                        y: .nan
+                    mean:
+                        x: .nan
+                        xy: .nan
+                        y: .nan
+                    stddev:
+                        x: .nan
+                        xy: .nan
+                        y: .nan
+            browse:
+                full:
+                    path: browse.fr.jpg
+                    file_type: image/jpg
+                    cell_size: 25.0
+                    shape:
+                        x: 7740
+                        y: 2900
+                    red_band: '7'
+                    green_band: '5'
+                    blue_band: '2'
+                medium:
+                    path: browse.jpg
+                    file_type: image/jpg
+                    cell_size: 188.96484375
+                    shape:
+                        x: 1024
+                        y: 384
+                    red_band: '7'
+                    green_band: '5'
+                    blue_band: '2'
+            image:
+                satellite_ref_point_start:
+                    x: 90
+                    y: 69
+                cloud_cover_percentage: 3.03
+                sun_azimuth: 84.92843084
+                sun_elevation: 58.26579058
+                sun_earth_distance: 0.9904896
+                bands:
+                    '1':
+                        path: product/LC80900692018058LGN00_B1.TIF
+                        type: reflective
+                        label: Coastal Aerosol
+                        number: '1'
+                        cell_size: 25.0
+                    '10':
+                        path: product/LC80900692018058LGN00_B10.TIF
+                        type: thermal
+                        label: Thermal Infrared 1
+                        number: '10'
+                        cell_size: 25.0
+                    '11':
+                        path: product/LC80900692018058LGN00_B11.TIF
+                        type: thermal
+                        label: Thermal Infrared 2
+                        number: '11'
+                        cell_size: 25.0
+                    '2':
+                        path: product/LC80900692018058LGN00_B2.TIF
+                        type: reflective
+                        label: Visible Blue
+                        number: '2'
+                        cell_size: 25.0
+                    '3':
+                        path: product/LC80900692018058LGN00_B3.TIF
+                        type: reflective
+                        label: Visible Green
+                        number: '3'
+                        cell_size: 25.0
+                    '4':
+                        path: product/LC80900692018058LGN00_B4.TIF
+                        type: reflective
+                        label: Visible Red
+                        number: '4'
+                        cell_size: 25.0
+                    '5':
+                        path: product/LC80900692018058LGN00_B5.TIF
+                        type: reflective
+                        label: Near Infrared
+                        number: '5'
+                        cell_size: 25.0
+                    '6':
+                        path: product/LC80900692018058LGN00_B6.TIF
+                        type: reflective
+                        label: Short-wave Infrared 1
+                        number: '6'
+                        cell_size: 25.0
+                    '7':
+                        path: product/LC80900692018058LGN00_B7.TIF
+                        type: reflective
+                        label: Short-wave Infrared 2
+                        number: '7'
+                        cell_size: 25.0
+                    '8':
+                        path: product/LC80900692018058LGN00_B8.TIF
+                        type: panchromatic
+                        label: Panchromatic
+                        number: '8'
+                        cell_size: 12.5
+                    '9':
+                        path: product/LC80900692018058LGN00_B9.TIF
+                        type: atmosphere
+                        label: Cirrus
+                        number: '9'
+                        cell_size: 25.0
+                    qa:
+                        path: product/LC80900692018058LGN00_BQA.TIF
+                        type: quality
+                        label: Quality
+                        number: qa
+                        cell_size: 25.0
+            lineage:
+                algorithm:
+                    name: LPGS
+                    version: 2.6.2
+                    parameters: {}
+                machine:
+                    hostname: r1743
+                    runtime_id: bb47bb30-2075-11e8-acfc-a0000220fe80
+                    software_versions:
+                        eodatasets:
+                            repo_url: https://github.com/GeoscienceAustralia/eo-datasets.git
+                            version: 0.9+24.gd332b9f
+                        galpgs:
+                            repo_url: https://github.com/GeoscienceAustralia/galpgs.git
+                            version: 1.4.0a1+22.g88470cd
+                        gqa:
+                            repo_url: https://github.com/GeoscienceAustralia/gqa.git
+                            version: 0.9.1+9.g9ab1ca8
+                        pinkmatter: 4.1.4110
+                        rcc-etm-correction: 1.4.0a1+22.g88470cd
+                    uname: 'Linux r1743 3.10.0-693.17.1.el6.x86_64 #1 SMP Fri Feb
+                        9 03:25:58 UTC 2018 x86_64'
+                ancillary:
+                    bpf_oli:
+                        name: LO8BPF20180227214036_20180228000120.01
+                        uri: /g/data/v10/eoancillarydata/sensor-specific/LANDSAT8/BiasParameterFile/2018/02/LO8BPF20180227214036_20180228000120.01
+                        access_dt: 2018-03-06 00:11:20
+                        modification_dt: 2018-02-28 14:00:03
+                        checksum_sha1: b4920757ccd54c66647d5694bcd2af4405f43d2a
+                    bpf_tirs:
+                        name: LT8BPF20180215111236_20180302113150.01
+                        uri: /g/data/v10/eoancillarydata/sensor-specific/LANDSAT8/BiasParameterFile/2018/02/LT8BPF20180215111236_20180302113150.01
+                        access_dt: 2018-03-06 00:17:37
+                        modification_dt: 2018-03-03 05:15:02
+                        checksum_sha1: 11546744ae4e856258b8a2e5d2370ebac79ac026
+                    cpf:
+                        name: L8CPF20180101_20180331.01
+                        uri: /g/data/v10/eoancillarydata/sensor-specific/LANDSAT8/CalibrationParameterFile/L8CPF20180101_20180331.01
+                        access_dt: 2018-03-06 00:17:13
+                        modification_dt: 2018-01-16 10:38:45
+                        checksum_sha1: 4b4a35fae9a7589a7c707d5890fd04acb6273251
+                    rlut:
+                        name: L8RLUT20150303_20431231v11.h5
+                        uri: /g/data/v10/eoancillarydata/sensor-specific/LANDSAT8/RLUT/L8RLUT20150303_20431231v11.h5
+                        access_dt: 2018-03-06 00:12:49
+                        modification_dt: 2015-05-01 10:02:39
+                        checksum_sha1: ac3782a2af8c5dd170d72127f003685b18325417
+                    tirs_ssm_position:
+                        name: 20180304.l8_tirs_estimated_ssm_position.txt
+                        uri: /g/data/v10/eoancillarydata/sensor-specific/LANDSAT8/TIRS-SSM/20180304.l8_tirs_estimated_ssm_position.txt
+                        access_dt: 2018-03-06 00:11:19
+                        modification_dt: 2018-03-05 02:00:02
+                        checksum_sha1: 2770fd07868970e0b91eb58e542499ee9f2020e2
+                        properties:
+                            model: PRELIMINARY
+                            position_status: ESTIMATED
+                source_datasets:
+                    satellite_telemetry_data:
+                        id: 8a76a6c7-3f95-4e47-a5df-a28a98e87dd9
+                        ga_label: LS8_OLITIRS_STD-MD_P00_LC80900630682018058LGN00_090_063-068_20180228T012456Z20180228T012702
+                        ga_level: P00
+                        product_type: satellite_telemetry_data
+                        creation_dt: 2018-02-28 06:23:42
+                        size_bytes: 2121127971
+                        checksum_path: package.sha1
+                        platform:
+                            code: LANDSAT_8
+                        instrument:
+                            name: OLI_TIRS
+                        format:
+                            name: MD
+                        usgs:
+                            interval_id: LC80900630682018058LGN00
+                        acquisition:
+                            aos: 2018-02-28 01:24:56.442000
+                            los: 2018-02-28 01:27:02.391000
+                            groundstation:
+                                code: LGN
+                                label: Landsat Ground Network
+                                eods_domain_code: '032'
+                        image:
+                            satellite_ref_point_start:
+                                x: 90
+                                y: 63
+                            satellite_ref_point_end:
+                                x: 90
+                                y: 68
+                            bands: {}
+                        lineage:
+                            machine:
+                                software_versions:
+                                    eodatasets:
+                                        repo_url: https://github.com/GeoscienceAustralia/eo-datasets.git
+                                        version: '0.8'
+                            source_datasets: {}
+        nbar:
+            id: 4af0cebc-af58-44b7-bb8b-2d022471e3ae
+            ga_label: LS8_OLITIRS_NBAR_P54_GANBAR01-032_090_069_20180227
+            ga_level: P54
+            product_type: nbar
+            product_doi: http://dx.doi.org/10.4225/25/5487CC0D4F40B
+            creation_dt: 2018-03-07 04:16:55
+            size_bytes: 79797753
+            checksum_path: package.sha1
+            platform:
+                code: LANDSAT_8
+            instrument:
+                name: OLI_TIRS
+            format:
+                name: GeoTIFF
+            acquisition:
+                groundstation:
+                    code: LGN
+                    label: Landsat Ground Network
+                    eods_domain_code: '032'
+            extent:
+                coord:
+                    ul:
+                        lat: -12.070571
+                        lon: 154.383562
+                    ur:
+                        lat: -12.056076
+                        lon: 156.159805
+                    ll:
+                        lat: -12.725779
+                        lon: 154.387023
+                    lr:
+                        lat: -12.710472
+                        lon: 156.167696
+                from_dt: 2018-02-27 23:43:47
+                center_dt: 2018-02-27 23:43:55.039245
+                to_dt: 2018-02-27 23:43:55
+            grid_spatial:
+                projection:
+                    geo_ref_points:
+                        ul:
+                            x: 650587.5
+                            y: 8665262.5
+                        ur:
+                            x: 844062.5
+                            y: 8665262.5
+                        ll:
+                            x: 650587.5
+                            y: 8592787.5
+                        lr:
+                            x: 844062.5
+                            y: 8592787.5
+                    datum: GDA94
+                    ellipsoid: GRS80
+                    map_projection: UTM
+                    orientation: NORTH_UP
+                    resampling_option: CUBIC_CONVOLUTION
+                    zone: -56
+                    valid_data:
+                        coordinates:
+                        - - - 657575.0
+                            - 8665225.0
+                          - - 650775.6070936976
+                            - 8635055.475958558
+                          - - 650768.9366093741
+                            - 8634825.746437496
+                          - - 836819.4991063378
+                            - 8592850.612704765
+                          - - 836950.0
+                            - 8592850.0
+                          - - 836999.2535625036
+                            - 8592893.936609374
+                          - - 843824.4046765047
+                            - 8623344.576738555
+                          - - 843850.0
+                            - 8623550.0
+                          - - 843805.5405275897
+                            - 8623599.378321394
+                          - - 658180.4572459527
+                            - 8665124.397099553
+                          - - 657575.0
+                            - 8665225.0
+                        type: Polygon
+            browse:
+                full:
+                    path: browse.fr.jpg
+                    file_type: image/jpg
+                    cell_size: 25.0
+                    shape:
+                        x: 7740
+                        y: 2900
+                    red_band: '7'
+                    green_band: '5'
+                    blue_band: '2'
+                medium:
+                    path: browse.jpg
+                    file_type: image/jpg
+                    cell_size: 188.96484375
+                    shape:
+                        x: 1024
+                        y: 384
+                    red_band: '7'
+                    green_band: '5'
+                    blue_band: '2'
+            image:
+                satellite_ref_point_start:
+                    x: 90
+                    y: 69
+                bands:
+                    '1':
+                        path: product/LS8_OLITIRS_NBAR_P54_GANBAR01-032_090_069_20180227_B1.tif
+                        type: reflective
+                        label: Coastal Aerosol
+                        number: '1'
+                        cell_size: 25.0
+                    '2':
+                        path: product/LS8_OLITIRS_NBAR_P54_GANBAR01-032_090_069_20180227_B2.tif
+                        type: reflective
+                        label: Visible Blue
+                        number: '2'
+                        cell_size: 25.0
+                    '3':
+                        path: product/LS8_OLITIRS_NBAR_P54_GANBAR01-032_090_069_20180227_B3.tif
+                        type: reflective
+                        label: Visible Green
+                        number: '3'
+                        cell_size: 25.0
+                    '4':
+                        path: product/LS8_OLITIRS_NBAR_P54_GANBAR01-032_090_069_20180227_B4.tif
+                        type: reflective
+                        label: Visible Red
+                        number: '4'
+                        cell_size: 25.0
+                    '5':
+                        path: product/LS8_OLITIRS_NBAR_P54_GANBAR01-032_090_069_20180227_B5.tif
+                        type: reflective
+                        label: Near Infrared
+                        number: '5'
+                        cell_size: 25.0
+                    '6':
+                        path: product/LS8_OLITIRS_NBAR_P54_GANBAR01-032_090_069_20180227_B6.tif
+                        type: reflective
+                        label: Short-wave Infrared 1
+                        number: '6'
+                        cell_size: 25.0
+                    '7':
+                        path: product/LS8_OLITIRS_NBAR_P54_GANBAR01-032_090_069_20180227_B7.tif
+                        type: reflective
+                        label: Short-wave Infrared 2
+                        number: '7'
+                        cell_size: 25.0
+            lineage:
+                algorithm:
+                    name: brdf
+                    version: '2.0'
+                    doi: http://dx.doi.org/10.1109/JSTARS.2010.2042281
+                    parameters:
+                        aerosol: 0.06
+                        band_1_brdf_geo: 0.0
+                        band_1_brdf_iso: 1.0
+                        band_1_brdf_vol: 0.0
+                        band_2_brdf_geo: 0.0
+                        band_2_brdf_iso: 1.0
+                        band_2_brdf_vol: 0.0
+                        band_3_brdf_geo: 0.0
+                        band_3_brdf_iso: 1.0
+                        band_3_brdf_vol: 0.0
+                        band_4_brdf_geo: 0.0
+                        band_4_brdf_iso: 1.0
+                        band_4_brdf_vol: 0.0
+                        band_5_brdf_geo: 0.0
+                        band_5_brdf_iso: 1.0
+                        band_5_brdf_vol: 0.0
+                        band_6_brdf_geo: 0.0
+                        band_6_brdf_iso: 1.0
+                        band_6_brdf_vol: 0.0
+                        band_7_brdf_geo: 0.0
+                        band_7_brdf_iso: 1.0
+                        band_7_brdf_vol: 0.0
+                        elevation: 0.0
+                        ozone: 0.25
+                        solar_distance: 0.99036
+                        water_vapour: 4.690000152587891
+                machine:
+                    hostname: r2547
+                    runtime_id: 37fd8ef0-21bd-11e8-92a6-a0000220fe80
+                    software_versions:
+                        eodatasets:
+                            repo_url: https://github.com/GeoscienceAustralia/eo-datasets.git
+                            version: '0.8'
+                        gaip:
+                            repo_url: https://github.com/GeoscienceAustralia/ga-neo-landsat-processor.git
+                            version: 4.2.5
+                        modtran:
+                            repo_url: http://www.ontar.com/software/productdetails.aspx?item=modtran
+                            version: 5.2.1
+                    uname: 'Linux r2547 3.10.0-693.17.1.el6.x86_64 #1 SMP Fri Feb
+                        9 03:25:58 UTC 2018 x86_64'
+                ancillary:
+                    elevation:
+                        type: elevation
+                        name: DEM_one_deg.tif
+                        uri: /g/data/v10/eoancillarydata/elevation/world_1deg/DEM_one_deg.tif
+                        access_dt: 2018-03-07 04:12:30
+                        modification_dt: 2010-02-23 21:59:29
+                        file_owner: Roger Edberg
+                    ozone:
+                        type: ozone
+                        name: feb.tif
+                        uri: /g/data/v10/eoancillarydata/lookup_tables/ozone/feb.tif
+                        access_dt: 2018-03-07 04:12:30
+                        modification_dt: 2010-02-23 22:00:21
+                        file_owner: Roger Edberg
+                    solar_distance:
+                        type: solar_distance
+                        name: EarthSun_distanceLUT.txt
+                        uri: /g/data/v10/eoancillarydata/lookup_tables/earthsun_distance/EarthSun_distanceLUT.txt
+                        access_dt: 2018-03-07 04:12:30
+                        modification_dt: 2012-05-21 02:04:01
+                        file_owner: Roger Edberg
+                    water_vapour:
+                        type: water_vapour
+                        name: pr_wtr.eatm.2018.tif
+                        uri: /g/data/v10/eoancillarydata/water_vapour/pr_wtr.eatm.2018.tif
+                        access_dt: 2018-03-07 04:12:30
+                        modification_dt: 2018-03-07 02:40:02
+                        file_owner: Landsat Processing
+                source_datasets:
+                    level1:
+                        id: f31b74fc-765e-4fe0-8af3-1404a4d4789b
+                        ga_label: LS8_OLITIRS_OTH_P41_GALPGS01-032_090_069_20180227
+                        product_type: level1
+                        product_level: L1GT
+                        creation_dt: 2018-03-05 13:11:35
+                        size_bytes: 194730120
+                        checksum_path: package.sha1
+                        platform:
+                            code: LANDSAT_8
+                        instrument:
+                            name: OLI_TIRS
+                        format:
+                            name: GeoTIFF
+                        usgs:
+                            scene_id: LC80900692018058LGN00
+                        acquisition:
+                            groundstation:
+                                code: LGN
+                                label: Landsat Ground Network
+                                eods_domain_code: '032'
+                        extent:
+                            coord:
+                                ul:
+                                    lat: -12.070571
+                                    lon: 154.383562
+                                ur:
+                                    lat: -12.056076
+                                    lon: 156.159805
+                                ll:
+                                    lat: -12.725779
+                                    lon: 154.387023
+                                lr:
+                                    lat: -12.710472
+                                    lon: 156.167696
+                            from_dt: 2018-02-27 23:43:47
+                            center_dt: 2018-02-27 23:43:55.039245
+                            to_dt: 2018-02-27 23:43:55
+                        grid_spatial:
+                            projection:
+                                geo_ref_points:
+                                    ul:
+                                        x: 650587.5
+                                        y: 8665262.5
+                                    ur:
+                                        x: 844062.5
+                                        y: 8665262.5
+                                    ll:
+                                        x: 650587.5
+                                        y: 8592787.5
+                                    lr:
+                                        x: 844062.5
+                                        y: 8592787.5
+                                datum: GDA94
+                                ellipsoid: GRS80
+                                map_projection: UTM
+                                orientation: NORTH_UP
+                                resampling_option: CUBIC_CONVOLUTION
+                                zone: -56
+                        gqa:
+                            error_message: No reference or backup reference imagery
+                                available.
+                            final_gcp_count: 0
+                            ref_date: null
+                            ref_source: null
+                            ref_source_path: null
+                            residual:
+                                abs:
+                                    x: .nan
+                                    xy: .nan
+                                    y: .nan
+                                abs_iterative_mean:
+                                    x: .nan
+                                    xy: .nan
+                                    y: .nan
+                                cep90: .nan
+                                iterative_mean:
+                                    x: .nan
+                                    xy: .nan
+                                    y: .nan
+                                iterative_stddev:
+                                    x: .nan
+                                    xy: .nan
+                                    y: .nan
+                                mean:
+                                    x: .nan
+                                    xy: .nan
+                                    y: .nan
+                                stddev:
+                                    x: .nan
+                                    xy: .nan
+                                    y: .nan
+                        browse:
+                            full:
+                                path: browse.fr.jpg
+                                file_type: image/jpg
+                                cell_size: 25.0
+                                shape:
+                                    x: 7740
+                                    y: 2900
+                                red_band: '7'
+                                green_band: '5'
+                                blue_band: '2'
+                            medium:
+                                path: browse.jpg
+                                file_type: image/jpg
+                                cell_size: 188.96484375
+                                shape:
+                                    x: 1024
+                                    y: 384
+                                red_band: '7'
+                                green_band: '5'
+                                blue_band: '2'
+                        image:
+                            satellite_ref_point_start:
+                                x: 90
+                                y: 69
+                            cloud_cover_percentage: 3.03
+                            sun_azimuth: 84.92843084
+                            sun_elevation: 58.26579058
+                            sun_earth_distance: 0.9904896
+                            bands:
+                                '1':
+                                    path: product/LC80900692018058LGN00_B1.TIF
+                                    type: reflective
+                                    label: Coastal Aerosol
+                                    number: '1'
+                                    cell_size: 25.0
+                                '10':
+                                    path: product/LC80900692018058LGN00_B10.TIF
+                                    type: thermal
+                                    label: Thermal Infrared 1
+                                    number: '10'
+                                    cell_size: 25.0
+                                '11':
+                                    path: product/LC80900692018058LGN00_B11.TIF
+                                    type: thermal
+                                    label: Thermal Infrared 2
+                                    number: '11'
+                                    cell_size: 25.0
+                                '2':
+                                    path: product/LC80900692018058LGN00_B2.TIF
+                                    type: reflective
+                                    label: Visible Blue
+                                    number: '2'
+                                    cell_size: 25.0
+                                '3':
+                                    path: product/LC80900692018058LGN00_B3.TIF
+                                    type: reflective
+                                    label: Visible Green
+                                    number: '3'
+                                    cell_size: 25.0
+                                '4':
+                                    path: product/LC80900692018058LGN00_B4.TIF
+                                    type: reflective
+                                    label: Visible Red
+                                    number: '4'
+                                    cell_size: 25.0
+                                '5':
+                                    path: product/LC80900692018058LGN00_B5.TIF
+                                    type: reflective
+                                    label: Near Infrared
+                                    number: '5'
+                                    cell_size: 25.0
+                                '6':
+                                    path: product/LC80900692018058LGN00_B6.TIF
+                                    type: reflective
+                                    label: Short-wave Infrared 1
+                                    number: '6'
+                                    cell_size: 25.0
+                                '7':
+                                    path: product/LC80900692018058LGN00_B7.TIF
+                                    type: reflective
+                                    label: Short-wave Infrared 2
+                                    number: '7'
+                                    cell_size: 25.0
+                                '8':
+                                    path: product/LC80900692018058LGN00_B8.TIF
+                                    type: panchromatic
+                                    label: Panchromatic
+                                    number: '8'
+                                    cell_size: 12.5
+                                '9':
+                                    path: product/LC80900692018058LGN00_B9.TIF
+                                    type: atmosphere
+                                    label: Cirrus
+                                    number: '9'
+                                    cell_size: 25.0
+                                qa:
+                                    path: product/LC80900692018058LGN00_BQA.TIF
+                                    type: quality
+                                    label: Quality
+                                    number: qa
+                                    cell_size: 25.0
+                        lineage:
+                            algorithm:
+                                name: LPGS
+                                version: 2.6.2
+                                parameters: {}
+                            machine:
+                                hostname: r1743
+                                runtime_id: bb47bb30-2075-11e8-acfc-a0000220fe80
+                                software_versions:
+                                    eodatasets:
+                                        repo_url: https://github.com/GeoscienceAustralia/eo-datasets.git
+                                        version: 0.9+24.gd332b9f
+                                    galpgs:
+                                        repo_url: https://github.com/GeoscienceAustralia/galpgs.git
+                                        version: 1.4.0a1+22.g88470cd
+                                    gqa:
+                                        repo_url: https://github.com/GeoscienceAustralia/gqa.git
+                                        version: 0.9.1+9.g9ab1ca8
+                                    pinkmatter: 4.1.4110
+                                    rcc-etm-correction: 1.4.0a1+22.g88470cd
+                                uname: 'Linux r1743 3.10.0-693.17.1.el6.x86_64 #1
+                                    SMP Fri Feb 9 03:25:58 UTC 2018 x86_64'
+                            ancillary:
+                                bpf_oli:
+                                    name: LO8BPF20180227214036_20180228000120.01
+                                    uri: /g/data/v10/eoancillarydata/sensor-specific/LANDSAT8/BiasParameterFile/2018/02/LO8BPF20180227214036_20180228000120.01
+                                    access_dt: 2018-03-06 00:11:20
+                                    modification_dt: 2018-02-28 14:00:03
+                                    checksum_sha1: b4920757ccd54c66647d5694bcd2af4405f43d2a
+                                bpf_tirs:
+                                    name: LT8BPF20180215111236_20180302113150.01
+                                    uri: /g/data/v10/eoancillarydata/sensor-specific/LANDSAT8/BiasParameterFile/2018/02/LT8BPF20180215111236_20180302113150.01
+                                    access_dt: 2018-03-06 00:17:37
+                                    modification_dt: 2018-03-03 05:15:02
+                                    checksum_sha1: 11546744ae4e856258b8a2e5d2370ebac79ac026
+                                cpf:
+                                    name: L8CPF20180101_20180331.01
+                                    uri: /g/data/v10/eoancillarydata/sensor-specific/LANDSAT8/CalibrationParameterFile/L8CPF20180101_20180331.01
+                                    access_dt: 2018-03-06 00:17:13
+                                    modification_dt: 2018-01-16 10:38:45
+                                    checksum_sha1: 4b4a35fae9a7589a7c707d5890fd04acb6273251
+                                rlut:
+                                    name: L8RLUT20150303_20431231v11.h5
+                                    uri: /g/data/v10/eoancillarydata/sensor-specific/LANDSAT8/RLUT/L8RLUT20150303_20431231v11.h5
+                                    access_dt: 2018-03-06 00:12:49
+                                    modification_dt: 2015-05-01 10:02:39
+                                    checksum_sha1: ac3782a2af8c5dd170d72127f003685b18325417
+                                tirs_ssm_position:
+                                    name: 20180304.l8_tirs_estimated_ssm_position.txt
+                                    uri: /g/data/v10/eoancillarydata/sensor-specific/LANDSAT8/TIRS-SSM/20180304.l8_tirs_estimated_ssm_position.txt
+                                    access_dt: 2018-03-06 00:11:19
+                                    modification_dt: 2018-03-05 02:00:02
+                                    checksum_sha1: 2770fd07868970e0b91eb58e542499ee9f2020e2
+                                    properties:
+                                        model: PRELIMINARY
+                                        position_status: ESTIMATED
+                            source_datasets:
+                                satellite_telemetry_data:
+                                    id: 8a76a6c7-3f95-4e47-a5df-a28a98e87dd9
+                                    ga_label: LS8_OLITIRS_STD-MD_P00_LC80900630682018058LGN00_090_063-068_20180228T012456Z20180228T012702
+                                    ga_level: P00
+                                    product_type: satellite_telemetry_data
+                                    creation_dt: 2018-02-28 06:23:42
+                                    size_bytes: 2121127971
+                                    checksum_path: package.sha1
+                                    platform:
+                                        code: LANDSAT_8
+                                    instrument:
+                                        name: OLI_TIRS
+                                    format:
+                                        name: MD
+                                    usgs:
+                                        interval_id: LC80900630682018058LGN00
+                                    acquisition:
+                                        aos: 2018-02-28 01:24:56.442000
+                                        los: 2018-02-28 01:27:02.391000
+                                        groundstation:
+                                            code: LGN
+                                            label: Landsat Ground Network
+                                            eods_domain_code: '032'
+                                    image:
+                                        satellite_ref_point_start:
+                                            x: 90
+                                            y: 63
+                                        satellite_ref_point_end:
+                                            x: 90
+                                            y: 68
+                                        bands: {}
+                                    lineage:
+                                        machine:
+                                            software_versions:
+                                                eodatasets:
+                                                    repo_url: https://github.com/GeoscienceAustralia/eo-datasets.git
+                                                    version: '0.8'
+                                        source_datasets: {}
+product_flags:
+    tested_band_1_saturated: true
+    tested_band_2_saturated: true
+    tested_band_3_saturated: true
+    tested_band_4_saturated: true
+    tested_band_5_saturated: true
+    tested_band_6_saturated: true
+    tested_band_7_saturated: true
+    tested_cloud_acca: true
+    tested_cloud_fmask: true
+    tested_cloud_shadow_acca: true
+    tested_cloud_shadow_fmask: true
+    tested_contiguity: true
+    tested_land_obs: true

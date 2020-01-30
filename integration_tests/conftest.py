@@ -37,22 +37,6 @@ DEA_MD_TYPES = digitalearthau.CONFIG_DIR / 'metadata-types.yaml'
 DEA_PRODUCTS_DIR = digitalearthau.CONFIG_DIR / 'products'
 
 
-@pytest.fixture(scope="session", autouse=True)
-def configure_log_output(request):
-    structlog.configure(
-        processors=[
-            structlog.stdlib.add_log_level,
-            structlog.processors.TimeStamper(fmt="%Y-%m-%d %H:%M.%S"),
-            structlog.processors.StackInfoRenderer(),
-            structlog.processors.format_exc_info,
-            # Coloured output if to terminal.
-            CleanConsoleRenderer()
-        ],
-        context_class=dict,
-        cache_logger_on_first_use=True,
-    )
-
-
 def load_yaml_file(path):
     with path.open() as f:
         return list(yaml.load_all(f, Loader=SafeLoader))
@@ -67,7 +51,7 @@ def work_path(tmpdir):
     return paths.NCI_WORK_ROOT
 
 
-@pytest.fixture
+@pytest.fixture(autouse=True)
 def integration_test_data(tmpdir):
     temp_data_dir = Path(tmpdir) / 'integration_data'
     shutil.copytree(INTEGRATION_TEST_DATA, temp_data_dir)
@@ -147,6 +131,21 @@ class DatasetForTests(NamedTuple):
         """If this is indexed, return the full Dataset record"""
         return self.collection.index_.datasets.get(self.id_)
 
+    def remove_location_in_index(self) -> bool:
+        """Remove location from the index"""
+        return self.collection.index_.datasets.remove_location(self.id_, self.uri)
+
+    def get_index_loc_record(self) -> Optional[Dataset]:
+        """If this is indexed, return the dataset location"""
+        return self.collection.index_.datasets.get(self.uri)
+
+    def archive_parent_in_index(self, archived_dt: datetime = None):
+        archive_dataset(self.parent_id, self.collection, archived_dt=archived_dt)
+
+    def get_parent_index_record(self) -> Optional[Dataset]:
+        """If this is indexed, return the full Dataset record"""
+        return self.collection.index_.datasets.get(self.parent_id)
+
 
 # We want one fixture to return all of this data. Returning a tuple was getting unwieldy.
 class SimpleEnv(NamedTuple):
@@ -168,7 +167,7 @@ def test_dataset(integration_test_data, dea_index) -> DatasetForTests:
     ls8_collection = Collection(
         name='ls8_scene_test',
         query={},
-        file_patterns=[str(test_data.joinpath('LS8*/ga-metadata.yaml'))],
+        file_patterns=[str(test_data.joinpath('LS8_OLITIRS_OTH_P51_GALPGS01*/ga-metadata.yaml'))],
         unique=[],
         index_=dea_index
     )
@@ -188,7 +187,10 @@ def test_dataset(integration_test_data, dea_index) -> DatasetForTests:
     register_base_directory(str(test_data))
 
     cache_path = test_data.joinpath('cache')
-    cache_path.mkdir()
+    try:
+        cache_path.mkdir()
+    except FileExistsError:
+        pass
 
     return DatasetForTests(
         collection=ls8_collection,
@@ -234,6 +236,38 @@ def other_dataset(integration_test_data: Path, test_dataset: DatasetForTests) ->
         id_=ds_id,
         base_path=integration_test_data,
         path_offset=('LS8_INDEXED_ALREADY', 'ga-metadata.yaml')
+    )
+
+
+@pytest.fixture
+def ls8_pq_scene_test_dataset(integration_test_data, dea_index) -> DatasetForTests:
+    """A dataset on disk, with corresponding collection"""
+    test_data = integration_test_data
+
+    ls8_collection = Collection(
+        name='ls8_pq_scene_test',
+        query={},
+        file_patterns=[str(test_data.joinpath('LS8_OLITIRS_PQ_P55_GAPQ01-032_090_069_20180227/ga-metadata.yaml'))],
+        unique=[],
+        index_=dea_index
+    )
+    collections._add(ls8_collection)
+
+    # register this as a base directory so that datasets can be trashed within it.
+    register_base_directory(str(test_data))
+
+    cache_path = test_data.joinpath('cache')
+    try:
+        cache_path.mkdir()
+    except FileExistsError:
+        pass
+
+    return DatasetForTests(
+        collection=ls8_collection,
+        id_=uuid.UUID('d358afb6-9ddf-44a5-80ba-7d64a7fb09c4'),
+        base_path=test_data,
+        path_offset=('LS8_OLITIRS_PQ_P55_GAPQ01-032_090_069_20180227', 'ga-metadata.yaml'),
+        parent_id=uuid.UUID('f31b74fc-765e-4fe0-8af3-1404a4d4789b')
     )
 
 
