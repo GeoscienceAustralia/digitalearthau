@@ -98,6 +98,7 @@ def do_qsub(queue, project, nodes, walltime, name, allow_product_changes, email_
 
     prep = 'qsub -V -q %(queue)s -N ingest_save_tasks -P %(project)s ' \
            '-m %(email_options)s -M %(email_id)s -l walltime=05:00:00,mem=31GB -W umask=33 ' \
+           '-l storage=gdata/rs0+gdata/v10 ' \
            '-- datacube -v ingest -c "%(config)s" %(product_changes_flag)s --year %(year)s ' \
            '--save-tasks "%(taskfile)s"'
     cmd = prep % dict(queue=queue, project=project, email_options=email_options, email_id=email_id,
@@ -111,6 +112,7 @@ def do_qsub(queue, project, nodes, walltime, name, allow_product_changes, email_
 
     test = 'qsub -V -q %(queue)s -N ingest_dry_run -P %(project)s -W depend=afterok:%(savetask_job)s ' \
            '-m %(email_options)s -M %(email_id)s -l walltime=05:00:00,mem=31GB -W umask=33 ' \
+           '-l storage=gdata/rs0+gdata/v10 ' \
            '-- datacube -v ingest %(product_changes_flag)s --load-tasks "%(taskfile)s" --dry-run'
     cmd = test % dict(queue=queue, project=project, savetask_job=savetask_job,
                       email_options=email_options, email_id=email_id,
@@ -126,7 +128,8 @@ def do_qsub(queue, project, nodes, walltime, name, allow_product_changes, email_
     qsub = 'qsub -V -q %(queue)s -N %(name)s -P %(project)s -W depend=afterok:%(savetask_job)s:%(dryrun_job)s: ' \
            '-m %(email_options)s -M %(email_id)s -W %(job_attributes)s ' \
            '-l ncpus=%(ncpus)d,mem=%(mem)dgb,walltime=%(walltime)d:00:00 ' \
-           '-- "%(distr)s" "%(dea_module)s" --ppn 16 ' \
+           '-l storage=gdata/rs0+gdata/v10 ' \
+           '-- "%(distr)s" "%(dea_module)s" --ppn 48 ' \
            'datacube -v -C %(datacube_config)s ingest %(product_changes_flag)s --load-tasks "%(taskfile)s" ' \
            '--queue-size %(queue_size)s --executor distributed DSCHEDULER'
     cmd = qsub % dict(queue=queue,
@@ -137,8 +140,8 @@ def do_qsub(queue, project, nodes, walltime, name, allow_product_changes, email_
                       email_options=email_options,
                       email_id=email_id,
                       job_attributes=job_attributes,
-                      ncpus=nodes * 16,
-                      mem=nodes * 31,
+                      ncpus=nodes * 48,
+                      mem=nodes * 190,
                       walltime=walltime,
                       distr=DISTRIBUTED_SCRIPT,
                       dea_module=digitalearthau.MODULE_NAME,

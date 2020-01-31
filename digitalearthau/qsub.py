@@ -20,7 +20,7 @@ from . import pbs
 from .runners import celery_environment
 from .runners.model import TaskDescription
 
-NUM_CPUS_PER_NODE = 16
+NUM_CPUS_PER_NODE = 48  # Gadi: 48 CPUs/node, 192 GB RAM/node, 400 GB PBS_JOBFS/node.
 RESERVED_MEM_PER_NODE = 1024   # in MB
 QSUB_L_FLAGS = 'mem ncpus walltime wd'.split(' ')
 
@@ -317,9 +317,9 @@ def norm_qsub_params(p):
     ...    'name': 'staggering-fc-run',
     ... }))
     {'extra_qsub_args': [],
-     'mem': '126976MB',
+     'mem': '389120MB',
      'name': 'staggering-fc-run',
-     'ncpus': 64,
+     'ncpus': 192,
      'noask': True,
      'project': 'v10',
      'queue': 'normal',
@@ -330,7 +330,7 @@ def norm_qsub_params(p):
      'wd': True}
     >>> # Default params
     >>> norm_qsub_params({})
-    {'ncpus': 16, 'mem': '31744MB', 'walltime': None, 'extra_qsub_args': []}
+    {'ncpus': 48, 'mem': '97280MB', 'walltime': None, 'extra_qsub_args': []}
     >>> # TODO error on unknown args? It seems to explicitly pass through (PASS_THRU_KEYS) some, but not all valid keys?
     >>> # No error currently:
     >>> # norm_qsub_params({'ubermensch': 'understood'})

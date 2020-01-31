@@ -27,7 +27,7 @@ BASE_DIRECTORIES = [
     '/g/data/v10/reprocess',
     '/g/data/v10/archived',
     '/g/data/rs0/scenes',
-    '/short/v10/scenes',
+    '/scratch/v10/scenes',
     '/g/data/v10/public/data',
     '/g/data/if87/datacube',
 ]
@@ -63,10 +63,10 @@ def get_trash_path(file_path):
     >>> trash_path = str(get_trash_path('/g/data/fk4/datacube/ls7/2003/something.nc'))
     >>> trash_path == '/g/data/fk4/datacube/.trash/{day}/ls7/2003/something.nc'.format(day=_TRASH_DAY)
     True
-    >>> get_trash_path('/short/unknown_location/something.nc')
+    >>> get_trash_path('/scratch/unknown_location/something.nc')
     Traceback (most recent call last):
     ...
-    ValueError: Unknown location: can't calculate base directory: /short/unknown_location/something.nc
+    ValueError: Unknown location: can't calculate base directory: /scratch/unknown_location/something.nc
     """
     root_path, dir_offset = split_path_from_base(file_path)
 
@@ -117,10 +117,10 @@ def split_path_from_base(file_path):
     '/g/data/if87/datacube'
     >>> offset
     '002/S2_MSI_ARD/2018-11-30/something'
-    >>> split_path_from_base('/short/unknown_location/something.nc')
+    >>> split_path_from_base('/scratch/unknown_location/something.nc')
     Traceback (most recent call last):
     ...
-    ValueError: Unknown location: can't calculate base directory: /short/unknown_location/something.nc
+    ValueError: Unknown location: can't calculate base directory: /scratch/unknown_location/something.nc
     """
 
     for root_location in BASE_DIRECTORIES:
