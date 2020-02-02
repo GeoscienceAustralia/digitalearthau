@@ -22,7 +22,7 @@ from .runners.model import TaskDescription
 
 NUM_CPUS_PER_NODE = 48  # Gadi: 48 CPUs/node, 192 GB RAM/node, 400 GB PBS_JOBFS/node.
 RESERVED_MEM_PER_NODE = 1024   # in MB
-QSUB_L_FLAGS = 'mem ncpus walltime wd'.split(' ')
+QSUB_L_FLAGS = 'mem ncpus walltime wd storage'.split(' ')
 
 # Keys that can be sent as-is to the qsub builder without normalisation (I think?)
 PASS_THRU_KEYS = 'name project queue env_vars wd noask umask stdout stderr'.split(' ')

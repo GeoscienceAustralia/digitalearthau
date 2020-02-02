@@ -23,6 +23,11 @@ import sys
 from datacube import _celery_runner as cr
 
 
+###############################################
+# Test Utilities re PBS Job Submission
+###############################################
+
+
 def test_parse_args():
     p = qsub.parse_comma_args('nodes=1,mem=small')
     assert 'mem' in p
@@ -64,6 +69,10 @@ def test_remove_args():
     assert qsub.remove_args('--qsub', args2, 1) == ['--foo', 'bar']
     assert qsub.remove_args('--removed', args3, 0) == ['--foo', 'bar']
 
+
+#################################################
+# Tests of Celery Executor Related Functionality
+#################################################
 
 # Three events: received, started, success
 _SUCCESS_CELERY_EVENTS = r"""
