@@ -25,7 +25,7 @@ RESERVED_MEM_PER_NODE = 1024   # in MB
 QSUB_L_FLAGS = 'mem ncpus walltime wd storage'.split(' ')
 
 # Keys that can be sent as-is to the qsub builder without normalisation (I think?)
-PASS_THRU_KEYS = 'name project queue env_vars wd noask umask stdout stderr'.split(' ')
+PASS_THRU_KEYS = 'name project queue env_vars wd storage noask umask stdout stderr'.split(' ')
 # All keys/arguments supported by QsubLauncher functions
 VALID_KEYS = PASS_THRU_KEYS + 'walltime ncpus nodes mem extra_qsub_args'.split(' ')
 
@@ -153,7 +153,7 @@ Following parameters are understood:
    nodes    = <int> number of nodes
    ncpus    = <int> number of cores if your don't need whole node
    walltime = <duration> e.g. "10m" -- ten minutes, "5h" -- five hours
-   mem      = (small|medium|large) or 2G, 4G memory per core
+   mem      = (small|medium|large) or 2G, 4G, 8G memory per core
    name     = job name
    project  = (u46|v10 etc.)
    queue    = (normal|express)
@@ -330,7 +330,7 @@ def norm_qsub_params(p):
      'wd': True}
     >>> # Default params
     >>> norm_qsub_params({})
-    {'ncpus': 48, 'mem': '97280MB', 'walltime': None, 'extra_qsub_args': []}
+    {'ncpus': 48, 'mem': '195584MB', 'walltime': None, 'extra_qsub_args': []}
     >>> # TODO error on unknown args? It seems to explicitly pass through (PASS_THRU_KEYS) some, but not all valid keys?
     >>> # No error currently:
     >>> # norm_qsub_params({'ubermensch': 'understood'})
@@ -343,7 +343,7 @@ def norm_qsub_params(p):
     else:
         nodes = None
 
-    mem = normalise_mem(p.get('mem', 'small'))
+    mem = normalise_mem(p.get('mem', 'medium'))
 
     if nodes:
         mem = int((mem * NUM_CPUS_PER_NODE * 1024 - RESERVED_MEM_PER_NODE) * nodes)
