@@ -32,6 +32,7 @@ extensions = [
     'sphinx.ext.viewcode',
     'sphinx.ext.todo',
     'sphinx_rst_builder',
+    'sphinx_click.ext',
 
 
 ]
