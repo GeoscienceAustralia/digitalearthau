@@ -15,23 +15,24 @@ _siblings_count = 0
 @click.option('--check-locationless/--no-check-locationless',
               is_flag=True,
               default=False,
-              help='Check any datasets without locations')
+              help='Check any datasets without locations. (Off by default)')
 @click.option('--archive-locationless',
               is_flag=True,
               default=False,
-              help="Archive datasets with no active locations (forces --check-locationless)")
+              help="Archive datasets with no active locations (forces --check-locationless) (Off by default)")
 @click.option('--check-ancestors',
               is_flag=True,
               default=False,
-              help='Check if ancestor/source datasets are still active/valid')
+              help='Check if ancestor/source datasets are still active/valid. (Off by default)')
 @click.option('--check-siblings',
               is_flag=True,
               default=False,
-              help='Check if ancestor datasets have other children of the same type (they may be duplicates)')
+              help='Check if ancestor datasets have other children of the same type (they may be duplicates).'
+                   ' (Off by default)')
 @click.option('--archive-siblings',
               is_flag=True,
               default=False,
-              help="Archive sibling datasets (forces --check-ancestors)")
+              help="Archive sibling datasets (forces --check-ancestors). (Off by default).")
 @click.option('--test-dc-config', '-C',
               default=None,
               help='Custom datacube config file (testing purpose only)')
@@ -50,36 +51,50 @@ def main(expressions, check_locationless, archive_locationless, check_ancestors,
 
     (the sync tool cannot do these checks "live", as we don't know how many locations there are of a dataset
     until the entire folder has been synced, and ideally the ancestors synced too.)
-    TODO: This could be merged into it as a post-processing step, although it's less safe than sync if
-    TODO: the index is being updated concurrently by another
     """
+    # TODO: This could be merged into it as a post-processing step, although it's less safe than sync if
+    # the index is being updated concurrently by another process
     global _siblings_count
     uiutil.init_logging()
+
+    product_counter = collections.Counter()
+    locationless_counter = collections.Counter()
+    archived_counter = collections.Counter()
+
     with Datacube(config=test_dc_config) as dc:
         _LOG.info('query', query=expressions)
         count = 0
         archive_count = 0
         locationless_count = 0
         for dataset in dc.index.datasets.search(**expressions):
+            product_counter[dataset.type.name] += 1
             count += 1
             # Archive if it has no locations.
             # (the sync tool removes locations that don't exist anymore on disk,
             # but can't archive datasets as another path may be added later during the sync)
             if check_locationless or archive_locationless:
                 if dataset.uris is not None and len(dataset.uris) == 0:
+                    locationless_counter[dataset.type.name] += 1
                     locationless_count += 1
 
                     if archive_locationless:
                         dc.index.datasets.archive([dataset.id])
+                        archived_counter[dataset.type.name] += 1
                         archive_count += 1
-                        _LOG.info("locationless_dataset_id.archived", dataset_id=str(dataset.id))
+                        _LOG.info("locationless_dataset_id.archived", dataset_id=str(dataset.id),
+                                  product=dataset.type.name)
                     else:
-                        _LOG.info("locationless_dataset_id", dataset_id=str(dataset.id))
+                        _LOG.info("locationless_dataset_id", dataset_id=str(dataset.id), product=dataset.type.name)
 
             # If an ancestor is archived, it may have been replaced. This one may need
             # to be reprocessed too.
             if check_ancestors or archive_siblings or check_siblings:
                 archive_count += _check_ancestors(check_ancestors, check_siblings, archive_siblings, dc, dataset)
+
+        _LOG.info("coherence.details",
+                  product_count=dict(product_counter),
+                  locationless_count=dict(locationless_counter),
+                  archived_count=dict(archived_counter))
 
         _LOG.info("coherence.finish",
                   datasets_count=count,
