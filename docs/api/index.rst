@@ -11,7 +11,7 @@ Welcome to digitalearthau's documentation!
    :caption: Contents:
 
    digitalearthau
-   cli
+   cli/*
 
 
 Indices and tables
