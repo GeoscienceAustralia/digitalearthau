@@ -1,8 +1,4 @@
-#!/usr/bin/env python3
-
 from setuptools import setup, find_packages
-
-import versioneer
 
 tests_require = ['pytest', 'pytest-cov', 'mock', 'pycodestyle', 'pylint',
                  'hypothesis', 'compliance-checker', 'yamllint']
@@ -15,13 +11,11 @@ extras_require = {
 
 setup(
     name='digitalearthau',
-    version=versioneer.get_version(),
-    cmdclass=versioneer.get_cmdclass(),
 
     url='https://github.com/GeoscienceAustralia/digitalearthau',
     author='Geoscience Australia',
-    author_email='damien.ayers@ga.gov.au',
     license='Apache License 2.0',
+    use_scm_version=True,
 
     packages=find_packages(
         exclude=('tests', 'tests.*',
@@ -34,7 +28,7 @@ setup(
     scripts=[
     ],
     setup_requires=[
-        'pytest-runner'
+        'setuptools_scm',
     ],
     install_requires=[
         'attrs>=19.2.0',

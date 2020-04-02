@@ -1,10 +1,10 @@
-from pathlib import Path
 import re
+from pathlib import Path
 
-from ._version import get_versions
-
-__version__ = get_versions()['version']
-del get_versions
+try:
+    from ._version import version as __version__
+except ImportError:
+    __version__ = 'Unknown/Not Installed'
 
 
 def _get_module_name():
