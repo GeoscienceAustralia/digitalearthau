@@ -445,7 +445,7 @@ def _build_qsub_args(**p):
 
 def self_launch_args(*args):
     """
-    Build tuple in the form (current_python, current_script, *args)
+    Build tuple in the form ``(current_python, current_script, *args)``
     """
 
     py_file = str(Path(sys.argv[0]).absolute())

@@ -19,7 +19,7 @@ def simple_object_repr(o):
 
 def wofs_fuser(dest, src):
     """
-    Fuse two WOfS water measurements represented as `ndarray`s.
+    Fuse two WOfS water measurements represented as `ndarray`
     """
     empty = (dest & 1).astype(numpy.bool)
     both = ~empty & ~((src & 1).astype(numpy.bool))

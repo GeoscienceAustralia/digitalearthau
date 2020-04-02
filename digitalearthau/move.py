@@ -106,9 +106,9 @@ class FileMover:
 
     There are several types of Datasets we may want to move around.
 
-    1. A single file dataset. Eg. A *.nc file with an embedded `datasets` variable containing all metadata
+    1. A single file dataset. Eg. A ``*.nc`` file with an embedded ``datasets`` variable containing all metadata
     2. A directory dataset. Eg. Landsat scenes. A dataset is a directory containing multiple data files,
-       a *-metadata.yaml file, and potentially other files as well.
+       a ``*-metadata.yaml`` file, and potentially other files as well.
     3. A dataset is a metadata file which lives beside a data file.
     4. A dataset is a metadata file which lives separately to a data file. (Probably not managed by DEA, unable to move)
     """
