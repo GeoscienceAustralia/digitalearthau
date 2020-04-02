@@ -1,3 +1,11 @@
+"""
+
+Generate RST output files for Click based CLI tools
+
+The generated outputs require the sphinx-click extension.
+
+"""
+
 import pkg_resources
 
 eps = [ep for ep in pkg_resources.iter_entry_points('console_scripts') if ep.dist.project_name == 'digitalearthau']
