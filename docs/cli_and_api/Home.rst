@@ -3,16 +3,23 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to digitalearthau's documentation!
-==========================================
+CLI Docs
+========
 
 .. toctree::
-   :maxdepth: 4
-   :caption: Contents:
+   :maxdepth: 1
+   :glob:
+
+   dea-*
+
+
+API Docs
+========
+
+.. toctree::
+   :maxdepth: 2
 
    digitalearthau
-   cli/*
-
 
 Indices and tables
 ==================
