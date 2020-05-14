@@ -3,6 +3,8 @@ name: ga_ls5t_level1_3
 description: Geoscience Australia Landsat 5 Thematic Mapper Level 1 Collection 3
 metadata_type: eo3_landsat_l1
 
+license: CC-BY-4.0
+
 metadata:
   product:
     name: ga_ls5t_level1_3

@@ -3,6 +3,8 @@ name: ga_ls8c_level1_3
 description: Geoscience Australia Landsat 8 Operational Land Imager and Thermal Infra-Red Scanner Level 1 Collection 3
 metadata_type: eo3_landsat_l1
 
+license: CC-BY-4.0
+
 metadata:
   product:
     name: ga_ls8c_level1_3
