@@ -32,21 +32,22 @@ def parse_nodes_file(fname=None):
 
     def load_lines(fname):
         with open(fname, 'r') as f:
-            ll = [l.strip() for l in f.readlines()]
-            return [l for l in ll if len(l) > 0]
+            stripped_lines = [line.strip() for line in f.readlines()]
+            return [line for line in stripped_lines
+                    if len(line) > 0]
 
     main_hostname = hostname()
     _nodes = OrderedDict()
 
-    for idx, l in enumerate(load_lines(fname)):
-        if l in _nodes:
-            _nodes[l]['num_cores'] += 1
+    for idx, line in enumerate(load_lines(fname)):
+        if line in _nodes:
+            _nodes[line]['num_cores'] += 1
         else:
-            _nodes[l] = dict(
-                name=l,
+            _nodes[line] = dict(
+                name=line,
                 num_cores=1,
                 offset=idx,
-                is_main=(main_hostname == l))
+                is_main=(main_hostname == line))
 
     return [Node(**x) for x in _nodes.values()]
 
