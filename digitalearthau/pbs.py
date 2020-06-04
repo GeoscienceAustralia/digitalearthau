@@ -9,6 +9,11 @@ import shlex
 from collections import namedtuple, OrderedDict
 from typing import Optional
 
+ENV_VARS_TO_PASS = set(['PATH', 'LANG', 'LD_LIBRARY_PATH', 'HOME', 'USER',
+                        'CPL_ZIP_ENCODING'])
+ENV_REGEXES_TO_PASS = ['^PYTHON.*', '^GDAL.*', '^LC.*', '^DATACUBE.*',
+                       '^PROJ_.*']
+
 Node = namedtuple('Node', ['name', 'num_cores', 'offset', 'is_main'])
 
 
@@ -110,13 +115,10 @@ def preferred_queue_size():
 def get_env(extras=None, **more_env):
     extras = extras or []
 
-    pass_envs = set(['PATH', 'LANG', 'LD_LIBRARY_PATH', 'HOME', 'USER',
-                     'CPL_ZIP_ENCODING'])
-    regexes = ['^PYTHON.*', '^GDAL.*', '^LC.*', '^DATACUBE.*']
-    rgxs = [re.compile(r) for r in regexes]
+    rgxs = [re.compile(r) for r in ENV_REGEXES_TO_PASS]
 
     def need_this_env(k):
-        if k in pass_envs or k in extras:
+        if k in ENV_VARS_TO_PASS or k in extras:
             return True
         for rgx in rgxs:
             if rgx.match(k):
