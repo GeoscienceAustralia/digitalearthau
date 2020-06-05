@@ -1,4 +1,3 @@
-import json
 from io import StringIO
 from uuid import UUID
 
@@ -9,7 +8,7 @@ from boltons.jsonutils import JSONLIterator
 from datetime import datetime
 
 from dateutil import tz
-from mock import mock
+from unittest import mock
 from typing import List
 
 from digitalearthau.events import TaskEvent, NodeMessage, Status
@@ -18,10 +17,13 @@ from digitalearthau.runners.celery_environment import _celery_event_to_task
 from . import qsub
 
 import celery.events.state as celery_state
-import sys
 
 from datacube import _celery_runner as cr
 
+# Flake8 doesn't allow ignoring just one error for a whole file,
+# so because of the long lines in here, lets ignore all errors in the file.
+# Hey, it's only a linter...
+# flake8: noqa
 
 ###############################################
 # Test Utilities re PBS Job Submission

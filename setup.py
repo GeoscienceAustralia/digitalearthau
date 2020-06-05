@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 import versioneer
 
-tests_require = ['pytest', 'pytest-cov', 'mock', 'pycodestyle', 'pylint',
+tests_require = ['pytest', 'pytest-cov', 'pycodestyle', 'pylint',
                  'hypothesis', 'compliance-checker', 'yamllint']
 
 extras_require = {
@@ -48,6 +48,7 @@ setup(
         'boltons',
         'lxml',
         'pydash',
+        'gdal',
     ],
     tests_require=tests_require,
     extras_require=extras_require,
