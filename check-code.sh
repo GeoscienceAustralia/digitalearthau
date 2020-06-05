@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
-# Convenience script for running Travis-like checks.
+# Convenience script for running CI checks.
 
-set -eu
-set -x
+set -eux
 
 shopt -s globstar
 
@@ -26,5 +25,4 @@ shellcheck ./**/*.sh
 yamllint ./**/*.yaml
 
 # Users can specify extra folders (ie. integration_tests) as arguments.
-py.test -r sx --cov digitalearthau --durations=5 digitalearthau scripts/**/*.py "$@"
-
+pytest -r sx --cov digitalearthau --durations=5 digitalearthau scripts/**/*.py "$@"

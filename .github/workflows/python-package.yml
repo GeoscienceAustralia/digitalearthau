@@ -55,7 +55,7 @@ jobs:
           conda config --show
     - name: Create Integration Test Database
       run: |
-        sudo apt-get -yqq install postgresql-client
+        sudo apt-get -yqq install postgresql-client yamllint
         createdb dea_integration
       env:
         # The hostname used to communicate with the PostgreSQL service container
