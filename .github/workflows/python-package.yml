@@ -5,9 +5,9 @@ name: Python package
 
 on:
   push:
-    branches: [ develop, fix/ci ]
+    branches: [develop, fix/ci]
   pull_request:
-    branches: [ develop, fix/ci ]
+    branches: [develop, fix/ci]
 
 jobs:
   build:
@@ -38,7 +38,8 @@ jobs:
     - name: Install dependencies
       shell: 'bash -l {0}'
       run: |
-        conda create -n dea python=3.6 datacube
+        conda update -n base -c defaults conda
+        conda create -n dea python=3.6 datacube boltons pydash ciso8601 cattrs ruamel.yaml dawg structlog
         conda activate dea
         python setup.py bdist_wheel
         pip install dist/*.whl

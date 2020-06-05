@@ -8,8 +8,8 @@ tests_require = ['pytest', 'pytest-cov', 'mock', 'pycodestyle', 'pylint',
                  'hypothesis', 'compliance-checker', 'yamllint']
 
 extras_require = {
-    'doc': ['Sphinx', 'nbsphinx', 'setuptools', 'sphinx_rtd_theme', 'IPython', 'jupyter_sphinx',
-            'recommonmark'],
+    'doc': ['Sphinx', 'nbsphinx', 'setuptools', 'sphinx_rtd_theme',
+            'IPython', 'jupyter_sphinx', 'recommonmark'],
     'test': tests_require,
 }
 
@@ -42,7 +42,6 @@ setup(
         'click>=5.0',
         'datacube[celery]',
         'python-dateutil',
-        'gdal',
         'eodatasets3>=0.4.0',
         'structlog',
         'DAWG',
