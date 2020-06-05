@@ -69,7 +69,7 @@ jobs:
       shell: 'bash -l {0}'
       run: |
         conda update -n base -c defaults conda
-        conda create -n dea python=3.6 datacube boltons pydash ciso8601 cattrs ruamel.yaml dawg structlog flake8
+        conda create -n dea python=3.6 datacube boltons pydash ciso8601 cattrs ruamel.yaml dawg structlog flake8 pylint
         conda activate dea
         python setup.py bdist_wheel
         pip install dist/*.whl
