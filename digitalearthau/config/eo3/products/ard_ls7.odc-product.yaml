@@ -1,6 +1,6 @@
 ---
 name: ga_ls7e_ard_3
-description: Landsat 7 ETM+ ARD, GA Collection 3
+description: Geoscience Australia Landsat 7 Enhanced Thematic Mapper Plus Analysis Ready Data Collection 3
 metadata_type: eo3_landsat_ard
 
 metadata:
