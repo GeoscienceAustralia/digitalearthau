@@ -127,3 +127,9 @@ dataset:
       offset:
         - properties
         - landsat:landsat_scene_id
+    landsat_data_type:
+      description: "Landsat Data Type (eg. 'L1T')"
+      indexed: false
+      offset:
+        - properties
+        - landsat:data_type
