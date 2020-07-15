@@ -25,4 +25,4 @@ metadata:
     platform:
         code: SENTINEL_2A,SENTINEL_2B
     product_type: S2_MSI_TSmask
-metadata_type: eo_plus
+metadata_type: eo
