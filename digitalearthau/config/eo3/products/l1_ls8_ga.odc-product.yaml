@@ -8,6 +8,11 @@ license: CC-BY-4.0
 metadata:
   product:
     name: ga_ls8c_level1_3
+  properties:
+    eo:platform: landsat-8
+    eo:instrument: OLI_TIRS
+    odc:product_family: level1
+    odc:producer: ga.gov.au
 
 measurements:
   - name: coastal_aerosol

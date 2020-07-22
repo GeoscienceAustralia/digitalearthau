@@ -8,7 +8,11 @@ license: CC-BY-4.0
 metadata:
   product:
     name: usgs_ls7e_level1_1
-
+  properties:
+    eo:platform: landsat-7
+    eo:instrument: ETM
+    odc:product_family: level1
+    odc:producer: usgs.gov
 measurements:
   - name: blue
     aliases:
