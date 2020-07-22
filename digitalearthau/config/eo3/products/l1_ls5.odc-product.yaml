@@ -13,6 +13,7 @@ metadata:
      eo:instrument: TM
      odc:product_family: level1
      odc:producer: usgs.gov
+     landsat:collection_number: 1
 
 measurements:
   - name: blue
