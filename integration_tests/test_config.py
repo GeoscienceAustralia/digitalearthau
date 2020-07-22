@@ -13,7 +13,6 @@ def test_dea_config(dea_index: Index):
 
     expected_mds = sorted([
         'eo',
-        'eo_plus',
         'gqa_eo',
         'landsat_l1_scene',
         'landsat_scene',
