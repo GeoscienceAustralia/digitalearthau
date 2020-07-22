@@ -8,6 +8,12 @@ license: CC-BY-4.0
 metadata:
   product:
     name: ga_ls8c_ard_3
+  properties:
+     eo:platform: landsat-8
+     eo:instrument: OLI_TIRS
+     dea:dataset_maturity: final
+     odc:product_family: ard
+     odc:producer: ga.gov.au
 
 measurements:
   # NBAR
