@@ -9,10 +9,11 @@ metadata:
   product:
     name: ga_ls7e_level1_3
   properties:
-    eo:platform: landsat-7
-    eo:instrument: ETM
-    odc:product_family: level1
-    odc:producer: ga.gov.au
+     eo:platform: landsat-7
+     eo:instrument: ETM
+     odc:product_family: level1
+     odc:producer: ga.gov.au
+     landsat:collection_number: 1
 
 measurements:
   - name: blue

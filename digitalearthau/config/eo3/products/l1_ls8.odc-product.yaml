@@ -9,10 +9,11 @@ metadata:
   product:
     name: usgs_ls8c_level1_1
   properties:
-    eo:platform: landsat-8
-    eo:instrument: OLI_TIRS
-    odc:product_family: level1
-    odc:producer: usgs.gov
+     eo:platform: landsat-8
+     eo:instrument: OLI_TIRS
+     odc:product_family: level1
+     odc:producer: usgs.gov
+     landsat:collection_number: 1
 
 measurements:
   - name: coastal_aerosol

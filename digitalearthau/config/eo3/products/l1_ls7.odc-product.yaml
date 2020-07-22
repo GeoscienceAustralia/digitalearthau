@@ -9,10 +9,12 @@ metadata:
   product:
     name: usgs_ls7e_level1_1
   properties:
-    eo:platform: landsat-7
-    eo:instrument: ETM
-    odc:product_family: level1
-    odc:producer: usgs.gov
+     eo:platform: landsat-7
+     eo:instrument: ETM
+     odc:product_family: level1
+     odc:producer: usgs.gov
+     landsat:collection_number: 1
+
 measurements:
   - name: blue
     aliases:

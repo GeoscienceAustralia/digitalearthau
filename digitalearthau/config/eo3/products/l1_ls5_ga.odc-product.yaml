@@ -13,6 +13,7 @@ metadata:
      eo:instrument: TM
      odc:product_family: level1
      odc:producer: ga.gov.au
+     landsat:collection_number: 1
 
 measurements:
   - name: blue
