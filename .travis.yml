@@ -65,7 +65,7 @@ before_install:
   - pip install gdal=="$(gdal-config --version)"'.*'
 
 install:
-  - travis_retry pip install --upgrade pytest
+  - travis_retry pip install --upgrade pytest setuptools pip
   - travis_retry pip install codecov cython boto3
   - travis_retry pip install -e .[doc,test]
 
