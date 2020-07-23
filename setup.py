@@ -40,7 +40,7 @@ setup(
         'attrs>=19.2.0',
         'colorama',  # Needed for structlog's CLI output.
         'click>=5.0',
-        'datacube[celery]',
+        'datacube[celery] >= 1.8',
         'python-dateutil',
         'gdal',
         'eodatasets3>=0.4.0',

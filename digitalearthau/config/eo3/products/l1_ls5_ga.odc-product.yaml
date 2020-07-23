@@ -1,18 +1,18 @@
 ---
-name: usgs_ls7e_level1_1
-description: United States Geological Survey Landsat 7 Enhanced Thematic Mapper Plus Level 1 Collection 1
+name: ga_ls5t_level1_3
+description: Geoscience Australia Landsat 5 Thematic Mapper Level 1 Collection 3
 metadata_type: eo3_landsat_l1
 
 license: CC-BY-4.0
 
 metadata:
   product:
-    name: usgs_ls7e_level1_1
+    name: ga_ls5t_level1_3
   properties:
-     eo:platform: landsat-7
-     eo:instrument: ETM
+     eo:platform: landsat-5
+     eo:instrument: TM
      odc:product_family: level1
-     odc:producer: usgs.gov
+     odc:producer: ga.gov.au
      landsat:collection_number: 1
 
 measurements:
@@ -52,12 +52,6 @@ measurements:
     dtype: uint16
     nodata: 65535
     units: '1'
-    #   - name: panchromatic
-    #     aliases:
-    #       - band08
-    #     dtype: uint16
-    #     nodata: 65535
-    #     units: '1'
   - name: quality
     aliases:
       - bqa
