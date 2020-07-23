@@ -3,9 +3,18 @@ name: ga_ls7e_nbart_3
 description: Geoscience Australia Landsat 7 Enhanced Thematic Mapper Plus Analysis Ready Data Collection 3 NBART
 metadata_type: eo3_landsat_ard
 
+license: CC-BY-4.0
+
 metadata:
   product:
     name: ga_ls7e_nbart_3
+  properties:
+     eo:platform: landsat-7
+     eo:instrument: ETM
+     dea:dataset_maturity: final
+     odc:product_family: ard
+     odc:producer: ga.gov.au
+     landsat:collection_number: 1
 
 measurements:
   # NBART
