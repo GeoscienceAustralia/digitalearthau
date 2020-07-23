@@ -112,6 +112,11 @@ def test_dea_config(dea_index: Index):
         'ga_ls5t_level1_3',
         'ga_ls7e_level1_3',
         'ga_ls8c_level1_3',
+
+        # AWS-converted EO3
+        'ga_ls5t_nbart_3',
+        'ga_ls7e_nbart_3',
+        'ga_ls8c_nbart_3',
     }
 
 
