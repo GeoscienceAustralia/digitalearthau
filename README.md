@@ -14,7 +14,7 @@ See the modules [readme](modules/README.md)
 ### Creating a DEA-configured Data Cube
 
 DEA has its own metadata types, so you must initialise using the config in this
-repository rather that `datacube system init`. A command is available to do this:
+repository rather than `datacube system init`. A command is available to do this:
 
     dea-system init
 
