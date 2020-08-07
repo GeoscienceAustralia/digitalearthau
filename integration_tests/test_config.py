@@ -91,6 +91,7 @@ def test_dea_config(dea_index: Index):
         'ls7_fc_albers',
         'ls8_fc_albers',
         'fc_percentile_albers_annual',
+        'fc_percentile_albers_seasonal',
         'mangrove_extent_cover_albers',
         'wofs_summary',
         'wofs_filtered_summary',
