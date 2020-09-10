@@ -31,4 +31,3 @@ measurements:
     dtype: uint8
     nodata: 255
     aliases: ["err"]
-    
