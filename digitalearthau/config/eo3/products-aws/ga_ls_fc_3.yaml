@@ -11,23 +11,24 @@ metadata:
     href: https://collections.dea.ga.gov.au/product/ga_ls_fc_3
 
 measurements:
-    - name: bs
-      units: "percent"
-      dtype: uint8
-      nodata: 255
-      aliases: ["bare"]
-    - name: pv
-      units: "percent"
-      dtype: uint8
-      nodata: 255
-      aliases: ["green_veg"]
-    - name: npv
-      units: "percent"
-      dtype: uint8
-      nodata: 255
-      aliases: ["dead_veg"]
-    - name: ue
-      units: "1"
-      dtype: uint8
-      nodata: 255
-      aliases: ["err"]
+  - name: bs
+    units: "percent"
+    dtype: uint8
+    nodata: 255
+    aliases: ["bare"]
+  - name: pv
+    units: "percent"
+    dtype: uint8
+    nodata: 255
+    aliases: ["green_veg"]
+  - name: npv
+    units: "percent"
+    dtype: uint8
+    nodata: 255
+    aliases: ["dead_veg"]
+  - name: ue
+    units: "1"
+    dtype: uint8
+    nodata: 255
+    aliases: ["err"]
+    
