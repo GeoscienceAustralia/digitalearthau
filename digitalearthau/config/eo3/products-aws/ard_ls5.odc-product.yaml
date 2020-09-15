@@ -1,6 +1,6 @@
 ---
 name: ga_ls5t_ard_3
-description: Geoscience Australia Landsat 5 Thematic Mapper Analysis Ready Data Collection 3 NBART
+description: Geoscience Australia Landsat 5 Thematic Mapper Analysis Ready Data Collection 3
 metadata_type: eo3_landsat_ard
 
 license: CC-BY-4.0
