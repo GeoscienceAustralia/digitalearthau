@@ -11,11 +11,11 @@ from datacube.utils import read_documents
 from datacube.drivers import storage_writer_by_name
 
 DEA_MD_TYPES = digitalearthau.CONFIG_DIR / 'metadata-types.odc-type.yaml'
-DEA_PRODUCTS_DIR = digitalearthau.CONFIG_DIR / 'products'
-DEA_INGESTION_DIR = digitalearthau.CONFIG_DIR / 'ingestion'
+DEA_PRODUCTS_DIR = digitalearthau.PRODUCTS_CONFIG_DIR / 'products'
+DEA_INGESTION_DIR = digitalearthau.INGEST_CONFIG_DIR
 
-DEA_EO3_TYPES = list((digitalearthau.CONFIG_DIR / 'eo3').rglob('*.odc-type.yaml'))
-DEA_EO3_PRODUCTS_DIR = digitalearthau.CONFIG_DIR / 'eo3' / 'products'
+DEA_EO3_TYPES = list((digitalearthau.EO3_CONFIG_DIR).rglob('*.odc-type.yaml'))
+DEA_EO3_PRODUCTS_DIR = digitalearthau.EO3_CONFIG_DIR
 
 
 def print_header(msg):
