@@ -72,3 +72,6 @@ docs/notebooks
 
 # MYPY static type checker cache
 .mypy_cache
+
+# Visual Studio Code stuff
+.vscode
