@@ -19,5 +19,7 @@ MODULE_NAME = _get_module_name()
 
 BASE_DIR = Path(__file__).absolute().parent
 SCRIPT_DIR = BASE_DIR
-CONFIG_DIR = BASE_DIR / 'config'
+CONFIG_DIR = BASE_DIR.parent / 'config' / 'config' / 'collection-2-nci'
 INGEST_CONFIG_DIR = CONFIG_DIR / 'ingestion'
+PRODUCTS_CONFIG_DIR = CONFIG_DIR / 'products'
+EO3_CONFIG_DIR = CONFIG_DIR / 'config' / 'config' / 'collection-3-nci'
