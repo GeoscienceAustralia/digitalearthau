@@ -3,10 +3,9 @@ description: Geoscience Australia Landsat Water Observations Collection 3
 metadata_type: eo3
 metadata:
   properties:
-    odc:product_family: wofs
     odc:file_format: GeoTIFF
   product:
-    name: ga_ls_wofs_3
+    name: ga_ls_wo_3
 
 measurements:
   - name: water
