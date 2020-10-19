@@ -5,6 +5,7 @@ metadata_type: eo3
 metadata:
   properties:
     odc:file_format: GeoTIFF
+    odc:product_family: fc
   product:
     name: ga_ls_fc_3
 

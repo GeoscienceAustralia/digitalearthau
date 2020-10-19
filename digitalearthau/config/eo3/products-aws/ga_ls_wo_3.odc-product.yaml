@@ -4,6 +4,7 @@ metadata_type: eo3
 metadata:
   properties:
     odc:file_format: GeoTIFF
+    odc:product_family: wo
   product:
     name: ga_ls_wo_3
 
