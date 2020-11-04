@@ -47,6 +47,7 @@ dataset:
       description: Cloud cover percentage [0, 100]
       type: double
       offset: [properties, 'eo:cloud_cover']
+      indexed: false
 
     time:
       description: Acquisition time range
