@@ -26,7 +26,7 @@ _LOG = structlog.get_logger()
 # pylint: disable=invalid-sequence-index
 
 
-@click.command()
+@click.command('dea-sync')
 @ui.global_cli_options
 @click.option('--cache-folder',
               type=click.Path(exists=True, readable=True, writable=True),

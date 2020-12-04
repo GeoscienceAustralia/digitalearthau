@@ -93,7 +93,7 @@ def init_dea(
             log(f"{product.name}")
 
 
-@click.group('system')
+@click.group('dea-system')
 @global_cli_options
 def cli():
     pass

@@ -140,7 +140,7 @@ def _write_csv(unique_fields, dicts, stream, append=False):
 collections.init_nci_collections(None)
 
 
-@click.command('duplicates')
+@click.command('dea-duplicates')
 @global_cli_options
 @click.option('-a', '--all_', is_flag=True)
 @click.argument('collections_', type=click.Choice(collections.registered_collection_names()), nargs=-1)

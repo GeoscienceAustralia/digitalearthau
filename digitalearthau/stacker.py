@@ -1,4 +1,6 @@
 """
+DEA Stacker
+
 A DEA version of `stacker` from ODC
 
 Uses the exact same implementation, but wraps it in QSUB Running/Event logging goodness.
@@ -51,7 +53,7 @@ _LOG = logging.getLogger(__file__)
 APP_NAME = 'dea-stacker'
 
 
-@click.group(help='DEA Stacker\n\n' + __doc__)
+@click.group('dea-stacker', help=__doc__)
 @click.version_option(version=__version__)
 def cli():
     pass

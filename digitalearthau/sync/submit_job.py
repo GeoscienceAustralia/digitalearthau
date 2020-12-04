@@ -177,7 +177,7 @@ class SyncSubmission(object):
         return job_id, command
 
 
-@click.command()
+@click.command('dea-submit-sync')
 @click.argument('folders',
                 type=click.Path(exists=True, readable=True),
                 nargs=-1)

@@ -22,13 +22,13 @@ from digitalearthau import paths, uiutil
 from dateutil import tz
 
 
-@click.group(help=__doc__)
+@click.group(name='dea-cleanup', help=__doc__)
 @ui.global_cli_options
-def cli():
+def dea_cleanup():
     pass
 
 
-@cli.command('archived')
+@dea_cleanup.command('archived')
 @click.option('--min-trash-age-hours',
               type=int,
               default=72,

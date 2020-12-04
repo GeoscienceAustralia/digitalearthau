@@ -76,7 +76,7 @@ def as_dict(local_config):
     return dict(local_config._config[local_config._env])
 
 
-@click.group()
+@click.group('dea-test-env')
 @click.option('-C', '--config-file',
               type=click.Path(exists=True, dir_okay=False),
               help="Database configuration file.")

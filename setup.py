@@ -10,6 +10,7 @@ tests_require = ['pytest', 'pytest-cov', 'mock', 'pycodestyle', 'pylint',
 extras_require = {
     'doc': ['Sphinx', 'nbsphinx', 'setuptools', 'sphinx_rtd_theme', 'IPython', 'jupyter_sphinx',
             'recommonmark'],
+    'sync': ['compliance_checker'],
     'test': tests_require,
 }
 
@@ -55,7 +56,7 @@ setup(
 
     entry_points={
         'console_scripts': [
-            'dea-clean = digitalearthau.cleanup:cli',
+            'dea-clean = digitalearthau.cleanup:dea_cleanup',
             'dea-coherence = digitalearthau.coherence:main',
             'dea-duplicates = digitalearthau.duplicates:cli',
             'dea-harvest = digitalearthau.harvest.iso19115:main',

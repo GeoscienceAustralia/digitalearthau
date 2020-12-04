@@ -25,7 +25,7 @@ from digitalearthau.uiutil import init_logging
 _LOG = structlog.get_logger()
 
 
-@click.command()
+@click.command('dea-move')
 @ui.global_cli_options
 @click.option('--dry-run', is_flag=True, default=False)
 @click.option('--checksum/--no-checksum', is_flag=True, default=True)

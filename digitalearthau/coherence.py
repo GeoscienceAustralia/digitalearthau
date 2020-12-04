@@ -11,7 +11,7 @@ _LOG = structlog.getLogger('archive-locationless')
 _siblings_count = 0
 
 
-@click.command()
+@click.command(name='dea-coherence')
 @click.option('--check-locationless/--no-check-locationless',
               is_flag=True,
               default=False,

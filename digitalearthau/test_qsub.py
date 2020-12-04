@@ -9,7 +9,7 @@ from boltons.jsonutils import JSONLIterator
 from datetime import datetime
 
 from dateutil import tz
-from mock import mock
+from unittest import mock
 from typing import List
 
 from digitalearthau.events import TaskEvent, NodeMessage, Status

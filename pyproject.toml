@@ -1,0 +1,2 @@
+[tool.portray]
+extra_markdown_extensions = ["mkdocs-click"]

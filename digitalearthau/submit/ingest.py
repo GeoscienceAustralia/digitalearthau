@@ -48,7 +48,7 @@ email_id_options = click.option('--email-id', '-M', default='nci.monitor@dea.ga.
                                 help='Email Recipient List')
 
 
-@click.group()
+@click.group('dea-submit-ingest')
 def cli():
     pass
 

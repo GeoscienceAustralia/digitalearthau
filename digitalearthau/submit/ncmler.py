@@ -22,7 +22,7 @@ def cell_list_to_file(filename: Path, cell_list):
             cell_file.write('{0},{1}\n'.format(*cell))
 
 
-@click.group()
+@click.group('dea-submit-ncmler')
 def cli():
     pass
 

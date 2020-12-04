@@ -68,7 +68,7 @@ def local_file(filename):
     return os.path.join(os.path.split(os.path.realpath(__file__))[0], filename)
 
 
-@click.command()
+@click.command('dea-harvest')
 @click.option('mapping', '-m', help='Mapping file of global attributes to xpath queries.',
               type=click.Path(exists=True, readable=True), default=local_file('mapping.yaml'))
 @click.argument('iso', callback=convert_cmi_node, required=True)
