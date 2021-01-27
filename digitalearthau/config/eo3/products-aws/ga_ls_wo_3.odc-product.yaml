@@ -1,6 +1,9 @@
 name: ga_ls_wo_3
 description: Geoscience Australia Landsat Water Observations Collection 3
 metadata_type: eo3
+
+license: CC-BY-4.0
+
 metadata:
   properties:
     odc:file_format: GeoTIFF
