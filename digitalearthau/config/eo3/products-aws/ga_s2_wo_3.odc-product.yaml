@@ -1,13 +1,16 @@
----
 name: ga_s2_wo_3
 metadata_type: eo3
-description: Sentinel 2 Water Observations
+description: Sentinel 2 Water Observations Collection 3
+
+license: CC-BY-4.0
+
 metadata:
   product:
     name: ga_s2_wo_3
   properties:
     odc:file_format: GeoTIFF
     odc:product_family: wo
+
 measurements:
 - name: water
   dtype: uint8
