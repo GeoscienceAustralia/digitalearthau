@@ -38,6 +38,11 @@ dataset:
 
       offset: [properties, 'odc:region_code']
 
+    crs_raw:
+      description: The raw CRS string as it appears in metadata
+      offset: ['crs']
+      indexed: false
+
     dataset_maturity:
       description: One of - final|interim|nrt  (near real time)
       offset: [properties, 'dea:dataset_maturity']
