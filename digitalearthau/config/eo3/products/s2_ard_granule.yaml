@@ -72,12 +72,12 @@ measurements:
             bits: [0, 1, 2, 3, 4, 5, 6, 7]
             description: Pixel contiguity in band stack
             values: {'0': not_contiguous, '1': contiguous}
-    name: nbar_contiguity
+    name: nbart_contiguity
     nodata: 255
     units: '1'
-  - aliases: [nbar_band_01, nbar_B01, nbar_Band1]
+  - aliases: [nbart_band_01, nbart_B01, nbart_Band1]
     dtype: int16
-    name: nbar_coastal_aerosol
+    name: nbart_coastal_aerosol
     nodata: -999
     spectral_definition:
         response: [0.015297, 0.067133, 0.19593, 0.357242, 0.460571, 0.511598, 0.551051,
@@ -88,9 +88,9 @@ measurements:
             443, 444, 445, 446, 447, 448, 449, 450, 451, 452, 453, 454, 455, 456,
             457]
     units: '1'
-  - aliases: [nbar_band_02, nbar_B02, nbar_Band2]
+  - aliases: [nbart_band_02, nbart_B02, nbart_Band2]
     dtype: int16
-    name: nbar_blue
+    name: nbart_blue
     nodata: -999
     spectral_definition:
         response: [0.001206, 0.00204, 0.002623, 0.002738, 0.002746, 0.002076, 0.003246,
@@ -115,9 +115,9 @@ measurements:
             523, 524, 525, 526, 527, 528, 529, 530, 531, 532, 533, 534, 535, 536,
             537, 538]
     units: '1'
-  - aliases: [nbar_band_03, nbar_B03, nbar_Band3]
+  - aliases: [nbart_band_03, nbart_B03, nbart_Band3]
     dtype: int16
-    name: nbar_green
+    name: nbart_green
     nodata: -999
     spectral_definition:
         response: [0.00084, 0.016372, 0.037688, 0.080665, 0.169509, 0.341374, 0.573031,
@@ -131,9 +131,9 @@ measurements:
             564, 565, 566, 567, 568, 569, 570, 571, 572, 573, 574, 575, 576, 577,
             578, 579, 580, 581, 582]
     units: '1'
-  - aliases: [nbar_band_04, nbar_B04, nbar_Band4]
+  - aliases: [nbart_band_04, nbart_B04, nbart_Band4]
     dtype: int16
-    name: nbar_red
+    name: nbart_red
     nodata: -999
     spectral_definition:
         response: [0.002584, 0.034529, 0.14997, 0.464826, 0.817746, 0.965324, 0.983869,
@@ -146,9 +146,9 @@ measurements:
             659, 660, 661, 662, 663, 664, 665, 666, 667, 668, 669, 670, 671, 672,
             673, 674, 675, 676, 677, 678, 679, 680, 681, 682, 683, 684]
     units: '1'
-  - aliases: [nbar_band_05, nbar_B05, nbar_Band5]
+  - aliases: [nbart_band_05, nbart_B05, nbart_Band5]
     dtype: int16
-    name: nbar_red_edge_1
+    name: nbart_red_edge_1
     nodata: -999
     spectral_definition:
         response: [0.001187, 0.04126, 0.167712, 0.478496, 0.833878, 0.985479, 1.0,
@@ -157,9 +157,9 @@ measurements:
         wavelength: [694, 695, 696, 697, 698, 699, 700, 701, 702, 703, 704, 705, 706,
             707, 708, 709, 710, 711, 712, 713]
     units: '1'
-  - aliases: [nbar_band_06, nbar_B06, nbar_Band6]
+  - aliases: [nbart_band_06, nbart_B06, nbart_Band6]
     dtype: int16
-    name: nbar_red_edge_2
+    name: nbart_red_edge_2
     nodata: -999
     spectral_definition:
         response: [0.005331, 0.085006, 0.345714, 0.750598, 0.920265, 0.917917, 0.934211,
@@ -168,9 +168,9 @@ measurements:
         wavelength: [731, 732, 733, 734, 735, 736, 737, 738, 739, 740, 741, 742, 743,
             744, 745, 746, 747, 748, 749]
     units: '1'
-  - aliases: [nbar_band_07, nbar_B07, nbar_Band7]
+  - aliases: [nbart_band_07, nbart_B07, nbart_Band7]
     dtype: int16
-    name: nbar_red_edge_3
+    name: nbart_red_edge_3
     nodata: -999
     spectral_definition:
         response: [0.001595, 0.014731, 0.067032, 0.199495, 0.422803, 0.694015, 0.898494,
@@ -181,9 +181,9 @@ measurements:
             782, 783, 784, 785, 786, 787, 788, 789, 790, 791, 792, 793, 794, 795,
             796, 797]
     units: '1'
-  - aliases: [nbar_band_08, nbar_B08, nbar_Band8]
+  - aliases: [nbart_band_08, nbart_B08, nbart_Band8]
     dtype: int16
-    name: nbar_nir_1
+    name: nbart_nir_1
     nodata: -999
     spectral_definition:
         response: [0.000451, 0.007614, 0.019072, 0.033498, 0.056536, 0.087148, 0.13246,
@@ -215,9 +215,9 @@ measurements:
             884, 885, 886, 887, 888, 889, 890, 891, 892, 893, 894, 895, 896, 897,
             898, 899, 900, 901, 902, 903, 904, 905, 906, 907, 908]
     units: '1'
-  - aliases: [nbar_band_8A, nbar_B8A, nbar_Band8A]
+  - aliases: [nbart_band_8A, nbart_B8A, nbart_Band8A]
     dtype: int16
-    name: nbar_nir_2
+    name: nbart_nir_2
     nodata: -999
     spectral_definition:
         response: [0.001651, 0.013242, 0.02471, 0.051379, 0.104944, 0.216577, 0.384865,
@@ -229,9 +229,9 @@ measurements:
             861, 862, 863, 864, 865, 866, 867, 868, 869, 870, 871, 872, 873, 874,
             875, 876, 877, 878, 879, 880, 881]
     units: '1'
-  - aliases: [nbar_band_11, nbar_B11, nbar_Band11]
+  - aliases: [nbart_band_11, nbart_B11, nbart_Band11]
     dtype: int16
-    name: nbar_swir_2
+    name: nbart_swir_2
     nodata: -999
     spectral_definition:
         response: [7.0e-06, 7.0e-06, 8.0e-06, 2.8e-05, 3.8e-05, 9.1e-05, 0.000147,
@@ -268,9 +268,9 @@ measurements:
             1670, 1671, 1672, 1673, 1674, 1675, 1676, 1677, 1678, 1679, 1680, 1681,
             1682]
     units: '1'
-  - aliases: [nbar_band_12, nbar_B12, nbar_Band12]
+  - aliases: [nbart_band_12, nbart_B12, nbart_Band12]
     dtype: int16
-    name: nbar_swir_3
+    name: nbart_swir_3
     nodata: -999
     spectral_definition:
         response: [0.000639, 0.001023, 0.002885, 0.003997, 0.006597, 0.00766, 0.008004,
@@ -335,7 +335,7 @@ metadata:
     processing_level: Level-2
     product_type: S2MSIARD_NBAR
 metadata_type: eo_plus
-name: ga_s2a_ard_nbar_granule
+name: s2a_ard_granule
 ---
 description: Sentinel-2B MSI Definitive ARD - NBAR and Pixel Quality
 measurements:
@@ -411,12 +411,12 @@ measurements:
             bits: [0, 1, 2, 3, 4, 5, 6, 7]
             description: Pixel contiguity in band stack
             values: {'0': not_contiguous, '1': contiguous}
-    name: nbar_contiguity
+    name: nbart_contiguity
     nodata: 255
     units: '1'
-  - aliases: [nbar_band_01, nbar_B01, nbar_Band1]
+  - aliases: [nbart_band_01, nbart_B01, nbart_Band1]
     dtype: int16
-    name: nbar_coastal_aerosol
+    name: nbart_coastal_aerosol
     nodata: -999
     spectral_definition:
         response: [0.006797798, 0.01099643, 0.004208363, 0.006568034, 0.005883123,
@@ -432,9 +432,9 @@ measurements:
             438, 439, 440, 441, 442, 443, 444, 445, 446, 447, 448, 449, 450, 451,
             452, 453, 454, 455, 456]
     units: '1'
-  - aliases: [nbar_band_02, nbar_B02, nbar_Band2]
+  - aliases: [nbart_band_02, nbart_B02, nbart_Band2]
     dtype: int16
-    name: nbar_blue
+    name: nbart_blue
     nodata: -999
     spectral_definition:
         response: [0.001893306, 0.019440751, 0.020059028, 0.014109631, 0.015612858,
@@ -461,9 +461,9 @@ measurements:
             507, 508, 509, 510, 511, 512, 513, 514, 515, 516, 517, 518, 519, 520,
             521, 522, 523, 524, 525, 526, 527, 528, 529, 530, 531, 532]
     units: '1'
-  - aliases: [nbar_band_03, nbar_B03, nbar_Band3]
+  - aliases: [nbart_band_03, nbart_B03, nbart_Band3]
     dtype: int16
-    name: nbar_green
+    name: nbart_green
     nodata: -999
     spectral_definition:
         response: [0.005090312, 0.026897029, 0.12087986, 0.33742273, 0.603624689,
@@ -478,9 +478,9 @@ measurements:
             563, 564, 565, 566, 567, 568, 569, 570, 571, 572, 573, 574, 575, 576,
             577, 578, 579, 580, 581, 582]
     units: '1'
-  - aliases: [nbar_band_04, nbar_B04, nbar_Band4]
+  - aliases: [nbart_band_04, nbart_B04, nbart_Band4]
     dtype: int16
-    name: nbar_red
+    name: nbart_red
     nodata: -999
     spectral_definition:
         response: [0.002584, 0.034529, 0.14997, 0.464826, 0.817746, 0.965324, 0.983869,
@@ -493,9 +493,9 @@ measurements:
             659, 660, 661, 662, 663, 664, 665, 666, 667, 668, 669, 670, 671, 672,
             673, 674, 675, 676, 677, 678, 679, 680, 681, 682, 683, 684, 685]
     units: '1'
-  - aliases: [nbar_band_05, nbar_B05, nbar_Band5]
+  - aliases: [nbart_band_05, nbart_B05, nbart_Band5]
     dtype: int16
-    name: nbar_red_edge_1
+    name: nbart_red_edge_1
     nodata: -999
     spectral_definition:
         response: [0.010471827, 0.057252544, 0.214724996, 0.547189415, 0.871043978,
@@ -505,9 +505,9 @@ measurements:
         wavelength: [694, 695, 696, 697, 698, 699, 700, 701, 702, 703, 704, 705, 706,
             707, 708, 709, 710, 711, 712, 713, 714]
     units: '1'
-  - aliases: [nbar_band_06, nbar_B06, nbar_Band6]
+  - aliases: [nbart_band_06, nbart_B06, nbart_Band6]
     dtype: int16
-    name: nbar_red_edge_2
+    name: nbart_red_edge_2
     nodata: -999
     spectral_definition:
         response: [0.017433807, 0.105812957, 0.386050533, 0.782313159, 0.905953099,
@@ -517,9 +517,9 @@ measurements:
         wavelength: [730, 731, 732, 733, 734, 735, 736, 737, 738, 739, 740, 741, 742,
             743, 744, 745, 746, 747, 748]
     units: '1'
-  - aliases: [nbar_band_07, nbar_B07, nbar_Band7]
+  - aliases: [nbart_band_07, nbart_B07, nbart_Band7]
     dtype: int16
-    name: nbar_red_edge_3
+    name: nbart_red_edge_3
     nodata: -999
     spectral_definition:
         response: [0.010282026, 0.037427714, 0.112026989, 0.257953812, 0.478980823,
@@ -531,9 +531,9 @@ measurements:
             779, 780, 781, 782, 783, 784, 785, 786, 787, 788, 789, 790, 791, 792,
             793, 794]
     units: '1'
-  - aliases: [nbar_band_08, nbar_B08, nbar_Band8]
+  - aliases: [nbart_band_08, nbart_B08, nbart_Band8]
     dtype: int16
-    name: nbar_nir_1
+    name: nbart_nir_1
     nodata: -999
     spectral_definition:
         response: [0.000386696, 0.003018401, 0.01669158, 0.028340486, 0.0502885, 0.08626388,
@@ -570,9 +570,9 @@ measurements:
             885, 886, 887, 888, 889, 890, 891, 892, 893, 894, 895, 896, 897, 898,
             899, 900, 901, 902, 903, 904, 905, 906, 907]
     units: '1'
-  - aliases: [nbar_band_8A, nbar_B8A, nbar_Band8A]
+  - aliases: [nbart_band_8A, nbart_B8A, nbart_Band8A]
     dtype: int16
-    name: nbar_nir_2
+    name: nbart_nir_2
     nodata: -999
     spectral_definition:
         response: [0.001661751, 0.01602581, 0.032253895, 0.073411273, 0.168937582,
@@ -585,9 +585,9 @@ measurements:
             861, 862, 863, 864, 865, 866, 867, 868, 869, 870, 871, 872, 873, 874,
             875, 876, 877, 878, 879, 880]
     units: '1'
-  - aliases: [nbar_band_11, nbar_B11, nbar_Band11]
+  - aliases: [nbart_band_11, nbart_B11, nbart_Band11]
     dtype: int16
-    name: nbar_swir_2
+    name: nbart_swir_2
     nodata: -999
     spectral_definition:
         response: [1.15e-05, 2.6996e-05, 8.1157e-05, 0.000169507, 0.000273428, 0.000343776,
@@ -627,9 +627,9 @@ measurements:
             1657, 1658, 1659, 1660, 1661, 1662, 1663, 1664, 1665, 1666, 1667, 1668,
             1669, 1670, 1671, 1672, 1673, 1674, 1675, 1676, 1677, 1678, 1679]
     units: '1'
-  - aliases: [nbar_band_12, nbar_B12, nbar_Band12]
+  - aliases: [nbart_band_12, nbart_B12, nbart_Band12]
     dtype: int16
-    name: nbar_swir_3
+    name: nbart_swir_3
     nodata: -999
     spectral_definition:
         response: [0.000227567, 0.000739283, 0.001656775, 0.003019587, 0.004589377,
@@ -700,4 +700,4 @@ metadata:
     processing_level: Level-2
     product_type: S2MSIARD_NBAR
 metadata_type: eo_plus
-name: ga_s2b_ard_nbar_granule
+name: s2b_ard_granule
