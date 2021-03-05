@@ -329,11 +329,8 @@ measurements:
             2317, 2318, 2319, 2320]
     units: '1'
 metadata:
-    format: {name: GeoTIFF}
-    instrument: {name: MSI}
-    platform: {code: SENTINEL_2A}
-    processing_level: Level-2
-    product_type: S2MSIARD_NBAR
+    product:
+        name: s2a_ard_granule
 metadata_type: eo3
 name: s2a_ard_granule
 ---
@@ -694,10 +691,7 @@ measurements:
             2292, 2293, 2294, 2295, 2296, 2297, 2298, 2299, 2300, 2301, 2302, 2303]
     units: '1'
 metadata:
-    format: {name: GeoTIFF}
-    instrument: {name: MSI}
-    platform: {code: SENTINEL_2B}
-    processing_level: Level-2
-    product_type: S2MSIARD_NBAR
+    product:
+        name: s2b_ard_granule
 metadata_type: eo3
 name: s2b_ard_granule
