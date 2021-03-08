@@ -1,4 +1,4 @@
-description: Sentinel-2A MSI Definitive ARD - NBAR and Pixel Quality
+description: Sentinel-2A MSI Definitive ARD - NBART and Pixel Quality
 measurements:
   - aliases: [azimuthal_exiting]
     dtype: float32
@@ -334,7 +334,7 @@ metadata:
 metadata_type: eo3
 name: s2a_ard_granule
 ---
-description: Sentinel-2B MSI Definitive ARD - NBAR and Pixel Quality
+description: Sentinel-2B MSI Definitive ARD - NBART and Pixel Quality
 measurements:
   - aliases: [azimuthal_exiting]
     dtype: float32
