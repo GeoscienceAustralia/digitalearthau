@@ -1,9 +1,13 @@
+name: s2a_ard_granule
+description: Sentinel-2A MSI Definitive ARD - NBART and Pixel Quality
+metadata_type: eo3
+
+license: CC-BY-4.0
+
 metadata:
     product:
         name: s2a_ard_granule
-metadata_type: eo3
-name: s2a_ard_granule
-description: Sentinel-2A MSI Definitive ARD - NBART and Pixel Quality
+
 measurements:
   - aliases: [azimuthal_exiting]
     dtype: float32
@@ -334,12 +338,16 @@ measurements:
             2317, 2318, 2319, 2320]
     units: '1'
 ---
+name: s2b_ard_granule
+description: Sentinel-2B MSI Definitive ARD - NBART and Pixel Quality
+metadata_type: eo3
+
+license: CC-BY-4.0
+
 metadata:
     product:
         name: s2b_ard_granule
-metadata_type: eo3
-name: s2b_ard_granule
-description: Sentinel-2B MSI Definitive ARD - NBART and Pixel Quality
+
 measurements:
   - aliases: [azimuthal_exiting]
     dtype: float32
