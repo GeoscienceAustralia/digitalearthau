@@ -49,6 +49,10 @@ measurements:
         bits: 6
         description: Cloudy
         values: {0: false, 1: true}
+      water_observed:
+        bits: 7
+        description: Classified as water by the decision tree
+        values: {0: false, 1: true}
       wet:
         bits: [7, 6, 5, 4, 3, 2, 1, 0]
         description: Clear and Wet
