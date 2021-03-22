@@ -35,8 +35,12 @@ dataset:
         For Sentinel it is MGRS code.
         In general it is a unique string identifier that datasets
         covering roughly the same spatial region share.
-
       offset: [properties, 'odc:region_code']
+
+    crs_raw:
+      description: The raw CRS string as it appears in metadata
+      offset: ['crs']
+      indexed: false
 
     dataset_maturity:
       description: One of - final|interim|nrt  (near real time)

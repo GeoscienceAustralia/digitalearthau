@@ -1,0 +1,88 @@
+name: ga_s2_wo_3
+metadata_type: eo3
+description: Sentinel 2 Water Observations Collection 3
+
+license: CC-BY-4.0
+
+metadata:
+  product:
+    name: ga_s2_wo_3
+  properties:
+    odc:file_format: GeoTIFF
+    odc:product_family: wo
+
+measurements:
+- name: water
+  dtype: uint8
+  units: '1'
+  nodata: 1
+  flags_definition:
+    dry:
+      bits:
+      - 7
+      - 6
+      - 5
+      - 4
+      - 3
+      - 2
+      - 1
+      - 0
+      values:
+        '0': true
+      description: No water detected
+    wet:
+      bits:
+      - 7
+      - 6
+      - 5
+      - 4
+      - 3
+      - 2
+      - 1
+      - 0
+      values:
+        '128': true
+      description: Clear and Wet
+    cloud:
+      bits: 6
+      values:
+        '0': false
+        '1': true
+      description: Cloudy
+    nodata:
+      bits: 0
+      values:
+        '0': false
+        '1': true
+      description: No data
+    high_slope:
+      bits: 4
+      values:
+        '0': false
+        '1': true
+      description: High slope
+    cloud_shadow:
+      bits: 5
+      values:
+        '0': false
+        '1': true
+      description: Cloud shadow
+    noncontiguous:
+      bits: 1
+      values:
+        '0': false
+        '1': true
+      description: At least one EO band is missing or saturated
+    terrain_shadow:
+      bits: 3
+      values:
+        '0': false
+        '1': true
+      description: Terrain shadow
+    low_solar_angle:
+      bits: 2
+      values:
+        '0': false
+        '1': true
+      description: Low solar incidence angle
+...
