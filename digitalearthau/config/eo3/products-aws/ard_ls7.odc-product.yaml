@@ -41,7 +41,7 @@ measurements:
   - name: nbart_nir
     aliases:
       - nbart_band04
-      - red
+      - nir
     dtype: int16
     nodata: -999
     units: '1'
