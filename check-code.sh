@@ -23,7 +23,7 @@ pycodestyle --ignore=E122,E711,E701,E501 --max-line-length 120  \
     scripts/**/*.py
 
 shellcheck ./digitalearthau/**/*.sh ./scripts/**/*.sh ./modules/**/*.sh
-yamllint ./**/*.yaml
+yamllint -d relaxed ./**/*.yaml
 
 # Users can specify extra folders (ie. integration_tests) as arguments.
 py.test -r sx --cov digitalearthau --durations=5 digitalearthau scripts/**/*.py "$@"
