@@ -107,6 +107,7 @@ def test_dea_config(dea_index: Index):
         'usgs_ls5t_level1_1',
         'usgs_ls7e_level1_1',
         'usgs_ls8c_level1_1',
+        "usgs_ls8c_level1_2",
         'ga_ls5t_ard_3',
         'ga_ls7e_ard_3',
         'ga_ls8c_ard_3',
