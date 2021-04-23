@@ -1,0 +1,47 @@
+#%Module########################################################################
+##
+## ${module_name} modulefile
+##
+
+proc ModulesHelp { } {
+        global version
+
+        puts stderr "   ${module_description}"
+        puts stderr "   Version ${module_version}"
+}
+
+set name          ${module_name}
+set version       ${module_version}
+set base          ${module_path}
+
+module-whatis   "${module_description} ${module_version}"
+
+# Enable segfault tracebacks in py3. https://docs.python.org/3/library/faulthandler.html
+setenv PYTHONFAULTHANDLER 1
+
+# Set PYTHONUSERBASE based on the version of dea-env module.
+# This allows users to install python packages with "pip install --user <package>",
+setenv PYTHONUSERBASE ~/.digitalearthau/${module_name}/${module_version}/local
+setenv GDAL_DATA ${module_path}/share/gdal
+setenv PROJ_LIB ${module_path}/share/proj
+setenv PROJ_NETWORK ON
+setenv UDUNITS2_XML_PATH ${module_path}/share/udunits/udunits2.xml
+setenv GSETTINGS_SCHEMA_DIR ${module_path}/share/glib-2.0/schemas
+
+if {[module-info mode load] && [info exists env(PYTHONPATH)] && $$env(PYTHONPATH) != ""} {
+        puts stderr "Warning: ${module_name}/${module_version} exists in the python env ($$env(PYTHONPATH))"
+        puts stderr "Unload all python modules, if you experience any issues."
+}
+
+prepend-path PYTHONPATH ${module_path}/share/qgis/python
+
+# Remove duplicate entries for module path dir and prepend again
+remove-path PATH ${module_path}/bin
+prepend-path PATH ${module_path}/bin
+
+# To avoid user packages conflicting with Environment Module packages, point the PYTHONUSERBASE and PATH
+# variables to point to a directory based on the Environment Module version which is loaded so that extra
+# packages must be re-installed when a new dea-env module is released
+# Remove duplicate entries for HOME dir and prepend again
+remove-path PATH ~/.digitalearthau/${module_name}/${module_version}/local/bin
+prepend-path PATH ~/.digitalearthau/${module_name}/${module_version}/local/bin

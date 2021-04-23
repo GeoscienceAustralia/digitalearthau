@@ -1,0 +1,31 @@
+variables:
+  module_name: dea-env
+  module_description: DEA Environment Module
+  modules_dir: "/g/data/v10/public/modules"
+  conda_path: "/g/data/v10/private/miniconda3/bin/conda"
+  python_version: 3.7
+
+# These templated variables are filled and included in the available variables used
+# in template files and configuration sections below
+templated_variables:
+  module_path: "{modules_dir}/{module_name}/{module_version}"
+  python_path: "{modules_dir}/{module_name}/{module_version}/lib/python{python_version}/site-packages/"
+
+install_conda_packages: environment.yaml
+
+dea_env_miniconda3: reinstall_miniconda.sh
+
+copy_files:
+- src: environment.yaml
+  dest: "{modules_dir}/{module_name}/{module_version}/environment.yaml"
+
+template_files:
+- src: modulefile.template
+  dest: "{modules_dir}/modulefiles/{module_name}/{module_version}"
+  chmod: 0o444
+
+finalise_commands:
+# New geomedian/hdstats package from s3
+- pip install -U -v --no-deps --compile --requirement requirements.txt
+- jupyter labextension install @bokeh/jupyter_bokeh @jupyterlab/geojson-extension @jupyterlab/github @jupyterlab/toc @jupyter-widgets/jupyterlab-manager @ryantam626/jupyterlab_code_formatter jupyterlab-dash @jupyter-widgets/jupyterlab-sidecar
+- jupyter serverextension enable --py jupyterlab_code_formatter --sys-prefix

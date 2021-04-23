@@ -1,0 +1,83 @@
+#%Module########################################################################
+##
+## ${module_name} modulefile
+##
+
+proc ModulesHelp { } {
+        global version
+
+        puts stderr "   ${module_description}"
+        puts stderr "   Version ${module_version}"
+}
+
+set name          ${module_name}
+set version       ${module_version}
+set base          ${module_path}
+
+module-whatis   "${module_description} ${module_version}"
+
+module load ${fixed_dea_env}
+
+setenv DATACUBE_CONFIG_PATH ${module_path}/datacube.conf
+setenv LC_ALL en_AU.utf8
+setenv LANG C.UTF-8
+
+if {[module-info mode load] && [is-loaded $$name/$$version]} {
+        puts stderr "Warning: $$name/$$version exists in the python env ($$env(PYTHONPATH))"
+}
+
+# To avoid user packages conflicting with Environment Module packages, point the PYTHONUSERBASE and PATH
+# variables to point to a directory based on the Environment Module version which is loaded so that extra
+# packages must be re-installed when a new dea-env module is released
+prepend-path PATH ${module_path}/bin
+prepend-path PYTHONPATH ${python_path}
+
+# Remove duplicate entries for HOME dir and prepend at the top
+remove-path PATH ~/.digitalearthau/${fixed_dea_env}/local/bin
+prepend-path PATH ~/.digitalearthau/${fixed_dea_env}/local/bin
+
+# Remove duplicate entries for HOME dir and prepend at the top
+remove-path PYTHONPATH ~/.digitalearthau/${fixed_dea_env}/local/lib/python3.6/site-packages
+prepend-path PYTHONPATH ~/.digitalearthau/${fixed_dea_env}/local/lib/python3.6/site-packages
+
+
+#############################################################
+# For users new to gadi, but that did have access on raijin, attempt to
+# copy their backed up ~/.pgpass file.
+#------------------------------------------------------------
+if [string match "gadi*" [info hostname]] {
+    if {! [file exists ~/.pgpass]} {
+        set oldpgpass [lindex [glob -nocomplain ~/raijin_home*/*/.pgpass] 0]
+        if [file exists $$oldpgpass] {
+            puts "Attempting to copy raijin .pgpass to ~/.pgpass for DEA Database Access"
+            file copy $$oldpgpass [pwd]
+        }
+    }
+}
+
+
+#############################################################
+# When loading, ensure a database username has been created
+# and warn if a ~/.datacube.conf file exists
+#
+
+if [module-info mode load] {
+    if [catch {exec -ignorestderr ${module_path}/bin/datacube-ensure-user.py ${dbhost} ${dbport}} results options ] {
+        puts stderr "Error: database connection check failed!"
+        puts stderr "  see log above for more details"
+    }
+
+    if [file exists ~/.datacube.conf] {
+        puts stderr "Warning: ~/.datacube.conf detected"
+        puts stderr "  it might conflict with this module"
+        puts stderr "  consider removing or renaming it"
+    }
+}
+
+################################################################
+# Log access to this module, so that we know when old versions can
+# safely be removed
+
+set sqlstr "insert into dea_module_loaded (module, username, host) values ('$$name/$$version', '$$env(USER)', '[info hostname]');"
+set ::env(PGPASSWORD) guest
+exec psql -X -h dea-db.nci.org.au -c $$sqlstr guest guest
