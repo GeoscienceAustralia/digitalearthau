@@ -1,0 +1,32 @@
+variables:
+  module_name: dea
+  module_description: DEA tools for the NCI
+  modules_base: "/g/data/v10/public/modules"
+  dbhost: dea-db.nci.org.au
+  dbport: 6432
+  python_version: 3.6
+  module_version: unstable
+
+templated_variables:
+  module_path: "{modules_base}/{module_name}/{module_version}"
+  python_path: "{modules_base}/{module_name}/{module_version}/lib/python{python_version}/site-packages/"
+  dea_module: "{module_name}/{module_version}"
+
+stable_module_deps:
+- dea-env
+
+install_pip_packages:
+  pip_cmd: "module load {fixed_dea_env}; pip install --no-warn-script-location --prefix {module_path} --requirement requirements.txt"
+
+copy_files:
+- src: ../dea/requirements.txt
+  dest: "{module_path}/requirements.txt"
+- src: ../dea/datacube.conf
+  dest: "{module_path}/datacube.conf"
+- src: ../dea/datacube-ensure-user.py
+  dest: "{module_path}/bin/datacube-ensure-user.py"
+  chmod: 0o755
+
+template_files:
+- src: ../dea/modulefile.template
+  dest: "{modules_base}/modulefiles/{module_name}/{module_version}"
