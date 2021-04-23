@@ -79,7 +79,7 @@ def main(expressions, check_locationless, archive_locationless, check_ancestors,
             # If an ancestor is archived, it may have been replaced. This one may need
             # to be reprocessed too.
             if check_ancestors or archive_siblings or check_siblings:
-                archive_count += _check_ancestors(check_ancestors, check_siblings, archive_siblings, dc, dataset)
+                archive_count += _check_ancestors(check_siblings, archive_siblings, dc, dataset)
 
         _LOG.info("coherence.finish",
                   datasets_count=count,
@@ -111,11 +111,7 @@ def _archive_duplicate_siblings(dc, ids):
     return len(older_duplicates)
 
 
-def _check_ancestors(check_ancestors: bool,
-                     check_siblings: bool,
-                     archive_siblings: bool,
-                     dc: Datacube,
-                     dataset: Dataset):
+def _check_ancestors(check_siblings: bool, archive_siblings: bool, dc: Datacube, dataset: Dataset):
     global _siblings_count
     ancestors_archive_count = 0
     dataset = dc.index.datasets.get(dataset.id, include_sources=True)
