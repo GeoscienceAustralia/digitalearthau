@@ -2,8 +2,6 @@
 
 from setuptools import setup, find_packages
 
-import versioneer
-
 tests_require = ['pytest', 'pytest-cov', 'mock', 'pycodestyle', 'pylint',
                  'hypothesis', 'compliance-checker', 'yamllint']
 
@@ -15,9 +13,8 @@ extras_require = {
 
 setup(
     name='digitalearthau',
-    version=versioneer.get_version(),
-    cmdclass=versioneer.get_cmdclass(),
 
+    use_scm_version=True,
     url='https://github.com/GeoscienceAustralia/digitalearthau',
     author='Geoscience Australia',
     author_email='damien.ayers@ga.gov.au',
@@ -31,10 +28,9 @@ setup(
         '': ['*.yaml', '*/*.yaml'],
     },
     include_package_data=True,
-    scripts=[
-    ],
     setup_requires=[
-        'pytest-runner'
+        'pytest-runner',
+        'setuptools_scm',
     ],
     install_requires=[
         'attrs>=19.2.0',
