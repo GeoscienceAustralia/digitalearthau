@@ -56,7 +56,7 @@ jobs:
           which python
       - name: Install dependencies using conda
         run: |
-          mamba install datacube pycodestyle pylint pytest ephem hypothesis pytest-cov sphinx ipython boltons lxml
+          mamba install --file conda-dev
 
       - name: Setup Database
         run: |
@@ -81,7 +81,7 @@ jobs:
         run: pip install -e .[doc,test]
 
       - name: Lint and test code
-        run: ./check-code.sh
+        run: ./check-code.sh integration_tests/
 
       - uses: codecov/codecov-action@v1
         with:

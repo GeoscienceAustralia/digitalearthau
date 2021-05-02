@@ -3,7 +3,7 @@ import os
 import tempfile
 from pathlib import Path
 
-import gdal
+from osgeo import gdal
 from compliance_checker.runner import ComplianceChecker, CheckSuite
 
 from digitalearthau import paths
