@@ -76,6 +76,13 @@ jobs:
       - name: Setup Database
         run: |
           createdb dea_integration
+        env:
+          # The hostname used to communicate with the PostgreSQL service container
+          PGHOST: localhost
+          # The default PostgreSQL port
+          PGPORT: 5432
+          PGUSER: postgres
+          PGPASSWORD: postgres
 
       - name: Download and install PDS Tools
         run: |
