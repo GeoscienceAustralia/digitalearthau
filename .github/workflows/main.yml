@@ -82,6 +82,13 @@ jobs:
 
       - name: Lint and test code
         run: ./check-code.sh integration_tests/
+        env:
+          # The hostname used to communicate with the PostgreSQL service container
+          PGHOST: localhost
+          # The default PostgreSQL port
+          PGPORT: 5432
+          PGUSER: postgres
+          PGPASSWORD: postgres
 
       - uses: codecov/codecov-action@v1
         with:

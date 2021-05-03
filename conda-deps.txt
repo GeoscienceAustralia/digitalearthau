@@ -19,7 +19,7 @@ nbsphinx
 recommonmark
 jupyter-sphinx
 requests-cache
-cattrs
+cattrs<1.1  # Pin For py3.6
 ruamel.yaml
 python-rapidjson
 owslib
