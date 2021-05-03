@@ -58,16 +58,26 @@ jobs:
         run: |
           mamba install --file conda-deps.txt
 
+      # We can't use DB_ per standard Datacube Conventions, because they only work
+      # when a configuration file is not explicitly loaded, and the tests in this repository
+      # explicitly load a configuration to avoid destroying a production database.
+      # We also can't use PG* environment variables, because they're ignored by ODC code.
+      - uses: DamianReeves/write-file-action@v1.0
+        with:
+          path: ${{ env.home}}/.datacube_integration.conf
+          contents: |
+            [datacube]
+            db_hostname: localhost
+            db_database: dea_integration
+            db_username: postgres
+            db_password: postgres
+            db_port: 5432
+
+          write-mode: overwrite
+
       - name: Setup Database
         run: |
           createdb dea_integration
-        env:
-          # The hostname used to communicate with the PostgreSQL service container
-          PGHOST: localhost
-          # The default PostgreSQL port
-          PGPORT: 5432
-          PGUSER: postgres
-          PGPASSWORD: postgres
 
       - name: Download and install PDS Tools
         run: |
@@ -82,14 +92,6 @@ jobs:
 
       - name: Lint and test code
         run: ./check-code.sh integration_tests/
-        env:
-          # We can't use DB_ per standard Datacube Conventions, because they only work
-          # when a configuration file is not explicitly loaded, and the tests in this repository
-          # explicitly load a configuration to avoid destroying a production database.
-          PGHOST: localhost
-          PGPORT: 5432
-          PGUSER: postgres
-          PGPASSWORD: postgres
 
       - uses: codecov/codecov-action@v1
         with:
