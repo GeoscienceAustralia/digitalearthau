@@ -64,7 +64,7 @@ jobs:
       # We also can't use PG* environment variables, because they're ignored by ODC code.
       - uses: DamianReeves/write-file-action@v1.0
         with:
-          path: ${{ env.home}}/.datacube_integration.conf
+          path: ${{ env.HOME}}/.datacube_integration.conf
           contents: |
             [datacube]
             db_hostname: localhost
