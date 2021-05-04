@@ -61,7 +61,7 @@ pbsdsh -n 0 -- /bin/bash -c "${init_env}; dask-worker $SCHEDULER_ADDR --nprocs $
 sleep 1s
 
 for ((i=NCPUS; i<PBS_NCPUS; i+=NCPUS)); do
-  pbsdsh -n $i -- /bin/bash -c "${init_env}; dask-worker $SCHEDULER_ADDR --nprocs ${ppn} --nthreads ${tpp} --memory-limit ${mem} --name worker-$i-$PBS_JOBNAME"&
+  pbsdsh -n "$i" -- /bin/bash -c "${init_env}; dask-worker $SCHEDULER_ADDR --nprocs ${ppn} --nthreads ${tpp} --memory-limit ${mem} --name worker-$i-$PBS_JOBNAME"&
   sleep 1s
 done
 sleep 5s

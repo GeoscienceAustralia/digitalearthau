@@ -1,10 +1,7 @@
 from pathlib import Path
 import re
 
-from ._version import get_versions
-
-__version__ = get_versions()['version']
-del get_versions
+from ._version import version as __version__
 
 
 def _get_module_name():

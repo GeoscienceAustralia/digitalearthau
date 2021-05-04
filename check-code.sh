@@ -26,5 +26,4 @@ shellcheck ./**/*.sh
 yamllint ./**/*.yaml
 
 # Users can specify extra folders (ie. integration_tests) as arguments.
-py.test -r sx --cov digitalearthau --durations=5 digitalearthau scripts/**/*.py "$@"
-
+pytest -r sx --cov digitalearthau --durations=5 digitalearthau scripts/**/*.py "$@"

@@ -1,0 +1,143 @@
+name: Main
+
+on:
+  push:
+  pull_request:
+  release:
+    types: [created, edited]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    # Service containers to run with `runner-job`
+    services:
+      # Label used to access the service container
+      postgres:
+        # Docker Hub image
+        image: postgres:12
+        # Provide the password for postgres
+        env:
+          POSTGRES_PASSWORD: postgres
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          # Maps tcp port 5432 on service container to the host
+          - 5432:5432
+    # Necessary to activate conda env. See https://github.com/conda-incubator/setup-miniconda#important
+    defaults:
+      run:
+        shell: bash -l {0}
+    strategy:
+      matrix:
+        python-version: [3.6]
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Setup conda environment
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          auto-update-conda: true
+          python-version: ${{ matrix.python-version }}
+          mamba-version: "*"
+          channels: conda-forge,defaults
+          channel-priority: true
+      - run: |
+          conda info
+          conda list
+          conda config --show-sources
+          conda config --show
+          python --version
+          which python
+      - name: Install dependencies using conda
+        run: |
+          mamba install --file conda-deps.txt
+
+      # We can't use DB_ per standard Datacube Conventions, because they only work
+      # when a configuration file is not explicitly loaded, and the tests in this repository
+      # explicitly load a configuration to avoid destroying a production database.
+      # We also can't use PG* environment variables, because they're ignored by ODC code.
+      - name: Setup test configuration file
+        run: |
+
+           echo [datacube] >> ~/.datacube_integration.conf
+           echo db_hostname: localhost >> ~/.datacube_integration.conf
+           echo db_database: dea_integration >> ~/.datacube_integration.conf
+           echo db_username: postgres >> ~/.datacube_integration.conf
+           echo db_password: postgres >> ~/.datacube_integration.conf
+           echo db_port: 5432 >> ~/.datacube_integration.conf
+
+
+      - name: Setup Database
+        run: |
+          createdb dea_integration
+        env:
+          # The hostname used to communicate with the PostgreSQL service container
+          PGHOST: localhost
+          # The default PostgreSQL port
+          PGPORT: 5432
+          PGUSER: postgres
+          PGPASSWORD: postgres
+
+      - name: Download and install PDS Tools
+        run: |
+          mkdir pdstools
+          cd pdstools
+          wget https://raw.githubusercontent.com/GeoscienceAustralia/pds-tools/988b0b6e8495f9224c384ec0ac4c720c054d022c/pdsinfo.c
+          clang -O pdsinfo.c -lm -o pdsinfo
+          export PATH="$(pwd):${PATH}"
+
+      - name: install package
+        run: pip install -e .[doc,test]
+
+      - name: Lint and test code
+        run: ./check-code.sh integration_tests/
+
+      - uses: codecov/codecov-action@v1
+        with:
+          env_vars: OS,PYTHON
+          file: ./coverage.xml
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: packages
+          path: dist
+
+  deploy-packages:
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    steps:
+      - name: Download a single artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: packages
+          path: dist
+
+      - name: Display directory structure of downloaded files
+        run: ls -lR
+
+      - name: Deploy packages
+        uses: jakejarvis/s3-sync-action@master
+        with:
+          args: --acl public-read --follow-symlinks
+        env:
+          AWS_S3_BUCKET: "datacube-core-deployment"
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: "ap-southeast-2" # optional: defaults to us-east-1
+          SOURCE_DIR: "dist" # optional: defaults to entire repository
+          DEST_DIR: "wofs"
+
+      # - name: Publish package
+      #   if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
+      #   uses: pypa/gh-action-pypi-publish@release/v1
+      #   with:
+      #     user: __token__
+      #     password: ${{ secrets.PYPI_API_TOKEN }}
