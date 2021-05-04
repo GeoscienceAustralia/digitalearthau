@@ -130,7 +130,8 @@ def test_dea_config(dea_index: Index):
 def test_products_are_valid(dea_index: Index):
     for product in dea_index.products.get_all():
         validation_messages = [str(m) for m in eodatasets3.validate.validate_product(product.definition)]
-        assert validation_messages == [], f"{product.name} has validation issues: {validation_messages}\n {product.definition}"
+        assert validation_messages == [], f"{product.name} has validation issues: " \
+                                          f"{validation_messages}\n {product.definition}"
 
 
 def test_metadata_type(dea_index):
