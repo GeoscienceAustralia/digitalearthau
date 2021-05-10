@@ -209,10 +209,17 @@ def copy_files(copy_tasks, variables):
 
 def wget_files(wget_tasks, variables):
     """
-    wget files from source to destination as per configuration settings in modulespec yaml file
+    Download files from source to destination.
 
-    :param wget_tasks: Tasks to download files with `wget`
-    :param variables: Configuration variables as per configuration settings in modulespec yaml file
+    Example:
+
+        wget_files:
+         - src: http://example.com/safe_shell_script.sh
+           dest: "{module_path}/bin/safe-script.sh"
+           chmod: 0o755
+
+    :param wget_tasks: List of download operations to perform
+    :param variables: Global configuration variables
     :return:
     """
     for task in wget_tasks:
@@ -224,7 +231,7 @@ def wget_files(wget_tasks, variables):
         LOG.info("Ensuring parent dir %s exists", dest.parent)
         dest.parent.mkdir(parents=True, exist_ok=True)
 
-        run_command(f"wget -O {desc} {src}")
+        run_command(f"wget -O {dest} {src}")
 
         if "chmod" in task:
             perms = int(task["chmod"], base=8)
