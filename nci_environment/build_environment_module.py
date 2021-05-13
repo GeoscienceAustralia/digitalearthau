@@ -214,7 +214,7 @@ def wget_files(wget_tasks, variables):
     Example:
 
         wget_files:
-         - src: http://example.com/safe_shell_script.sh
+         - src: "http://example.com/safe_shell_script.sh"
            dest: "{module_path}/bin/safe-script.sh"
            chmod: 0o755
 
@@ -224,10 +224,10 @@ def wget_files(wget_tasks, variables):
     """
     for task in wget_tasks:
         fill_templates_from_variables(task, variables)
-        src = Path(task["src"])
+        src = task["src"]
         dest = Path(task["dest"])
 
-        LOG.info("Copying %s to %s", src, dest)
+        LOG.info("Downloading %s to %s", src, dest)
         LOG.info("Ensuring parent dir %s exists", dest.parent)
         dest.parent.mkdir(parents=True, exist_ok=True)
 
