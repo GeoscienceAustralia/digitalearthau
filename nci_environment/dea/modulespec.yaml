@@ -33,7 +33,7 @@ copy_files:
   chmod: 0o755
 
 wget_files:
-- src: https://github.com/99designs/aws-vault/releases/download/v6.3.1/aws-vault-linux-amd64
+- src: "https://github.com/99designs/aws-vault/releases/download/v6.3.1/aws-vault-linux-amd64"
   dest: "{module_path}/bin/aws-vault"
   chmod: 0o755
 
