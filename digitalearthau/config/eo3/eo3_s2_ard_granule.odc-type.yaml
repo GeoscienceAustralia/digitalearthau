@@ -1,5 +1,5 @@
 ---
-name: eo3
+name: eo3_gqa
 description: EO3 with GQA fields
 dataset:
   id: [id]  # No longer configurable in newer ODCs.
