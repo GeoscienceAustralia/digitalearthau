@@ -1,6 +1,6 @@
 ---
-name: eo3_landsat_l1
-description: EO3 for Level 1 Landsat, GA Collection 3
+name: eo3
+description: Default EO3 with no custom fields
 dataset:
   id: [id]  # No longer configurable in newer ODCs.
   sources: [lineage, source_datasets]  # No longer configurable in newer ODCs.
@@ -35,7 +35,6 @@ dataset:
         For Sentinel it is MGRS code.
         In general it is a unique string identifier that datasets
         covering roughly the same spatial region share.
-
       offset: [properties, 'odc:region_code']
 
     crs_raw:
@@ -52,6 +51,7 @@ dataset:
       description: Cloud cover percentage [0, 100]
       type: double
       offset: [properties, 'eo:cloud_cover']
+      indexed: false
 
     time:
       description: Acquisition time range
@@ -93,48 +93,75 @@ dataset:
       min_offset:
         - [extent, lat, begin]
       max_offset:
-        - [extent, lat, end]
+        - [extent, lat, end]  
 
-    # semi-auto generated below
-    eo_gsd:
-      # The nominal distance between pixel centers available, in meters.
-      description: Ground Sample distance, meters
+    gqa_abs_iterative_mean_xy:
+      description: 'Mean of the absolute values of the GCP residuals after removal of outliers'
       indexed: false
       offset:
         - properties
-        - eo:gsd
+        - gqa:abs_iterative_mean_xy
       type: double
-    eo_sun_azimuth:
-      description: Sun azimuth angle
+    gqa_abs_xy:
+      description: 'Absolute value of the total GCP residual'
       indexed: false
       offset:
         - properties
-        - eo:sun_azimuth
+        - gqa:abs_xy
       type: double
-    eo_sun_elevation:
-      description: Sun elevation angle
+    gqa_cep90:
+      description: 'Circular error probable (90%) of the values of the GCP residuals'
       indexed: false
       offset:
         - properties
-        - eo:sun_elevation
+        - gqa:cep90
       type: double
-
-    # Level 1 fields
-    landsat_product_id:
-      description: Landsat Product ID
+    gqa_iterative_mean_xy:
+      description: 'Mean of the values of the GCP residuals after removal of outliers'
       indexed: false
       offset:
         - properties
-        - landsat:landsat_product_id
-    landsat_scene_id:
-      description: Landsat Scene ID
+        - gqa:iterative_mean_xy
+      type: double
+    gqa_iterative_stddev_xy:
+      description: 'Standard Deviation of the values of the GCP residuals after removal of outliers'
       indexed: false
       offset:
         - properties
-        - landsat:landsat_scene_id
-    landsat_data_type:
-      description: "Landsat Data Type (eg. 'L1T')"
+        - gqa:iterative_stddev_xy
+      type: double
+    gqa_mean_xy:
+      description: 'Mean of the values of the GCP residuals'
       indexed: false
       offset:
         - properties
-        - landsat:data_type
+        - gqa:mean_xy
+      type: double
+    gqa_stddev_xy:
+      description: 'Standard Deviation of the values of the GCP residuals'
+      indexed: false
+      offset:
+        - properties
+        - gqa:stddev_xy
+      type: double
+    gqa_ref_source:
+      description: 'GQA reference imagery collection name'
+      indexed: false
+      offset:
+        - properties
+        - gqa:ref_source
+      type: string
+    gqa_error_message:
+      description: 'GQA Error Message'
+      indexed: false
+      offset:
+        - properties
+        - gqa:error_message
+      type: string
+    gqa_final_gcp_count:
+      description: 'GQA GCP Count'
+      indexed: false
+      offset:
+        - properties
+        - gqa:final_gcp_count
+      type: integer
