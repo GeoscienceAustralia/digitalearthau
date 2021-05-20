@@ -1,6 +1,6 @@
 name: s2a_ard_granule
 description: Sentinel-2A MSI Definitive ARD - NBART and Pixel Quality
-metadata_type: eo3
+metadata_type: eo3_landsat_ard
 
 license: CC-BY-4.0
 
@@ -340,7 +340,7 @@ measurements:
 ---
 name: s2b_ard_granule
 description: Sentinel-2B MSI Definitive ARD - NBART and Pixel Quality
-metadata_type: eo3
+metadata_type: eo3_landsat_ard
 
 license: CC-BY-4.0
 
