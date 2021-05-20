@@ -93,7 +93,7 @@ dataset:
       min_offset:
         - [extent, lat, begin]
       max_offset:
-        - [extent, lat, end]  
+        - [extent, lat, end]
 
     gqa_abs_iterative_mean_xy:
       description: 'Mean of the absolute values of the GCP residuals after removal of outliers'
