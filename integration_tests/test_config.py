@@ -21,7 +21,6 @@ def test_dea_config(dea_index: Index):
         'eo3',
         'eo3_landsat_ard',
         'eo3_landsat_l1',
-        'eo3_gqa'
     ])
 
     assert md_names == expected_mds
