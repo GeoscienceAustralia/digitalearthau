@@ -19,3 +19,4 @@ odc-io
 odc-ppt
 odc-ui
 wofs>1.5,<1.6,!=1.5.5,!=1.5.6
+nbval
