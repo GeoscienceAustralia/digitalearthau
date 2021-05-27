@@ -40,7 +40,7 @@ dependencies:
 - docutils
 - expat
 - eventlet
-#- brittainhard::fancyimpute
+- brittainhard::fancyimpute
 - flake8
 - flask
 - flask-caching
