@@ -1,1 +1,1 @@
-aiobotocoe==1.1.2
+aiobotocore==1.1.2
