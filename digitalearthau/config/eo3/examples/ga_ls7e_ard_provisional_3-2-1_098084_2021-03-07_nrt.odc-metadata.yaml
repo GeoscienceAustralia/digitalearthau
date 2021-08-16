@@ -1,0 +1,159 @@
+---
+# Dataset
+$schema: https://schemas.opendatacube.org/dataset
+id: 5c28f075-54ac-47bf-a271-ff746cc048b8
+
+label: ga_ls7e_ard_provisional_3-2-1_098084_2021-03-07_nrt
+product:
+  name: ga_ls7e_ard_provisional_3
+  href: https://collections.dea.ga.gov.au/product/ga_ls7e_ard_provisional_3
+
+crs: epsg:32653
+geometry:
+  type: Polygon
+  coordinates: [[[651440.5404209408, -3738681.3952169777], [654765.9792191037, -3725947.3977453234],
+      [654791.7247854887, -3725931.8314561853], [655043.1922612389, -3725132.9957118714],
+      [655072.5, -3725107.5], [812241.9241413967, -3756682.818817098], [836720.9122653925,
+        -3761595.5883506425], [857000.9378499181, -3765675.5935051674], [859191.0382289505,
+        -3766125.613952441], [859240.5239399208, -3766169.235213578], [859874.076923077,
+        -3767242.3846153845], [842504.0559842148, -3835132.466577617], [815414.0559842148,
+        -3940552.466577617], [814880.2135600173, -3942464.5435067643], [813699.1165159459,
+        -3942644.417420271], [808653.9413398134, -3941632.1713325237], [808594.5582579729,
+        -3941632.2087101354], [609562.898742475, -3901690.935590006], [609502.5, -3901432.5],
+      [609532.7912898647, -3901264.558257973], [609836.0095872098, -3900045.4700508504],
+      [610245.9400840186, -3898297.548739492], [629595.9550809988, -3822967.49049401],
+      [646155.9550809988, -3758917.49049401], [650760.8162942152, -3741284.2412882783],
+      [651322.9855072249, -3739128.7145674643], [651440.5404209408, -3738681.3952169777]]]
+grids:
+  default:
+    shape: [7281, 8381]
+    transform: [30.0, 0.0, 609285.0, 0.0, -30.0, -3724785.0, 0.0, 0.0, 1.0]
+  panchromatic:
+    shape: [14561, 16761]
+    transform: [15.0, 0.0, 609292.5, 0.0, -15.0, -3724792.5, 0.0, 0.0, 1.0]
+
+properties:
+  datetime: 2021-03-07 23:53:21.697011Z
+  dea:dataset_maturity: nrt
+  dea:product_maturity: provisional
+  dtr:end_datetime: 2021-03-07 23:53:35.471535Z
+  dtr:start_datetime: 2021-03-07 23:53:07.781435Z
+  eo:cloud_cover: 21.549381922966017
+  eo:gsd: 15.0  # Ground sample distance (m)
+  eo:instrument: ETM
+  eo:platform: landsat-7
+  eo:sun_azimuth: 66.38980469
+  eo:sun_elevation: 37.55892144
+  fmask:clear: 28.47389001960202
+  fmask:cloud: 21.549381922966017
+  fmask:cloud_shadow: 5.3966278822532265
+  fmask:snow: 0.00011974160409089099
+  fmask:water: 44.57998043357464
+  gqa:abs_iterative_mean_x: .nan
+  gqa:abs_iterative_mean_xy: .nan
+  gqa:abs_iterative_mean_y: .nan
+  gqa:abs_x: .nan
+  gqa:abs_xy: .nan
+  gqa:abs_y: .nan
+  gqa:cep90: .nan
+  gqa:iterative_mean_x: .nan
+  gqa:iterative_mean_xy: .nan
+  gqa:iterative_mean_y: .nan
+  gqa:iterative_stddev_x: .nan
+  gqa:iterative_stddev_xy: .nan
+  gqa:iterative_stddev_y: .nan
+  gqa:mean_x: .nan
+  gqa:mean_xy: .nan
+  gqa:mean_y: .nan
+  gqa:stddev_x: .nan
+  gqa:stddev_xy: .nan
+  gqa:stddev_y: .nan
+  landsat:collection_category: RT
+  landsat:collection_number: 2
+  landsat:landsat_product_id: LE07_L1TP_098084_20210307_20210308_02_RT
+  landsat:landsat_scene_id: LE70980842021066ASA00
+  landsat:wrs_path: 98
+  landsat:wrs_row: 84
+  odc:dataset_version: 3.2.1
+  odc:file_format: GeoTIFF
+  odc:processing_datetime: 2021-08-10 21:46:49.676351Z
+  odc:producer: ga.gov.au
+  odc:product_family: ard
+  odc:region_code: '098084'
+
+measurements:
+  nbar_blue:
+    path: ga_ls7e_nbar_provisional_3-2-1_098084_2021-03-07_nrt_band01.tif
+  nbar_green:
+    path: ga_ls7e_nbar_provisional_3-2-1_098084_2021-03-07_nrt_band02.tif
+  nbar_nir:
+    path: ga_ls7e_nbar_provisional_3-2-1_098084_2021-03-07_nrt_band04.tif
+  nbar_panchromatic:
+    path: ga_ls7e_nbar_provisional_3-2-1_098084_2021-03-07_nrt_band08.tif
+    grid: panchromatic
+  nbar_red:
+    path: ga_ls7e_nbar_provisional_3-2-1_098084_2021-03-07_nrt_band03.tif
+  nbar_swir_1:
+    path: ga_ls7e_nbar_provisional_3-2-1_098084_2021-03-07_nrt_band05.tif
+  nbar_swir_2:
+    path: ga_ls7e_nbar_provisional_3-2-1_098084_2021-03-07_nrt_band07.tif
+  nbart_blue:
+    path: ga_ls7e_nbart_provisional_3-2-1_098084_2021-03-07_nrt_band01.tif
+  nbart_green:
+    path: ga_ls7e_nbart_provisional_3-2-1_098084_2021-03-07_nrt_band02.tif
+  nbart_nir:
+    path: ga_ls7e_nbart_provisional_3-2-1_098084_2021-03-07_nrt_band04.tif
+  nbart_panchromatic:
+    path: ga_ls7e_nbart_provisional_3-2-1_098084_2021-03-07_nrt_band08.tif
+    grid: panchromatic
+  nbart_red:
+    path: ga_ls7e_nbart_provisional_3-2-1_098084_2021-03-07_nrt_band03.tif
+  nbart_swir_1:
+    path: ga_ls7e_nbart_provisional_3-2-1_098084_2021-03-07_nrt_band05.tif
+  nbart_swir_2:
+    path: ga_ls7e_nbart_provisional_3-2-1_098084_2021-03-07_nrt_band07.tif
+  oa_azimuthal_exiting:
+    path: ga_ls7e_oa_provisional_3-2-1_098084_2021-03-07_nrt_azimuthal-exiting.tif
+  oa_azimuthal_incident:
+    path: ga_ls7e_oa_provisional_3-2-1_098084_2021-03-07_nrt_azimuthal-incident.tif
+  oa_combined_terrain_shadow:
+    path: ga_ls7e_oa_provisional_3-2-1_098084_2021-03-07_nrt_combined-terrain-shadow.tif
+  oa_exiting_angle:
+    path: ga_ls7e_oa_provisional_3-2-1_098084_2021-03-07_nrt_exiting-angle.tif
+  oa_fmask:
+    path: ga_ls7e_oa_provisional_3-2-1_098084_2021-03-07_nrt_fmask.tif
+  oa_incident_angle:
+    path: ga_ls7e_oa_provisional_3-2-1_098084_2021-03-07_nrt_incident-angle.tif
+  oa_nbar_contiguity:
+    path: ga_ls7e_oa_provisional_3-2-1_098084_2021-03-07_nrt_nbar-contiguity.tif
+  oa_nbart_contiguity:
+    path: ga_ls7e_oa_provisional_3-2-1_098084_2021-03-07_nrt_nbart-contiguity.tif
+  oa_relative_azimuth:
+    path: ga_ls7e_oa_provisional_3-2-1_098084_2021-03-07_nrt_relative-azimuth.tif
+  oa_relative_slope:
+    path: ga_ls7e_oa_provisional_3-2-1_098084_2021-03-07_nrt_relative-slope.tif
+  oa_satellite_azimuth:
+    path: ga_ls7e_oa_provisional_3-2-1_098084_2021-03-07_nrt_satellite-azimuth.tif
+  oa_satellite_view:
+    path: ga_ls7e_oa_provisional_3-2-1_098084_2021-03-07_nrt_satellite-view.tif
+  oa_solar_azimuth:
+    path: ga_ls7e_oa_provisional_3-2-1_098084_2021-03-07_nrt_solar-azimuth.tif
+  oa_solar_zenith:
+    path: ga_ls7e_oa_provisional_3-2-1_098084_2021-03-07_nrt_solar-zenith.tif
+  oa_time_delta:
+    path: ga_ls7e_oa_provisional_3-2-1_098084_2021-03-07_nrt_time-delta.tif
+
+accessories:
+  thumbnail:nbar:
+    path: ga_ls7e_nbar_provisional_3-2-1_098084_2021-03-07_nrt_thumbnail.jpg
+  thumbnail:nbart:
+    path: ga_ls7e_nbart_provisional_3-2-1_098084_2021-03-07_nrt_thumbnail.jpg
+  metadata:processor:
+    path: ga_ls7e_ard_provisional_3-2-1_098084_2021-03-07_nrt.proc-info.yaml
+  checksum:sha1:
+    path: ga_ls7e_ard_provisional_3-2-1_098084_2021-03-07_nrt.sha1
+
+lineage:
+  level1:
+  - fa778ce7-339f-5569-8d9f-e208aec7c8c2
+...
