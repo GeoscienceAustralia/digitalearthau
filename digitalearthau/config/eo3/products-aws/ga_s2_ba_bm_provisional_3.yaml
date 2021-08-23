@@ -1,0 +1,35 @@
+name: ga_s2_ba_provisional_3
+metadata_type: eo3
+description: Sentinel 2 Burnt Area Collection 3 (Provisional)
+
+license: CC-BY-4.0
+
+metadata:
+  product:
+    name: ga_s2_ba_provisional_3
+  properties:
+     eo:platform: sentinel-2
+     eo:instrument: MSI
+     odc:file_format: GeoTIFF
+     odc:product_family: burnscar
+     odc:producer: ga.gov.au
+     dea:product_maturity: provisional
+
+measurements:
+- name: dbsi
+  dtype: "float32"
+  units: "1"
+  nodata: .nan
+- name: dnbr
+  dtype: "float32"
+  units: "1"
+  nodata: .nan
+- name: dndvi
+  dtype: "float32"
+  units: "1"
+  nodata: .nan
+- name: fmask
+  dtype: "float32"
+  units: "1"
+  nodata: .nan
+
