@@ -11,7 +11,7 @@ metadata:
      eo:platform: sentinel-2
      eo:instrument: MSI
      odc:file_format: GeoTIFF
-     odc:product_family: burnscar
+     odc:product_family: ba
      odc:producer: ga.gov.au
      dea:product_maturity: provisional
 
