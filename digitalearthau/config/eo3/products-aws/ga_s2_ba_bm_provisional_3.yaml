@@ -32,4 +32,3 @@ measurements:
   dtype: "float32"
   units: "1"
   nodata: .nan
-
