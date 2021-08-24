@@ -163,7 +163,7 @@ dependencies:
 - redis-py
 - requests
 - rios
-#- rsgislib  # broken because of libgeos dependency
+# - rsgislib  # broken because of libgeos dependency
 - rtree
 - ruamel.yaml
 - s3transfer
