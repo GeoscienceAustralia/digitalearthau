@@ -17,18 +17,18 @@ metadata:
 
 measurements:
   - name: dbsi
-    dtype: "float32"
-    units: "1"
+    dtype: float32
+    units: '1'
     nodata: .nan
   - name: dnbr
-    dtype: "float32"
-    units: "1"
+    dtype: float32
+    units: '1'
     nodata: .nan
   - name: dndvi
-    dtype: "float32"
-    units: "1"
+    dtype: float32
+    units: '1'
     nodata: .nan
   - name: fmask
-    dtype: "float32"
-    units: "1"
+    dtype: float32
+    units: 1
     nodata: .nan
