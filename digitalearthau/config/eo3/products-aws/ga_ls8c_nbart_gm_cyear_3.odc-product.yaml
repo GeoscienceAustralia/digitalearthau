@@ -1,6 +1,9 @@
 name: ga_ls8c_nbart_gm_cyear_3
 description: Geoscience Australia Landsat  Nadir BRDF Adjusted Reflectance Terrain, Landsat 8 Geomedian Calendar Year Collection 3
 metadata_type: eo3
+
+license: CC-BY-4.0
+
 metadata:
   product:
     name: ga_ls8c_nbart_gm_cyear_3
