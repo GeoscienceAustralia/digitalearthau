@@ -93,7 +93,7 @@ jobs:
           export PATH="$(pwd):${PATH}"
 
       - name: install package
-        run: pip install -e .[doc,test]
+        run: pip -v install -e .[doc,test]
 
       - name: Lint and test code
         run: ./check-code.sh integration_tests/
