@@ -9,58 +9,47 @@ metadata:
         name: s2a_ard_granule
 
 measurements:
-  - aliases: [azimuthal_exiting]
-    dtype: float32
+  - dtype: float32
     name: azimuthal_exiting
     nodata: -999
     units: '1'
-  - aliases: [azimuthal_incident]
-    dtype: float32
+  - dtype: float32
     name: azimuthal_incident
     nodata: -999
     units: '1'
-  - aliases: [exiting]
-    dtype: float32
+  - dtype: float32
     name: exiting
     nodata: -999
     units: '1'
-  - aliases: [incident]
-    dtype: float32
+  - dtype: float32
     name: incident
     nodata: -999
     units: '1'
-  - aliases: [relative_azimuth]
-    dtype: float32
+  - dtype: float32
     name: relative_azimuth
     nodata: -999
     units: '1'
-  - aliases: [relative_slope]
-    dtype: float32
+  - dtype: float32
     name: relative_slope
     nodata: -999
     units: '1'
-  - aliases: [satellite_azimuth]
-    dtype: float32
+  - dtype: float32
     name: satellite_azimuth
     nodata: -999
     units: '1'
-  - aliases: [satellite_view]
-    dtype: float32
+  - dtype: float32
     name: satellite_view
     nodata: -999
     units: '1'
-  - aliases: [solar_azimuth]
-    dtype: float32
+  - dtype: float32
     name: solar_azimuth
     nodata: -999
     units: '1'
-  - aliases: [solar_zenith]
-    dtype: float32
+  - dtype: float32
     name: solar_zenith
     nodata: -999
     units: '1'
-  - aliases: [terrain_shadow]
-    dtype: uint8
+  - dtype: uint8
     name: terrain_shadow
     nodata: 0
     units: '1'
@@ -349,58 +338,47 @@ metadata:
         name: s2b_ard_granule
 
 measurements:
-  - aliases: [azimuthal_exiting]
-    dtype: float32
+  - dtype: float32
     name: azimuthal_exiting
     nodata: -999
     units: '1'
-  - aliases: [azimuthal_incident]
-    dtype: float32
+  - dtype: float32
     name: azimuthal_incident
     nodata: -999
     units: '1'
-  - aliases: [exiting]
-    dtype: float32
+  - dtype: float32
     name: exiting
     nodata: -999
     units: '1'
-  - aliases: [incident]
-    dtype: float32
+  - dtype: float32
     name: incident
     nodata: -999
     units: '1'
-  - aliases: [relative_azimuth]
-    dtype: float32
+  - dtype: float32
     name: relative_azimuth
     nodata: -999
     units: '1'
-  - aliases: [relative_slope]
-    dtype: float32
+  - dtype: float32
     name: relative_slope
     nodata: -999
     units: '1'
-  - aliases: [satellite_azimuth]
-    dtype: float32
+  - dtype: float32
     name: satellite_azimuth
     nodata: -999
     units: '1'
-  - aliases: [satellite_view]
-    dtype: float32
+  - dtype: float32
     name: satellite_view
     nodata: -999
     units: '1'
-  - aliases: [solar_azimuth]
-    dtype: float32
+  - dtype: float32
     name: solar_azimuth
     nodata: -999
     units: '1'
-  - aliases: [solar_zenith]
-    dtype: float32
+  - dtype: float32
     name: solar_zenith
     nodata: -999
     units: '1'
-  - aliases: [terrain_shadow]
-    dtype: uint8
+  - dtype: uint8
     name: terrain_shadow
     nodata: 0
     units: '1'
