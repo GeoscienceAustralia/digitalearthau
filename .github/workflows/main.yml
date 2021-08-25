@@ -84,14 +84,6 @@ jobs:
           PGUSER: postgres
           PGPASSWORD: postgres
 
-      - name: Download and install PDS Tools
-        run: |
-          mkdir pdstools
-          cd pdstools
-          wget https://raw.githubusercontent.com/GeoscienceAustralia/pds-tools/988b0b6e8495f9224c384ec0ac4c720c054d022c/pdsinfo.c
-          clang -O pdsinfo.c -lm -o pdsinfo
-          export PATH="$(pwd):${PATH}"
-
       - name: install package
         run: pip -v install -e .[doc,test]
 
