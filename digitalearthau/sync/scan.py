@@ -1,4 +1,4 @@
-import dawg
+
 import logging
 import multiprocessing
 import time
@@ -40,12 +40,13 @@ def cache_is_too_old(path):
 def build_pathset(
         collection: Collection,
         cache_path: Path = None,
-        log=_LOG) -> dawg.CompletionDAWG:
+        log=_LOG) -> 'dawg.CompletionDAWG':
     """
     Build a combined set (in dawg form) of all dataset paths in the given index and filesystem.
 
     Optionally use the given cache directory to cache repeated builds.
     """
+    import dawg
     locations_cache = cache_path.joinpath(query_name(collection.query), 'locations.dawg') if cache_path else None
     if locations_cache:
         fileutils.mkdir_p(str(locations_cache.parent))
