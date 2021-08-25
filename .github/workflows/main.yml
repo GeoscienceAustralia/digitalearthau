@@ -87,7 +87,7 @@ jobs:
       - name: install package
         run: |
           python -m pip install -U pip
-          pip -v install -e .[doc,test]
+          pip -v install -e .[test]
 
       - name: Lint and test code
         run: ./check-code.sh integration_tests/
