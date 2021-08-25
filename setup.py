@@ -8,6 +8,7 @@ tests_require = ['pytest', 'pytest-cov', 'mock', 'pycodestyle', 'pylint',
 extras_require = {
     'doc': ['Sphinx', 'nbsphinx', 'setuptools', 'sphinx_rtd_theme', 'IPython', 'jupyter_sphinx',
             'recommonmark'],
+    'scan': ['DAWG'],
     'test': tests_require,
 }
 
@@ -41,7 +42,6 @@ setup(
         'gdal',
         'eodatasets3>=0.22.0',
         'structlog',
-        'DAWG',
         'boltons',
         'lxml',
         'pydash',
