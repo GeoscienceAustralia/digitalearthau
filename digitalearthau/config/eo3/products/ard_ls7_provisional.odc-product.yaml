@@ -17,50 +17,6 @@ metadata:
      dea:product_maturity: provisional
 
 measurements:
-  # NBAR
-  - name: nbar_blue
-    aliases:
-      - nbar_band01
-    dtype: int16
-    nodata: -999
-    units: '1'
-  - name: nbar_green
-    aliases:
-      - nbar_band02
-    dtype: int16
-    nodata: -999
-    units: '1'
-  - name: nbar_red
-    aliases:
-      - nbar_band03
-    dtype: int16
-    nodata: -999
-    units: '1'
-  - name: nbar_nir
-    aliases:
-      - nbar_band04
-    dtype: int16
-    nodata: -999
-    units: '1'
-  - name: nbar_swir_1
-    aliases:
-      - nbar_band05
-    dtype: int16
-    nodata: -999
-    units: '1'
-  - name: nbar_swir_2
-    aliases:
-      - nbar_band07
-    dtype: int16
-    nodata: -999
-    units: '1'
-  - name: nbar_panchromatic
-    aliases:
-      - nbar_band08
-    dtype: int16
-    nodata: -999
-    units: '1'
-
     # NBART
   - name: nbart_blue
     aliases:
@@ -134,18 +90,6 @@ measurements:
           '3': shadow
           '4': snow
           '5': water
-  - name: oa_nbar_contiguity
-    aliases:
-      - nbar_contiguity
-    dtype: uint8
-    nodata: 255
-    units: '1'
-    flags_definition:
-      contiguous:
-        bits: [0]
-        values:
-          '1': true
-          '0': false
   - name: oa_nbart_contiguity
     aliases:
       - nbart_contiguity
