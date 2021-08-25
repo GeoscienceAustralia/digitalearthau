@@ -1,7 +1,6 @@
----
 # Dataset
 $schema: https://schemas.opendatacube.org/dataset
-id: 5c28f075-54ac-47bf-a271-ff746cc048b8
+id: 396d1289-a846-461d-b462-67b031c5494f
 
 label: ga_ls7e_ard_provisional_3-2-1_098084_2021-03-07_nrt
 product:
@@ -28,7 +27,7 @@ grids:
   default:
     shape: [7281, 8381]
     transform: [30.0, 0.0, 609285.0, 0.0, -30.0, -3724785.0, 0.0, 0.0, 1.0]
-  panchromatic:
+  nbart:panchromatic:
     shape: [14561, 16761]
     transform: [15.0, 0.0, 609292.5, 0.0, -15.0, -3724792.5, 0.0, 0.0, 1.0]
 
@@ -36,8 +35,6 @@ properties:
   datetime: 2021-03-07 23:53:21.697011Z
   dea:dataset_maturity: nrt
   dea:product_maturity: provisional
-  dtr:end_datetime: 2021-03-07 23:53:35.471535Z
-  dtr:start_datetime: 2021-03-07 23:53:07.781435Z
   eo:cloud_cover: 21.549381922966017
   eo:gsd: 15.0  # Ground sample distance (m)
   eo:instrument: ETM
@@ -76,27 +73,12 @@ properties:
   landsat:wrs_row: 84
   odc:dataset_version: 3.2.1
   odc:file_format: GeoTIFF
-  odc:processing_datetime: 2021-08-10 21:46:49.676351Z
+  odc:processing_datetime: 2021-08-24 13:41:38.792746Z
   odc:producer: ga.gov.au
   odc:product_family: ard
   odc:region_code: '098084'
 
 measurements:
-  nbar_blue:
-    path: ga_ls7e_nbar_provisional_3-2-1_098084_2021-03-07_nrt_band01.tif
-  nbar_green:
-    path: ga_ls7e_nbar_provisional_3-2-1_098084_2021-03-07_nrt_band02.tif
-  nbar_nir:
-    path: ga_ls7e_nbar_provisional_3-2-1_098084_2021-03-07_nrt_band04.tif
-  nbar_panchromatic:
-    path: ga_ls7e_nbar_provisional_3-2-1_098084_2021-03-07_nrt_band08.tif
-    grid: panchromatic
-  nbar_red:
-    path: ga_ls7e_nbar_provisional_3-2-1_098084_2021-03-07_nrt_band03.tif
-  nbar_swir_1:
-    path: ga_ls7e_nbar_provisional_3-2-1_098084_2021-03-07_nrt_band05.tif
-  nbar_swir_2:
-    path: ga_ls7e_nbar_provisional_3-2-1_098084_2021-03-07_nrt_band07.tif
   nbart_blue:
     path: ga_ls7e_nbart_provisional_3-2-1_098084_2021-03-07_nrt_band01.tif
   nbart_green:
@@ -105,7 +87,7 @@ measurements:
     path: ga_ls7e_nbart_provisional_3-2-1_098084_2021-03-07_nrt_band04.tif
   nbart_panchromatic:
     path: ga_ls7e_nbart_provisional_3-2-1_098084_2021-03-07_nrt_band08.tif
-    grid: panchromatic
+    grid: nbart:panchromatic
   nbart_red:
     path: ga_ls7e_nbart_provisional_3-2-1_098084_2021-03-07_nrt_band03.tif
   nbart_swir_1:
@@ -124,8 +106,6 @@ measurements:
     path: ga_ls7e_oa_provisional_3-2-1_098084_2021-03-07_nrt_fmask.tif
   oa_incident_angle:
     path: ga_ls7e_oa_provisional_3-2-1_098084_2021-03-07_nrt_incident-angle.tif
-  oa_nbar_contiguity:
-    path: ga_ls7e_oa_provisional_3-2-1_098084_2021-03-07_nrt_nbar-contiguity.tif
   oa_nbart_contiguity:
     path: ga_ls7e_oa_provisional_3-2-1_098084_2021-03-07_nrt_nbart-contiguity.tif
   oa_relative_azimuth:
@@ -144,8 +124,6 @@ measurements:
     path: ga_ls7e_oa_provisional_3-2-1_098084_2021-03-07_nrt_time-delta.tif
 
 accessories:
-  thumbnail:nbar:
-    path: ga_ls7e_nbar_provisional_3-2-1_098084_2021-03-07_nrt_thumbnail.jpg
   thumbnail:nbart:
     path: ga_ls7e_nbart_provisional_3-2-1_098084_2021-03-07_nrt_thumbnail.jpg
   metadata:processor:

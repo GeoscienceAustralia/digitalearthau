@@ -82,23 +82,6 @@ properties:
   odc:region_code: '090085'
 
 measurements:
-  nbar_blue:
-    path: ga_ls8c_nbar_provisional_3-2-1_090085_2021-03-07_interim_band02.tif
-  nbar_coastal_aerosol:
-    path: ga_ls8c_nbar_provisional_3-2-1_090085_2021-03-07_interim_band01.tif
-  nbar_green:
-    path: ga_ls8c_nbar_provisional_3-2-1_090085_2021-03-07_interim_band03.tif
-  nbar_nir:
-    path: ga_ls8c_nbar_provisional_3-2-1_090085_2021-03-07_interim_band05.tif
-  nbar_panchromatic:
-    path: ga_ls8c_nbar_provisional_3-2-1_090085_2021-03-07_interim_band08.tif
-    grid: panchromatic
-  nbar_red:
-    path: ga_ls8c_nbar_provisional_3-2-1_090085_2021-03-07_interim_band04.tif
-  nbar_swir_1:
-    path: ga_ls8c_nbar_provisional_3-2-1_090085_2021-03-07_interim_band06.tif
-  nbar_swir_2:
-    path: ga_ls8c_nbar_provisional_3-2-1_090085_2021-03-07_interim_band07.tif
   nbart_blue:
     path: ga_ls8c_nbart_provisional_3-2-1_090085_2021-03-07_interim_band02.tif
   nbart_coastal_aerosol:
@@ -128,8 +111,6 @@ measurements:
     path: ga_ls8c_oa_provisional_3-2-1_090085_2021-03-07_interim_fmask.tif
   oa_incident_angle:
     path: ga_ls8c_oa_provisional_3-2-1_090085_2021-03-07_interim_incident-angle.tif
-  oa_nbar_contiguity:
-    path: ga_ls8c_oa_provisional_3-2-1_090085_2021-03-07_interim_nbar-contiguity.tif
   oa_nbart_contiguity:
     path: ga_ls8c_oa_provisional_3-2-1_090085_2021-03-07_interim_nbart-contiguity.tif
   oa_relative_azimuth:

@@ -1,7 +1,6 @@
----
 # Dataset
 $schema: https://schemas.opendatacube.org/dataset
-id: 04dacb82-0d7e-4e6e-8dfb-0b2326776fd2
+id: 899e9160-2639-42f0-80da-1d1864e6aa18
 
 label: ga_s2bm_ard_provisional_3-2-1_56JNQ_2021-07-24_interim
 product:
@@ -64,7 +63,7 @@ properties:
   gqa:stddev_y: .nan
   odc:dataset_version: 3.2.1
   odc:file_format: GeoTIFF
-  odc:processing_datetime: 2021-08-10 11:43:22.636072Z
+  odc:processing_datetime: 2021-08-24 12:21:56.304928Z
   odc:producer: ga.gov.au
   odc:product_family: ard
   odc:region_code: 56JNQ
@@ -76,35 +75,6 @@ properties:
   sentinel:utm_zone: 56
 
 measurements:
-  nbar_blue:
-    path: ga_s2bm_nbar_provisional_3-2-1_56JNQ_2021-07-24_interim_band02.tif
-  nbar_coastal_aerosol:
-    path: ga_s2bm_nbar_provisional_3-2-1_56JNQ_2021-07-24_interim_band01.tif
-    grid: '60'
-  nbar_green:
-    path: ga_s2bm_nbar_provisional_3-2-1_56JNQ_2021-07-24_interim_band03.tif
-  nbar_nir_1:
-    path: ga_s2bm_nbar_provisional_3-2-1_56JNQ_2021-07-24_interim_band08.tif
-  nbar_nir_2:
-    path: ga_s2bm_nbar_provisional_3-2-1_56JNQ_2021-07-24_interim_band08a.tif
-    grid: '20'
-  nbar_red:
-    path: ga_s2bm_nbar_provisional_3-2-1_56JNQ_2021-07-24_interim_band04.tif
-  nbar_red_edge_1:
-    path: ga_s2bm_nbar_provisional_3-2-1_56JNQ_2021-07-24_interim_band05.tif
-    grid: '20'
-  nbar_red_edge_2:
-    path: ga_s2bm_nbar_provisional_3-2-1_56JNQ_2021-07-24_interim_band06.tif
-    grid: '20'
-  nbar_red_edge_3:
-    path: ga_s2bm_nbar_provisional_3-2-1_56JNQ_2021-07-24_interim_band07.tif
-    grid: '20'
-  nbar_swir_2:
-    path: ga_s2bm_nbar_provisional_3-2-1_56JNQ_2021-07-24_interim_band11.tif
-    grid: '20'
-  nbar_swir_3:
-    path: ga_s2bm_nbar_provisional_3-2-1_56JNQ_2021-07-24_interim_band12.tif
-    grid: '20'
   nbart_blue:
     path: ga_s2bm_nbart_provisional_3-2-1_56JNQ_2021-07-24_interim_band02.tif
   nbart_coastal_aerosol:
@@ -147,8 +117,6 @@ measurements:
     grid: '20'
   oa_incident_angle:
     path: ga_s2bm_oa_provisional_3-2-1_56JNQ_2021-07-24_interim_incident-angle.tif
-  oa_nbar_contiguity:
-    path: ga_s2bm_oa_provisional_3-2-1_56JNQ_2021-07-24_interim_nbar-contiguity.tif
   oa_nbart_contiguity:
     path: ga_s2bm_oa_provisional_3-2-1_56JNQ_2021-07-24_interim_nbart-contiguity.tif
   oa_relative_azimuth:
@@ -167,8 +135,6 @@ measurements:
     path: ga_s2bm_oa_provisional_3-2-1_56JNQ_2021-07-24_interim_time-delta.tif
 
 accessories:
-  thumbnail:nbar:
-    path: ga_s2bm_nbar_provisional_3-2-1_56JNQ_2021-07-24_interim_thumbnail.jpg
   thumbnail:nbart:
     path: ga_s2bm_nbart_provisional_3-2-1_56JNQ_2021-07-24_interim_thumbnail.jpg
   metadata:processor:
