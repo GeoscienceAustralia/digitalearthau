@@ -85,7 +85,9 @@ jobs:
           PGPASSWORD: postgres
 
       - name: install package
-        run: pip -v install -e .[doc,test]
+        run: |
+          python -m pip install -U pip
+          pip -v install -e .[doc,test]
 
       - name: Lint and test code
         run: ./check-code.sh integration_tests/
