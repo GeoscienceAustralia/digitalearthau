@@ -28,6 +28,4 @@ yamllint ./**/*.yaml
 # Users can specify extra folders (ie. integration_tests) as arguments.
 pytest -r sx --cov digitalearthau --durations=5 digitalearthau scripts/**/*.py "$@"
 
-eo3-validate --warnings-as-errors \
-	digitalearthau/config/eo3 \
-	digitalearthau/config/eo3/examples
+eo3-validate --warnings-as-errors digitalearthau/config/eo3
