@@ -33,8 +33,10 @@ jobs:
         shell: bash -l {0}
     strategy:
       matrix:
-        python-version: [3.6]
-
+        # ODC itself only tests on 3.8 now in Github CI.
+        # (Some dependencies seem to have issues on 3.6 now.
+        #  It could probably be fixed with careful pinning if people care about 3.6)
+        python-version: [3.8]
     steps:
       - uses: actions/checkout@v2
         with:
