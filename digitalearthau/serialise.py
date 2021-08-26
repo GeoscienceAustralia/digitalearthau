@@ -205,7 +205,7 @@ def dict_to_type(o, expected_type):
     >>> dict_to_type('eating', expected_type=Status)
     Traceback (most recent call last):
     ...
-    digitalearthau.serialise.SerialisationError: Unknown field EATING for Status. Expected one of ...
+    ValueError: 'eating' is not a valid Status
     >>> # More tests in test_serialise.py
     """
     if o is None:
@@ -219,10 +219,6 @@ def dict_to_type(o, expected_type):
     # Needed for cattrs 1.0.0: our properties are a raw dict, so do nothing to them.
     c.register_structure_hook(dict, _passthrough)
     return c.structure(o, expected_type)
-
-
-class SerialisationError(Exception):
-    pass
 
 
 class MultilineString(str):
