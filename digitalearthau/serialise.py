@@ -188,6 +188,10 @@ def _structure_as_pathlib(d, t) -> pathlib.Path:
     return pathlib.Path(d)
 
 
+def _passthrough(d, t) -> dict:
+    return d
+
+
 def dict_to_type(o, expected_type):
     """
     Try to parse the given dict (from json/etc) into the given NamedTuple.
@@ -211,6 +215,9 @@ def dict_to_type(o, expected_type):
     c.register_structure_hook(uuid.UUID, _structure_as_uuid)
     c.register_structure_hook(datetime.datetime, _structure_as_datetime)
     c.register_structure_hook(pathlib.Path, _structure_as_pathlib)
+
+    # Needed for cattrs 1.0.0: our properties are a raw dict, so do nothing to them.
+    c.register_structure_hook(dict, _passthrough)
     return c.structure(o, expected_type)
 
 
