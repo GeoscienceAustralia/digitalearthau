@@ -1,23 +1,24 @@
-import pathlib
-
 import datetime
-import pytest
-from typing import NamedTuple, List
+import pathlib
+from dataclasses import dataclass
+from pathlib import Path
+from typing import List
 
 from digitalearthau import serialise
 from digitalearthau.events import Status
 from digitalearthau.runners.model import TaskDescription, DefaultJobParameters, TaskAppState
-from pathlib import Path
 
 
 def test_roundtrip():
     # Convert to dict and back again, checking that it's identical.
 
-    class MyEmbeddedNamedTuple(NamedTuple):
+    @dataclass
+    class MyEmbeddedNamedTuple:
         arg1: str
         my_dt: datetime.datetime
 
-    class MyNamedTuple(NamedTuple):
+    @dataclass
+    class MyNamedTuple:
         var1: str
         var2: List[int]
         inner_tuple: MyEmbeddedNamedTuple

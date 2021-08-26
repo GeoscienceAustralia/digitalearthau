@@ -35,6 +35,7 @@ setup(
     ],
     install_requires=[
         'attrs>=19.2.0',
+        'cattrs',
         'colorama',  # Needed for structlog's CLI output.
         'click>=5.0',
         'datacube[celery] >= 1.8',

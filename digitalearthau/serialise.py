@@ -8,15 +8,16 @@ common types (events, runner model objects)
 A lot of the previous dict-based code grew unwieldy, especially as it neutered pycharm/pylint.
 Normal classes are an option too, but they'd need their own serialization code regardless.)
 """
+import datetime
 import enum
 import json
 import pathlib
 import uuid
 
-import datetime
+import cattr
 import dateutil.parser
 import yaml
-from typing import Dict
+from cattr import unstructure
 
 from digitalearthau import paths
 from digitalearthau.events import Status
@@ -163,19 +164,28 @@ def type_to_dict(o):
     """
     Convert a named tuple and all of its directly-embedded named tuples to dicts/etc suitable for json/yaml
 
-    TODO: Doesn't handle indirectly embedded NamedTuples, such as within a list.
-    (It's currently only used for simple cases, not complex hierarchies)
-
     >>> type_to_dict(Status.ACTIVE)
     'active'
     >>> # More tests in test_serialise.py
     """
+    # This was greatly simplified now that cattrs exists.
+    return unstructure(o)
 
-    # We can't isinstance() for NamedTuple, the noraml way is to see if attributes like _fields exist.
-    try:
-        return dict(zip(o._fields, (type_to_dict(value) for value in o)))
-    except AttributeError:
-        return simplify_obj(o)
+
+def _structure_as_uuid(d, t) -> uuid.UUID:
+    return uuid.UUID(str(d))
+
+
+def _structure_as_datetime(d, t) -> datetime.datetime:
+    if isinstance(d, datetime.datetime):
+        return d
+    return dateutil.parser.parse(d)
+
+
+def _structure_as_pathlib(d, t) -> pathlib.Path:
+    if isinstance(d, pathlib.Path):
+        return d
+    return pathlib.Path(d)
 
 
 def dict_to_type(o, expected_type):
@@ -197,30 +207,11 @@ def dict_to_type(o, expected_type):
     if o is None:
         return None
 
-    if expected_type in (pathlib.Path, uuid.UUID):
-        return expected_type(o)
-
-    if expected_type == datetime.datetime:
-        return dateutil.parser.parse(o)
-
-    if issubclass(expected_type, enum.Enum):
-        name = str(o).upper()
-        v = expected_type.__members__.get(name)
-        if not v:
-            raise SerialisationError(f"Unknown field {name} for {expected_type.__name__}. "
-                                     f"Expected one of {', '.join(expected_type.__members__)}")
-        return v
-    try:
-        # We can't isinstance() for NamedTuple, the noraml way is to see if attributes like _fields exist.
-        # pylint: disable=protected-access
-        field_types: Dict = expected_type._field_types
-        assert isinstance(o, dict)
-        return expected_type(
-            **{k: dict_to_type(v, field_types[k]) for (k, v) in o.items()}
-        )
-    except AttributeError:
-        pass
-    return o
+    c = cattr.Converter()
+    c.register_structure_hook(uuid.UUID, _structure_as_uuid)
+    c.register_structure_hook(datetime.datetime, _structure_as_datetime)
+    c.register_structure_hook(pathlib.Path, _structure_as_pathlib)
+    return c.structure(o, expected_type)
 
 
 class SerialisationError(Exception):
@@ -231,6 +222,7 @@ class MultilineString(str):
     """
     A string that will be represented preserved in multi-line format in yaml.
     """
+
     pass
 
 
