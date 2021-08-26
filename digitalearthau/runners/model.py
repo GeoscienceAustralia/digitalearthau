@@ -2,13 +2,14 @@
 Model objects for tracking the state and outputs of a task in NCI,
 such as log locations, pbs parameters etc.
 """
-import dataclasses
 import datetime
 from pathlib import Path
 from typing import List, Optional
 
+import attr
 
-@dataclasses.dataclass
+
+@attr.frozen
 class PbsParameters:
     """
     PBS-running context: options to be reused if a task needs to submit further tasks
@@ -22,16 +23,16 @@ class PbsParameters:
     queue: str
 
     # Envronment variables to set
-    env_vars: dict = dataclasses.field(default_factory=dict)
+    env_vars: dict = attr.ib(factory=dict)
 
     # Default group and world read
     umask: int = 33
 
     # Addition raw cli arguments to append to qsub commands. Be careful!
-    extra_qsub_args: List[str] = dataclasses.field(default_factory=list)
+    extra_qsub_args: List[str] = attr.ib(factory=list)
 
 
-@dataclasses.dataclass
+@attr.frozen
 class TaskAppState:
     """
     Common state for apps using the task_app framework.
@@ -44,7 +45,7 @@ class TaskAppState:
     pbs_parameters: Optional[PbsParameters] = None
 
 
-@dataclasses.dataclass
+@attr.frozen
 class DefaultJobParameters:
     """
     Input ("user") parameters for the job.
@@ -59,7 +60,7 @@ class DefaultJobParameters:
     output_products: List[str]
 
 
-@dataclasses.dataclass
+@attr.frozen
 class TaskDescription:
     """
     Representation of a task that has been submitted
