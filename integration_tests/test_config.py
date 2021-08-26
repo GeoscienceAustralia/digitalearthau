@@ -31,7 +31,7 @@ def test_dea_config(dea_index: Index):
 
     # Make sure some were indexed.
     # (We're not exact, as we don't want to bump this constantly as products are added)
-    assert len(products_names) > 80
+    assert len(products_names) >= 80
 
 
 # Damien 2021-05-03: C2 ingested products started failing validation, stating that they have duplicate
