@@ -58,16 +58,16 @@ class BaseMessage(NamedTuple):
 class Status(Enum):
     # Not yet received or queued: sent to pre-announce an expected future task,
     # such as on reception of satellite schedule.
-    SCHEDULED = 1
+    SCHEDULED = 'scheduled'
     # Received but can't be queued yet: such as waiting for Ancillary data.
-    WAITING = 2
+    WAITING = 'waiting'
     # Queued to run
-    PENDING = 3
+    PENDING = 'pending'
     # .... the rest are self-expanatory
-    ACTIVE = 4
-    COMPLETE = 5
-    FAILED = 6
-    CANCELLED = 7
+    ACTIVE = 'active'
+    COMPLETE = 'complete'
+    FAILED = 'failed'
+    CANCELLED = 'cancelled'
 
 
 class TaskEvent(NamedTuple):
