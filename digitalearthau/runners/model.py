@@ -2,13 +2,14 @@
 Model objects for tracking the state and outputs of a task in NCI,
 such as log locations, pbs parameters etc.
 """
-from pathlib import Path
-
+import dataclasses
 import datetime
-from typing import NamedTuple, List, Tuple
+from pathlib import Path
+from typing import List, Optional
 
 
-class PbsParameters(NamedTuple):
+@dataclasses.dataclass
+class PbsParameters:
     """
     PBS-running context: options to be reused if a task needs to submit further tasks
 
@@ -21,16 +22,17 @@ class PbsParameters(NamedTuple):
     queue: str
 
     # Envronment variables to set
-    env_vars: dict = {}
+    env_vars: dict = dataclasses.field(default_factory=dict)
 
     # Default group and world read
     umask: int = 33
 
     # Addition raw cli arguments to append to qsub commands. Be careful!
-    extra_qsub_args: List[str] = []
+    extra_qsub_args: List[str] = dataclasses.field(default_factory=list)
 
 
-class TaskAppState(NamedTuple):
+@dataclasses.dataclass
+class TaskAppState:
     """
     Common state for apps using the task_app framework.
     """
@@ -39,10 +41,11 @@ class TaskAppState(NamedTuple):
     # Path where tasks are stored, once calculated
     task_serialisation_path: Path
 
-    pbs_parameters: PbsParameters = None
+    pbs_parameters: Optional[PbsParameters] = None
 
 
-class DefaultJobParameters(NamedTuple):
+@dataclasses.dataclass
+class DefaultJobParameters:
     """
     Input ("user") parameters for the job.
 
@@ -56,7 +59,8 @@ class DefaultJobParameters(NamedTuple):
     output_products: List[str]
 
 
-class TaskDescription(NamedTuple):
+@dataclasses.dataclass
+class TaskDescription:
     """
     Representation of a task that has been submitted
 
@@ -82,7 +86,7 @@ class TaskDescription(NamedTuple):
 
     # Parameters specific to the task runtime (eg. datacube task_app).
     # (Expect this type to be a union eventually: other runtime types might be added in the future...)
-    runtime_state: TaskAppState = None
+    runtime_state: Optional[TaskAppState] = None
 
     # Folder containing records of submitted jobs.
-    jobs_path: Path = None
+    jobs_path: Optional[Path] = None
