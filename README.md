@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/GeoscienceAustralia/digitalearthau.svg?branch=develop)](https://travis-ci.org/GeoscienceAustralia/digitalearthau)
+[![Main](https://github.com/GeoscienceAustralia/digitalearthau/actions/workflows/main.yml/badge.svg)](https://github.com/GeoscienceAustralia/digitalearthau/actions/workflows/main.yml)
 
 ## Digital Earth Australia
 
@@ -17,6 +17,3 @@ DEA has its own metadata types, so you must initialise using the config in this
 repository rather than `datacube system init`. A command is available to do this:
 
     dea-system init
-
-
-
