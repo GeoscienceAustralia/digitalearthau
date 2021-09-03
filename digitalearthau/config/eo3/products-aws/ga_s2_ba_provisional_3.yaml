@@ -30,5 +30,5 @@ measurements:
     nodata: .nan
   - name: fmask
     dtype: float32
-    units: 1
+    units: '1'
     nodata: .nan
