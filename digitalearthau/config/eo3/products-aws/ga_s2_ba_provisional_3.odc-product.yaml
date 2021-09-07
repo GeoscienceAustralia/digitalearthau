@@ -8,7 +8,6 @@ metadata:
   product:
     name: ga_s2_ba_provisional_3
   properties:
-    eo:platform: sentinel-2
     eo:instrument: MSI
     odc:file_format: GeoTIFF
     odc:product_family: ba
