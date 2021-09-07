@@ -1,0 +1,92 @@
+---
+# Dataset
+$schema: https://schemas.opendatacube.org/dataset
+id: 52f3c83f-df47-521a-a962-ebf6ce011640
+
+label: ga_s2_ba_provisional_3_54KWC_2021-09-06_interim
+product:
+  name: ga_s2_ba_provisional_3
+  href: https://collections.dea.ga.gov.au/product/ga_s2_ba_provisional_3
+
+crs: epsg:32754
+geometry:
+  type: Polygon
+  coordinates: [[[499980.0, 7800040.0], [609780.0, 7800040.0], [609780.0, 7690240.0],
+      [499980.0, 7690240.0], [499980.0, 7800040.0]]]
+grids:
+  default:
+    shape: [10980, 10980]
+    transform: [10.0, 0.0, 499980.0, 0.0, -10.0, 7800040.0, 0.0, 0.0, 1.0]
+
+properties:
+  datetime: 2021-09-06 00:52:42.951963Z
+  dea:dataset_maturity: interim
+  dea:product_maturity: provisional
+  eo:cloud_cover: 19.744114983029252
+  eo:constellation: sentinel-2
+  eo:gsd: 20.0  # Ground sample distance (m)
+  eo:instrument: MSI
+  eo:platform: sentinel-2a
+  eo:sun_azimuth: 44.9633023744417
+  eo:sun_elevation: 36.3040140199758
+  fmask:clear: 77.48671371362404
+  fmask:cloud: 19.744114983029252
+  fmask:cloud_shadow: 2.49798441279226
+  fmask:snow: 0.02196409434607052
+  fmask:water: 0.24922279620837356
+  gqa:abs_iterative_mean_x: .nan
+  gqa:abs_iterative_mean_xy: .nan
+  gqa:abs_iterative_mean_y: .nan
+  gqa:abs_x: .nan
+  gqa:abs_xy: .nan
+  gqa:abs_y: .nan
+  gqa:cep90: .nan
+  gqa:iterative_mean_x: .nan
+  gqa:iterative_mean_xy: .nan
+  gqa:iterative_mean_y: .nan
+  gqa:iterative_stddev_x: .nan
+  gqa:iterative_stddev_xy: .nan
+  gqa:iterative_stddev_y: .nan
+  gqa:mean_x: .nan
+  gqa:mean_xy: .nan
+  gqa:mean_y: .nan
+  gqa:stddev_x: .nan
+  gqa:stddev_xy: .nan
+  gqa:stddev_y: .nan
+  odc:collection_number: 3
+  odc:dataset_version: 1.6.0
+  odc:file_format: GeoTIFF
+  odc:naming_conventions: dea_c3
+  odc:processing_datetime: 2021-09-06 19:58:15.599499Z
+  odc:producer: ga.gov.au
+  odc:product_family: ba
+  odc:region_code: 54KWC
+  sentinel:datastrip_id: S2A_OPER_MSI_L1C_DS_VGS4_20210906T021657_S20210906T004707_N03.01
+  sentinel:datatake_start_datetime: 2021-09-06 02:16:57Z
+  sentinel:grid_square: WC
+  sentinel:latitude_band: K
+  sentinel:sentinel_tile_id: S2A_OPER_MSI_L1C_TL_VGS4_20210906T021657_A032417_T54KWC_N03.01
+  sentinel:utm_zone: 54
+
+measurements:
+  delta_bsi:
+    path: ga_s2_ba_provisional_3_54KWC_2021-09-06_interim_delta-bsi.tif
+  delta_nbr:
+    path: ga_s2_ba_provisional_3_54KWC_2021-09-06_interim_delta-nbr.tif
+  delta_ndvi:
+    path: ga_s2_ba_provisional_3_54KWC_2021-09-06_interim_delta-ndvi.tif
+  fmask:
+    path: ga_s2_ba_provisional_3_54KWC_2021-09-06_interim_fmask.tif
+
+accessories:
+  thumbnail:
+    path: ga_s2_ba_provisional_3_54KWC_2021-09-06_interim_thumbnail.jpg
+  metadata:processor:
+    path: ga_s2_ba_provisional_3_54KWC_2021-09-06_interim.proc-info.yaml
+  checksum:sha1:
+    path: ga_s2_ba_provisional_3_54KWC_2021-09-06_interim.sha1
+
+lineage:
+  ard:
+  - 027d6afc-92ec-4595-85a1-07e9e1dabb18
+...
