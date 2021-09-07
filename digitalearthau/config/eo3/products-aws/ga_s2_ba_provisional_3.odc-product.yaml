@@ -15,15 +15,15 @@ metadata:
     dea:product_maturity: provisional
 
 measurements:
-  - name: dbsi
+  - name: delta_bsi
     dtype: float32
     units: '1'
     nodata: .nan
-  - name: dnbr
+  - name: delta_bsi
     dtype: float32
     units: '1'
     nodata: .nan
-  - name: dndvi
+  - name: delta_bsi
     dtype: float32
     units: '1'
     nodata: .nan
