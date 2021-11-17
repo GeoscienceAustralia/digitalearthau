@@ -13,7 +13,6 @@ metadata:
      eo:instrument: ETM
      odc:product_family: ard
      odc:producer: ga.gov.au
-     landsat:collection_number: 1
 
 measurements:
   # NBAR
