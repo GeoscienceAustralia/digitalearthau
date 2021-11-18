@@ -209,8 +209,8 @@ def other_dataset(integration_test_data: Path, test_dataset: DatasetForTests) ->
     paths.write_files(
         {
             'LS8_INDEXED_ALREADY': {
-                'ga-metadata.yaml': (dedent("""\
-                                     id: {}
+                'ga-metadata.yaml': (dedent(f"""\
+                                     id: {str(ds_id)}
                                      platform:
                                          code: LANDSAT_8
                                      instrument:
@@ -222,7 +222,7 @@ def other_dataset(integration_test_data: Path, test_dataset: DatasetForTests) ->
                                      image:
                                          bands: {{}}
                                      lineage:
-                                         source_datasets: {{}}""".format(str(ds_id)))),
+                                         source_datasets: {{}}""")),
                 'dummy-file.txt': ''
             }
         },
