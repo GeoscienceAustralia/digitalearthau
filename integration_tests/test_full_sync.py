@@ -161,7 +161,7 @@ def test_detect_corrupt_existing(test_dataset: DatasetForTests,
 
     # Overwrite with corrupted file.
     os.unlink(str(path))
-    with path.open('w') as f:
+    with path.open('w', encoding='utf8') as f:
         f.write('corruption!')
     assert path.exists()
 
@@ -191,7 +191,7 @@ def test_detect_corrupt_new(test_dataset: DatasetForTests,
 
     # Write corrupted file.
     os.unlink(str(path))
-    with path.open('w') as f:
+    with path.open('w', encoding='utf8') as f:
         f.write('corruption!')
     assert path.exists()
 
@@ -296,9 +296,9 @@ def test_is_trashed(test_dataset: DatasetForTests,
     )
 
     # Show output structure for debugging
-    print("Output structure")
-    for p in paths.list_file_paths(root):
-        print("\t{}".format(p))
+    # print("Output structure")
+    # for p in paths.list_file_paths(root):
+    #    print(f"\t{p}")
 
     if expect_to_be_trashed:
         assert trashed_path.exists(), "File isn't in trash."
