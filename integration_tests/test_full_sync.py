@@ -20,7 +20,7 @@ from digitalearthau.sync import differences as mm, fixes, scan, Mismatch
 from integration_tests.conftest import DatasetForTests, freeze_index
 
 
-# These are ok in tests. What will linting do?
+# These are ok in tests.
 # pylint: disable=too-many-locals, protected-access, redefined-outer-name
 
 
@@ -298,7 +298,7 @@ def test_is_trashed(test_dataset: DatasetForTests,
     # Show output structure for debugging
     print("Output structure")
     for p in paths.list_file_paths(root):
-        print("\t{}".format(p))
+        print(f"\t{p}")
 
     if expect_to_be_trashed:
         assert trashed_path.exists(), "File isn't in trash."
