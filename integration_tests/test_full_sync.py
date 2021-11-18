@@ -161,7 +161,7 @@ def test_detect_corrupt_existing(test_dataset: DatasetForTests,
 
     # Overwrite with corrupted file.
     os.unlink(str(path))
-    with path.open('w') as f:
+    with path.open('w', encoding='utf8') as f:
         f.write('corruption!')
     assert path.exists()
 
@@ -191,7 +191,7 @@ def test_detect_corrupt_new(test_dataset: DatasetForTests,
 
     # Write corrupted file.
     os.unlink(str(path))
-    with path.open('w') as f:
+    with path.open('w', encoding='utf8') as f:
         f.write('corruption!')
     assert path.exists()
 
