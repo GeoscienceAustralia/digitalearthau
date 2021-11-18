@@ -296,9 +296,9 @@ def test_is_trashed(test_dataset: DatasetForTests,
     )
 
     # Show output structure for debugging
-    print("Output structure")
-    for p in paths.list_file_paths(root):
-        print(f"\t{p}")
+    # print("Output structure")
+    # for p in paths.list_file_paths(root):
+    #    print(f"\t{p}")
 
     if expect_to_be_trashed:
         assert trashed_path.exists(), "File isn't in trash."
