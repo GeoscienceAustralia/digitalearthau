@@ -20,7 +20,7 @@ from digitalearthau.sync import differences as mm, fixes, scan, Mismatch
 from integration_tests.conftest import DatasetForTests, freeze_index
 
 
-# These are ok in tests.
+# These are ok in tests. What will linting do?
 # pylint: disable=too-many-locals, protected-access, redefined-outer-name
 
 
