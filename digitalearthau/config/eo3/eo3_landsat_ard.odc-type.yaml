@@ -106,7 +106,7 @@ dataset:
       offset:
         - properties
         - landsat:landsat_product_id
-	
+
     # semi-auto generated below
     eo_gsd:
       description: Ground sample distance, meters
