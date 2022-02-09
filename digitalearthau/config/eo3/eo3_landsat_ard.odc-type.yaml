@@ -100,6 +100,13 @@ dataset:
       max_offset:
         - [extent, lat, end]
 
+    landsat_product_id:
+      description: Landsat Product ID
+      indexed: false
+      offset:
+        - properties
+        - landsat:landsat_product_id
+	
     # semi-auto generated below
     eo_gsd:
       description: Ground sample distance, meters
