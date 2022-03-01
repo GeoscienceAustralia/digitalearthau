@@ -290,6 +290,7 @@ dataset:
         - properties
         - gqa:stddev_y
       type: double
+
     landsat_scene_id:
       description: Landsat Scene ID
       indexed: false
