@@ -1,8 +1,9 @@
 
 
-for name in `find . -name '*.html'`; do
-    path=${name#./}
-    cat > $name <<EOF
+find . -name '*.html' -print0 | while read -d $'\0' name
+do
+    path="${name#./}"
+    cat > "$name" <<EOF
 <!DOCTYPE html>
 <meta charset="utf-8">
 <title>Redirecting to https://docs.dea.ga.gov.au/$path</title>
