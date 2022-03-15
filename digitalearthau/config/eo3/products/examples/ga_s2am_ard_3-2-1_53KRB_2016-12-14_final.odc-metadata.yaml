@@ -1,0 +1,182 @@
+---
+# Dataset
+$schema: https://schemas.opendatacube.org/dataset
+id: 10a17116-5bef-4217-9510-e80614b8bcec
+
+label: ga_s2am_ard_3-2-1_53KRB_2016-12-14_final
+product:
+  name: ga_s2am_ard_3
+  href: https://collections.dea.ga.gov.au/product/ga_s2am_ard_3
+
+crs: epsg:32753
+geometry:
+  type: Polygon
+  coordinates: [[[909780.0, 8090200.0], [813840.0, 8090200.0], [813780.0, 8090200.0],
+      [813640.0, 8090200.0], [813640.292465965, 8090332.400787987], [813870.2964212612,
+        8091262.416724986], [832680.2985749985, 8166732.42535625], [840650.2985749985,
+        8198612.42535625], [840930.3648209037, 8199722.676438638], [840980.7152330911,
+        8199903.713906763], [841025.3630088934, 8200000.0], [841124.9989785545, 8200000.0],
+      [841128.8868430493, 8200000.0], [909780.0, 8200000.0], [909780.0, 8090200.0]]]
+grids:
+  default:
+    shape: [10980, 10980]
+    transform: [10.0, 0.0, 799980.0, 0.0, -10.0, 8200000.0, 0.0, 0.0, 1.0]
+  '20':
+    shape: [5490, 5490]
+    transform: [20.0, 0.0, 799980.0, 0.0, -20.0, 8200000.0, 0.0, 0.0, 1.0]
+  '60':
+    shape: [1830, 1830]
+    transform: [60.0, 0.0, 799980.0, 0.0, -60.0, 8200000.0, 0.0, 0.0, 1.0]
+
+properties:
+  datetime: 2016-12-14 00:58:40.869000Z
+  dea:dataset_maturity: final
+  dea:product_maturity: stable
+  eo:cloud_cover: 11.966662016986879
+  eo:constellation: sentinel-2
+  eo:gsd: 10.0  # Ground sample distance (m)
+  eo:instrument: MSI
+  eo:platform: sentinel-2a
+  eo:sun_azimuth: 109.538694028183
+  eo:sun_elevation: 24.2374231657688
+  fmask:clear: 41.921231476902626
+  fmask:cloud: 11.966662016986879
+  fmask:cloud_shadow: 6.184968683190788
+  fmask:snow: 1.4666519586462934
+  fmask:water: 38.460485864273416
+  gqa:abs_iterative_mean_x: 3.66
+  gqa:abs_iterative_mean_xy: 13.49
+  gqa:abs_iterative_mean_y: 12.98
+  gqa:abs_x: 4.22
+  gqa:abs_xy: 14.16
+  gqa:abs_y: 13.51
+  gqa:cep90: 17.96
+  gqa:iterative_mean_x: -3.66
+  gqa:iterative_mean_xy: 13.49
+  gqa:iterative_mean_y: -12.98
+  gqa:iterative_stddev_x: 1.97
+  gqa:iterative_stddev_xy: 4.02
+  gqa:iterative_stddev_y: 3.5
+  gqa:mean_x: -4.01
+  gqa:mean_xy: 14.1
+  gqa:mean_y: -13.51
+  gqa:stddev_x: 3.46
+  gqa:stddev_xy: 5.57
+  gqa:stddev_y: 4.36
+  odc:dataset_version: 3.2.1
+  odc:file_format: GeoTIFF
+  odc:processing_datetime: 2022-02-24 04:29:03.153841Z
+  odc:producer: ga.gov.au
+  odc:product_family: ard
+  odc:region_code: 53KRB
+  sat:orbit_state: descending
+  sat:relative_orbit: 2
+  sentinel:datastrip_id: S2A_OPER_MSI_L1C_DS_SGS__20161214T040601_S20161214T005840_N02.04
+  sentinel:datatake_start_datetime: 2016-12-14 04:06:01Z
+  sentinel:sentinel_tile_id: S2A_OPER_MSI_L1C_TL_SGS__20161214T040601_A007721_T53KRB_N02.04
+
+measurements:
+  nbar_blue:
+    path: ga_s2am_nbar_3-2-1_53KRB_2016-12-14_final_band02.tif
+  nbar_coastal_aerosol:
+    path: ga_s2am_nbar_3-2-1_53KRB_2016-12-14_final_band01.tif
+    grid: '60'
+  nbar_green:
+    path: ga_s2am_nbar_3-2-1_53KRB_2016-12-14_final_band03.tif
+  nbar_nir_1:
+    path: ga_s2am_nbar_3-2-1_53KRB_2016-12-14_final_band08.tif
+  nbar_nir_2:
+    path: ga_s2am_nbar_3-2-1_53KRB_2016-12-14_final_band08a.tif
+    grid: '20'
+  nbar_red:
+    path: ga_s2am_nbar_3-2-1_53KRB_2016-12-14_final_band04.tif
+  nbar_red_edge_1:
+    path: ga_s2am_nbar_3-2-1_53KRB_2016-12-14_final_band05.tif
+    grid: '20'
+  nbar_red_edge_2:
+    path: ga_s2am_nbar_3-2-1_53KRB_2016-12-14_final_band06.tif
+    grid: '20'
+  nbar_red_edge_3:
+    path: ga_s2am_nbar_3-2-1_53KRB_2016-12-14_final_band07.tif
+    grid: '20'
+  nbar_swir_2:
+    path: ga_s2am_nbar_3-2-1_53KRB_2016-12-14_final_band11.tif
+    grid: '20'
+  nbar_swir_3:
+    path: ga_s2am_nbar_3-2-1_53KRB_2016-12-14_final_band12.tif
+    grid: '20'
+  nbart_blue:
+    path: ga_s2am_nbart_3-2-1_53KRB_2016-12-14_final_band02.tif
+  nbart_coastal_aerosol:
+    path: ga_s2am_nbart_3-2-1_53KRB_2016-12-14_final_band01.tif
+    grid: '60'
+  nbart_green:
+    path: ga_s2am_nbart_3-2-1_53KRB_2016-12-14_final_band03.tif
+  nbart_nir_1:
+    path: ga_s2am_nbart_3-2-1_53KRB_2016-12-14_final_band08.tif
+  nbart_nir_2:
+    path: ga_s2am_nbart_3-2-1_53KRB_2016-12-14_final_band08a.tif
+    grid: '20'
+  nbart_red:
+    path: ga_s2am_nbart_3-2-1_53KRB_2016-12-14_final_band04.tif
+  nbart_red_edge_1:
+    path: ga_s2am_nbart_3-2-1_53KRB_2016-12-14_final_band05.tif
+    grid: '20'
+  nbart_red_edge_2:
+    path: ga_s2am_nbart_3-2-1_53KRB_2016-12-14_final_band06.tif
+    grid: '20'
+  nbart_red_edge_3:
+    path: ga_s2am_nbart_3-2-1_53KRB_2016-12-14_final_band07.tif
+    grid: '20'
+  nbart_swir_2:
+    path: ga_s2am_nbart_3-2-1_53KRB_2016-12-14_final_band11.tif
+    grid: '20'
+  nbart_swir_3:
+    path: ga_s2am_nbart_3-2-1_53KRB_2016-12-14_final_band12.tif
+    grid: '20'
+  oa_azimuthal_exiting:
+    path: ga_s2am_oa_3-2-1_53KRB_2016-12-14_final_azimuthal-exiting.tif
+  oa_azimuthal_incident:
+    path: ga_s2am_oa_3-2-1_53KRB_2016-12-14_final_azimuthal-incident.tif
+  oa_combined_terrain_shadow:
+    path: ga_s2am_oa_3-2-1_53KRB_2016-12-14_final_combined-terrain-shadow.tif
+  oa_exiting_angle:
+    path: ga_s2am_oa_3-2-1_53KRB_2016-12-14_final_exiting-angle.tif
+  oa_fmask:
+    path: ga_s2am_oa_3-2-1_53KRB_2016-12-14_final_fmask.tif
+    grid: '20'
+  oa_incident_angle:
+    path: ga_s2am_oa_3-2-1_53KRB_2016-12-14_final_incident-angle.tif
+  oa_nbar_contiguity:
+    path: ga_s2am_oa_3-2-1_53KRB_2016-12-14_final_nbar-contiguity.tif
+  oa_nbart_contiguity:
+    path: ga_s2am_oa_3-2-1_53KRB_2016-12-14_final_nbart-contiguity.tif
+  oa_relative_azimuth:
+    path: ga_s2am_oa_3-2-1_53KRB_2016-12-14_final_relative-azimuth.tif
+  oa_relative_slope:
+    path: ga_s2am_oa_3-2-1_53KRB_2016-12-14_final_relative-slope.tif
+  oa_satellite_azimuth:
+    path: ga_s2am_oa_3-2-1_53KRB_2016-12-14_final_satellite-azimuth.tif
+  oa_satellite_view:
+    path: ga_s2am_oa_3-2-1_53KRB_2016-12-14_final_satellite-view.tif
+  oa_solar_azimuth:
+    path: ga_s2am_oa_3-2-1_53KRB_2016-12-14_final_solar-azimuth.tif
+  oa_solar_zenith:
+    path: ga_s2am_oa_3-2-1_53KRB_2016-12-14_final_solar-zenith.tif
+  oa_time_delta:
+    path: ga_s2am_oa_3-2-1_53KRB_2016-12-14_final_time-delta.tif
+
+accessories:
+  thumbnail:nbar:
+    path: ga_s2am_nbar_3-2-1_53KRB_2016-12-14_final_thumbnail.jpg
+  thumbnail:nbart:
+    path: ga_s2am_nbart_3-2-1_53KRB_2016-12-14_final_thumbnail.jpg
+  metadata:processor:
+    path: ga_s2am_ard_3-2-1_53KRB_2016-12-14_final.proc-info.yaml
+  checksum:sha1:
+    path: ga_s2am_ard_3-2-1_53KRB_2016-12-14_final.sha1
+
+lineage:
+  level1:
+  - 53658f68-797b-5077-99ac-285258ee1113
+...

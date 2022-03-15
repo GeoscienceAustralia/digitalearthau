@@ -1,0 +1,182 @@
+---
+# Dataset
+$schema: https://schemas.opendatacube.org/dataset
+id: 2c4734e6-60a0-4b48-a44a-3e1345074466
+
+label: ga_s2bm_ard_3-2-1_55HFB_2018-12-01_final
+product:
+  name: ga_s2bm_ard_3
+  href: https://collections.dea.ga.gov.au/product/ga_s2bm_ard_3
+
+crs: epsg:32755
+geometry:
+  type: Polygon
+  coordinates: [[[600000.0, 6090220.0], [600000.0, 6095567.366289851], [600000.0,
+        6095580.807687497], [600000.0, 6095801.185979423], [600000.337650604, 6095802.576626506],
+      [608840.3582810746, 6128162.6527827205], [625580.35961332, 6188972.6576201115],
+      [628330.3648209037, 6198892.676438638], [628657.1016587514, 6200020.0], [628723.0733859958,
+        6200020.0], [628727.4089381347, 6200020.0], [709800.0, 6200020.0], [709800.0,
+        6090220.0], [600000.0, 6090220.0]]]
+grids:
+  default:
+    shape: [10980, 10980]
+    transform: [10.0, 0.0, 600000.0, 0.0, -10.0, 6200020.0, 0.0, 0.0, 1.0]
+  '20':
+    shape: [5490, 5490]
+    transform: [20.0, 0.0, 600000.0, 0.0, -20.0, 6200020.0, 0.0, 0.0, 1.0]
+  '60':
+    shape: [1830, 1830]
+    transform: [60.0, 0.0, 600000.0, 0.0, -60.0, 6200020.0, 0.0, 0.0, 1.0]
+
+properties:
+  datetime: 2018-12-01 00:06:27.504000Z
+  dea:dataset_maturity: final
+  dea:product_maturity: stable
+  eo:cloud_cover: 0.026351221891572168
+  eo:constellation: sentinel-2
+  eo:gsd: 10.0  # Ground sample distance (m)
+  eo:instrument: MSI
+  eo:platform: sentinel-2b
+  eo:sun_azimuth: 68.1117733314713
+  eo:sun_elevation: 26.9238289992751
+  fmask:clear: 99.4314614948406
+  fmask:cloud: 0.026351221891572168
+  fmask:cloud_shadow: 0.019311599997317516
+  fmask:snow: 0.08003496926492745
+  fmask:water: 0.4428407140055854
+  gqa:abs_iterative_mean_x: 0.2
+  gqa:abs_iterative_mean_xy: 0.24
+  gqa:abs_iterative_mean_y: 0.13
+  gqa:abs_x: 0.25
+  gqa:abs_xy: 0.32
+  gqa:abs_y: 0.19
+  gqa:cep90: 0.43
+  gqa:iterative_mean_x: 0.18
+  gqa:iterative_mean_xy: 0.18
+  gqa:iterative_mean_y: -0.01
+  gqa:iterative_stddev_x: 0.15
+  gqa:iterative_stddev_xy: 0.22
+  gqa:iterative_stddev_y: 0.16
+  gqa:mean_x: 0.18
+  gqa:mean_xy: 0.18
+  gqa:mean_y: -0.0
+  gqa:stddev_x: 0.42
+  gqa:stddev_xy: 0.59
+  gqa:stddev_y: 0.41
+  odc:dataset_version: 3.2.1
+  odc:file_format: GeoTIFF
+  odc:processing_datetime: 2022-02-24 06:44:44.887715Z
+  odc:producer: ga.gov.au
+  odc:product_family: ard
+  odc:region_code: 55HFB
+  sat:orbit_state: descending
+  sat:relative_orbit: 30
+  sentinel:datastrip_id: S2B_OPER_MSI_L1C_DS_EPAE_20181201T011218_S20181201T000235_N02.07
+  sentinel:datatake_start_datetime: 2018-12-01 01:12:18Z
+  sentinel:sentinel_tile_id: S2B_OPER_MSI_L1C_TL_EPAE_20181201T011218_A009065_T55HFB_N02.07
+
+measurements:
+  nbar_blue:
+    path: ga_s2bm_nbar_3-2-1_55HFB_2018-12-01_final_band02.tif
+  nbar_coastal_aerosol:
+    path: ga_s2bm_nbar_3-2-1_55HFB_2018-12-01_final_band01.tif
+    grid: '60'
+  nbar_green:
+    path: ga_s2bm_nbar_3-2-1_55HFB_2018-12-01_final_band03.tif
+  nbar_nir_1:
+    path: ga_s2bm_nbar_3-2-1_55HFB_2018-12-01_final_band08.tif
+  nbar_nir_2:
+    path: ga_s2bm_nbar_3-2-1_55HFB_2018-12-01_final_band08a.tif
+    grid: '20'
+  nbar_red:
+    path: ga_s2bm_nbar_3-2-1_55HFB_2018-12-01_final_band04.tif
+  nbar_red_edge_1:
+    path: ga_s2bm_nbar_3-2-1_55HFB_2018-12-01_final_band05.tif
+    grid: '20'
+  nbar_red_edge_2:
+    path: ga_s2bm_nbar_3-2-1_55HFB_2018-12-01_final_band06.tif
+    grid: '20'
+  nbar_red_edge_3:
+    path: ga_s2bm_nbar_3-2-1_55HFB_2018-12-01_final_band07.tif
+    grid: '20'
+  nbar_swir_2:
+    path: ga_s2bm_nbar_3-2-1_55HFB_2018-12-01_final_band11.tif
+    grid: '20'
+  nbar_swir_3:
+    path: ga_s2bm_nbar_3-2-1_55HFB_2018-12-01_final_band12.tif
+    grid: '20'
+  nbart_blue:
+    path: ga_s2bm_nbart_3-2-1_55HFB_2018-12-01_final_band02.tif
+  nbart_coastal_aerosol:
+    path: ga_s2bm_nbart_3-2-1_55HFB_2018-12-01_final_band01.tif
+    grid: '60'
+  nbart_green:
+    path: ga_s2bm_nbart_3-2-1_55HFB_2018-12-01_final_band03.tif
+  nbart_nir_1:
+    path: ga_s2bm_nbart_3-2-1_55HFB_2018-12-01_final_band08.tif
+  nbart_nir_2:
+    path: ga_s2bm_nbart_3-2-1_55HFB_2018-12-01_final_band08a.tif
+    grid: '20'
+  nbart_red:
+    path: ga_s2bm_nbart_3-2-1_55HFB_2018-12-01_final_band04.tif
+  nbart_red_edge_1:
+    path: ga_s2bm_nbart_3-2-1_55HFB_2018-12-01_final_band05.tif
+    grid: '20'
+  nbart_red_edge_2:
+    path: ga_s2bm_nbart_3-2-1_55HFB_2018-12-01_final_band06.tif
+    grid: '20'
+  nbart_red_edge_3:
+    path: ga_s2bm_nbart_3-2-1_55HFB_2018-12-01_final_band07.tif
+    grid: '20'
+  nbart_swir_2:
+    path: ga_s2bm_nbart_3-2-1_55HFB_2018-12-01_final_band11.tif
+    grid: '20'
+  nbart_swir_3:
+    path: ga_s2bm_nbart_3-2-1_55HFB_2018-12-01_final_band12.tif
+    grid: '20'
+  oa_azimuthal_exiting:
+    path: ga_s2bm_oa_3-2-1_55HFB_2018-12-01_final_azimuthal-exiting.tif
+  oa_azimuthal_incident:
+    path: ga_s2bm_oa_3-2-1_55HFB_2018-12-01_final_azimuthal-incident.tif
+  oa_combined_terrain_shadow:
+    path: ga_s2bm_oa_3-2-1_55HFB_2018-12-01_final_combined-terrain-shadow.tif
+  oa_exiting_angle:
+    path: ga_s2bm_oa_3-2-1_55HFB_2018-12-01_final_exiting-angle.tif
+  oa_fmask:
+    path: ga_s2bm_oa_3-2-1_55HFB_2018-12-01_final_fmask.tif
+    grid: '20'
+  oa_incident_angle:
+    path: ga_s2bm_oa_3-2-1_55HFB_2018-12-01_final_incident-angle.tif
+  oa_nbar_contiguity:
+    path: ga_s2bm_oa_3-2-1_55HFB_2018-12-01_final_nbar-contiguity.tif
+  oa_nbart_contiguity:
+    path: ga_s2bm_oa_3-2-1_55HFB_2018-12-01_final_nbart-contiguity.tif
+  oa_relative_azimuth:
+    path: ga_s2bm_oa_3-2-1_55HFB_2018-12-01_final_relative-azimuth.tif
+  oa_relative_slope:
+    path: ga_s2bm_oa_3-2-1_55HFB_2018-12-01_final_relative-slope.tif
+  oa_satellite_azimuth:
+    path: ga_s2bm_oa_3-2-1_55HFB_2018-12-01_final_satellite-azimuth.tif
+  oa_satellite_view:
+    path: ga_s2bm_oa_3-2-1_55HFB_2018-12-01_final_satellite-view.tif
+  oa_solar_azimuth:
+    path: ga_s2bm_oa_3-2-1_55HFB_2018-12-01_final_solar-azimuth.tif
+  oa_solar_zenith:
+    path: ga_s2bm_oa_3-2-1_55HFB_2018-12-01_final_solar-zenith.tif
+  oa_time_delta:
+    path: ga_s2bm_oa_3-2-1_55HFB_2018-12-01_final_time-delta.tif
+
+accessories:
+  thumbnail:nbart:
+    path: ga_s2bm_nbart_3-2-1_55HFB_2018-12-01_final_thumbnail.jpg
+  thumbnail:nbar:
+    path: ga_s2bm_nbar_3-2-1_55HFB_2018-12-01_final_thumbnail.jpg
+  metadata:processor:
+    path: ga_s2bm_ard_3-2-1_55HFB_2018-12-01_final.proc-info.yaml
+  checksum:sha1:
+    path: ga_s2bm_ard_3-2-1_55HFB_2018-12-01_final.sha1
+
+lineage:
+  level1:
+  - d6796c28-1d5b-5876-8882-f8dee7aa3119
+...
