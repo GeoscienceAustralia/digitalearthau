@@ -117,12 +117,6 @@ dataset:
       type: double
 
     # Sentinel-specific.
-    sentinel_product_name:
-      description: Sentinel product name
-      indexed: false
-      offset:
-        - properties
-        - sentinel:product_name
     sentinel_tile_id:
       description: Sentinel Tile ID
       indexed: false
