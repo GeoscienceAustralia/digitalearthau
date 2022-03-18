@@ -115,18 +115,6 @@ measurements:
           '3': shadow
           '4': snow
           '5': water
-  - name: oa_nbar_contiguity
-    aliases:
-      - nbar_contiguity
-    dtype: uint8
-    nodata: 255
-    units: '1'
-    flags_definition:
-      contiguous:
-        bits: [0]
-        values:
-          '1': true
-          '0': false
   - name: oa_nbart_contiguity
     aliases:
       - nbart_contiguity
