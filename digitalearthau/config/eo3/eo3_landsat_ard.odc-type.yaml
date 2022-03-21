@@ -54,7 +54,10 @@ dataset:
       offset: [properties, 'gqa:cep90']
 
     cloud_cover:
-      description: Cloud cover percentage [0, 100]
+      description: |
+        The proportion (from 0 to 100) of the dataset's valid data area that contains cloud pixels.
+
+        For these ARD products, this value comes from the Fmask algorithm.
       type: double
       offset: [properties, 'eo:cloud_cover']
 
