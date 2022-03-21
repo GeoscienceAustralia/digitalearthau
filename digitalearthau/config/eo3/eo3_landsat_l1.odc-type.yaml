@@ -98,21 +98,25 @@ dataset:
     # semi-auto generated below
     eo_gsd:
       # The nominal distance between pixel centers available, in meters.
-      description: Ground Sample distance, meters
+      description: |
+        Ground sampling distance of the sensor’s best resolution band
+        in metres; represents the size (or spatial resolution) of one pixel.
       indexed: false
       offset:
         - properties
         - eo:gsd
       type: double
     eo_sun_azimuth:
-      description: Sun azimuth angle
+      description: |
+        The azimuth angle of the sun at the moment of acquisition, in degree units measured clockwise from due north
       indexed: false
       offset:
         - properties
         - eo:sun_azimuth
       type: double
     eo_sun_elevation:
-      description: Sun elevation angle
+      description: |
+        The elevation angle of the sun at the moment of acquisition, in degree units relative to the horizon.
       indexed: false
       offset:
         - properties
@@ -121,17 +125,28 @@ dataset:
 
     # Level 1 fields
     landsat_product_id:
-      description: Landsat Product ID
+      description: |
+        A Landsat Collection 1 Level-1 product identifier including the
+        Collection processing levels, processing date, collection number, and
+        collection tier category
+
+        (e.g. ‘LE07_L1TP_098084_20210307_20210308_02_RT’)
       indexed: false
       offset:
         - properties
         - landsat:landsat_product_id
+
     landsat_scene_id:
-      description: Landsat Scene ID
+      description: |
+        A Landsat scene ID including WRS path and row, year and day,
+        ground station identifier and archive version number
+
+        (e.g. ‘LC80900852021066LGN00’)
       indexed: false
       offset:
         - properties
         - landsat:landsat_scene_id
+
     landsat_data_type:
       description: "Landsat Data Type (eg. 'L1T')"
       indexed: false
