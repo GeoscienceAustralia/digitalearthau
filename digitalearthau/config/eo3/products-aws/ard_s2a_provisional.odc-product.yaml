@@ -1,7 +1,7 @@
 ---
 name: ga_s2am_ard_provisional_3
 description: Geoscience Australia Sentinel 2a MSI Analysis Ready Data Collection 3 (provisional)
-metadata_type: eo3_landsat_ard
+metadata_type: eo3_sentinel_ard
 
 license: CC-BY-4.0
 
