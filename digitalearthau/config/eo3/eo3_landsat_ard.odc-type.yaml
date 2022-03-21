@@ -101,199 +101,239 @@ dataset:
         - [extent, lat, end]
 
     landsat_product_id:
-      description: Landsat Product ID
+      description: |
+        A Landsat Collection 1 Level-1 product identifier including the
+        Collection processing levels, processing date, collection number, and
+        collection tier category
+
+        (e.g. ‘LE07_L1TP_098084_20210307_20210308_02_RT’)
       indexed: false
       offset:
         - properties
         - landsat:landsat_product_id
 
+    landsat_scene_id:
+      description: |
+        A Landsat scene ID including WRS path and row, year and day,
+        ground station identifier and archive version number
+
+        (e.g. ‘LC80900852021066LGN00’)
+      indexed: false
+      offset:
+        - properties
+        - landsat:landsat_scene_id
+
     # semi-auto generated below
     eo_gsd:
-      description: Ground sample distance, meters
+      # The nominal distance between pixel centers available, in meters.
+      description: |
+        Ground sampling distance of the sensor’s best resolution band
+        in metres; represents the size (or spatial resolution) of one pixel.
       indexed: false
       offset:
         - properties
         - eo:gsd
       type: double
     eo_sun_azimuth:
-      description: 'TODO: <eo:sun_azimuth>'
+      description: |
+        The azimuth angle of the sun at the moment of acquisition, in degree units measured clockwise from due north
       indexed: false
       offset:
         - properties
         - eo:sun_azimuth
       type: double
     eo_sun_elevation:
-      description: 'TODO: <eo:sun_elevation>'
+      description: |
+        The elevation angle of the sun at the moment of acquisition, in degree units relative to the horizon.
       indexed: false
       offset:
         - properties
         - eo:sun_elevation
       type: double
+
+
+    # ARD-specific
     fmask_clear:
-      description: 'TODO: <fmask:clear>'
+      description: |
+        The proportion (from 0 to 100) of the dataset's valid data area that contains clear land pixels according to the Fmask algorithm
       indexed: false
       offset:
         - properties
         - fmask:clear
       type: double
     fmask_cloud_shadow:
-      description: 'TODO: <fmask:cloud_shadow>'
+      description: |
+        The proportion (from 0 to 100) of the dataset's valid data area that contains cloud shadow pixels according to the Fmask algorithm
       indexed: false
       offset:
         - properties
         - fmask:cloud_shadow
       type: double
     fmask_snow:
-      description: 'TODO: <fmask:snow>'
+      description: |
+        The proportion (from 0 to 100) of the dataset's valid data area that contains clear snow pixels according to the Fmask algorithm
       indexed: false
       offset:
         - properties
         - fmask:snow
       type: double
     fmask_water:
-      description: 'TODO: <fmask:water>'
+      description: |
+        The proportion (from 0 to 100) of the dataset's valid data area that contains clear water pixels according to the Fmask algorithm
       indexed: false
       offset:
         - properties
         - fmask:water
       type: double
     gqa_abs_iterative_mean_x:
-      description: 'TODO: <gqa:abs_iterative_mean_x>'
+      description: |
+        Mean of the absolute values of the x-axis (east-to-west) GCP residuals after removal of outliers, in pixel units based on a 25 metre resolution reference image (i.e. 0.2 = 5 metres)
       indexed: false
       offset:
         - properties
         - gqa:abs_iterative_mean_x
       type: double
     gqa_abs_iterative_mean_xy:
-      description: 'TODO: <gqa:abs_iterative_mean_xy>'
+      description: |
+        Mean of the absolute values of the GCP residuals after removal of outliers, in pixel units based on a 25 metre resolution reference image (i.e. 0.2 = 5 metres)
       indexed: false
       offset:
         - properties
         - gqa:abs_iterative_mean_xy
       type: double
     gqa_abs_iterative_mean_y:
-      description: 'TODO: <gqa:abs_iterative_mean_y>'
+      description: |
+        Mean of the absolute values of the y-axis (north-to-south) GCP residuals after removal of outliers, in pixel units based on a 25 metre resolution reference image (i.e. 0.2 = 5 metres)
       indexed: false
       offset:
         - properties
         - gqa:abs_iterative_mean_y
       type: double
     gqa_abs_x:
-      description: 'TODO: <gqa:abs_x>'
+      description: |
+        Absolute value of the x-axis (east-to-west) GCP residuals, in pixel units based on a 25 metre resolution reference image (i.e. 0.2 = 5 metres)
       indexed: false
       offset:
         - properties
         - gqa:abs_x
       type: double
     gqa_abs_xy:
-      description: 'TODO: <gqa:abs_xy>'
+      description: |
+        Absolute value of the total GCP residuals, in pixel units based on a 25 metre resolution reference image (i.e. 0.2 = 5 metres)
       indexed: false
       offset:
         - properties
         - gqa:abs_xy
       type: double
     gqa_abs_y:
-      description: 'TODO: <gqa:abs_y>'
+      description: |
+        Absolute value of the y-axis (north-to-south) GCP residuals, in pixel units based on a 25 metre resolution reference image (i.e. 0.2 = 5 metres)
       indexed: false
       offset:
         - properties
         - gqa:abs_y
       type: double
     gqa_cep90:
-      description: 'TODO: <gqa:cep90>'
+      description: |
+        Circular error probable (90%) of the values of the GCP residuals, in pixel units based on a 25 metre resolution reference image (i.e. 0.2 = 5 metres)
       indexed: false
       offset:
         - properties
         - gqa:cep90
       type: double
     gqa_iterative_mean_x:
-      description: 'TODO: <gqa:iterative_mean_x>'
+      description: |
+        Mean of the values of the x-axis (east-to-west) GCP residuals after removal of outliers, in pixel units based on a 25 metre resolution reference image (i.e. 0.2 = 5 metres)
       indexed: false
       offset:
         - properties
         - gqa:iterative_mean_x
       type: double
     gqa_iterative_mean_xy:
-      description: 'TODO: <gqa:iterative_mean_xy>'
+      description: |
+        Mean of the values of the GCP residuals after removal of outliers, in pixel units based on a 25 metre resolution reference image (i.e. 0.2 = 5 metres)
       indexed: false
       offset:
         - properties
         - gqa:iterative_mean_xy
       type: double
     gqa_iterative_mean_y:
-      description: 'TODO: <gqa:iterative_mean_y>'
+      description: |
+        Mean of the values of the y-axis (north-to-south) GCP residuals after removal of outliers, in pixel units based on a 25 metre resolution reference image (i.e. 0.2 = 5 metres)
       indexed: false
       offset:
         - properties
         - gqa:iterative_mean_y
       type: double
     gqa_iterative_stddev_x:
-      description: 'TODO: <gqa:iterative_stddev_x>'
+      description: |
+        Standard Deviation of the values of the x-axis (east-to-west) GCP residuals after removal of outliers, in pixel units based on a 25 metre resolution reference image (i.e. 0.2 = 5 metres)
       indexed: false
       offset:
         - properties
         - gqa:iterative_stddev_x
       type: double
     gqa_iterative_stddev_xy:
-      description: 'TODO: <gqa:iterative_stddev_xy>'
+      description: |
+        Standard Deviation of the values of the GCP residuals after removal of outliers, in pixel units based on a 25 metre resolution reference image (i.e. 0.2 = 5 metres)
       indexed: false
       offset:
         - properties
         - gqa:iterative_stddev_xy
       type: double
     gqa_iterative_stddev_y:
-      description: 'TODO: <gqa:iterative_stddev_y>'
+      description: |
+        Standard Deviation of the values of the y-axis (north-to-south) GCP residuals after removal of outliers, in pixel units based on a 25 metre resolution reference image (i.e. 0.2 = 5 metres)
       indexed: false
       offset:
         - properties
         - gqa:iterative_stddev_y
       type: double
     gqa_mean_x:
-      description: 'TODO: <gqa:mean_x>'
+      description: |
+        Mean of the values of the x-axis (east-to-west) GCP residuals, in pixel units based on a 25 metre resolution reference image (i.e. 0.2 = 5 metres)
       indexed: false
       offset:
         - properties
         - gqa:mean_x
       type: double
     gqa_mean_xy:
-      description: 'TODO: <gqa:mean_xy>'
+      description: |
+        Mean of the values of the GCP residuals, in pixel units based on a 25 metre resolution reference image (i.e. 0.2 = 5 metres)
       indexed: false
       offset:
         - properties
         - gqa:mean_xy
       type: double
     gqa_mean_y:
-      description: 'TODO: <gqa:mean_y>'
+      description: |
+        Mean of the values of the y-axis (north-to-south) GCP residuals, in pixel units based on a 25 metre resolution reference image (i.e. 0.2 = 5 metres)
       indexed: false
       offset:
         - properties
         - gqa:mean_y
       type: double
     gqa_stddev_x:
-      description: 'TODO: <gqa:stddev_x>'
+      description: |
+        Standard Deviation of the values of the x-axis (east-to-west) GCP residuals, in pixel units based on a 25 metre resolution reference image (i.e. 0.2 = 5 metres)
       indexed: false
       offset:
         - properties
         - gqa:stddev_x
       type: double
     gqa_stddev_xy:
-      description: 'TODO: <gqa:stddev_xy>'
+      description: |
+        Standard Deviation of the values of the GCP residuals, in pixel units based on a 25 metre resolution reference image (i.e. 0.2 = 5 metres)
       indexed: false
       offset:
         - properties
         - gqa:stddev_xy
       type: double
     gqa_stddev_y:
-      description: 'TODO: <gqa:stddev_y>'
+      description: |
+        Standard Deviation of the values of the y-axis (north-to-south) GCP residuals, in pixel units based on a 25 metre resolution reference image (i.e. 0.2 = 5 metres)
       indexed: false
       offset:
         - properties
         - gqa:stddev_y
       type: double
-
-    landsat_scene_id:
-      description: Landsat Scene ID
-      indexed: false
-      offset:
-        - properties
-        - landsat:landsat_scene_id
