@@ -43,11 +43,6 @@ dataset:
       offset: ['crs']
       indexed: false
 
-    dataset_maturity:
-      description: One of - final|interim|nrt  (near real time)
-      offset: [properties, 'dea:dataset_maturity']
-      indexed: false
-
     cloud_cover:
       description: |
         The proportion (from 0 to 100) of the dataset's valid data area that contains cloud pixels.
