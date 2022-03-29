@@ -129,10 +129,18 @@ dataset:
         - properties
         - eo:sun_elevation
       type: double
+    sentinel_product_name:
+      description: |
+        ESA product URI, with the '.SAFE' ending removed.
 
+        (e.g. 'S2A_MSIL1C_20220303T000731_N0400_R073_T56LNM_20220303T012845')
+      indexed: false
+      offset:
+        - properties
+        - sentinel:product_name
     sentinel_tile_id:
       description: |
-          Tile ID according to the US-MGRS naming convention
+          Granule ID according to the ESA naming convention
 
           (e.g. ‘S2A_OPER_MSI_L1C_TL_SGS__20161214T040601_A007721_T53KRB_N02.04’)
       indexed: false
