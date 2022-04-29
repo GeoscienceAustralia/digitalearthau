@@ -1,5 +1,5 @@
 ---
-name: esa_s2bm_level1_1
+name: esa_s2bm_level1_0
 description: ESA Sentinel 2B Level 1
 metadata_type: eo3_sentinel
 
@@ -7,7 +7,7 @@ license: CC-BY-4.0
 
 metadata:
   product:
-    name: esa_s2bm_level1_1
+    name: esa_s2bm_level1_0
   properties:
      eo:platform: sentinel-2b
      eo:instrument: MSI
