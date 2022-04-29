@@ -1,13 +1,11 @@
 ---
 # Dataset
 $schema: https://schemas.opendatacube.org/dataset
-id: 10a17116-5bef-4217-9510-e80614b8bcec
-
+id: 41ac9791-dc54-4128-8ddb-ae58a26eb460
 label: ga_s2am_ard_3-2-1_53KRB_2016-12-14_final
 product:
   name: ga_s2am_ard_3
   href: https://collections.dea.ga.gov.au/product/ga_s2am_ard_3
-
 crs: epsg:32753
 geometry:
   type: Polygon
@@ -19,31 +17,30 @@ geometry:
       [841128.8868430493, 8200000.0], [909780.0, 8200000.0], [909780.0, 8090200.0]]]
 grids:
   default:
-    shape: [10980, 10980]
-    transform: [10.0, 0.0, 799980.0, 0.0, -10.0, 8200000.0, 0.0, 0.0, 1.0]
-  '20':
     shape: [5490, 5490]
     transform: [20.0, 0.0, 799980.0, 0.0, -20.0, 8200000.0, 0.0, 0.0, 1.0]
+  '10':
+    shape: [10980, 10980]
+    transform: [10.0, 0.0, 799980.0, 0.0, -10.0, 8200000.0, 0.0, 0.0, 1.0]
   '60':
     shape: [1830, 1830]
     transform: [60.0, 0.0, 799980.0, 0.0, -60.0, 8200000.0, 0.0, 0.0, 1.0]
-
 properties:
   datetime: 2016-12-14 00:58:40.869000Z
   dea:dataset_maturity: final
   dea:product_maturity: stable
-  eo:cloud_cover: 11.966662016986879
+  eo:cloud_cover: 11.975544305442845
   eo:constellation: sentinel-2
   eo:gsd: 10.0  # Ground sample distance (m)
   eo:instrument: MSI
   eo:platform: sentinel-2a
   eo:sun_azimuth: 109.538694028183
   eo:sun_elevation: 24.2374231657688
-  fmask:clear: 41.921231476902626
-  fmask:cloud: 11.966662016986879
-  fmask:cloud_shadow: 6.184968683190788
-  fmask:snow: 1.4666519586462934
-  fmask:water: 38.460485864273416
+  fmask:clear: 41.91795091043456
+  fmask:cloud: 11.975544305442845
+  fmask:cloud_shadow: 6.185278170593436
+  fmask:snow: 1.462022911352418
+  fmask:water: 38.45920370217674
   gqa:abs_iterative_mean_x: 3.66
   gqa:abs_iterative_mean_xy: 13.49
   gqa:abs_iterative_mean_y: 12.98
@@ -65,46 +62,46 @@ properties:
   gqa:stddev_y: 4.36
   odc:dataset_version: 3.2.1
   odc:file_format: GeoTIFF
-  odc:processing_datetime: 2022-02-24 04:29:03.153841Z
+  odc:processing_datetime: 2022-04-28 20:18:24.715550Z
   odc:producer: ga.gov.au
   odc:product_family: ard
   odc:region_code: 53KRB
+  s2cloudless:clear: 71.20033079809438
+  s2cloudless:cloud: 28.79966920190561
   sat:orbit_state: descending
   sat:relative_orbit: 2
   sentinel:datastrip_id: S2A_OPER_MSI_L1C_DS_SGS__20161214T040601_S20161214T005840_N02.04
   sentinel:datatake_start_datetime: 2016-12-14 04:06:01Z
+  sentinel:product_name: S2A_MSIL1C_20161214T005702_N0204_R002_T53KRB_20161214T005840
   sentinel:sentinel_tile_id: S2A_OPER_MSI_L1C_TL_SGS__20161214T040601_A007721_T53KRB_N02.04
-
 measurements:
   nbart_blue:
     path: ga_s2am_nbart_3-2-1_53KRB_2016-12-14_final_band02.tif
+    grid: '10'
   nbart_coastal_aerosol:
     path: ga_s2am_nbart_3-2-1_53KRB_2016-12-14_final_band01.tif
     grid: '60'
   nbart_green:
     path: ga_s2am_nbart_3-2-1_53KRB_2016-12-14_final_band03.tif
+    grid: '10'
   nbart_nir_1:
     path: ga_s2am_nbart_3-2-1_53KRB_2016-12-14_final_band08.tif
+    grid: '10'
   nbart_nir_2:
     path: ga_s2am_nbart_3-2-1_53KRB_2016-12-14_final_band08a.tif
-    grid: '20'
   nbart_red:
     path: ga_s2am_nbart_3-2-1_53KRB_2016-12-14_final_band04.tif
+    grid: '10'
   nbart_red_edge_1:
     path: ga_s2am_nbart_3-2-1_53KRB_2016-12-14_final_band05.tif
-    grid: '20'
   nbart_red_edge_2:
     path: ga_s2am_nbart_3-2-1_53KRB_2016-12-14_final_band06.tif
-    grid: '20'
   nbart_red_edge_3:
     path: ga_s2am_nbart_3-2-1_53KRB_2016-12-14_final_band07.tif
-    grid: '20'
   nbart_swir_2:
     path: ga_s2am_nbart_3-2-1_53KRB_2016-12-14_final_band11.tif
-    grid: '20'
   nbart_swir_3:
     path: ga_s2am_nbart_3-2-1_53KRB_2016-12-14_final_band12.tif
-    grid: '20'
   oa_azimuthal_exiting:
     path: ga_s2am_oa_3-2-1_53KRB_2016-12-14_final_azimuthal-exiting.tif
   oa_azimuthal_incident:
@@ -115,15 +112,21 @@ measurements:
     path: ga_s2am_oa_3-2-1_53KRB_2016-12-14_final_exiting-angle.tif
   oa_fmask:
     path: ga_s2am_oa_3-2-1_53KRB_2016-12-14_final_fmask.tif
-    grid: '20'
   oa_incident_angle:
     path: ga_s2am_oa_3-2-1_53KRB_2016-12-14_final_incident-angle.tif
   oa_nbart_contiguity:
     path: ga_s2am_oa_3-2-1_53KRB_2016-12-14_final_nbart-contiguity.tif
+    grid: '10'
   oa_relative_azimuth:
     path: ga_s2am_oa_3-2-1_53KRB_2016-12-14_final_relative-azimuth.tif
   oa_relative_slope:
     path: ga_s2am_oa_3-2-1_53KRB_2016-12-14_final_relative-slope.tif
+  oa_s2cloudless_mask:
+    path: ga_s2am_oa_3-2-1_53KRB_2016-12-14_final_s2cloudless-mask.tif
+    grid: '60'
+  oa_s2cloudless_prob:
+    path: ga_s2am_oa_3-2-1_53KRB_2016-12-14_final_s2cloudless-prob.tif
+    grid: '60'
   oa_satellite_azimuth:
     path: ga_s2am_oa_3-2-1_53KRB_2016-12-14_final_satellite-azimuth.tif
   oa_satellite_view:
@@ -134,17 +137,13 @@ measurements:
     path: ga_s2am_oa_3-2-1_53KRB_2016-12-14_final_solar-zenith.tif
   oa_time_delta:
     path: ga_s2am_oa_3-2-1_53KRB_2016-12-14_final_time-delta.tif
-
 accessories:
-  thumbnail:nbar:
-    path: ga_s2am_nbar_3-2-1_53KRB_2016-12-14_final_thumbnail.jpg
   thumbnail:nbart:
     path: ga_s2am_nbart_3-2-1_53KRB_2016-12-14_final_thumbnail.jpg
   metadata:processor:
     path: ga_s2am_ard_3-2-1_53KRB_2016-12-14_final.proc-info.yaml
   checksum:sha1:
     path: ga_s2am_ard_3-2-1_53KRB_2016-12-14_final.sha1
-
 lineage:
   level1:
   - 53658f68-797b-5077-99ac-285258ee1113
