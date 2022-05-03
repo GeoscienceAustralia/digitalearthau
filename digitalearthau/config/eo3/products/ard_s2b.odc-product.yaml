@@ -199,3 +199,11 @@ measurements:
     dtype: float32
     nodata: .nan
     units: '1'
+  - name: oa_s2cloudless_mask
+    dtype: float64
+    nodata: .nan
+    units: '1'
+  - name: oa_s2cloudless_prob
+    dtype: float64
+    nodata: .nan
+    units: '1'

@@ -2,10 +2,12 @@
 # Dataset
 $schema: https://schemas.opendatacube.org/dataset
 id: c91f34e4-dcc2-497e-84cf-05d589075471
+
 label: ga_s2bm_ard_3-2-1_55HFB_2018-12-01_final
 product:
   name: ga_s2bm_ard_3
   href: https://collections.dea.ga.gov.au/product/ga_s2bm_ard_3
+
 crs: epsg:32755
 geometry:
   type: Polygon
@@ -25,6 +27,7 @@ grids:
   '60':
     shape: [1830, 1830]
     transform: [60.0, 0.0, 600000.0, 0.0, -60.0, 6200020.0, 0.0, 0.0, 1.0]
+
 properties:
   datetime: 2018-12-01 00:06:27.504000Z
   dea:dataset_maturity: final
@@ -74,6 +77,7 @@ properties:
   sentinel:datatake_start_datetime: 2018-12-01 01:12:18Z
   sentinel:product_name: S2B_MSIL1C_20181201T000239_N0207_R030_T55HFB_20181201T011218
   sentinel:sentinel_tile_id: S2B_OPER_MSI_L1C_TL_EPAE_20181201T011218_A009065_T55HFB_N02.07
+
 measurements:
   nbart_blue:
     path: ga_s2bm_nbart_3-2-1_55HFB_2018-12-01_final_band02.tif
@@ -137,6 +141,7 @@ measurements:
     path: ga_s2bm_oa_3-2-1_55HFB_2018-12-01_final_solar-zenith.tif
   oa_time_delta:
     path: ga_s2bm_oa_3-2-1_55HFB_2018-12-01_final_time-delta.tif
+
 accessories:
   thumbnail:nbart:
     path: ga_s2bm_nbart_3-2-1_55HFB_2018-12-01_final_thumbnail.jpg
@@ -144,6 +149,7 @@ accessories:
     path: ga_s2bm_ard_3-2-1_55HFB_2018-12-01_final.proc-info.yaml
   checksum:sha1:
     path: ga_s2bm_ard_3-2-1_55HFB_2018-12-01_final.sha1
+
 lineage:
   level1:
   - d6796c28-1d5b-5876-8882-f8dee7aa3119
