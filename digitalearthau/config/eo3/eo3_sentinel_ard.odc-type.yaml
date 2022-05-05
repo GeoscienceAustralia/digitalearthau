@@ -343,3 +343,17 @@ dataset:
         - properties
         - gqa:stddev_y
       type: double
+    s2cloudless_clear:
+      type: double
+      description: |
+        The proportion (from 0 to 100) of the dataset's valid data area that contains clear land pixels according to s3cloudless
+      offset:
+      - properties
+      - "s2cloudless:clear"
+    s2cloudless_cloud:
+      description: |
+        The proportion (from 0 to 100) of the dataset's valid data area that contains cloud land pixels according to s3cloudless
+      type: double
+      offset:
+      - properties
+      - "s2cloudless:cloud"
