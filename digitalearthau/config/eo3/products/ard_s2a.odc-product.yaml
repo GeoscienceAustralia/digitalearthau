@@ -200,6 +200,8 @@ measurements:
     nodata: .nan
     units: '1'
   - name: oa_s2cloudless_mask
+    aliases:
+      - s2cloudless_mask
     dtype: uint8
     nodata: 0
     units: '1'
@@ -212,6 +214,8 @@ measurements:
           '1': valid
           '2': cloud
   - name: oa_s2cloudless_prob
+    aliases:
+      - s2cloudless_prob
     dtype: float64
     nodata: .nan
     units: '1'
