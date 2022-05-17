@@ -1,141 +1,137 @@
----
-description: 'Landsat 5 Fractional Cover 25 metre, 100km tile, Australian Albers
-    Equal Area projection (EPSG:3577)'
-managed: true
-measurements:
-  - aliases:
-      - bare
-    dtype: int8
-    name: BS
-    nodata: -1
-    units: percent
-  - aliases:
-      - green_veg
-    dtype: int8
-    name: PV
-    nodata: -1
-    units: percent
-  - aliases:
-      - dead_veg
-    dtype: int8
-    name: NPV
-    nodata: -1
-    units: percent
-  - aliases:
-      - err
-    dtype: int8
-    name: UE
-    nodata: -1
-    units: '1'
+name: ls5_fc_albers
+
+description: Landsat 5 Fractional Cover 25 metre, 100km tile, Australian Albers Equal Area projection (EPSG:3577)
+metadata_type: eo
+
 metadata:
-  format:
-    name: NetCDF
-  instrument:
-    name: TM
   platform:
     code: LANDSAT_5
+  format:
+    name: GeoTIFF
+  instrument:
+    name: TM
   product_type: fractional_cover
-metadata_type: eo
-name: ls5_fc_albers
+
 storage:
   crs: EPSG:3577
   resolution:
-    x: 25
-    y: -25
+          x: 25
+          y: -25
+  dimension_order: ['time', 'y', 'x']
   tile_size:
     x: 100000.0
     y: 100000.0
----
-description: 'Landsat 7 Fractional Cover 25 metre, 100km tile, Australian Albers
-    Equal Area projection (EPSG:3577)'
-managed: true
+
 measurements:
-  - aliases:
-      - bare
-    dtype: int8
-    name: BS
-    nodata: -1
-    units: percent
-  - aliases:
-      - green_veg
-    dtype: int8
-    name: PV
-    nodata: -1
-    units: percent
-  - aliases:
-      - dead_veg
-    dtype: int8
-    name: NPV
-    nodata: -1
-    units: percent
-  - aliases:
-      - err
-    dtype: int8
-    name: UE
-    nodata: -1
-    units: '1'
+    - name: BS
+      units: "percent"
+      dtype: int16
+      nodata: -1
+      aliases: ["bare"]
+    - name: PV
+      units: "percent"
+      dtype: int16
+      nodata: -1
+      aliases: ["green_veg"]
+    - name: NPV
+      units: "percent"
+      dtype: int16
+      nodata: -1
+      aliases: ["dead_veg"]
+    - name: UE
+      units: "1"
+      dtype: int16
+      nodata: -1
+      aliases: ["err"]
+---
+name: ls7_fc_albers
+
+description: Landsat 7 Fractional Cover 25 metre, 100km tile, Australian Albers Equal Area projection (EPSG:3577)
+metadata_type: eo
+
 metadata:
-  format:
-    name: NetCDF
-  instrument:
-    name: ETM
   platform:
     code: LANDSAT_7
+  format:
+    name: GeoTIFF
+  instrument:
+    name: ETM
   product_type: fractional_cover
-metadata_type: eo
-name: ls7_fc_albers
+
 storage:
   crs: EPSG:3577
   resolution:
-    x: 25
-    y: -25
+          x: 25
+          y: -25
+  dimension_order: ['time', 'y', 'x']
   tile_size:
     x: 100000.0
     y: 100000.0
----
-description: 'Landsat 8 Fractional Cover 25 metre, 100km tile, Australian Albers
-    Equal Area projection (EPSG:3577)'
-managed: true
+
 measurements:
-  - aliases:
-      - bare
-    dtype: int8
-    name: BS
-    nodata: -1
-    units: percent
-  - aliases:
-      - green_veg
-    dtype: int8
-    name: PV
-    nodata: -1
-    units: percent
-  - aliases:
-      - dead_veg
-    dtype: int8
-    name: NPV
-    nodata: -1
-    units: percent
-  - aliases:
-      - err
-    dtype: int8
-    name: UE
-    nodata: -1
-    units: '1'
+    - name: BS
+      units: "percent"
+      dtype: int16
+      nodata: -1
+      aliases: ["bare"]
+    - name: PV
+      units: "percent"
+      dtype: int16
+      nodata: -1
+      aliases: ["green_veg"]
+    - name: NPV
+      units: "percent"
+      dtype: int16
+      nodata: -1
+      aliases: ["dead_veg"]
+    - name: UE
+      units: "1"
+      dtype: int16
+      nodata: -1
+      aliases: ["err"]
+---
+name: ls8_fc_albers
+
+description: Landsat 8 Fractional Cover 25 metre, 100km tile, Australian Albers Equal Area projection (EPSG:3577)
+metadata_type: eo
+
 metadata:
-  format:
-    name: NetCDF
-  instrument:
-    name: OLI_TIRS
   platform:
     code: LANDSAT_8
+  format:
+    name: GeoTIFF
+  instrument:
+    name: OLI_TIRS
   product_type: fractional_cover
-metadata_type: eo
-name: ls8_fc_albers
+
 storage:
   crs: EPSG:3577
   resolution:
-    x: 25
-    y: -25
+          x: 25
+          y: -25
+  dimension_order: ['time', 'y', 'x']
   tile_size:
     x: 100000.0
     y: 100000.0
+
+measurements:
+    - name: BS
+      units: "percent"
+      dtype: int16
+      nodata: -1
+      aliases: ["bare"]
+    - name: PV
+      units: "percent"
+      dtype: int16
+      nodata: -1
+      aliases: ["green_veg"]
+    - name: NPV
+      units: "percent"
+      dtype: int16
+      nodata: -1
+      aliases: ["dead_veg"]
+    - name: UE
+      units: "1"
+      dtype: int16
+      nodata: -1
+      aliases: ["err"]
