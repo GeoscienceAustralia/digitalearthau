@@ -129,7 +129,7 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: "ap-southeast-2" # optional: defaults to us-east-1
           SOURCE_DIR: "dist" # optional: defaults to entire repository
-          DEST_DIR: "wofs"
+          DEST_DIR: "digitalearthau"
 
       # - name: Publish package
       #   if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
