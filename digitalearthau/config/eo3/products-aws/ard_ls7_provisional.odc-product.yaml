@@ -174,3 +174,6 @@ measurements:
     dtype: float32
     nodata: .nan
     units: '1'
+
+default_allowances:
+  allow_extra_measurements: [nbar_blue, nbar_green, nbar_nir, nbar_panchromatic, nbar_red, nbar_swir_1, nbar_swir_2, oa_nbar_contiguity]
