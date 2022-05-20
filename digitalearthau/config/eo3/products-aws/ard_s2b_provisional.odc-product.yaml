@@ -199,3 +199,11 @@ measurements:
     dtype: float32
     nodata: .nan
     units: '1'
+
+default_allowances:
+  # Provisional datasets predate these new fields
+  allow_missing_fields:
+    - sentinel_product_name
+    - s2cloudless_clear
+    - s2cloudless_cloud
+  allow_extra_measurements: [nbar_coastal_aerosol, nbar_blue, nbar_green, nbar_nir_1, nbar_nir_2, nbar_red, nbar_red_edge_1, nbar_red_edge_2, nbar_red_edge_3, nbar_swir_2, nbar_swir_3, oa_nbar_contiguity]
