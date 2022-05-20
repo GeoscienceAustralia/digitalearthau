@@ -41,7 +41,7 @@ setup(
         'datacube[celery] >= 1.8',
         'python-dateutil',
         'gdal',
-        'eodatasets3>=0.22.0',
+        'eodatasets3>=0.28.0',
         'structlog',
         'boltons',
         'lxml',
