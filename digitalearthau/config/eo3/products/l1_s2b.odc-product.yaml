@@ -1,6 +1,6 @@
 ---
 name: esa_s2bm_level1_0
-description: ESA Sentinel 2B Level 1
+description: ESA Sentinel 2B Level 0
 metadata_type: eo3_sentinel
 
 license: CC-BY-4.0
