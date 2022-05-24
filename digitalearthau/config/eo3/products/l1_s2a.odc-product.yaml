@@ -13,7 +13,6 @@ metadata:
      eo:instrument: MSI
      odc:product_family: level1
      odc:producer: esa.int
-     # ? dea:product_maturity: final
 
 measurements:
   - name: blue
