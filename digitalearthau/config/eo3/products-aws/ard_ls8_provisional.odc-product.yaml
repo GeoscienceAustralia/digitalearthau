@@ -9,15 +9,15 @@ metadata:
   product:
     name: ga_ls8c_ard_provisional_3
   properties:
-     eo:platform: landsat-8
-     eo:instrument: OLI_TIRS
-     odc:product_family: ard
-     odc:producer: ga.gov.au
-     landsat:collection_number: 2
-     dea:product_maturity: provisional
+    eo:platform: landsat-8
+    eo:instrument: OLI_TIRS
+    odc:product_family: ard
+    odc:producer: ga.gov.au
+    landsat:collection_number: 2
+    dea:product_maturity: provisional
 
 measurements:
-    # NBART
+  # NBART
   - name: nbart_coastal_aerosol
     aliases:
       - nbart_band01
