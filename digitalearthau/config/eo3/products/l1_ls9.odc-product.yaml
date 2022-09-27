@@ -1,0 +1,110 @@
+---
+name: usgs_ls9c_level1_2
+description: United States Geological Survey Landsat 9 Operational Land Imager and Thermal Infra-Red Scanner Level 1 Collection 2
+metadata_type: eo3_landsat_l1
+
+license: CC-BY-4.0
+
+metadata:
+  product:
+    name: usgs_ls9c_level1_2
+  properties:
+     eo:platform: landsat-9
+     eo:instrument: OLI_TIRS
+     odc:product_family: level1
+     odc:producer: usgs.gov
+     landsat:collection_number: 2
+
+measurements:
+  - name: coastal_aerosol
+    aliases:
+      - band01
+    dtype: uint16
+    nodata: 0
+    units: '1'
+  - name: blue
+    aliases:
+      - band02
+    dtype: uint16
+    nodata: 0
+    units: '1'
+  - name: green
+    aliases:
+      - band03
+    dtype: uint16
+    nodata: 0
+    units: '1'
+  - name: red
+    aliases:
+      - band04
+    dtype: uint16
+    nodata: 0
+    units: '1'
+  - name: nir
+    aliases:
+      - band05
+    dtype: uint16
+    nodata: 0
+    units: '1'
+  - name: swir_1
+    aliases:
+      - band06
+    dtype: uint16
+    nodata: 0
+    units: '1'
+  - name: swir_2
+    aliases:
+      - band07
+    dtype: uint16
+    nodata: 0
+    units: '1'
+  - name: panchromatic
+    aliases:
+      - band08
+    dtype: uint16
+    nodata: 0
+    units: '1'
+  - name: cirrus
+    aliases:
+      - band09
+    dtype: uint16
+    nodata: 0
+    units: '1'
+  - name: lwir_1
+    aliases:
+      - band10
+    dtype: uint16
+    nodata: 0
+    units: '1'
+  - name: lwir_2
+    aliases:
+      - band11
+    dtype: uint16
+    nodata: 0
+    units: '1'
+  - name: quality
+    aliases:
+      - bqa
+    dtype: uint16
+    nodata: 0
+    units: '1'
+  - name: qa_radsat
+    dtype: uint16
+    nodata: 0
+    units: '1'
+  - name: solar_azimuth
+    dtype: int16
+    nodata: 0
+    units: '1'
+  - name: solar_zenith
+    dtype: int16
+    nodata: 0
+    units: '1'
+  - name: view_azimuth
+    dtype: int16
+    nodata: 0
+    units: '1'
+  - name: view_zenith
+    dtype: int16
+    nodata: 0
+    units: '1'

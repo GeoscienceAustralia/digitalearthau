@@ -1,0 +1,106 @@
+---
+# Dataset
+$schema: https://schemas.opendatacube.org/dataset
+id: dba08e46-2651-5125-b811-c4adf0a8e450
+
+label: usgs_ls9c_level1_2-0-20220209_112081_2022-02-09
+product:
+  name: usgs_ls9c_level1_2
+  href: https://collections.dea.ga.gov.au/product/usgs_ls9c_level1_2
+
+location: tar:/g/data/v10/agdc/jez/test-data/LC09_L1TP_112081_20220209_20220209_02_T1.tar!/
+
+crs: epsg:32650
+geometry:
+  type: Polygon
+  coordinates: [[[384795.7917960675, -3427085.916407865], [384787.79128986463, -3427009.558257973],
+      [384832.87335854105, -3426799.1741377614], [389017.87385311665, -3408394.17196344],
+      [404032.87662139226, -3342484.1598206493], [420082.8791378223, -3272239.148822717],
+      [427807.8841320646, -3238564.1271073995], [428257.9478624978, -3236628.8619656246],
+      [428317.5, -3236467.5], [428402.0175046276, -3236486.6599973687], [428415.0,
+        -3236475.0], [615936.2132034355, -3278993.7867965642], [615936.5770162833,
+        -3279000.4763079984], [616053.1066017178, -3279026.893398282], [574867.1269928368,
+        -3460375.824316554], [573052.1158679354, -3468355.8728926005], [572748.1066017178,
+        -3469608.106601718], [572614.1895318776, -3469597.130133315], [572549.6544946418,
+        -3469582.5231363764], [572409.1165159459, -3469574.417420271], [570548.3785672389,
+        -3469154.2601542748], [386408.35136689234, -3427484.2539856737], [385033.06734977465,
+        -3427139.621858966], [384795.7917960675, -3427085.916407865]]]
+grids:
+  default:
+    shape: [7781, 7721]
+    transform: [30.0, 0.0, 384585.0, 0.0, -30.0, -3236385.0, 0.0, 0.0, 1.0]
+  panchromatic:
+    shape: [15561, 15441]
+    transform: [15.0, 0.0, 384592.5, 0.0, -15.0, -3236392.5, 0.0, 0.0, 1.0]
+
+properties:
+  datetime: 2022-02-09 02:05:18.736033Z
+  eo:cloud_cover: 0.12
+  eo:gsd: 15.0  # Ground sample distance (m)
+  eo:instrument: OLI_TIRS
+  eo:platform: landsat-9
+  eo:sun_azimuth: 72.16674497
+  eo:sun_elevation: 54.14346217
+  landsat:collection_category: T1
+  landsat:collection_number: 2
+  landsat:data_type: L1TP
+  landsat:geometric_rmse_model_x: 4.208
+  landsat:geometric_rmse_model_y: 4.237
+  landsat:ground_control_points_model: 857
+  landsat:ground_control_points_version: 5
+  landsat:landsat_product_id: LC09_L1TP_112081_20220209_20220209_02_T1
+  landsat:landsat_scene_id: LC91120812022040LGN00
+  landsat:processing_software_version: LPGS_15.6.0
+  landsat:station_id: LGN
+  landsat:wrs_path: 112
+  landsat:wrs_row: 81
+  odc:dataset_version: 2.0.20220209
+  odc:file_format: GeoTIFF
+  odc:processing_datetime: 2022-02-09 04:08:31Z
+  odc:producer: usgs.gov
+  odc:product_family: level1
+  odc:region_code: '112081'
+
+measurements:
+  blue:
+    path: LC09_L1TP_112081_20220209_20220209_02_T1_B2.TIF
+  cirrus:
+    path: LC09_L1TP_112081_20220209_20220209_02_T1_B9.TIF
+  coastal_aerosol:
+    path: LC09_L1TP_112081_20220209_20220209_02_T1_B1.TIF
+  green:
+    path: LC09_L1TP_112081_20220209_20220209_02_T1_B3.TIF
+  lwir_1:
+    path: LC09_L1TP_112081_20220209_20220209_02_T1_B10.TIF
+  lwir_2:
+    path: LC09_L1TP_112081_20220209_20220209_02_T1_B11.TIF
+  nir:
+    path: LC09_L1TP_112081_20220209_20220209_02_T1_B5.TIF
+  panchromatic:
+    path: LC09_L1TP_112081_20220209_20220209_02_T1_B8.TIF
+    grid: panchromatic
+  qa_radsat:
+    path: LC09_L1TP_112081_20220209_20220209_02_T1_QA_RADSAT.TIF
+  quality:
+    path: LC09_L1TP_112081_20220209_20220209_02_T1_QA_PIXEL.TIF
+  red:
+    path: LC09_L1TP_112081_20220209_20220209_02_T1_B4.TIF
+  solar_azimuth:
+    path: LC09_L1TP_112081_20220209_20220209_02_T1_SAA.TIF
+  solar_zenith:
+    path: LC09_L1TP_112081_20220209_20220209_02_T1_SZA.TIF
+  swir_1:
+    path: LC09_L1TP_112081_20220209_20220209_02_T1_B6.TIF
+  swir_2:
+    path: LC09_L1TP_112081_20220209_20220209_02_T1_B7.TIF
+  view_azimuth:
+    path: LC09_L1TP_112081_20220209_20220209_02_T1_VAA.TIF
+  view_zenith:
+    path: LC09_L1TP_112081_20220209_20220209_02_T1_VZA.TIF
+
+accessories:
+  metadata:landsat_mtl:
+    path: LC09_L1TP_112081_20220209_20220209_02_T1_MTL.txt
+
+lineage: {}
+...
