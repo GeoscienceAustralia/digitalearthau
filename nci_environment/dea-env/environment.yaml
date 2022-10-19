@@ -28,6 +28,7 @@ dependencies:
 - rsgislib
 
 - aiobotocore
+- awscli
 - boltons
 - cattrs
 - checksumdir
