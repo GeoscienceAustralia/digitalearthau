@@ -4,7 +4,7 @@ variables:
   modules_base: "/g/data/v10/public/modules"
   dbhost: dea-db.nci.org.au
   dbport: 6432
-  python_version: 3.6
+  python_version: 3.8
 
 templated_variables:
   module_path: "{modules_base}/{module_name}/{module_version}"
