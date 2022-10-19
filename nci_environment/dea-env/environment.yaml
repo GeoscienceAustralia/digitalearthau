@@ -2,229 +2,70 @@ name: dea-env
 channels:
 - conda-forge
 dependencies:
-- affine
-- attrs
-- autopep8
-- awscli
-- basemap
+## Python
+- pip
+- python=3.8
+
+## Necessary CLI Tools
+
+## DEA Critical Python Libraries and Tools
+- datacube
+
+
+# Useful Python Tools and Libs
 - black
-- boltons
-- boto3
-- botocore
-- bottleneck
-- bqplot
-- cachetools
-- cairo
-- cartopy
-- cattrs
-- celery
-- cffi
-- ciso8601
-- click
-- click-plugins
-- cligj
-- cmake
-- cmocean
-- compliance-checker
-- colour
-- conda
-- conda-env
-- curl
-- cvxopt
-- cvxpy
-- cython
-- dask
-- dask-labextension
-- descartes
-- distributed
-- docutils
-- expat
-- eventlet
-- brittainhard::fancyimpute
-- flake8
-- flask
-- flask-caching
-- fiona==1.8.13
-- folium
-- fontconfig
-- freetype
-- freexl
-- future
-- gdal==3.0.4
+- isort
+
+
+# Scientific and Geospatial Python Libraries
 - geopandas
-- geopy
-- geos==3.8.1
-- geotiff
-- gettext
-- gevent
-- giflib
-- glib
+- matplotlib
 - glue-geospatial
 - glueviz
-- graphviz
-- gunicorn
-- h5py
-- hdbscan
-- hdf4
-- hdf5
-- hypothesis
+- cmocean
+- tensorflow
+- ffmpeg-python
+- rsgislib
+
+- aiobotocore
+- boltons
+- cattrs
+- checksumdir
+- ciso8601
+- dask
+- dask-image
+- datadog
+- distributed
+- ephem
 - icu
-- importlib_resources
-- intel-openmp
-- ipdb
-- ipycanvas
-- ipyevents
 - ipyleaflet
-- ipympl
-- ipython-sql
-- ipywidgets
-- jmespath
-- joblib
-- jpeg
-- jplephem
-- json-c
-- jsonschema
-- jupyter
-- jupyter_contrib_nbextensions
-- jupyter_dashboards
-- jupyterlab
-- jupyterlab-dash
-- kealib
-- keras
-- krb5
-- lark-parser
-- libgdal
-- libgfortran
-- libgfortran-ng
-- libnetcdf
-- line_profiler
-- luigi
-- matplotlib
-- memory_profiler
-- mock
-- modernize
-- moto
+- lxml
 - mpi4py
-- munch
-- mypy
-- nb_conda_kernels
-- nbdime
-- nbval
-- netcdf4
-- nodejs
-- notebook
-- numba
 - numexpr
-- numpy
-- openjpeg
-- openmp
-- openmpi
-- pandas
-- parallel
-- paramiko
-- parse
-- pcre
-- pep8
-- perf
-- pip
-- pixman
-- plotly
-- poppler
-- poppler-data
-- proj
-- pyproj
-- psutil
-- psycopg2
-- pthread-stubs
-- pudb
-- pyephem
 - pydash
 - pydotplus
-- pylint
-- pyparsing
-- pypeg2
-- pysolar
-- pytables
+- pystac
+- pystac-client
 - pytest
-- pytest-cov
-# - pytorch::pytorch           # not working because of mkl
-# - pytorch::torchvision
-- cudatoolkit
-- python=3.6
-- python-dateutil
-- python-lmdb
-- pyyaml
-- qgis
-- randomgen
-- rasterio!=1.1.5
-- rasterstats
-- recommonmark
-- redis
-- redis-py
-- requests
-- rios
-# - rsgislib  # broken because of libgeos dependency
-- rtree
+- python-rapidjson
+- rasterio
+- requests-aws4auth
 - ruamel.yaml
-- s3transfer
 - scikit-image
-- scikit-learn
-- scipy
-- seaborn
-- setuptools
-- shapely==1.7.0
-- sidecar
-- simplejson
-- singledispatch
-- skyfield
-- snuggs
-- spectral
-- sphinx
-- sphinx_rtd_theme
-- spyder
-- sqlalchemy
-- sqlite
+- statsmodels
 - structlog
-- tensorflow
-- tornado
 - tqdm
-- tuiview
-- typing
-- vega_datasets
+- urlpath
 - voluptuous
-- watchdog
-- widgetsnbextension
-- xarray
-- xerces-c
-- xgboost
-- yaml
-- yamllint
-- yapf
-- yappi
-- yarn
-- zarr
 - zstandard
 
-# moved from pip
-- apscheduler
-- dawg
-- ffmpeg-python
-- jupyter-server-proxy
-- isort
+## JupyterLab and Jupyter Notebooks (and useful extras and plugins)
+- jupyter
+- jupyterlab
 - dask-labextension
 - jupyterlab-git
+- jupyter-ui-poll
 
 - pip:
-  - checksumdir
-  - click-datetime
-  - graphviz
-  - hdmedians
-  - jupyter-ui-poll
-  - jupyterlab_code_formatter
-  - libtmux
-  - meinheld
-  - ptpython
-  - Py6S
-  - pyDEM
-  - python-intervals
-  - requests-aws4auth
+  - lmdb # correct version not available from mamba
+  - rio_stac
