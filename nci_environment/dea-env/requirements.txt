@@ -1,2 +1,0 @@
---index-url https://packages.dea.ga.gov.au/
-hdstats

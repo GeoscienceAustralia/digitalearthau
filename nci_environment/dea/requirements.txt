@@ -1,10 +1,8 @@
 --extra-index-url https://packages.dea.ga.gov.au/
-datacube
 datacube-alchemist
 datacube-stats
 dea_cogger
 digitalearthau
-eodatasets
 eodatasets3
 fc
 hdstats
@@ -17,6 +15,6 @@ odc-geom
 odc-index
 odc-io
 odc-ppt
+odc-stats
 odc-ui
-wofs>1.5,<1.6,!=1.5.5,!=1.5.6
-nbval
+wofs
