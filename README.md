@@ -9,7 +9,7 @@ to the DEA instance of the Open Data Cube.
 
 ### Building NCI modules
 
-See the modules [readme](modules/README.md)
+This has been removed.
 
 ### Creating a DEA-configured Data Cube
 

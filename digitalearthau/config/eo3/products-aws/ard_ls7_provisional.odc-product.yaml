@@ -9,15 +9,15 @@ metadata:
   product:
     name: ga_ls7e_ard_provisional_3
   properties:
-     eo:platform: landsat-7
-     eo:instrument: ETM
-     odc:product_family: ard
-     odc:producer: ga.gov.au
-     landsat:collection_number: 2
-     dea:product_maturity: provisional
+    eo:platform: landsat-7
+    eo:instrument: ETM
+    odc:product_family: ard
+    odc:producer: ga.gov.au
+    landsat:collection_number: 2
+    dea:product_maturity: provisional
 
 measurements:
-    # NBART
+  # NBART
   - name: nbart_blue
     aliases:
       - nbart_band01
