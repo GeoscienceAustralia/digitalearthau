@@ -21,9 +21,3 @@ template_files:
 - src: modulefile.template
   dest: "{modules_dir}/modulefiles/{module_name}/{module_version}"
   chmod: 0o444
-
-finalise_commands:
-# New geomedian/hdstats package from s3
-- pip install -U -v --no-deps --compile --requirement requirements.txt
-- jupyter labextension install @bokeh/jupyter_bokeh @jupyterlab/geojson-extension @jupyterlab/github @jupyterlab/toc @jupyter-widgets/jupyterlab-manager @ryantam626/jupyterlab_code_formatter jupyterlab-dash @jupyter-widgets/jupyterlab-sidecar
-- jupyter serverextension enable --py jupyterlab_code_formatter --sys-prefix

@@ -15,6 +15,5 @@ odc-geom
 odc-index
 odc-io
 odc-ppt
-odc-stats
 odc-ui
 wofs

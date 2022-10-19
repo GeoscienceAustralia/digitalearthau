@@ -28,6 +28,7 @@ dependencies:
 - rsgislib
 
 - aiobotocore
+- awscli
 - boltons
 - cattrs
 - checksumdir
@@ -66,6 +67,11 @@ dependencies:
 - dask-labextension
 - jupyterlab-git
 - jupyter-ui-poll
+- jupyter_bokeh
+- jupyterlab-dash
+- jupyterlab-github
+- sidecar
+- jupyterlab_code_formatter
 
 - pip:
   - lmdb  # correct version not available from mamba
