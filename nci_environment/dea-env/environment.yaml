@@ -41,6 +41,7 @@ dependencies:
 - ipyleaflet
 - lxml
 - mpi4py
+- nodejs
 - numexpr
 - pydash
 - pydotplus
