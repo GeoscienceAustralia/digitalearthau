@@ -15,7 +15,7 @@ stable_module_deps:
 - dea-env
 
 install_pip_packages:
-  pip_cmd: "module load {fixed_dea_env}; pip install --no-warn-script-location --prefix {module_path} --requirement requirements.txt"
+  pip_cmd: "module load {fixed_dea_env}; pip install --no-warn-script-location --prefix {module_path} --requirement requirements.txt; pip install --no-warn-script-location --prefix {module_path} --requirement requirements-private.txt"
 
 copy_files:
 - src: requirements.txt
