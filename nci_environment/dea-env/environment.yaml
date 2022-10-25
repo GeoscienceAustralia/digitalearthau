@@ -1,78 +1,80 @@
 name: dea-env
 channels:
-- conda-forge
+  - conda-forge
 dependencies:
-## Python
-- pip
-- python=3.8
+  ## Python
+  - pip
+  - python=3.8
 
-## Necessary CLI Tools
+  ## Necessary CLI Tools
 
-## DEA Critical Python Libraries and Tools
-- datacube
+  ## DEA Critical Python Libraries and Tools
+  - datacube
 
+  # Useful Python Tools and Libs
+  - black
+  - isort
 
-# Useful Python Tools and Libs
-- black
-- isort
+  # Scientific and Geospatial Python Libraries
+  - geopandas
+  - matplotlib
+  - glue-geospatial
+  - glueviz
+  - cmocean
+  - tensorflow
+  - ffmpeg-python
+  - rsgislib
 
+  - aiobotocore
+  - awscli
+  - boltons
+  - cattrs
+  - checksumdir
+  - ciso8601
+  - dask
+  - dask-image
+  - dask-ml
+  - datadog
+  - distributed
+  - ephem
+  - icu
+  - ipyleaflet
+  - lxml
+  - mpi4py
+  - nodejs
+  - numexpr
+  - owslib
+  - pydash
+  - pydotplus
+  - pystac
+  - pystac-client
+  - pytest
+  - python-rapidjson
+  - rasterio
+  - rasterstats
+  - requests-aws4auth
+  - ruamel.yaml
+  - scikit-image
+  - seaborn
+  - statsmodels
+  - structlog
+  - tqdm
+  - urlpath
+  - voluptuous
+  - zstandard
 
-# Scientific and Geospatial Python Libraries
-- geopandas
-- matplotlib
-- glue-geospatial
-- glueviz
-- cmocean
-- tensorflow
-- ffmpeg-python
-- rsgislib
+  ## JupyterLab and Jupyter Notebooks (and useful extras and plugins)
+  - jupyter
+  - jupyterlab
+  - dask-labextension
+  - jupyterlab-git
+  - jupyter-ui-poll
+  - jupyter_bokeh
+  - jupyterlab-dash
+  - jupyterlab-github
+  - sidecar
+  - jupyterlab_code_formatter
 
-- aiobotocore
-- awscli
-- boltons
-- cattrs
-- checksumdir
-- ciso8601
-- dask
-- dask-image
-- datadog
-- distributed
-- ephem
-- icu
-- ipyleaflet
-- lxml
-- mpi4py
-- nodejs
-- numexpr
-- pydash
-- pydotplus
-- pystac
-- pystac-client
-- pytest
-- python-rapidjson
-- rasterio
-- requests-aws4auth
-- ruamel.yaml
-- scikit-image
-- statsmodels
-- structlog
-- tqdm
-- urlpath
-- voluptuous
-- zstandard
-
-## JupyterLab and Jupyter Notebooks (and useful extras and plugins)
-- jupyter
-- jupyterlab
-- dask-labextension
-- jupyterlab-git
-- jupyter-ui-poll
-- jupyter_bokeh
-- jupyterlab-dash
-- jupyterlab-github
-- sidecar
-- jupyterlab_code_formatter
-
-- pip:
-  - lmdb  # correct version not available from mamba
-  - rio_stac
+  - pip:
+      - lmdb # correct version not available from mamba
+      - rio_stac
