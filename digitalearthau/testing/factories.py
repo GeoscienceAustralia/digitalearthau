@@ -24,7 +24,8 @@ def remove_dynamic_indexes():
     # Our normal indexes start with "ix_", dynamic indexes with "dix_"
     for table in _core.METADATA.tables.values():
         table.indexes.intersection_update(
-            [i for i in table.indexes if not i.name.startswith('dix_')])
+            [i for i in table.indexes if not i.name.startswith("dix_")]
+        )
 
 
 @contextmanager
@@ -35,7 +36,7 @@ def _increase_logging(log, level=logging.WARN):
     log.setLevel(previous_level)
 
 
-def db_fixture(config_fixture_name, scope='function'):
+def db_fixture(config_fixture_name, scope="function"):
     """
     Factory to create a pytest fixture for a Datacube PostgresDb
     """
@@ -43,12 +44,11 @@ def db_fixture(config_fixture_name, scope='function'):
     @pytest.fixture(scope=scope)
     def db_fixture_instance(request):
         local_config: LocalConfig = request.getfixturevalue(config_fixture_name)
-        db = PostgresDb.from_config(local_config,
-                                    application_name='dea-test-run',
-                                    validate_connection=False)
+        db = PostgresDb.from_config(
+            local_config, application_name="dea-test-run", validate_connection=False
+        )
         # Drop and recreate tables so our tests have a clean db.
-        with db.connect() as connection:
-            _core.drop_db(connection._connection)
+        _core.drop_db(db._engine)
         remove_dynamic_indexes()
         # Disable informational messages since we're doing this on every test run.
         with _increase_logging(_core._LOG) as _:
@@ -61,7 +61,7 @@ def db_fixture(config_fixture_name, scope='function'):
     return db_fixture_instance
 
 
-def index_fixture(db_fixture_name, scope='function'):
+def index_fixture(db_fixture_name, scope="function"):
     """
     Factory to create a pytest fixture for a Datacube index
     """
@@ -74,7 +74,7 @@ def index_fixture(db_fixture_name, scope='function'):
     return index_fixture_instance
 
 
-def dea_index_fixture(index_fixture_name, scope='function'):
+def dea_index_fixture(index_fixture_name, scope="function"):
     """
     Create a pytest fixture for a Datacube instance populated
     with DEA products/config.
@@ -93,7 +93,6 @@ def dea_index_fixture(index_fixture_name, scope='function'):
             # No "product added" logging as it makes test runs too noisy
             log_header=lambda *s: None,
             log=lambda *s: None,
-
         )
         return index
 
