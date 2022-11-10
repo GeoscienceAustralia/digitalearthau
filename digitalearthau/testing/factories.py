@@ -68,8 +68,8 @@ def index_fixture(db_fixture_name, scope="function"):
 
     @pytest.fixture(scope=scope)
     def index_fixture_instance(request):
-        db: PostgresDb = request.getfixturevalue(db_fixture_name)
-        return Index(db)
+        index: Index = request.getfixturevalue(db_fixture_name)
+        return index
 
     return index_fixture_instance
 
