@@ -8,7 +8,7 @@ from contextlib import contextmanager
 import digitalearthau
 import digitalearthau.system
 from datacube.config import LocalConfig
-from datacube.index import Index
+from datacube.index import Index, index_connect
 from datacube.drivers.postgres import PostgresDb
 from datacube.drivers.postgres import _dynamic
 from datacube.drivers.postgres import _core
@@ -68,8 +68,8 @@ def index_fixture(db_fixture_name, scope="function"):
 
     @pytest.fixture(scope=scope)
     def index_fixture_instance(request):
-        db: PostgresDb = request.getfixturevalue(db_fixture_name)
-        return Index(db)
+        index: Index = index_connect(request.getfixturevalue(db_fixture_name))
+        return index
 
     return index_fixture_instance
 
@@ -85,7 +85,7 @@ def dea_index_fixture(index_fixture_name, scope="function"):
         """
         An index initialised with DEA config (products)
         """
-        index: Index = request.getfixturevalue(index_fixture_name)
+        index: Index = index_connect(request.getfixturevalue(index_fixture_name))
         # Add DEA metadata types, products. They'll be validated too.
         digitalearthau.system.init_dea(
             index,
