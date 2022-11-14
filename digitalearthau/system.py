@@ -23,31 +23,30 @@ def print_header(msg):
 
 
 def print_(msg):
-    click.echo("    {}".format(msg))
+    click.echo('    {}'.format(msg))
 
 
 def init_dea(
-    index: Index,
-    with_permissions: bool,
-    with_eo1: bool = True,
-    with_eo3: bool = True,
-    log_header=print_header,
-    log=print_,
+        index: Index,
+        with_permissions: bool,
+        with_eo1: bool = True,
+        with_eo3: bool = True,
+        log_header=print_header,
+        log=print_
 ):
     """
     Create or update a DEA configured ODC instance.
     """
     log_header(f"ODC init of {index.url}")
-    was_created = index.init_db(
-        with_default_types=False, with_permissions=with_permissions
-    )
+    was_created = index.init_db(with_default_types=False,
+                                with_permissions=with_permissions)
 
     if was_created:
-        log("Created.")
+        log('Created.')
     else:
-        log("Updated.")
+        log('Updated.')
 
-    log("Checking indexes/views.")
+    log('Checking indexes/views.')
     index.metadata_types.check_field_indexes(
         allow_table_lock=True,
         rebuild_indexes=False,
@@ -55,25 +54,23 @@ def init_dea(
     )
 
     if with_eo1:
-        log_header("Checking DEA eo1 metadata types")
+        log_header('Checking DEA eo1 metadata types')
         # Add DEA metadata types, products.
         for _, md_type_def in read_documents(DEA_MD_TYPES):
             md = index.metadata_types.add(index.metadata_types.from_doc(md_type_def))
             log(f"{md.name}")
 
-        log_header("Checking DEA products")
-        for _, product_def in read_documents(
-            *DEA_PRODUCTS_DIR.glob("*.odc-product.yaml")
-        ):
+        log_header('Checking DEA products')
+        for _, product_def in read_documents(*DEA_PRODUCTS_DIR.glob('*.odc-product.yaml')):
             product = index.products.add_document(product_def)
             log(f"{product.name}")
 
-        log_header("Checking DEA ingested definitions")
+        log_header('Checking DEA ingested definitions')
 
-        for path in DEA_INGESTION_DIR.glob("*.yaml"):
+        for path in DEA_INGESTION_DIR.glob('*.yaml'):
             ingest_config = ingest.load_config_from_file(path)
 
-            driver_name = ingest_config["storage"]["driver"]
+            driver_name = ingest_config['storage']['driver']
             driver = storage_writer_by_name(driver_name)
             if driver is None:
                 raise ValueError("No driver found for {}".format(driver_name))
@@ -84,32 +81,28 @@ def init_dea(
             log(f"{output_type.name:<20}\t\t← {source_type.name}")
 
     if with_eo3:
-        log_header("Checking DEA eo3 metadata types")
+        log_header('Checking DEA eo3 metadata types')
         # Add DEA metadata types, products.
         for _, md_type_def in read_documents(*DEA_EO3_TYPES):
             md = index.metadata_types.add(index.metadata_types.from_doc(md_type_def))
             log(f"{md.name}")
 
-        log_header("Checking DEA eo3 products")
-        for _, product_def in read_documents(
-            *DEA_EO3_PRODUCTS_DIR.rglob("*.odc-product.yaml")
-        ):
+        log_header('Checking DEA eo3 products')
+        for _, product_def in read_documents(*DEA_EO3_PRODUCTS_DIR.rglob('*.odc-product.yaml')):
             product = index.products.add_document(product_def)
             log(f"{product.name}")
 
 
-@click.group("system")
+@click.group('system')
 @global_cli_options
 def cli():
     pass
 
 
-@cli.command("init")
+@cli.command('init')
 @click.option(
-    "--init-users/--no-init-users",
-    is_flag=True,
-    default=True,
-    help="Include user roles and grants. (default: true)",
+    '--init-users/--no-init-users', is_flag=True, default=True,
+    help="Include user roles and grants. (default: true)"
 )
 @pass_index(expect_initialised=False)
 def init_dea_cli(index: Index, init_users: bool):
@@ -128,5 +121,5 @@ def init_dea_cli(index: Index, init_users: bool):
     init_dea(index, with_permissions=init_users)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     cli()
