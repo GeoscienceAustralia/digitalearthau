@@ -4,6 +4,7 @@ Methods for creating custom datacube/dea instance pytest fixtures.
 import logging
 import pytest
 from contextlib import contextmanager
+from pathlib import Path
 
 import digitalearthau
 import digitalearthau.system
@@ -15,6 +16,8 @@ from datacube.drivers.postgres import _core
 
 # These are unavoidable in pytests due to fixtures
 # pylint: disable=redefined-outer-name,protected-access,invalid-name
+
+INTEGRATION_DEFAULT_CONFIG_PATH = Path(__file__).parent.joinpath("testing-default.conf")
 
 
 def remove_dynamic_indexes():
@@ -69,10 +72,10 @@ def index_fixture(db_fixture_name, scope="function"):
     @pytest.fixture(scope=scope)
     def index_fixture_instance(request):
         index: Index = index_connect(
-                LocalConfig.find(env="datacube"),
-                application_name=request.getfixturevalue(db_fixture_name),
-                validate_connection=False,
-            )
+            LocalConfig.find(INTEGRATION_DEFAULT_CONFIG_PATH, env="datacube"),
+            application_name=request.getfixturevalue(db_fixture_name),
+            validate_connection=False,
+        )
         return index
 
     return index_fixture_instance
@@ -89,8 +92,12 @@ def dea_index_fixture(index_fixture_name, scope="function"):
         """
         An index initialised with DEA config (products)
         """
-        config: LocalConfig = request.getfixturevalue(index_fixture_name)
-        index: Index = index_connect(config, validate_connection=False)
+        config = LocalConfig.find(INTEGRATION_DEFAULT_CONFIG_PATH, env="datacube")
+        index: Index = index_connect(
+            config,
+            application_name=request.getfixturevalue(index_fixture_name),
+            validate_connection=False,
+        )
         # Add DEA metadata types, products. They'll be validated too.
         digitalearthau.system.init_dea(
             index,
