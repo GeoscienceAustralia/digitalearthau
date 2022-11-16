@@ -68,7 +68,8 @@ def index_fixture(db_fixture_name, scope="function"):
 
     @pytest.fixture(scope=scope)
     def index_fixture_instance(request):
-        index: Index = index_connect(request.getfixturevalue(db_fixture_name))
+        config: LocalConfig = request.getfixturevalue(db_fixture_name)
+        index: Index = index_connect(config, validate_connection=False)
         return index
 
     return index_fixture_instance
@@ -85,7 +86,8 @@ def dea_index_fixture(index_fixture_name, scope="function"):
         """
         An index initialised with DEA config (products)
         """
-        index: Index = index_connect(request.getfixturevalue(index_fixture_name))
+        config: LocalConfig = request.getfixturevalue(index_fixture_name)
+        index: Index = index_connect(config, validate_connection=False)
         # Add DEA metadata types, products. They'll be validated too.
         digitalearthau.system.init_dea(
             index,
