@@ -43,7 +43,7 @@ def db_fixture(config_fixture_name, scope="function"):
 
     @pytest.fixture(scope=scope)
     def db_fixture_instance(request):
-        local_config: LocalConfig = request.getfixturevalue(config_fixture_name)
+        local_config = LocalConfig.find(env="dea_integration")
         db = PostgresDb.from_config(
             local_config, application_name="dea-test-run", validate_connection=False
         )
@@ -68,8 +68,11 @@ def index_fixture(db_fixture_name, scope="function"):
 
     @pytest.fixture(scope=scope)
     def index_fixture_instance(request):
-        config: LocalConfig = request.getfixturevalue(db_fixture_name)
-        index: Index = index_connect(config, validate_connection=False)
+        index: Index = index_connect(
+                LocalConfig.find(env="dea_integration"),
+                application_name=request.getfixturevalue(db_fixture_name),
+                validate_connection=False,
+            )
         return index
 
     return index_fixture_instance
