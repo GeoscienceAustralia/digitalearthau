@@ -1,17 +1,4 @@
 ---
-name: ls7_satellite_telemetry_data
-description: Landsat 7 Satellite Telemetry Data
-metadata_type: telemetry
-
-metadata:
-    platform:
-        code: LANDSAT_7
-    instrument:
-        name: ETM
-    product_type: satellite_telemetry_data
-
----
-
 name: ls7_level1_scene
 description: Landsat 7 Level 1 At-sensor Radiance 25 metre
 metadata_type: landsat_l1_scene

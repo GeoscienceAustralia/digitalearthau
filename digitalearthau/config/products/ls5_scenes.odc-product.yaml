@@ -1,17 +1,4 @@
 ---
-name: ls5_satellite_telemetry_data
-description: Landsat 5 Satellite Telemetry Data
-metadata_type: telemetry
-
-metadata:
-    platform:
-        code: LANDSAT_5
-    instrument:
-        name: TM
-    product_type: satellite_telemetry_data
-
----
-
 name: ls5_level1_scene
 description: Landsat 5 Level 1 At-sensor Radiance 25 metre
 
