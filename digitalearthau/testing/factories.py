@@ -72,8 +72,6 @@ def index_fixture(db_fixture_name, scope="function"):
     @pytest.fixture(scope=scope)
     def index_fixture_instance(request):
         index: Index = index_connect(
-            LocalConfig.find(INTEGRATION_DEFAULT_CONFIG_PATH, env="datacube"),
-            application_name=request.getfixturevalue(db_fixture_name),
             validate_connection=False,
         )
         return index
@@ -92,10 +90,7 @@ def dea_index_fixture(index_fixture_name, scope="function"):
         """
         An index initialised with DEA config (products)
         """
-        config = LocalConfig.find(INTEGRATION_DEFAULT_CONFIG_PATH, env="datacube")
         index: Index = index_connect(
-            config,
-            application_name=request.getfixturevalue(index_fixture_name),
             validate_connection=False,
         )
         # Add DEA metadata types, products. They'll be validated too.
