@@ -54,7 +54,7 @@ def test_new_and_old_on_disk(test_dataset: DatasetForTests,
             test_dataset.parent: (),
         },
         cache_path=integration_test_data,
-        fix_settings=dict(index_missing=True, update_locations=True)
+        fix_settings={"index_missing": True, "update_locations": True}
     )
 
 
@@ -84,7 +84,7 @@ def test_replace_on_disk(test_dataset: DatasetForTests,
             test_dataset.parent: (),
         },
         cache_path=integration_test_data,
-        fix_settings=dict(index_missing=True, update_locations=True)
+        fix_settings={"index_missing": True, "update_locations": True}
     )
 
 
@@ -116,7 +116,7 @@ def test_move_on_disk(test_dataset: DatasetForTests,
             test_dataset.parent: (),
         },
         cache_path=integration_test_data,
-        fix_settings=dict(index_missing=True, update_locations=True)
+        fix_settings={"index_missing": True, "update_locations": True}
     )
 
 
@@ -146,7 +146,7 @@ def test_archived_on_disk(test_dataset: DatasetForTests,
             test_dataset.parent: (),
         },
         cache_path=integration_test_data,
-        fix_settings=dict(index_missing=True, update_locations=True)
+        fix_settings={"index_missing": True, "update_locations": True}
     )
     assert uri_to_local_path(test_dataset.uri).exists(), "On-disk location shouldn't be touched"
 
@@ -177,7 +177,7 @@ def test_detect_corrupt_existing(test_dataset: DatasetForTests,
         # Unmodified index
         expected_index_result=freeze_index(test_dataset.collection.index_),
         cache_path=integration_test_data,
-        fix_settings=dict(trash_missing=True, trash_archived=True, update_locations=True)
+        fix_settings={"trash_missing": True, "trash_archived": True, "update_locations": True}
     )
     # If a dataset is in the index pointing to the corrupt location, it shouldn't be trashed with trash_archived=True
     assert path.exists(), "Corrupt dataset with sibling in index should not be trashed"
@@ -204,7 +204,7 @@ def test_detect_corrupt_new(test_dataset: DatasetForTests,
         ],
         expected_index_result={},
         cache_path=integration_test_data,
-        fix_settings=dict(trash_missing=True, trash_archived=True, update_locations=True)
+        fix_settings={"trash_missing": True, "trash_archived": True, "update_locations": True}
     )
     assert not path.exists(), "Corrupt dataset without sibling should be trashed with trash_archived=True"
 
@@ -239,7 +239,7 @@ def test_remove_missing(test_dataset: DatasetForTests,
         # Unmodified index
         expected_index_result=freeze_index(test_dataset.collection.index_),
         cache_path=integration_test_data,
-        fix_settings=dict(trash_missing=True, update_locations=True)
+        fix_settings={"trash_missing": True, "update_locations": True}
     )
     assert not test_dataset.path.exists(), "On-disk location should exist before test begins."
     assert trashed_path.exists(), "Trashed file shouldn't exit."
@@ -292,7 +292,7 @@ def test_is_trashed(test_dataset: DatasetForTests,
             test_dataset.parent: (),
         },
         cache_path=root,
-        fix_settings=dict(index_missing=True, update_locations=True, trash_archived=True)
+        fix_settings={"index_missing": True, "update_locations": True, "trash_archived": True}
     )
 
     # Show output structure for debugging
