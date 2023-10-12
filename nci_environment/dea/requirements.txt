@@ -5,3 +5,4 @@ odc-dscache
 odc-geom
 odc-io
 odc-ui
+odc-geo
