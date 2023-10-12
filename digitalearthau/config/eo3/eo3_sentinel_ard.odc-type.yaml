@@ -346,13 +346,13 @@ dataset:
     s2cloudless_clear:
       type: double
       description: |
-        The proportion (from 0 to 100) of the dataset's valid data area that contains clear land pixels according to s3cloudless
+        The proportion (from 0 to 100) of the dataset's valid data area that contains clear land pixels according to s2cloudless
       offset:
       - properties
       - "s2cloudless:clear"
     s2cloudless_cloud:
       description: |
-        The proportion (from 0 to 100) of the dataset's valid data area that contains cloud land pixels according to s3cloudless
+        The proportion (from 0 to 100) of the dataset's valid data area that contains cloud land pixels according to s2cloudless
       type: double
       offset:
       - properties
